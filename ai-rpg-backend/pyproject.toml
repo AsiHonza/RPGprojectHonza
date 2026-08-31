@@ -1,0 +1,27 @@
+[project]
+name = "ai-rpg-backend"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "AsiHonza", email = "janmlcak6@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "edge-tts>=7.2.8",
+    "fastapi>=0.141.1",
+    "google-genai>=2.19.0",
+    "openai>=3.3.1",
+    "pydantic>=2.13.4",
+    "python-dotenv>=1.2.3",
+    "supabase>=2.31.0",
+    "uvicorn>=0.52.4",
+    "yt-dlp>=2026.8.19",
+]
+
+[project.scripts]
+ai-rpg-backend = "ai_rpg_backend:main"
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"
