@@ -1011,21 +1011,6 @@ export default function Home() {
             </div>
 
             {/* AI Backstory Generator */}
-            <div className="bg-[#e3dcc8] p-4 rounded border border-[#90a4ae] flex flex-col gap-2 mb-6">
-              <h3 className="font-bold border-b border-[#90a4ae] pb-2 mb-2">Režim hry</h3>
-              <div className="flex gap-4 flex-col sm:flex-row">
-                <label className={`flex-1 p-4 rounded border-2 cursor-pointer transition ${gameMode === 'sandbox' ? 'border-[#b74b4b] bg-[#f4f1e1]' : 'border-transparent hover:bg-[#d8d1bc]'}`}>
-                  <input type="radio" name="gamemode" value="sandbox" checked={gameMode === 'sandbox'} onChange={() => setGameMode('sandbox')} className="hidden" />
-                  <div className="font-bold text-[#b74b4b] mb-1">Volný Sandbox</div>
-                  <div className="text-xs text-[#455a64]">Tradiční AI zážitek. AI si nekonečně vymýšlí svět, nová města a úkoly za pochodu. Nemá pevné hranice.</div>
-                </label>
-                <label className={`flex-1 p-4 rounded border-2 cursor-pointer transition ${gameMode === 'campaign' ? 'border-[#b74b4b] bg-[#f4f1e1]' : 'border-transparent hover:bg-[#d8d1bc]'}`}>
-                  <input type="radio" name="gamemode" value="campaign" checked={gameMode === 'campaign'} onChange={() => setGameMode('campaign')} className="hidden" />
-                  <div className="font-bold text-[#b74b4b] mb-1">Příběhová Kampaň</div>
-                  <div className="text-xs text-[#455a64]">Vygeneruje se pevný kampaňový svět (Omezená mapa, města, epická zápletka). AI drží příběh a neodbíhá. Doba tvorby trvá trochu déle.</div>
-                </label>
-              </div>
-            </div>
             <div className="bg-[#e3dcc8] p-4 rounded border border-[#90a4ae]">
                <h3 className="font-bold flex items-center gap-2 mb-2"><Sparkles size={18} className="text-[#b74b4b]" /> Příběh a charakter</h3>
                <p className="text-sm text-[#455a64] mb-3">Napiš pár slov o tom, jaký tvůj hrdina je (např. "zjizvený, hrubý, hledá pomstu za smrt bratra") a nech AI dopsat zbytek.</p>
