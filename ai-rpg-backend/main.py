@@ -84,6 +84,7 @@ class DMResponse(BaseModel):
     vyznamna_mista: List[PointOfInterest] = Field(default=[])
     popis_okoli: str
     image_prompt: str
+    novy_zapis_do_deniku: Optional[str] = Field(default=None, description="Zásadní posun v ději. Napiš max 2 věty, které se zapíšou do hráčova deníku jako shrnutí (např. Zabil jsem vlka a zachránil vesnici). U běžných kroků nech prázdné.")
     vypravec: str
     npc_dialogy: List[NPCDialog] = []
     system_log: str
