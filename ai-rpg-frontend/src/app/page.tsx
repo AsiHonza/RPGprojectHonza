@@ -289,7 +289,7 @@ export default function Home() {
     setLoading(true);
     try {
       const endpoint = isRegister ? "/auth/register" : "/auth/login";
-      const res = await fetch(`http://localhost:8000${endpoint}`, {
+      const res = await fetch(`${API_URL}${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password })
@@ -309,7 +309,7 @@ export default function Home() {
   const fetchCharacters = async (userEmail = email) => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:8000/list-characters", {
+      const res = await fetch(`${API_URL}/list-characters`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: userEmail })
