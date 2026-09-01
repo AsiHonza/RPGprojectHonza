@@ -297,7 +297,7 @@ export default function Home() {
           name: name,
           state: {
             hp, inventory, equipped, level, xp, skillPoints, skills, inCombat, enemies, quests,
-            locationType, currentRegion, pointsOfInterest, stats, rations, currentImage, currentImageError
+            locationType, currentRegion, pointsOfInterest, stats, rations, currentImage, currentImageError, currentLocationDesc
           }
         }),
       }).catch(err => console.error("Autosave failed", err));
@@ -491,6 +491,8 @@ export default function Home() {
         if (data.character.stats) setStats(data.character.stats);
         if (state.locationType) setLocationType(state.locationType);
         if (state.currentRegion) setCurrentRegion(state.currentRegion);
+        if (state.currentLocationDesc) setCurrentLocationDesc(state.currentLocationDesc);
+        if (state.popis_okoli) setCurrentLocationDesc(state.popis_okoli);
         if (state.pointsOfInterest) setPointsOfInterest(state.pointsOfInterest);
         if (state.currentImage) setCurrentImage(state.currentImage.startsWith("http") && !state.currentImage.includes("127.0.0.1") ? state.currentImage : (state.currentImage.includes("127.0.0.1") ? state.currentImage.replace("http://127.0.0.1:8000", API_URL) : `${API_URL}${state.currentImage}`));
         if (state.currentImageError) setCurrentImageError(state.currentImageError);
@@ -533,6 +535,7 @@ export default function Home() {
         ]);
         setSuggestedActions(["Rozhlédnout se", "Zkontrolovat vybavení", "Vydat se vpřed"]);
         setHp(100);
+          setCurrentLocationDesc("Mlha se pomalu rozestupuje a ty před sebou vidíš neznámý hvozd.");
         const startInv = [
             {id: "starter_clothes", name: "Cestovní oblečení", type: "zbroj", slot: "hruď", description: "Obyčejné, ale teplé.", stats: "Obrana: 1", sell_price: 5, icon: "Shirt"},
             {id: "starter_dagger", name: "Železná dýka", type: "zbraň", slot: "hlavní ruka", description: "Malá, ostrá dýka.", stats: "Poškození: 1d4", sell_price: 10, icon: "Sword"},
