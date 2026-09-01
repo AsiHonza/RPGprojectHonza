@@ -5,7 +5,7 @@ import { useState, useRef, useEffect } from "react";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
 import ReactPlayer from 'react-player';
-import { Send, Heart, Package, Sword, Shield, FlaskConical, Gem, Shirt, ScrollText, X, Volume2, VolumeX, User, Settings2, Sparkles, Skull, BookOpen, MapPin, Drumstick, Mail, Loader2 } from "lucide-react";
+import { Send, Heart, Package, Sword, Shield, FlaskConical, Gem, Shirt, ScrollText, X, Volume2, VolumeX, User, Settings2, Sparkles, Skull, BookOpen, MapPin, Drumstick, Mail, Loader2, Trash2 } from "lucide-react";
 
 const getStringHash = (str: string) => {
   let h = 0;
@@ -410,6 +410,26 @@ export default function Home() {
     }
   }, []);
 
+
+  const deleteCharacter = async (e: any, characterName: string) => {
+    e.stopPropagation();
+    if (!confirm(`Opravdu chceš smazat postavu ${characterName}? Tato akce je nevratná.`)) return;
+    
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/delete-character`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, name: characterName })
+      });
+      if (!res.ok) throw new Error("Nepodařilo se smazat postavu.");
+      fetchCharacters(email);
+    } catch (err: any) {
+      alert(err.message);
+      setLoading(false);
+    }
+  };
+
   const loadGame = async (characterName: string) => {
     if (!email || !characterName) return alert("Přihlaste se a vyberte postavu!");
     setLoading(true);
@@ -762,7 +782,17 @@ export default function Home() {
                       <div className="font-bold text-[#2b4c5e] group-hover:text-[#b74b4b] transition">{char.name}</div>
                       <div className="text-xs text-[#455a64]">{char.race} {char.dnd_class}</div>
                     </div>
-                  </button>
+                  
+                    <div className="ml-auto flex items-center">
+                      <div 
+                        onClick={(e) => deleteCharacter(e, char.name)}
+                        className="p-2 text-[#90a4ae] hover:text-[#b74b4b] hover:bg-[#f4f1e1] rounded transition"
+                        title="Smazat postavu"
+                      >
+                        <Trash2 size={20} />
+                      </div>
+                    </div>
+</button>
                 ))}
               </div>
             )}
