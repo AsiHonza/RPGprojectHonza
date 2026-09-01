@@ -226,8 +226,41 @@ async def create_character(req: CharacterCreateRequest):
     if res.data:
         raise HTTPException(status_code=400, detail="Character already exists.")
     
+    try:
+        model = genai.GenerativeModel("gemini-2.5-flash")
+        prompt = f'''
+Jsi Pán jeskyně v textové RPG hře D&D. Hráč právě vytvořil novou postavu:
+Jméno: {req.name}
+Rasa: {req.race}
+Třída: {req.dnd_class}
+Staty: {req.stats}
+
+Napiš poutavý první odstavec (intro), který postavu rovnou vrhne do děje. Zohledni její rasu a třídu. Nezačínej v obyčejné hospodě, začni např. na deštivé cestě, uprostřed lesa, u brány města nebo v nebezpečí.
+Vrať POUZE json ve formátu:
+{{
+  "intro_text": "Text vypravěče (min 3 věty)...",
+  "popis_okoli": "Stručný popis lokace (např. Temný les plný stínů a vlhka)"
+}}
+        '''
+        response = model.generate_content(prompt)
+        import json
+        
+        try:
+            # Clean possible markdown block
+            clean_text = response.text.strip().removeprefix('```json').removesuffix('```').strip()
+            data = json.loads(clean_text)
+            intro_text = data.get("intro_text", "Mlha se rozestupuje...")
+            popis_okoli = data.get("popis_okoli", "Neznámé místo.")
+        except Exception:
+            intro_text = response.text.strip()
+            popis_okoli = "Neznámé místo."
+            
+    except Exception as e:
+        intro_text = "Vítej ve světě Aethelgard. Mlha se pomalu rozestupuje a tvé dobrodružství právě začíná..."
+        popis_okoli = "Zamlžený hvozd."
+        
     initial_history = [
-        {"role": "model", "text": """{"aktualni_region": "Pocatecni vesnice", "popis_okoli": "Stojíš na začátku své cesty.", "vypravec": "Vítej ve světě dobrodružství!", "nabizene_akce": ["Rozhlédnout se", "Jít do hospody", "Odejít z vesnice"]}"""}
+        {"role": "model", "text": f'''{{"aktualni_region": "Začátek cesty", "popis_okoli": "{popis_okoli}", "vypravec": "{intro_text}", "nabizene_akce": ["Rozhlédnout se", "Zkontrolovat vybavení", "Vydat se vpřed"]}}'''}
     ]
     state = {
         "hp": 100,
@@ -236,8 +269,8 @@ async def create_character(req: CharacterCreateRequest):
         "equipped": {},
         "skills": [],
         "quests": [],
-        "locationType": "mesto",
-        "currentRegion": "Pocatecni vesnice",
+        "locationType": "divocina",
+        "currentRegion": "Neznámé končiny",
         "pointsOfInterest": [],
         "level": 1,
         "xp": 0
@@ -251,7 +284,8 @@ async def create_character(req: CharacterCreateRequest):
         "state": state,
         "history": initial_history
     }).execute()
-    return {"status": "success", "api_key": api_key, "message": "Úspěšně ses probudil v novém těle.", "intro_text": "Vítej ve světě Aethelgard. Mlha se pomalu rozestupuje a ty před sebou vidíš obrysy prvních stromů neznámého hvozdu. Tvé dobrodružství právě začíná..."}
+    
+    return {"status": "success", "api_key": api_key, "message": "Úspěšně ses probudil v novém těle.", "intro_text": intro_text, "popis_okoli": popis_okoli}
 
 class PlayerActionRequest(BaseModel):
     api_key: str
