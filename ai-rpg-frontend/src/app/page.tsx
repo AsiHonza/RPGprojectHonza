@@ -129,6 +129,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [inventoryOpen, setInventoryOpen] = useState(false);
   const [journalOpen, setJournalOpen] = useState(false);
+  const [journal, setJournal] = useState<string[]>([]);
   const [hp, setHp] = useState(100);
   const [inventory, setInventory] = useState<any[]>([]);
   const [equipped, setEquipped] = useState<any>({
@@ -552,7 +553,7 @@ export default function Home() {
         alert(data.detail || "Chyba při načítání pozice.");
       }
     } catch (err) {
-      alert("Chyba připojení k serveru.");
+      console.error(err); alert("Chyba připojení k serveru.");
     }
     setLoading(false);
   };
