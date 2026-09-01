@@ -428,20 +428,26 @@ async def create_character(req: CharacterCreateRequest):
     
     try:
         client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+        world_context = ""
+        if world_data:
+            import json
+            world_context = f"\n\n[HRAJE SE PŘÍBĚHOVÁ KAMPAŇ]: Zamotej postavu rovnou do vygenerované zápletky tohoto světa!\nZápletka: {world_data.get('main_plot')}\nMísto startu: Napiš intro odehrávající se v jedné z těchto lokací: {json.dumps(world_data.get('locations'), ensure_ascii=False)}\nZmíň v intru letmo klíčové NPC: {json.dumps(world_data.get('key_npcs'), ensure_ascii=False)}"
+        
         prompt = f'''
 Jsi Pán jeskyně v textové RPG hře D&D. Hráč právě vytvořil novou postavu:
 Jméno: {req.name}
 Rasa: {req.race}
 Třída: {req.dnd_class}
 Staty: {req.stats}
+{world_context}
 
-Napiš poutavý první odstavec (intro), který postavu rovnou vrhne do děje. Zohledni její rasu a třídu. Nezačínej v obyčejné hospodě, začni např. na deštivé cestě, uprostřed lesa, u brány města nebo v nebezpečí.
+Napiš poutavý první odstavec (intro), který postavu rovnou vrhne do děje (a do kampaně, pokud je zadaná). Zohledni její rasu a třídu. Nezačínej v obyčejné hospodě, začni na zajímavém místě spjatém se zápletkou světa (pokud existuje).
 Vrať POUZE json ve formátu:
 {{
   "intro_text": "Text vypravěče (min 3 věty)...",
-  "popis_okoli": "Stručný popis lokace (např. Temný les plný stínů a vlhka)"
+  "popis_okoli": "Stručný popis lokace"
 }}
-        '''
+'''
         response = client.models.generate_content(
             model='gemini-3.5-flash',
             contents=prompt,
@@ -506,7 +512,9 @@ Vrať POUZE json ve formátu:
         "pointsOfInterest": [],
         "level": 1,
         "xp": 0,
-        "journal": [f"Vytvořil jsi postavu {req.name} (Rasa: {req.race}, Třída: {req.dnd_class}). Tvé dobrodružství začíná."]
+        "journal": [f"Vytvořil jsi postavu {req.name} (Rasa: {req.race}, Třída: {req.dnd_class}). Tvé dobrodružství začíná."],
+        "zname_postavy": [],
+        "world_data": world_data
     }
     
     supabase.table("characters").insert({
