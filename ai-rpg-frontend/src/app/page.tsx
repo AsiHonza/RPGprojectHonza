@@ -104,6 +104,30 @@ const FormattedSystemLog = ({ text }: { text: string }) => {
   return <div className="font-serif text-base text-[#2b4c5e]">{lines}</div>;
 };
 
+
+const PATCH_NOTES = [
+  {
+    version: "v1.2.0 - Vládci Osudu & Objevitelé",
+    date: "Září 2026",
+    changes: [
+      "🗺️ Řízený Sandbox: Nový kampaňový režim hry! AI pro tebe při založení postavy vymyslí pevnou mapu, zápletku a skrytá tajemství.",
+      "📜 Interaktivní Mapa: Hraješ-li kampaň, máš nově přístup k interaktivní vizuální mapě světa a objevených cest.",
+      "🏕️ Epické Cestování: Každý krok cesty do nové lokace stojí 1 jídlo. Pán jeskyně hází tajně d20 kostkou na události (od klidné cesty po smrtící léčku).",
+      "👥 Deník Postav (Kodex): V horním menu nově najdeš vizitkář! Hra si pamatuje každé důležité NPC a jejich vztah k tobě (zelená/žlutá/červená).",
+      "📱 Mobilní UI & Notifikace: Kompaktní rozhraní pro telefony a epické oznámení přes celou obrazovku, když splníš quest!"
+    ]
+  },
+  {
+    version: "v1.1.0 - Magie a Ocel",
+    date: "Starší",
+    changes: [
+      "✨ Systém kouzel a cantripů pro magická povolání.",
+      "⚔️ Zbraně, zbroje a možnost se vybavovat z inventáře.",
+      "🎵 Adaptivní ambientní hudba (Město, Divočina, Boj)."
+    ]
+  }
+];
+
 export default function Home() {
 
   const [gameState, setGameState] = useState<"menu" | "creation" | "playing">("menu");
@@ -623,51 +647,38 @@ export default function Home() {
 
     setHistory([{ type: "system", text: `Postava ${name} vytvořena. Vstupuješ do světa...` }]);
 
-    try {
-      const res = await fetch(`${API_URL}/create-character`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, dnd_class: dndClass, race, stats, email: email, api_key: "DUMMY", game_mode: gameMode }),
-      });
-      const data = await res.json();
-      
-      if (res.ok) {
-        setHistory([
-          { type: "system", text: data.message },
-          { type: "dm", popis_okoli: data.popis_okoli, vypravec: data.intro_text }
-        ]);
-        setSuggestedActions(["Rozhlédnout se", "Zkontrolovat vybavení", "Vydat se vpřed"]);
-        setCurrentLocationDesc(data.popis_okoli || "Neznámé místo.");
-        setCurrentRegion("Začátek cesty");
-
-        setTravelMode(state.travel_mode || false);
-        setTravelDaysLeft(state.travel_days_left || 0);
-        setTravelDestination(state.travel_destination || "");
-        setNpcs(state.zname_postavy || []);
-        setWorldData(state.world_data || null);
-
+    
+      try {
+        const res = await fetch(`${API_URL}/create-character`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, dnd_class: dndClass, race, stats, email: email, api_key: "DUMMY", game_mode: gameMode }),
+        });
+        const data = await res.json();
         
-        const state = data.state || {};
-        setHp(state.hp || 100);
-        setXp(state.xp || 0);
-        setLevel(state.level || 1);
-        setSkillPoints(state.skillPoints || 0);
-        setInventory(state.inventory || []);
-        setEquipped(state.equipped || {});
-        setSkills(state.skills || []);
-        setAvailableSkills(state.available_skills || []);
-        setJournal(state.journal || []);
-        
-        // AUTO-PLAY intro
-        playAudioSequentially([{text: data.intro_text, type: "narrator"}]);
+        if (res.ok) {
+          setHistory([
+            { type: "system", text: data.message },
+            { type: "dm", popis_okoli: data.popis_okoli, vypravec: data.intro_text }
+          ]);
+          setSuggestedActions(["Rozhlédnout se", "Zkontrolovat vybavení", "Vydat se vpřed"]);
+          setCurrentLocationDesc(data.popis_okoli || "Neznámé místo.");
+          setCurrentRegion("Začátek cesty");
 
-      } else {
-        setHistory([{ type: "error", text: typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail) }]);
+          // Load the character to fetch full state including generated world_data
+          await loadGame(name);
+          
+          setGameState("playing");
+        } else {
+          alert(data.detail || "Chyba při tvorbě.");
+          setGameState("menu");
+        }
+      } catch (e) {
+        alert("Nelze se připojit k serveru.");
+        setGameState("menu");
       }
-    } catch (err) {
-      setHistory([{ type: "error", text: "Chyba připojení k serveru." }]);
-    }
-    setLoading(false);
+      setLoading(false);
+
   };
 
   const sendAction = async (actionText: string) => {
@@ -969,6 +980,21 @@ export default function Home() {
               </div>
             </div>
 
+            <div className="bg-[#e3dcc8] p-4 rounded border border-[#90a4ae] flex flex-col gap-2 mb-6">
+              <h3 className="font-bold border-b border-[#90a4ae] pb-2 mb-2">Režim hry</h3>
+              <div className="flex gap-4 flex-col sm:flex-row">
+                <label className={`flex-1 p-4 rounded border-2 cursor-pointer transition ${gameMode === 'sandbox' ? 'border-[#b74b4b] bg-[#f4f1e1]' : 'border-transparent hover:bg-[#d8d1bc]'}`}>
+                  <input type="radio" name="gamemode" value="sandbox" checked={gameMode === 'sandbox'} onChange={() => setGameMode('sandbox')} className="hidden" />
+                  <div className="font-bold text-[#b74b4b] mb-1">Volný Sandbox</div>
+                  <div className="text-xs text-[#455a64]">Tradiční AI zážitek. AI si nekonečně vymýšlí svět, nová města a úkoly za pochodu. Nemá pevné hranice.</div>
+                </label>
+                <label className={`flex-1 p-4 rounded border-2 cursor-pointer transition ${gameMode === 'campaign' ? 'border-[#b74b4b] bg-[#f4f1e1]' : 'border-transparent hover:bg-[#d8d1bc]'}`}>
+                  <input type="radio" name="gamemode" value="campaign" checked={gameMode === 'campaign'} onChange={() => setGameMode('campaign')} className="hidden" />
+                  <div className="font-bold text-[#b74b4b] mb-1">Příběhová Kampaň</div>
+                  <div className="text-xs text-[#455a64]">Vygeneruje se pevný kampaňový svět (Omezená mapa, města, epická zápletka). AI drží příběh a neodbíhá. Doba tvorby trvá trochu déle.</div>
+                </label>
+              </div>
+            </div>
             <div className="bg-[#e3dcc8] p-4 rounded border border-[#90a4ae]">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="font-bold flex items-center gap-2"><Settings2 size={18} /> Statistiky (Standard Array)</h3>
@@ -985,6 +1011,21 @@ export default function Home() {
             </div>
 
             {/* AI Backstory Generator */}
+            <div className="bg-[#e3dcc8] p-4 rounded border border-[#90a4ae] flex flex-col gap-2 mb-6">
+              <h3 className="font-bold border-b border-[#90a4ae] pb-2 mb-2">Režim hry</h3>
+              <div className="flex gap-4 flex-col sm:flex-row">
+                <label className={`flex-1 p-4 rounded border-2 cursor-pointer transition ${gameMode === 'sandbox' ? 'border-[#b74b4b] bg-[#f4f1e1]' : 'border-transparent hover:bg-[#d8d1bc]'}`}>
+                  <input type="radio" name="gamemode" value="sandbox" checked={gameMode === 'sandbox'} onChange={() => setGameMode('sandbox')} className="hidden" />
+                  <div className="font-bold text-[#b74b4b] mb-1">Volný Sandbox</div>
+                  <div className="text-xs text-[#455a64]">Tradiční AI zážitek. AI si nekonečně vymýšlí svět, nová města a úkoly za pochodu. Nemá pevné hranice.</div>
+                </label>
+                <label className={`flex-1 p-4 rounded border-2 cursor-pointer transition ${gameMode === 'campaign' ? 'border-[#b74b4b] bg-[#f4f1e1]' : 'border-transparent hover:bg-[#d8d1bc]'}`}>
+                  <input type="radio" name="gamemode" value="campaign" checked={gameMode === 'campaign'} onChange={() => setGameMode('campaign')} className="hidden" />
+                  <div className="font-bold text-[#b74b4b] mb-1">Příběhová Kampaň</div>
+                  <div className="text-xs text-[#455a64]">Vygeneruje se pevný kampaňový svět (Omezená mapa, města, epická zápletka). AI drží příběh a neodbíhá. Doba tvorby trvá trochu déle.</div>
+                </label>
+              </div>
+            </div>
             <div className="bg-[#e3dcc8] p-4 rounded border border-[#90a4ae]">
                <h3 className="font-bold flex items-center gap-2 mb-2"><Sparkles size={18} className="text-[#b74b4b]" /> Příběh a charakter</h3>
                <p className="text-sm text-[#455a64] mb-3">Napiš pár slov o tom, jaký tvůj hrdina je (např. "zjizvený, hrubý, hledá pomstu za smrt bratra") a nech AI dopsat zbytek.</p>
@@ -1034,14 +1075,14 @@ export default function Home() {
             </div>
             
             <div className="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-8">
-              {PATCH_NOTES.map((patch, idx) => (
+              {PATCH_NOTES.map((patch: any, idx: number) => (
                 <div key={idx} className="bg-[#1b262c]/10 border border-[#90a4ae] rounded p-5 shadow-sm">
                   <div className="flex justify-between items-end border-b border-[#90a4ae] pb-2 mb-4">
                     <h2 className="text-[#b74b4b] font-bold text-xl font-medieval tracking-wide">{patch.version}</h2>
                     <span className="text-[#455a64] text-xs font-bold uppercase">{patch.date}</span>
                   </div>
                   <ul className="space-y-3">
-                    {patch.changes.map((change, cIdx) => (
+                    {patch.changes.map((change: any, cIdx: number) => (
                       <li key={cIdx} className="text-[#2b4c5e] flex gap-3 text-sm md:text-base leading-relaxed">
                         <span className="shrink-0 text-lg mt-[-2px]">{change.split(' ')[0]}</span>
                         <span>{change.substring(change.indexOf(' ') + 1)}</span>
