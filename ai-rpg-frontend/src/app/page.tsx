@@ -82,7 +82,7 @@ export default function Home() {
   const [gameState, setGameState] = useState<"menu" | "creation" | "playing">("menu");
   
   // Character Creation Form
-  const [apiKey, setApiKey] = useState("");
+  const [setApiKey] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -227,7 +227,7 @@ export default function Home() {
       }).catch(err => console.error("Autosave failed", err));
     }, 2000);
     return () => clearTimeout(timer);
-  }, [hp, inventory, equipped, level, xp, skillPoints, skills, inCombat, enemies, quests, locationType, currentRegion, pointsOfInterest, gameState, apiKey, stats, gold, currentSpellSlots, maxSpellSlots, rations, currentImage, currentImageError]);
+  }, [hp, inventory, equipped, level, xp, skillPoints, skills, inCombat, enemies, quests, locationType, currentRegion, pointsOfInterest, gameState, stats, gold, currentSpellSlots, maxSpellSlots, rations, currentImage, currentImageError]);
 
   const playAudio = (text: string, voiceType: "narrator" | "npc_muz" | "npc_zena" = "narrator"): Promise<void> => {
     return new Promise((resolve) => {
@@ -266,13 +266,13 @@ export default function Home() {
   };
 
   const generateBackstory = async () => {
-    if (!name || !apiKey || !keywords) return alert("Zadejte jméno, API klíč a klíčová slova!");
+    if (!name || !keywords) return alert("Zadejte jméno a klíčová slova!");
     setLoading(true);
     try {
       const res = await fetch(`${API_URL}/generate-backstory`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ api_key: apiKey.trim(), name, race, dnd_class: dndClass, keywords }),
+        body: JSON.stringify({ api_key: "DUMMY", name, race, dnd_class: dndClass, keywords }),
       });
       if (res.ok) {
         setBackstory(await res.json());
@@ -331,13 +331,12 @@ export default function Home() {
       const res = await fetch(`${API_URL}/load-game`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email, api_key: apiKey.trim() || "DUMMY", name: characterName }),
+        body: JSON.stringify({ email: email, api_key: "DUMMY", name: characterName }),
       });
       const data = await res.json();
       
       if (res.ok) {
-        localStorage.setItem("aethelgard_api_key", apiKey.trim());
-        setName(data.character.name);
+                setName(data.character.name);
         setRace(data.character.race);
         setDndClass(data.character.dnd_class);
         
@@ -425,7 +424,7 @@ export default function Home() {
   };
 
   const startNewGame = async () => {
-    if (!name || !apiKey) return alert("Zadejte jméno a API klíč!");
+    if (!name) return alert("Zadejte jméno!");
     setLoading(true);
     localStorage.setItem("aethelgard_api_key", apiKey.trim());
     
@@ -437,7 +436,7 @@ export default function Home() {
       const res = await fetch(`${API_URL}/create-character`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, dnd_class: dndClass, race, stats, email: email, api_key: apiKey.trim() || "DUMMY" }),
+        body: JSON.stringify({ name, dnd_class: dndClass, race, stats, email: email, api_key: "DUMMY" }),
       });
       const data = await res.json();
       
@@ -489,7 +488,7 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           email: email,
-          api_key: apiKey.trim() || "DUMMY", 
+          api_key: "DUMMY", 
           name: name,
           action_text: actionText,
           stats: stats,
