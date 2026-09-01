@@ -227,14 +227,22 @@ class WorldLocation(BaseModel):
     id: str = Field(description="Unikátní ID bez diakritiky, např. 'mesto_vranov'")
     typ: str = Field(description="'hlavni_mesto', 'mesto', 'vesnice', 'zajimavost'")
     nazev: str
-    popis: str
+    popis: str = Field(description="Veřejně známý popis místa.")
+    tajemstvi_nebo_problem: str = Field(description="Skrytý problém, konflikt nebo tajemství lokace. (Hráč ho nezná!)")
     x: int = Field(description="X souřadnice na mapě (0-100)")
     y: int = Field(description="Y souřadnice na mapě (0-100)")
+
+class CampaignNPC(BaseModel):
+    jmeno: str
+    lokace_id: str = Field(description="ID lokace, kde se nachází.")
+    popis: str
+    skryty_motiv: str = Field(description="Skutečná motivace nebo tajemství postavy. (Hráč ho nezná!)")
+
 
 class CampaignWorld(BaseModel):
     main_plot: str = Field(description="Hlavní epická zápletka kampaně.")
     locations: List[WorldLocation] = Field(description="1-2 hlavni_mesto, 3-4 mesto, 4-8 vesnice, 3-5 zajimavost (rozmístěné po celé mapě 0-100).")
-    key_npcs: List[NPCRecord] = Field(description="3-5 důležitých klíčových postav pro zápletku kampaně.")
+    key_npcs: List[CampaignNPC] = Field(description="3-5 klíčových NPC (vůdci, padouši, zadavatelé úkolů) spjatých s kampaní.")
 
 class CharacterCreateRequest(BaseModel):
     name: str
@@ -570,7 +578,7 @@ async def play_action(req: PlayerActionRequest):
           world_data = state_dict.get('world_data')
           world_prompt_str = ""
           if world_data:
-              world_prompt_str = f"\n[TOTO JE ŘÍZENÝ SANDBOX! Hráč se může pohybovat POUZE v rámci těchto lokací!]\nHlavní zápletka: {world_data.get('main_plot', '')}\nMapa lokací: {json.dumps(world_data.get('locations', []), ensure_ascii=False)}\n"
+              world_prompt_str = f"\n[TOTO JE ŘÍZENÝ SANDBOX! Svět je pevně dán:]\nZápletka: {world_data.get('main_plot', '')}\nLokace: {json.dumps(world_data.get('locations', []), ensure_ascii=False)}\nKlíčová NPC: {json.dumps(world_data.get('key_npcs', []), ensure_ascii=False)}\n\n[KRITICKÉ PRAVIDLO PRO TAJEMSTVÍ]: Všechna 'tajemstvi_nebo_problem' a 'skryty_motiv' jsou před hráčem PŘÍSNĚ SKRYTÁ. Nesmíš je hráči vyžvanit v úvodním popisu lokace! Hráč na ně musí přijít sám pomocí průzkumu, dedukce nebo dialogů s NPC.\n"
               # Automatický výpočet vzdálenosti při cestování, pokud AI zadá cíl
               # (Tohle vyřešíme později, teď jen dáme AI mapu)
 
