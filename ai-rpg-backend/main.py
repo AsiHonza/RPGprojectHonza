@@ -237,7 +237,7 @@ async def create_character(req: CharacterCreateRequest):
         "state": state,
         "history": initial_history
     }).execute()
-    return {"status": "success", "api_key": api_key}
+    return {"status": "success", "api_key": api_key, "message": "Úspěšně ses probudil v novém těle.", "intro_text": "Vítej ve světě Aethelgard. Mlha se pomalu rozestupuje a ty před sebou vidíš obrysy prvních stromů neznámého hvozdu. Tvé dobrodružství právě začíná..."}
 
 class PlayerActionRequest(BaseModel):
     api_key: str
