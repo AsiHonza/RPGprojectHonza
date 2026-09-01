@@ -575,11 +575,12 @@ export default function Home() {
       if (res.ok) {
         setHistory([
           { type: "system", text: data.message },
-          { type: "dm", popis_okoli: "Mlha se pomalu rozestupuje...", vypravec: data.intro_text }
+          { type: "dm", popis_okoli: data.popis_okoli, vypravec: data.intro_text }
         ]);
         setSuggestedActions(["Rozhlédnout se", "Zkontrolovat vybavení", "Vydat se vpřed"]);
         setHp(100);
-          setCurrentLocationDesc("Mlha se pomalu rozestupuje a ty před sebou vidíš neznámý hvozd.");
+          setCurrentLocationDesc(data.popis_okoli || "Neznámé místo.");
+          setCurrentRegion("Začátek cesty");
         const startInv = [
             {id: "starter_clothes", name: "Cestovní oblečení", type: "zbroj", slot: "hruď", description: "Obyčejné, ale teplé.", stats: "Obrana: 1", sell_price: 5, icon: "Shirt"},
             {id: "starter_dagger", name: "Železná dýka", type: "zbraň", slot: "hlavní ruka", description: "Malá, ostrá dýka.", stats: "Poškození: 1d4", sell_price: 10, icon: "Sword"},
