@@ -170,6 +170,10 @@ export default function Home() {
   const [currentLocationDesc, setCurrentLocationDesc] = useState<string>("");
   const [locationType, setLocationType] = useState<string>("divocina");
   const [currentRegion, setCurrentRegion] = useState<string>("Neznámé končiny");
+  const [travelMode, setTravelMode] = useState(false);
+  const [travelDaysLeft, setTravelDaysLeft] = useState(0);
+  const [travelDestination, setTravelDestination] = useState("");
+
   const [pointsOfInterest, setPointsOfInterest] = useState<{nazev: string, ikona: string, ma_ukol: boolean}[]>([]);
   const [currentImage, setCurrentImage] = useState<string | null>(null);
   const [currentImageError, setCurrentImageError] = useState<string | null>(null);
@@ -351,13 +355,13 @@ export default function Home() {
           name: name,
           state: {
             hp, inventory, equipped, level, xp, skillPoints, skills, inCombat, enemies, quests,
-            locationType, currentRegion, pointsOfInterest, stats, rations, currentImage, currentImageError, currentLocationDesc
+            locationType, currentRegion, pointsOfInterest, stats, rations, currentImage, currentImageError, currentLocationDesc, travel_mode: travelMode, travel_days_left: travelDaysLeft, travel_destination: travelDestination
           }
         }),
       }).catch(err => console.error("Autosave failed", err));
     }, 2000);
     return () => clearTimeout(timer);
-  }, [hp, inventory, equipped, level, xp, skillPoints, skills, inCombat, enemies, quests, locationType, currentRegion, pointsOfInterest, gameState, stats, gold, currentSpellSlots, maxSpellSlots, rations, currentImage, currentImageError]);
+  }, [hp, inventory, equipped, level, xp, skillPoints, skills, inCombat, enemies, quests, locationType, currentRegion, pointsOfInterest, gameState, stats, gold, currentSpellSlots, maxSpellSlots, rations, currentImage, currentImageError, travelMode, travelDaysLeft, travelDestination]);
 
   const playAudio = (text: string, voiceType: "narrator" | "npc_muz" | "npc_zena" = "narrator"): Promise<void> => {
     return new Promise((resolve) => {
@@ -574,6 +578,11 @@ export default function Home() {
         if (data.character.stats) setStats(data.character.stats);
         if (state.locationType) setLocationType(state.locationType);
         if (state.currentRegion) setCurrentRegion(state.currentRegion);
+
+        if (state.travel_mode !== undefined) setTravelMode(state.travel_mode);
+        if (state.travel_days_left !== undefined) setTravelDaysLeft(state.travel_days_left);
+        if (state.travel_destination !== undefined) setTravelDestination(state.travel_destination);
+
         if (state.currentLocationDesc) setCurrentLocationDesc(state.currentLocationDesc);
         if (state.popis_okoli) setCurrentLocationDesc(state.popis_okoli);
         if (state.pointsOfInterest) setPointsOfInterest(state.pointsOfInterest);
@@ -619,6 +628,11 @@ export default function Home() {
         setSuggestedActions(["Rozhlédnout se", "Zkontrolovat vybavení", "Vydat se vpřed"]);
         setCurrentLocationDesc(data.popis_okoli || "Neznámé místo.");
         setCurrentRegion("Začátek cesty");
+
+        setTravelMode(state.travel_mode || false);
+        setTravelDaysLeft(state.travel_days_left || 0);
+        setTravelDestination(state.travel_destination || "");
+
         
         const state = data.state || {};
         setHp(state.hp || 100);
@@ -703,6 +717,13 @@ export default function Home() {
         if (data.popis_okoli) setCurrentLocationDesc(data.popis_okoli);
         
         if (data.v_boji !== undefined) setInCombat(data.v_boji);
+
+        if (data.zmeny_stavu) {
+          if (data.zmeny_stavu.travel_mode_set !== undefined && data.zmeny_stavu.travel_mode_set !== null) setTravelMode(data.zmeny_stavu.travel_mode_set);
+          if (data.zmeny_stavu.travel_days_left_set !== undefined && data.zmeny_stavu.travel_days_left_set !== null) setTravelDaysLeft(data.zmeny_stavu.travel_days_left_set);
+          if (data.zmeny_stavu.travel_destination_set !== undefined && data.zmeny_stavu.travel_destination_set !== null) setTravelDestination(data.zmeny_stavu.travel_destination_set);
+        }
+
         if (data.nepratele) setEnemies(data.nepratele);
         if (data.typ_lokace) setLocationType(data.typ_lokace);
         if (data.aktualni_region) setCurrentRegion(data.aktualni_region);
@@ -1110,7 +1131,18 @@ export default function Home() {
         <div className="hidden lg:flex flex-col w-1/3 bg-[#1b262c] border-2 border-[#455a64] rounded-lg shadow-lg overflow-hidden relative">
            {/* Region Header */}
            <div className="absolute top-0 left-0 w-full bg-gradient-to-b from-black/90 via-black/50 to-transparent p-6 z-10 text-center pointer-events-none">
-              <span className="text-[#d4af37] font-bold text-2xl uppercase tracking-widest drop-shadow-[0_2px_4px_rgba(0,0,0,1)] font-medieval">{currentRegion}</span>
+                            {travelMode || travelDaysLeft > 0 ? (
+                <div className="flex flex-col items-center">
+                   <span className="text-white font-bold text-sm tracking-widest uppercase drop-shadow-md">Putování do:</span>
+                   <span className="text-[#d4af37] font-bold text-2xl uppercase tracking-widest drop-shadow-[0_2px_4px_rgba(0,0,0,1)] font-medieval">{travelDestination}</span>
+                   <div className="mt-2 bg-[#1b262c] border border-[#d4af37] px-3 py-1 rounded-full flex gap-2 items-center shadow-lg">
+                      <span className="text-white font-bold text-xs uppercase tracking-wider">Cesta:</span>
+                      <span className="text-red-400 font-bold animate-pulse">{travelDaysLeft} dní</span>
+                   </div>
+                </div>
+              ) : (
+                <span className="text-[#d4af37] font-bold text-2xl uppercase tracking-widest drop-shadow-[0_2px_4px_rgba(0,0,0,1)] font-medieval">{currentRegion}</span>
+              )}
            </div>
            {currentLocationImage ? (
               <div className="w-full h-2/3 border-b-4 border-[#b74b4b] overflow-hidden">
