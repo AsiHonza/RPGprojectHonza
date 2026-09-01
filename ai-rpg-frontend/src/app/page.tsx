@@ -156,6 +156,7 @@ export default function Home() {
   const [currentSpellSlots, setCurrentSpellSlots] = useState(0);
   const [maxSpellSlots, setMaxSpellSlots] = useState(0);
   const [skills, setSkills] = useState<{id: string, name: string, desc: string}[]>([]);
+  const [availableSkills, setAvailableSkills] = useState<any[]>([]);
   const [inCombat, setInCombat] = useState(false);
   const [enemies, setEnemies] = useState<{jmeno: string, hp: number, max_hp: number, status: string}[]>([]);
   
