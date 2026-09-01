@@ -712,6 +712,11 @@ export default function Home() {
               </>
             )}
           </div>
+        <div className="mt-6 text-center">
+          <a href="mailto:janmlcak6@gmail.com?subject=Zpětná vazba - Aethelgard" className="text-[#90a4ae] hover:text-[#e3dcc8] transition text-sm flex items-center justify-center gap-2">
+            <Mail size={16} /> Máte nápad nebo problém? Napište mi.
+          </a>
+        </div>
         </div>
       </div>
     );
@@ -830,7 +835,13 @@ export default function Home() {
                   onChange={(e) => setTtsVolume(parseFloat(e.target.value))}
                   className="w-full accent-[#b74b4b]"
                 />
+              
+              <div className="pt-4 mt-6 border-t border-[#90a4ae]">
+                <a href="mailto:janmlcak6@gmail.com?subject=Zpětná vazba - Aethelgard" className="w-full py-2 bg-[#2b4c5e] text-[#f4f1e1] rounded font-bold hover:bg-[#1e3746] transition flex justify-center items-center gap-2">
+                  <Mail size={18} /> Odeslat zpětnou vazbu
+                </a>
               </div>
+</div>
             </div>
           </div>
         </div>
