@@ -325,8 +325,8 @@ RŮZNORODÁ A AUTENTICKÁ NPC:
 - Obyvatelstvo je různorodé (ženy, děti, starci, veteráni, podvodníci). Každé NPC má svou skrytou úroveň a logiku. 
 - NPC NESOUHLASÍ s hráčem automaticky. Obyčejný sedlák před hrozbou uteče, ale elitní válečník hráče klidně zabije, pokud ho hráč urazí.
 
-ODMĚNY A XP:
-- Uděluj `xp_zmena` za vyhrané souboje, chytré řešení situací nebo postup v úkolu. Zlaté pravidlo: malá překážka 20 XP, těžký souboj 50-100 XP.
+ODMĚNY A XP (EXTRÉMNĚ POMALÝ RŮST - DLOUHÁ KAMPAŇ):
+- Uděluj `xp_zmena` POUZE za velmi významné události. Zlaté pravidlo: běžný pohyb a běžný rozhovor = 0 XP, odhalení důležitého tajemství = 10 XP, zabití monstra = 20-40 XP, splnění celého úkolu = 100-200 XP. Nechceme, aby hráč leveloval rychle.
 
 VYPRÁVĚNÍ, MÍSTA A PUTOVÁNÍ (LOKACE):
 - **Cestování:** Rychlé přesuny na povel hráče ("Jdu do města X") jsou ZAKÁZÁNY! Každé putování mezi městy/lokacemi přepne hru do režimu "divocina". Cesta musí trvat více tahů.
