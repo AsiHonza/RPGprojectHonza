@@ -118,6 +118,7 @@ export default function Home() {
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [bgVolume, setBgVolume] = useState(0.2);
+  const [currentTrack, setCurrentTrack] = useState("/ambient.mp3");
   const [ttsVolume, setTtsVolume] = useState(1.0);
   
   // Nové stavy pro boj a RPG systém
@@ -1528,7 +1529,7 @@ export default function Home() {
       )}
 
       {/* Nativní HTML5 Přehrávač (Ambient Hudba) s lokálním m4a souborem */}
-      <audio ref={bgAudioRef} src="/ambient.mp3" loop />
+      <audio ref={bgAudioRef} src={currentTrack} loop onError={() => { if (currentTrack !== "/ambient.mp3") setCurrentTrack("/ambient.mp3"); }} />
 
     </div>
   );
