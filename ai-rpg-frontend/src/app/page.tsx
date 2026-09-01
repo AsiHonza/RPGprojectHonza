@@ -378,230 +378,25 @@ export default function Home() {
         body: JSON.stringify({ api_key: "DUMMY", name, race, dnd_class: dndClass, keywords }),
       });
       if (res.ok) {
-        setBackstory(await res.json());
-      } else {
-        alert("Chyba při generování.");
-      }
-    } catch (err) {
-      alert("Chyba připojení.");
-    }
-    setLoading(false);
-  };
-
-    const handleAuth = async (isRegister: boolean) => {
-    setLoading(true);
-    try {
-      const endpoint = isRegister ? "/auth/register" : "/auth/login";
-      const res = await fetch(`${API_URL}${endpoint}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Authentication failed");
-      
-      setIsLoggedIn(true);
-      fetchCharacters(email);
-    } catch (error: any) {
-      alert("Chyba přihlášení: " + error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchCharacters = async (userEmail = email) => {
-    setLoading(true);
-    try {
-      const res = await fetch(`${API_URL}/list-characters`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: userEmail })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail);
-      setSavedCharacters(data.characters);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-
-  useEffect(() => {
-    const savedEmail = localStorage.getItem("aethelgard_session_email");
-    if (savedEmail) {
-      setEmail(savedEmail);
-      setIsLoggedIn(true);
-      fetchCharacters(savedEmail);
-    }
-  }, []);
-
-
-  const deleteCharacter = async (e: any, characterName: string) => {
-    e.stopPropagation();
-    if (!confirm(`Opravdu chceš smazat postavu ${characterName}? Tato akce je nevratná.`)) return;
-    
-    setLoading(true);
-    try {
-      const res = await fetch(`${API_URL}/delete-character`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, name: characterName })
-      });
-      if (!res.ok) throw new Error("Nepodařilo se smazat postavu.");
-      fetchCharacters(email);
-    } catch (err: any) {
-      alert(err.message);
-      setLoading(false);
-    }
-  };
-
-  const loadGame = async (characterName: string) => {
-    if (!email || !characterName) return alert("Přihlaste se a vyberte postavu!");
-    setLoading(true);
-    try {
-      const res = await fetch(`${API_URL}/load-game`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email, api_key: "DUMMY", name: characterName }),
-      });
-      const data = await res.json();
-      
-      if (res.ok) {
-                setName(data.character.name);
-        setRace(data.character.race);
-        setDndClass(data.character.dnd_class);
-        
-        let lastSuggestedActions: string[] = [];
-        let lastImage = null;
-        let lastDesc = "";
-        
-        const loadedHistory = data.character.history.map((msg: any) => {
-          if (msg.role === "user") {
-            return { type: "player", text: msg.text };
-          }
-          if (msg.role === "model") {
-            try {
-              const dm_data = JSON.parse(msg.text);
-              if (dm_data.nabizene_akce) lastSuggestedActions = dm_data.nabizene_akce;
-              if (dm_data.image_prompt) lastImage = dm_data.image_prompt;
-              if (dm_data.popis_okoli) lastDesc = dm_data.popis_okoli;
-              
-              return {
-                type: "dm",
-                popis_okoli: dm_data.popis_okoli,
-                image_prompt: dm_data.image_prompt,
-                vypravec: dm_data.vypravec,
-                system_log: dm_data.system_log,
-                npc_dialogy: dm_data.npc_dialogy,
-                v_boji: dm_data.v_boji,
-                nepratele: dm_data.nepratele,
-                typ_lokace: dm_data.typ_lokace,
-                aktualni_region: dm_data.aktualni_region,
-                vyznamna_mista: dm_data.vyznamna_mista
-              };
-            } catch (e) {
-              return { type: "error", text: "Chybný formát zprávy z historie." };
-            }
-          }
-          return null;
-        }).filter(Boolean);
-        
-        setHistory(loadedHistory);
-        setSuggestedActions(lastSuggestedActions);
-        
-        const state = data.character.state || {};
-        setHp(state.hp || 100);
-        if (state.gold !== undefined) setGold(state.gold);
-        if (state.currentSpellSlots !== undefined) setCurrentSpellSlots(state.currentSpellSlots);
-        if (state.maxSpellSlots !== undefined) setMaxSpellSlots(state.maxSpellSlots);
-        setInventory(state.inventory || []);
-        setEquipped(state.equipped || {
-          "hlava": null,
-          "hruď": null,
-          "hlavní ruka": null,
-          "druhá ruka": null,
-          "prsten": null,
-          "krk": null
-        });
-        
-        
-        setLevel(state.level || 1);
-        setXp(state.xp || 0);
-        setSkillPoints(state.skillPoints || 0);
-        setSkills(state.skills || []);
-        setRations(state.rations ?? 3);
-        setInCombat(state.inCombat || false);
-        setEnemies(state.enemies || []);
-        setQuests(state.quests || []);
-      setJournal(state.journal || []);
-        if (data.character.stats) setStats(data.character.stats);
-        if (state.locationType) setLocationType(state.locationType);
-        if (state.currentRegion) setCurrentRegion(state.currentRegion);
-        if (state.currentLocationDesc) setCurrentLocationDesc(state.currentLocationDesc);
-        if (state.popis_okoli) setCurrentLocationDesc(state.popis_okoli);
-        if (state.pointsOfInterest) setPointsOfInterest(state.pointsOfInterest);
-        if (state.currentImage) setCurrentImage(state.currentImage.startsWith("http") && !state.currentImage.includes("127.0.0.1") ? state.currentImage : (state.currentImage.includes("127.0.0.1") ? state.currentImage.replace("http://127.0.0.1:8000", API_URL) : `${API_URL}${state.currentImage}`));
-        if (state.currentImageError) setCurrentImageError(state.currentImageError);
-
-        setGameState("playing");
-        
-        if (lastDesc) {
-            playAudioSequentially([{text: lastDesc, type: "narrator"}]);
-        }
-      } else {
-        alert(data.detail || "Chyba při načítání pozice.");
-      }
-    } catch (err) {
-      console.error(err); alert("Chyba připojení k serveru.");
-    }
-    setLoading(false);
-  };
-
-  const startNewGame = async () => {
-    if (!name) return alert("Zadejte jméno!");
-    setLoading(true);
-    
-    
-        setGameState("playing");
-
-    setHistory([{ type: "system", text: `Postava ${name} vytvořena. Vstupuješ do světa...` }]);
-
-    try {
-      const res = await fetch(`${API_URL}/create-character`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, dnd_class: dndClass, race, stats, email: email, api_key: "DUMMY" }),
-      });
-      const data = await res.json();
-      
-      if (res.ok) {
-        setHistory([
-          { type: "system", text: data.message },
-          { type: "dm", popis_okoli: data.popis_okoli, vypravec: data.intro_text }
-        ]);
-        setSuggestedActions(["Rozhlédnout se", "Zkontrolovat vybavení", "Vydat se vpřed"]);
-        setHp(100);
-          setCurrentLocationDesc(data.popis_okoli || "Neznámé místo.");
-          setCurrentRegion("Začátek cesty");
-        const startInv = [
-            {id: "starter_clothes", name: "Cestovní oblečení", type: "zbroj", slot: "hruď", description: "Obyčejné, ale teplé.", stats: "Obrana: 1", sell_price: 5, icon: "Shirt"},
-            {id: "starter_dagger", name: "Železná dýka", type: "zbraň", slot: "hlavní ruka", description: "Malá, ostrá dýka.", stats: "Poškození: 1d4", sell_price: 10, icon: "Sword"},
-            {id: "starter_potion", name: "Lektvar zdraví", type: "lektvar", slot: "žádný", description: "Léčí drobná zranění.", stats: "Doplní 10 HP", sell_price: 20, icon: "Potion"}
-        ];
-        setInventory(startInv);
-        setEquipped({
-            "hlava": null,
-            "hruď": "starter_clothes",
-            "hlavní ruka": "starter_dagger",
-            "druhá ruka": null,
-            "prsten": null,
-            "krk": null
-        });
-        
-        // AUTO-PLAY intro
-        playAudioSequentially([{text: data.intro_text, type: "narrator"}]);
+          localStorage.setItem("rpg_character", name);
+          localStorage.setItem("rpg_class", dndClass);
+          localStorage.setItem("rpg_race", race);
+          localStorage.setItem("rpg_stats", JSON.stringify(rolledStats));
+          setGameState("playing");
+          
+          const state = data.state || {};
+          setHp(state.hp || 100);
+          setXp(state.xp || 0);
+          setLevel(state.level || 1);
+          setSkillPoints(state.skillPoints || 0);
+          setInventory(state.inventory || []);
+          setEquipped(state.equipped || {});
+          setSkills(state.skills || []);
+          setAvailableSkills(state.available_skills || []);
+          setJournal(state.journal || []);
+          
+          // AUTO-PLAY intro
+          playAudioSequentially([{text: data.intro_text, type: "narrator"}]);
 
       } else {
         setHistory([{ type: "error", text: typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail) }]);
@@ -1449,14 +1244,14 @@ export default function Home() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {[
+                {(availableSkills.length > 0 ? availableSkills : [
                   {id: "silny_uder", name: "Silný úder", desc: "Základní útok nablízko se zvýšeným poškozením (Aktivní)"},
                   {id: "ohniva_koule", name: "Ohnivá koule", desc: "Sešle zničující ohnivou kouli na cíl (Aktivní - Magie)"},
                   {id: "plizeni", name: "Stínový krok", desc: "Postava se přesune do stínů a získá výhodu na další útok (Aktivní)"},
                   {id: "lecive_slovo", name: "Léčivé slovo", desc: "Magicky obnoví trochu zdraví (Aktivní)"},
                   {id: "odolnost", name: "Železná kůže", desc: "V boji tě je těžší zranit. (Pasivní)"},
                   {id: "sermir", name: "Mistr meče", desc: "Vyšší šance na kritický zásah. (Pasivní)"}
-                ].map(skill => {
+                ]).map(skill => {
                   const isUnlocked = skills.find(s => s.id === skill.id);
                   return (
                     <div key={skill.id} className={`p-4 border-2 rounded ${isUnlocked ? 'bg-[#2b4c5e] border-[#90a4ae]' : 'bg-[#1b262c] border-[#455a64] opacity-80'}`}>
