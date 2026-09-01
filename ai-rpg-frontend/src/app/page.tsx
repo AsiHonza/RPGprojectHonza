@@ -712,10 +712,7 @@ export default function Home() {
           <h2 className="text-3xl font-bold border-b-2 border-[#b74b4b] pb-4 mb-6 font-medieval">Tvorba Hrdiny</h2>
           
           <div className="space-y-6">
-            <div>
-              <label className="block font-bold mb-2">Gemini API Klíč</label>
-              <input type="password" value={apiKey} onChange={e => setApiKey(e.target.value)} className="w-full p-2 bg-[#e3dcc8] border border-[#90a4ae] rounded outline-none focus:ring-2 focus:ring-[#b74b4b]" placeholder="AQ.Ab..." />
-            </div>
+            
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
