@@ -5,7 +5,7 @@ import { useState, useRef, useEffect } from "react";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
 import ReactPlayer from 'react-player';
-import { Send, Heart, Package, Sword, Shield, FlaskConical, Gem, Shirt, ScrollText, X, Volume2, VolumeX, User, Settings2, Sparkles, Skull, BookOpen, MapPin, Drumstick, Mail, Loader2, Trash2 , Brain , Menu } from "lucide-react";
+import { Send, Heart, Package, Sword, Shield, FlaskConical, Gem, Shirt, ScrollText, X, Volume2, VolumeX, User, Users, Settings2, Sparkles, Skull, BookOpen, MapPin, Drumstick, Mail, Loader2, Trash2 , Brain , Menu } from "lucide-react";
 
 const getStringHash = (str: string) => {
   let h = 0;
@@ -173,6 +173,9 @@ export default function Home() {
   const [travelMode, setTravelMode] = useState(false);
   const [travelDaysLeft, setTravelDaysLeft] = useState(0);
   const [travelDestination, setTravelDestination] = useState("");
+  const [npcs, setNpcs] = useState<any[]>([]);
+  const [npcsOpen, setNpcsOpen] = useState(false);
+
 
   const [pointsOfInterest, setPointsOfInterest] = useState<{nazev: string, ikona: string, ma_ukol: boolean}[]>([]);
   const [currentImage, setCurrentImage] = useState<string | null>(null);
@@ -355,13 +358,13 @@ export default function Home() {
           name: name,
           state: {
             hp, inventory, equipped, level, xp, skillPoints, skills, inCombat, enemies, quests,
-            locationType, currentRegion, pointsOfInterest, stats, rations, currentImage, currentImageError, currentLocationDesc, travel_mode: travelMode, travel_days_left: travelDaysLeft, travel_destination: travelDestination
+            locationType, currentRegion, pointsOfInterest, stats, rations, currentImage, currentImageError, currentLocationDesc, travel_mode: travelMode, travel_days_left: travelDaysLeft, travel_destination: travelDestination, zname_postavy: npcs
           }
         }),
       }).catch(err => console.error("Autosave failed", err));
     }, 2000);
     return () => clearTimeout(timer);
-  }, [hp, inventory, equipped, level, xp, skillPoints, skills, inCombat, enemies, quests, locationType, currentRegion, pointsOfInterest, gameState, stats, gold, currentSpellSlots, maxSpellSlots, rations, currentImage, currentImageError, travelMode, travelDaysLeft, travelDestination]);
+  }, [hp, inventory, equipped, level, xp, skillPoints, skills, inCombat, enemies, quests, locationType, currentRegion, pointsOfInterest, gameState, stats, gold, currentSpellSlots, maxSpellSlots, rations, currentImage, currentImageError, travelMode, travelDaysLeft, travelDestination, npcs]);
 
   const playAudio = (text: string, voiceType: "narrator" | "npc_muz" | "npc_zena" = "narrator"): Promise<void> => {
     return new Promise((resolve) => {
@@ -582,6 +585,8 @@ export default function Home() {
         if (state.travel_mode !== undefined) setTravelMode(state.travel_mode);
         if (state.travel_days_left !== undefined) setTravelDaysLeft(state.travel_days_left);
         if (state.travel_destination !== undefined) setTravelDestination(state.travel_destination);
+        if (state.zname_postavy) setNpcs(state.zname_postavy);
+
 
         if (state.currentLocationDesc) setCurrentLocationDesc(state.currentLocationDesc);
         if (state.popis_okoli) setCurrentLocationDesc(state.popis_okoli);
@@ -632,6 +637,7 @@ export default function Home() {
         setTravelMode(state.travel_mode || false);
         setTravelDaysLeft(state.travel_days_left || 0);
         setTravelDestination(state.travel_destination || "");
+        setNpcs(state.zname_postavy || []);
 
         
         const state = data.state || {};
@@ -722,6 +728,19 @@ export default function Home() {
           if (data.zmeny_stavu.travel_mode_set !== undefined && data.zmeny_stavu.travel_mode_set !== null) setTravelMode(data.zmeny_stavu.travel_mode_set);
           if (data.zmeny_stavu.travel_days_left_set !== undefined && data.zmeny_stavu.travel_days_left_set !== null) setTravelDaysLeft(data.zmeny_stavu.travel_days_left_set);
           if (data.zmeny_stavu.travel_destination_set !== undefined && data.zmeny_stavu.travel_destination_set !== null) setTravelDestination(data.zmeny_stavu.travel_destination_set);
+
+          if (data.zmeny_stavu.zname_postavy_zmena && data.zmeny_stavu.zname_postavy_zmena.length > 0) {
+            setNpcs(prev => {
+              const updated = [...prev];
+              data.zmeny_stavu.zname_postavy_zmena.forEach((newNpc: any) => {
+                const idx = updated.findIndex(n => n.jmeno.toLowerCase() === newNpc.jmeno.toLowerCase());
+                if (idx !== -1) updated[idx] = newNpc;
+                else updated.push(newNpc);
+              });
+              return updated;
+            });
+          }
+
         }
 
         if (data.nepratele) setEnemies(data.nepratele);
@@ -1077,6 +1096,9 @@ export default function Home() {
                 {!unreadQuests && quests.filter(q => q.stav === 'aktivni').length > 0 && <span className="absolute -top-2 -right-2 w-4 h-4 bg-blue-500 text-white text-[10px] rounded-full flex items-center justify-center">{quests.filter(q => q.stav === 'aktivni').length}</span>}
               </button>
               
+                            <button onClick={() => setNpcsOpen(true)} className="flex items-center gap-1 font-bold text-[#2b4c5e] hover:text-[#b74b4b] transition cursor-pointer bg-[#e3dcc8] px-2 py-1 rounded border border-[#90a4ae]" title="Známé postavy">
+                <Users size={18} />
+              </button>
               <button onClick={() => setInventoryOpen(true)} className="flex items-center gap-1 font-bold text-[#2b4c5e] hover:text-[#b74b4b] transition cursor-pointer bg-[#e3dcc8] px-2 py-1 rounded border border-[#90a4ae]" title="Batoh">
                 <Package size={18} />
               </button>
@@ -1363,7 +1385,10 @@ export default function Home() {
                 <button onClick={() => setSkillsOpen(true)} className="bg-[#1b262c] border border-[#90a4ae] text-[#90a4ae] px-4 py-2 rounded-sm text-sm hover:bg-[#90a4ae] hover:text-[#1b262c] transition-all shadow-md font-bold flex items-center gap-1 font-serif">
                   <Sparkles size={16} /> Použít dovednost
                 </button>
-                <button onClick={() => setInventoryOpen(true)} className="bg-[#1b262c] border border-[#90a4ae] text-[#90a4ae] px-4 py-2 rounded-sm text-sm hover:bg-[#90a4ae] hover:text-[#1b262c] transition-all shadow-md font-bold flex items-center gap-1 font-serif">
+                              <button onClick={() => setNpcsOpen(true)} className="flex items-center gap-1 font-bold text-[#2b4c5e] hover:text-[#b74b4b] transition cursor-pointer bg-[#e3dcc8] px-2 py-1 rounded border border-[#90a4ae]" title="Známé postavy">
+                <Users size={18} />
+              </button>
+              <button onClick={() => setInventoryOpen(true)} className="bg-[#1b262c] border border-[#90a4ae] text-[#90a4ae] px-4 py-2 rounded-sm text-sm hover:bg-[#90a4ae] hover:text-[#1b262c] transition-all shadow-md font-bold flex items-center gap-1 font-serif">
                   <Package size={16} /> Batoh
                 </button>
                 <button onClick={() => sendAction("Pokusím se z boje utéct!")} className="bg-[#1b262c] border border-[#455a64] text-[#78909c] px-4 py-2 rounded-sm text-sm hover:bg-[#2b4c5e] hover:text-[#f4f1e1] transition-all shadow-md italic font-serif">
@@ -1634,7 +1659,46 @@ export default function Home() {
         </div>
       )}
 
-      {/* Inventory Modal */}
+      
+        {/* NPCs Modal */}
+        {npcsOpen && (
+          <div className="absolute inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+            <div className="bg-[#f4f1e1] border-2 border-[#b74b4b] rounded max-w-2xl w-full max-h-[80vh] flex flex-col shadow-2xl overflow-hidden">
+              <div className="flex justify-between items-center p-4 border-b border-[#90a4ae] bg-[#e3dcc8]">
+                <div className="flex items-center gap-2 text-[#b74b4b] font-bold text-2xl uppercase tracking-widest font-medieval">
+                  <Users size={28} /> Deník postav
+                </div>
+                <button onClick={() => setNpcsOpen(false)} className="text-[#2b4c5e] hover:text-[#b74b4b] transition">
+                  <X size={28} />
+                </button>
+              </div>
+              <div className="p-6 overflow-y-auto custom-scrollbar flex-1 bg-[url('/assets/parchment.jpg')] bg-cover bg-center">
+                {npcs.length === 0 ? (
+                  <div className="text-center text-[#455a64] py-8 italic font-serif">Zatím jsi nepotkal nikoho důležitého...</div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {npcs.map((npc, idx) => (
+                      <div key={idx} className="bg-[#1b262c]/80 border border-[#90a4ae] rounded p-4 flex flex-col gap-2 relative">
+                        <div className="flex justify-between items-start gap-2">
+                          <h3 className="text-[#d4af37] font-bold font-medieval text-lg uppercase">{npc.jmeno}</h3>
+                          <span className={`text-[10px] uppercase tracking-wider px-2 py-1 rounded border font-bold ${npc.vztah.toLowerCase().includes('přát') ? 'bg-green-900/50 text-green-400 border-green-500' : npc.vztah.toLowerCase().includes('nepř') ? 'bg-red-900/50 text-red-400 border-red-500' : 'bg-yellow-900/50 text-yellow-400 border-yellow-500'}`}>
+                            {npc.vztah}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1 text-[#90a4ae] text-xs">
+                          <MapPin size={12} /> {npc.lokace}
+                        </div>
+                        <p className="text-[#f4f1e1] text-sm font-serif italic mt-2">{npc.popis}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Inventory Modal */}
       {inventoryOpen && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
           <div className="w-full max-w-5xl bg-[#2b4c5e] rounded-lg border-4 border-[#90a4ae] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
