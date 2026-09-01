@@ -1138,6 +1138,7 @@ export default function Home() {
               )}
             </div>
           </div>
+        </div>
         
         {/* XP Bar */}
         <div className="w-full bg-[#e3dcc8] h-2 mt-2 rounded-full overflow-hidden border border-[#90a4ae] relative">
@@ -1868,6 +1869,16 @@ export default function Home() {
 
             </div>
           </div>
+        </div>
+      )}
+
+            {/* Epic Quest Banner */}
+      {questBanner && (
+        <div className="fixed inset-0 pointer-events-none z-[100] flex items-center justify-center">
+           <div className="animate-in fade-in zoom-in duration-500 flex flex-col items-center bg-black/70 px-12 py-6 border-y-4 border-[#d4af37] shadow-[0_0_50px_rgba(212,175,55,0.4)] backdrop-blur-sm">
+             <div className="text-[#d4af37] text-xs sm:text-sm font-bold tracking-[0.4em] uppercase mb-2">{questBanner.title}</div>
+             <div className="text-[#f4f1e1] text-xl sm:text-3xl font-serif drop-shadow-lg text-center max-w-md">{questBanner.subtitle}</div>
+           </div>
         </div>
       )}
 
