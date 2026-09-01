@@ -116,6 +116,7 @@ export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [name, setName] = useState("");
   const [dndClass, setDndClass] = useState("Bojovník");
+  const [gameMode, setGameMode] = useState("sandbox");
   const [race, setRace] = useState("Člověk");
   const [stats, setStats] = useState({ str: 15, dex: 14, con: 13, intel: 12, wis: 10, cha: 8 });
   const [keywords, setKeywords] = useState("");
@@ -621,7 +622,7 @@ export default function Home() {
       const res = await fetch(`${API_URL}/create-character`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, dnd_class: dndClass, race, stats, email: email, api_key: "DUMMY" }),
+        body: JSON.stringify({ name, dnd_class: dndClass, race, stats, email: email, api_key: "DUMMY", game_mode: gameMode }),
       });
       const data = await res.json();
       
