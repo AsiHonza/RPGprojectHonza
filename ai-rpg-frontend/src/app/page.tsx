@@ -84,6 +84,7 @@ export default function Home() {
 
   const [gameState, setGameState] = useState<"menu" | "creation" | "playing">("menu");
   const [actionsOpen, setActionsOpen] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
   
   // Character Creation Form
   const [setApiKey] = useState("");
@@ -631,21 +632,22 @@ export default function Home() {
                     placeholder="Heslo" 
                   />
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-col gap-4">
                   <button 
-                    onClick={() => handleAuth(false)}
+                    onClick={() => handleAuth(isRegistering)}
                     disabled={loading || !email || !password}
-                    className="w-1/2 py-3 bg-[#e3dcc8] border-2 border-[#b74b4b] text-[#b74b4b] font-bold rounded hover:bg-[#b74b4b] hover:text-[#f4f1e1] transition uppercase tracking-widest disabled:opacity-50"
+                    className="w-full py-3 bg-[#b74b4b] border-2 border-[#b74b4b] text-[#f4f1e1] font-bold rounded hover:bg-[#d46a6a] transition uppercase tracking-widest shadow-lg disabled:opacity-50"
                   >
-                    Přihlásit
+                    {isRegistering ? "Vytvořit účet" : "Přihlásit do hry"}
                   </button>
-                  <button 
-                    onClick={() => handleAuth(true)}
-                    disabled={loading || !email || !password}
-                    className="w-1/2 py-3 bg-[#b74b4b] border-2 border-[#b74b4b] text-[#f4f1e1] font-bold rounded hover:bg-[#d46a6a] transition uppercase tracking-widest disabled:opacity-50"
-                  >
-                    Registrovat
-                  </button>
+                  <div className="text-center">
+                    <button 
+                      onClick={() => setIsRegistering(!isRegistering)}
+                      className="text-[#455a64] hover:text-[#b74b4b] text-sm underline transition"
+                    >
+                      {isRegistering ? "Už máš účet? Přihlas se." : "Ještě nemáš účet? Zaregistruj se."}
+                    </button>
+                  </div>
                 </div>
               </>
             ) : savedCharacters.length === 0 ? (
