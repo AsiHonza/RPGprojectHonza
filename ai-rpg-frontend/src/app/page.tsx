@@ -87,7 +87,6 @@ export default function Home() {
   const [isRegistering, setIsRegistering] = useState(false);
   
   // Character Creation Form
-  const [setApiKey] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -285,11 +284,6 @@ export default function Home() {
       default: setStats(assign("str", "dex", "con")); break;
     }
   }, [dndClass]);
-
-  useEffect(() => {
-    const savedKey = localStorage.getItem("aethelgard_api_key");
-    if (savedKey) setApiKey(savedKey);
-  }, []);
 
   // Autosave
   useEffect(() => {
@@ -518,7 +512,7 @@ export default function Home() {
   const startNewGame = async () => {
     if (!name) return alert("Zadejte jméno!");
     setLoading(true);
-    localStorage.setItem("aethelgard_api_key", apiKey.trim());
+    
     
         setGameState("playing");
 
