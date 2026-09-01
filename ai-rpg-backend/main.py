@@ -1,3 +1,4 @@
+import random
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -58,6 +59,9 @@ class StateChanges(BaseModel):
     inventar_pridat: List[Item] = []
     inventar_odebrat_id: List[str] = []
     ukoly: List[Ukol] = Field(default=[])
+    travel_mode_set: Optional[bool] = None
+    travel_days_left_set: Optional[int] = None
+    travel_destination_set: Optional[str] = None
 
 class NPCDialog(BaseModel):
     jmeno: str
@@ -220,6 +224,171 @@ class CharacterCreateRequest(BaseModel):
     email: str
     api_key: str
 
+
+CLASS_TEMPLATES = {
+    "Barbar": {
+        "inventory": [
+            {"id": "c_greataxe", "icon": "Sword", "name": "Obouruční sekera", "slot": "hlavní ruka", "type": "zbraň", "stats": "Poškození: 1d12", "sell_price": 20, "description": "Těžká obouruční sekera."},
+            {"id": "c_rags", "icon": "Shirt", "name": "Kožené hadry", "slot": "hruď", "type": "zbroj", "stats": "Obrana: 0", "sell_price": 1, "description": "Barbar nepotřebuje zbroj."}
+        ],
+        "equipped": {"hlava": None, "hruď": "c_rags", "hlavní ruka": "c_greataxe", "druhá ruka": None, "prsten": None, "krk": None},
+        "available_skills": [
+            {"id": "rage", "name": "Zuřivost", "desc": "Dočasně zvýší poškození a fyzickou odolnost (Aktivní)."},
+            {"id": "reckless", "name": "Bezohledný útok", "desc": "Výhoda na útok, ale nepřátelé mají výhodu proti tobě (Aktivní)."},
+            {"id": "toughness", "name": "Zarputilost", "desc": "Tvé maximální zdraví se zvýší (Pasivní)."}
+        ],
+        "starting_skills": [{"id": "rage", "name": "Zuřivost", "desc": "Dočasně zvýší poškození a fyzickou odolnost (Aktivní)."}]
+    },
+    "Bard": {
+        "inventory": [
+            {"id": "c_rapier", "icon": "Sword", "name": "Rapír", "slot": "hlavní ruka", "type": "zbraň", "stats": "Poškození: 1d8", "sell_price": 15, "description": "Elegantní zbraň pro šermíře."},
+            {"id": "c_leather", "icon": "Shirt", "name": "Kožená zbroj", "slot": "hruď", "type": "zbroj", "stats": "Obrana: 1", "sell_price": 10, "description": "Základní ochrana."}
+        ],
+        "equipped": {"hlava": None, "hruď": "c_leather", "hlavní ruka": "c_rapier", "druhá ruka": None, "prsten": None, "krk": None},
+        "available_skills": [
+            {"id": "mockery", "name": "Jízlivý posměch", "desc": "Způsobí psychické zranění a nevýhodu na útok nepřítele (Cantrip)."},
+            {"id": "inspiration", "name": "Bardická inspirace", "desc": "Zlepší další hod spojence nebo tvůj vlastní (Aktivní)."},
+            {"id": "charm", "name": "Kouzlo osobnosti", "desc": "Velká výhoda při vyjednávání s NPC (Pasivní)."}
+        ],
+        "starting_skills": [{"id": "mockery", "name": "Jízlivý posměch", "desc": "Způsobí psychické zranění a nevýhodu na útok nepřítele (Cantrip)."}]
+    },
+    "Klerik": {
+        "inventory": [
+            {"id": "c_mace", "icon": "Sword", "name": "Palcát", "slot": "hlavní ruka", "type": "zbraň", "stats": "Poškození: 1d6", "sell_price": 10, "description": "Těžká zbraň drtící kosti."},
+            {"id": "c_shield", "icon": "Shield", "name": "Dřevěný štít", "slot": "druhá ruka", "type": "zbroj", "stats": "Obrana: +1", "sell_price": 10, "description": "Extra obrana."},
+            {"id": "c_chainshirt", "icon": "Shirt", "name": "Kroužková košile", "slot": "hruď", "type": "zbroj", "stats": "Obrana: 2", "sell_price": 20, "description": "Pevná obrana pro kněze."}
+        ],
+        "equipped": {"hlava": None, "hruď": "c_chainshirt", "hlavní ruka": "c_mace", "druhá ruka": "c_shield", "prsten": None, "krk": None},
+        "available_skills": [
+            {"id": "sacredflame", "name": "Posvátný plamen", "desc": "Ožehne cíl zářivou svatou energií (Cantrip)."},
+            {"id": "healingword", "name": "Léčivé slovo", "desc": "Okamžitě obnoví menší množství HP tobě nebo spojenci (Magie)."},
+            {"id": "turnundead", "name": "Odvracení nemrtvých", "desc": "Zastraší a zažene nemrtvé bytosti (Aktivní)."}
+        ],
+        "starting_skills": [{"id": "sacredflame", "name": "Posvátný plamen", "desc": "Ožehne cíl zářivou svatou energií (Cantrip)."}]
+    },
+    "Druid": {
+        "inventory": [
+            {"id": "c_staff", "icon": "Wand", "name": "Dřevěná hůl", "slot": "hlavní ruka", "type": "zbraň", "stats": "Poškození: 1d6", "sell_price": 5, "description": "Pevná hůl z dubového dřeva."},
+            {"id": "c_leather", "icon": "Shirt", "name": "Kožená zbroj", "slot": "hruď", "type": "zbroj", "stats": "Obrana: 1", "sell_price": 10, "description": "Základní ochrana."}
+        ],
+        "equipped": {"hlava": None, "hruď": "c_leather", "hlavní ruka": "c_staff", "druhá ruka": None, "prsten": None, "krk": None},
+        "available_skills": [
+            {"id": "shillelagh", "name": "Šillelagh", "desc": "Posílí tvou hůl magií přírody pro mnohem větší poškození (Cantrip)."},
+            {"id": "wildshape", "name": "Zvířecí podoba", "desc": "Promění tě v šelmu (vlk, medvěd) na jeden souboj (Aktivní)."},
+            {"id": "entangle", "name": "Propletení", "desc": "Ze země vyraší kořeny, které znehybní nepřátele (Magie)."}
+        ],
+        "starting_skills": [{"id": "shillelagh", "name": "Šillelagh", "desc": "Posílí tvou hůl magií přírody pro mnohem větší poškození (Cantrip)."}]
+    },
+    "Bojovník": {
+        "inventory": [
+            {"id": "c_longsword", "icon": "Sword", "name": "Dlouhý meč", "slot": "hlavní ruka", "type": "zbraň", "stats": "Poškození: 1d8", "sell_price": 15, "description": "Univerzální smrtící čepel."},
+            {"id": "c_shield", "icon": "Shield", "name": "Dřevěný štít", "slot": "druhá ruka", "type": "zbroj", "stats": "Obrana: +1", "sell_price": 10, "description": "Extra obrana."},
+            {"id": "c_chainmail", "icon": "Shirt", "name": "Kroužková zbroj", "slot": "hruď", "type": "zbroj", "stats": "Obrana: 3", "sell_price": 30, "description": "Těžká zbroj."}
+        ],
+        "equipped": {"hlava": None, "hruď": "c_chainmail", "hlavní ruka": "c_longsword", "druhá ruka": "c_shield", "prsten": None, "krk": None},
+        "available_skills": [
+            {"id": "secondwind", "name": "Druhý dech", "desc": "Obnoví ti v boji část zdraví (Aktivní)."},
+            {"id": "actionsurge", "name": "Akční vlna", "desc": "Umožní ti zaútočit dvakrát v jednom kole (Aktivní)."},
+            {"id": "defense", "name": "Mistr obrany", "desc": "Vyhnutí se útoku je snadnější (Pasivní)."}
+        ],
+        "starting_skills": [{"id": "secondwind", "name": "Druhý dech", "desc": "Obnoví ti v boji část zdraví (Aktivní)."}]
+    },
+    "Mnich": {
+        "inventory": [
+            {"id": "c_staff", "icon": "Wand", "name": "Hůl", "slot": "hlavní ruka", "type": "zbraň", "stats": "Poškození: 1d6", "sell_price": 5, "description": "Lehká hůl."},
+            {"id": "c_robes", "icon": "Shirt", "name": "Mnišský oděv", "slot": "hruď", "type": "zbroj", "stats": "Obrana: 0", "sell_price": 2, "description": "Neomezuje v pohybu."}
+        ],
+        "equipped": {"hlava": None, "hruď": "c_robes", "hlavní ruka": "c_staff", "druhá ruka": None, "prsten": None, "krk": None},
+        "available_skills": [
+            {"id": "flurry", "name": "Příval ran", "desc": "Série bleskových úderů pěstmi jako extra útok (Aktivní)."},
+            {"id": "patient", "name": "Trpělivá obrana", "desc": "Soustředíš se výhradně na uhýbání, nepřátelé tě těžko zasáhnou (Aktivní)."},
+            {"id": "deflect", "name": "Odražení střel", "desc": "Umíš holýma rukama chytat a odrážet letící šípy (Pasivní)."}
+        ],
+        "starting_skills": [{"id": "flurry", "name": "Příval ran", "desc": "Série bleskových úderů pěstmi jako extra útok (Aktivní)."}]
+    },
+    "Paladin": {
+        "inventory": [
+            {"id": "c_warhammer", "icon": "Sword", "name": "Válečné kladivo", "slot": "hlavní ruka", "type": "zbraň", "stats": "Poškození: 1d8", "sell_price": 15, "description": "Zbraň spravedlnosti."},
+            {"id": "c_shield", "icon": "Shield", "name": "Kovový štít", "slot": "druhá ruka", "type": "zbroj", "stats": "Obrana: +1", "sell_price": 15, "description": "Extra obrana."},
+            {"id": "c_chainmail", "icon": "Shirt", "name": "Kroužková zbroj", "slot": "hruď", "type": "zbroj", "stats": "Obrana: 3", "sell_price": 30, "description": "Těžká zbroj."}
+        ],
+        "equipped": {"hlava": None, "hruď": "c_chainmail", "hlavní ruka": "c_warhammer", "druhá ruka": "c_shield", "prsten": None, "krk": None},
+        "available_skills": [
+            {"id": "smite", "name": "Božský úder", "desc": "Tvůj zbraňový útok získá obrovské radiantní (svaté) poškození (Magie)."},
+            {"id": "layonhands", "name": "Vkládání rukou", "desc": "Léčivý dotyk obnovující větší množství zdraví (Aktivní)."},
+            {"id": "aura", "name": "Aura ochrany", "desc": "Ty a tvoji spojenci lépe odoláváte magii (Pasivní)."}
+        ],
+        "starting_skills": [{"id": "smite", "name": "Božský úder", "desc": "Tvůj zbraňový útok získá obrovské radiantní (svaté) poškození (Magie)."}]
+    },
+    "Hraničář": {
+        "inventory": [
+            {"id": "c_longbow", "icon": "Sword", "name": "Dlouhý luk", "slot": "hlavní ruka", "type": "zbraň", "stats": "Poškození: 1d8", "sell_price": 25, "description": "Vynikající luk pro střelbu na dálku."},
+            {"id": "c_dagger", "icon": "Sword", "name": "Lovecká dýka", "slot": "druhá ruka", "type": "zbraň", "stats": "Poškození: 1d4", "sell_price": 10, "description": "Záložní zbraň."},
+            {"id": "c_leather", "icon": "Shirt", "name": "Kožená zbroj", "slot": "hruď", "type": "zbroj", "stats": "Obrana: 1", "sell_price": 10, "description": "Základní ochrana."}
+        ],
+        "equipped": {"hlava": None, "hruď": "c_leather", "hlavní ruka": "c_longbow", "druhá ruka": "c_dagger", "prsten": None, "krk": None},
+        "available_skills": [
+            {"id": "huntersmark", "name": "Značka lovce", "desc": "Označí cíl. Útoky proti němu působí bonusové zranění (Magie)."},
+            {"id": "companion", "name": "Zvířecí společník", "desc": "Povolá na pomoc cvičené zvíře (Aktivní)."},
+            {"id": "survivalist", "name": "Přežití v divočině", "desc": "Výrazně lepší šance při orientaci, lovu a hledání stop (Pasivní)."}
+        ],
+        "starting_skills": [{"id": "huntersmark", "name": "Značka lovce", "desc": "Označí cíl. Útoky proti němu působí bonusové zranění (Magie)."}]
+    },
+    "Tulák": {
+        "inventory": [
+            {"id": "c_dagger1", "icon": "Sword", "name": "Jedovatá dýka", "slot": "hlavní ruka", "type": "zbraň", "stats": "Poškození: 1d4", "sell_price": 20, "description": "Ostrá a nebezpečná."},
+            {"id": "c_dagger2", "icon": "Sword", "name": "Dýka do levé ruky", "slot": "druhá ruka", "type": "zbraň", "stats": "Poškození: 1d4", "sell_price": 10, "description": "Skvělá na dorážení."},
+            {"id": "c_leather", "icon": "Shirt", "name": "Temná kožená zbroj", "slot": "hruď", "type": "zbroj", "stats": "Obrana: 1", "sell_price": 15, "description": "Neomezuje a splývá s nocí."}
+        ],
+        "equipped": {"hlava": None, "hruď": "c_leather", "hlavní ruka": "c_dagger1", "druhá ruka": "c_dagger2", "prsten": None, "krk": None},
+        "available_skills": [
+            {"id": "sneakattack", "name": "Zákeřný útok", "desc": "Pokud nečekaně zaútočíš, způsobíš smrtící bonusové zranění (Pasivní)."},
+            {"id": "cunning", "name": "Šikovná akce", "desc": "Můžeš uhýbat, schovat se nebo rychle utéct (Aktivní)."},
+            {"id": "lockpicking", "name": "Mistr zloděj", "desc": "Páčení zámků a vybírání kapes s obrovskou výhodou (Pasivní)."}
+        ],
+        "starting_skills": [{"id": "sneakattack", "name": "Zákeřný útok", "desc": "Pokud nečekaně zaútočíš, způsobíš smrtící bonusové zranění (Pasivní)."}]
+    },
+    "Čaroděj": {
+        "inventory": [
+            {"id": "c_dagger", "icon": "Sword", "name": "Dýka krystalová", "slot": "hlavní ruka", "type": "zbraň", "stats": "Poškození: 1d4", "sell_price": 15, "description": "Záložní zbraň pro případ nouze."},
+            {"id": "c_robes", "icon": "Shirt", "name": "Roba ze snových vláken", "slot": "hruď", "type": "zbroj", "stats": "Obrana: 0", "sell_price": 10, "description": "Jemná magická látka."}
+        ],
+        "equipped": {"hlava": None, "hruď": "c_robes", "hlavní ruka": "c_dagger", "druhá ruka": None, "prsten": None, "krk": None},
+        "available_skills": [
+            {"id": "firebolt", "name": "Ohnivá střela", "desc": "Vyšle mocný ohnivý projektil (Cantrip)."},
+            {"id": "quicken", "name": "Zrychlené kouzlo", "desc": "Umožní ti zakouzlit velmi rychle (Aktivní)."},
+            {"id": "shield", "name": "Magický štít", "desc": "Jako reakci vytvoříš bariéru odrážející útoky (Magie)."}
+        ],
+        "starting_skills": [{"id": "firebolt", "name": "Ohnivá střela", "desc": "Vyšle mocný ohnivý projektil (Cantrip)."}]
+    },
+    "Černokněžník": {
+        "inventory": [
+            {"id": "c_dagger", "icon": "Sword", "name": "Dýka s runou", "slot": "hlavní ruka", "type": "zbraň", "stats": "Poškození: 1d4", "sell_price": 15, "description": "Zbraň propojená s tvým patronem."},
+            {"id": "c_robes", "icon": "Shirt", "name": "Temná roba", "slot": "hruď", "type": "zbroj", "stats": "Obrana: 0", "sell_price": 10, "description": "Oděv utkaný ze stínů."}
+        ],
+        "equipped": {"hlava": None, "hruď": "c_robes", "hlavní ruka": "c_dagger", "druhá ruka": None, "prsten": None, "krk": None},
+        "available_skills": [
+            {"id": "eldritchblast", "name": "Mrazivý paprsek", "desc": "Ikonický útok praskající temnou energií (Cantrip)."},
+            {"id": "hellish", "name": "Pekelná odplata", "desc": "Pokud jsi zraněn, útočník vzplane (Magie)."},
+            {"id": "darkvision", "name": "Ďáblovo vidění", "desc": "Perfektní vidění ve tmě a magické temnotě (Pasivní)."}
+        ],
+        "starting_skills": [{"id": "eldritchblast", "name": "Mrazivý paprsek", "desc": "Ikonický útok praskající temnou energií (Cantrip)."}]
+    },
+    "Kouzelník": {
+        "inventory": [
+            {"id": "c_wand", "icon": "Wand", "name": "Magická hůlka", "slot": "hlavní ruka", "type": "zbraň", "stats": "Poškození: 1d4", "sell_price": 20, "description": "Ohnisko pro tvá kouzla."},
+            {"id": "c_robes", "icon": "Shirt", "name": "Učenecká roba", "slot": "hruď", "type": "zbroj", "stats": "Obrana: 0", "sell_price": 10, "description": "Pohodlný oděv na studium knížek."}
+        ],
+        "equipped": {"hlava": None, "hruď": "c_robes", "hlavní ruka": "c_wand", "druhá ruka": None, "prsten": None, "krk": None},
+        "available_skills": [
+            {"id": "rayoffrost", "name": "Mrazivý dotek", "desc": "Vrhne ledový paprsek, který zpomalí cíl (Cantrip)."},
+            {"id": "magicmissile", "name": "Magická střela", "desc": "Tři magické šipky, které vždy neomylně zasáhnou cíl (Magie)."},
+            {"id": "magearmor", "name": "Mágova zbroj", "desc": "Magicky zvýší tvou obranu (Magie)."}
+        ],
+        "starting_skills": [{"id": "rayoffrost", "name": "Mrazivý dotek", "desc": "Vrhne ledový paprsek, který zpomalí cíl (Cantrip)."}]
+    }
+}
+
 @app.post("/create-character")
 async def create_character(req: CharacterCreateRequest):
     api_key = f"{req.email}#{req.name}"
@@ -269,12 +438,16 @@ Vrať POUZE json ve formátu:
     initial_history = [
         {"role": "model", "text": f'''{{"aktualni_region": "Začátek cesty", "popis_okoli": "{popis_okoli}", "vypravec": "{intro_text}", "nabizene_akce": ["Rozhlédnout se", "Zkontrolovat vybavení", "Vydat se vpřed"]}}'''}
     ]
+    # Nacteni tridnich dat
+    cls_data = CLASS_TEMPLATES.get(req.dnd_class, CLASS_TEMPLATES["Bojovník"]) # fallback
+    
     state = {
         "hp": 100,
         "rations": 3,
-        "inventory": [],
-        "equipped": {},
-        "skills": [],
+        "inventory": cls_data["inventory"],
+        "equipped": cls_data["equipped"],
+        "available_skills": cls_data["available_skills"],
+        "skills": cls_data["starting_skills"],
         "quests": [],
         "locationType": "divocina",
         "currentRegion": "Neznámé končiny",
@@ -293,7 +466,7 @@ Vrať POUZE json ve formátu:
         "history": initial_history
     }).execute()
     
-    return {"status": "success", "api_key": api_key, "message": "Úspěšně ses probudil v novém těle.", "intro_text": intro_text, "popis_okoli": popis_okoli}
+    return {"status": "success", "api_key": api_key, "message": "Úspěšně ses probudil v novém těle.", "intro_text": intro_text, "popis_okoli": popis_okoli, "state": state}
 
 class PlayerActionRequest(BaseModel):
     api_key: str
@@ -346,6 +519,30 @@ async def play_action(req: PlayerActionRequest):
                     contents.append(
                         types.Content(role="model", parts=[types.Part.from_text(text=msg["text"])])
                     )
+        state_dict = char_data.get('state', {})
+        travel_days_left = state_dict.get("travel_days_left", 0)
+        is_traveling = state_dict.get("travel_mode", False) or travel_days_left > 0
+        
+        travel_prompt = ""
+        if is_traveling:
+            roll = random.randint(1, 20)
+            if roll <= 5:
+                enc = "Klidná cesta. ŽÁDNÝ BOJ ANI HROZBA. Popiš pouze krásu či ponurost krajiny, počasí a nechej hráče urazit kus cesty."
+            elif roll <= 9:
+                enc = "Objev zajímavé lokace. Hráč narazí na opuštěné či tajuplné místo (ruiny, stará svatyně, podivný strom). Žádný přímý útok, nech ho zkoumat."
+            elif roll <= 13:
+                enc = "Fyzická překážka. Do cesty se postavila nebezpečná překážka (stržený most, bouře, bažina). Hráč musí vymyslet, jak ji překonat."
+            elif roll <= 16:
+                enc = "Sociální setkání. Hráč potká cestovatele (kupec, prchající člověk, poutník). Žádná monstra."
+            elif roll <= 19:
+                enc = "Bojové přepadení! Hráč je napaden monstrem nebo bandity unikátními pro tento region. Vytvoř boj."
+            else:
+                enc = "Epická vzácná událost. Obrovská hrozba nebo magická anomálie. Scéna musí brát dech."
+            
+            travel_prompt = f"\n[SYSTÉMOVÝ HOD NA SETKÁNÍ PRO TENTO TAH: {roll}]\nPŘÍSNÝ PŘÍKAZ: Tvoje vyprávění V TOMTO TAHU se musí točit výhradně kolem tohoto scénáře: {enc}\nPOUŽIJ POLE 'travel_days_left_set' a nastav tam (aktuální hodnota mínus jedna). Pokud klesne na 0, nastav 'travel_mode_set' na false a 'travel_destination_set' na prázdný řetězec. ODEČTI 1 z 'rations'.\n\nPokud text akce začíná na [OOC/MYŠLENKA], ignoruj hod a nic neodečítej!"
+        else:
+            travel_prompt = "\n[SYSTÉM: CESTOVÁNÍ]: Pokud hráč vyslovil přání odejít daleko do jiné lokace, ZAHÁJÍŠ CESTOVÁNÍ. Vyplň pole 'travel_mode_set' jako true, 'travel_destination_set' jako 'Název cíle' a 'travel_days_left_set' jako (číslo 2 až 5 podle dálky). V tomto tahu pouze popiš, že vyráží. (Pokud používá OOC, ignoruj to)."
+
             
         relevant_memories = ""
         # Pidn aktuln akce s kontextem
@@ -354,6 +551,8 @@ async def play_action(req: PlayerActionRequest):
 
 [Aktuln stav hry - neukazovat hri, pouze pro informaci PJ:]
 {json.dumps(char_data.get('state', {}), ensure_ascii=False)}
+
+{travel_prompt}
 
 [Akce hre:]
 {req.action_text}
