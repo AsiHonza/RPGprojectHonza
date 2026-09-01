@@ -144,6 +144,7 @@ export default function Home() {
   });
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [patchNotesOpen, setPatchNotesOpen] = useState(false);
   const [bgVolume, setBgVolume] = useState(0.2);
   const [currentTrack, setCurrentTrack] = useState("/ambient.mp3");
   const [ttsVolume, setTtsVolume] = useState(1.0);
@@ -1018,6 +1019,42 @@ export default function Home() {
   return (
     <div className="h-[100dvh] max-h-[100dvh] overflow-hidden bg-[#1b262c] p-1 md:p-6 gap-2 md:gap-4 font-serif flex flex-col items-center relative">
 
+      
+      {/* Patch Notes Modal */}
+      {patchNotesOpen && (
+        <div className="absolute inset-0 bg-black/80 z-[110] flex items-center justify-center p-4 font-serif">
+          <div className="bg-[#f4f1e1] border-2 border-[#b74b4b] rounded max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden bg-[url('/assets/parchment.jpg')] bg-cover">
+            <div className="flex justify-between items-center p-4 border-b-2 border-[#b74b4b] bg-[#1b262c]/90">
+              <div className="flex items-center gap-2 text-[#d4af37] font-bold text-2xl uppercase tracking-widest font-medieval">
+                <ScrollText size={28} /> Kronika Změn (Patchnotes)
+              </div>
+              <button onClick={() => setPatchNotesOpen(false)} className="text-[#90a4ae] hover:text-[#b74b4b] transition">
+                <X size={28} />
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-8">
+              {PATCH_NOTES.map((patch, idx) => (
+                <div key={idx} className="bg-[#1b262c]/10 border border-[#90a4ae] rounded p-5 shadow-sm">
+                  <div className="flex justify-between items-end border-b border-[#90a4ae] pb-2 mb-4">
+                    <h2 className="text-[#b74b4b] font-bold text-xl font-medieval tracking-wide">{patch.version}</h2>
+                    <span className="text-[#455a64] text-xs font-bold uppercase">{patch.date}</span>
+                  </div>
+                  <ul className="space-y-3">
+                    {patch.changes.map((change, cIdx) => (
+                      <li key={cIdx} className="text-[#2b4c5e] flex gap-3 text-sm md:text-base leading-relaxed">
+                        <span className="shrink-0 text-lg mt-[-2px]">{change.split(' ')[0]}</span>
+                        <span>{change.substring(change.indexOf(' ') + 1)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Settings Modal */}
       {settingsOpen && (
         <div className="absolute inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
@@ -1120,7 +1157,12 @@ export default function Home() {
               <button onClick={() => setMusicPlaying(!musicPlaying)} className="hidden sm:flex items-center gap-1 font-bold text-[#2b4c5e] hover:text-[#b74b4b] transition cursor-pointer bg-[#e3dcc8] px-2 py-1 rounded border border-[#90a4ae]" title="Hudba">
                 {musicPlaying ? <Volume2 size={18} /> : <VolumeX size={18} />}
               </button>
-              <button onClick={() => setSettingsOpen(true)} className="hidden sm:flex items-center gap-1 font-bold text-[#2b4c5e] hover:text-[#b74b4b] transition cursor-pointer bg-[#e3dcc8] px-2 py-1 rounded border border-[#90a4ae]" title="Nastavení">
+                          {/* Patch Notes Button */}
+            <button onClick={() => setPatchNotesOpen(true)} className="text-[#b74b4b] hover:text-[#d4af37] transition flex items-center gap-1 font-bold bg-[#1b262c] px-2 py-1 rounded border border-[#90a4ae]" title="Novinky ve hře">
+              <ScrollText size={20} />
+              <span className="hidden sm:inline text-xs uppercase">Novinky</span>
+            </button>
+            <button onClick={() => setSettingsOpen(true)} className="hidden sm:flex items-center gap-1 font-bold text-[#2b4c5e] hover:text-[#b74b4b] transition cursor-pointer bg-[#e3dcc8] px-2 py-1 rounded border border-[#90a4ae]" title="Nastavení">
                 <Settings2 size={18} />
               </button>
 
