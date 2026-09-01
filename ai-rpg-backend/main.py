@@ -575,12 +575,12 @@ async def play_action(req: PlayerActionRequest):
         travel_days_left = state_dict.get("travel_days_left", 0)
         is_traveling = state_dict.get("travel_mode", False) or travel_days_left > 0
 
-          world_data = state_dict.get('world_data')
-          world_prompt_str = ""
-          if world_data:
-              world_prompt_str = f"\n[TOTO JE ŘÍZENÝ SANDBOX! Svět je pevně dán:]\nZápletka: {world_data.get('main_plot', '')}\nLokace: {json.dumps(world_data.get('locations', []), ensure_ascii=False)}\nKlíčová NPC: {json.dumps(world_data.get('key_npcs', []), ensure_ascii=False)}\n\n[KRITICKÉ PRAVIDLO PRO TAJEMSTVÍ]: Všechna 'tajemstvi_nebo_problem' a 'skryty_motiv' jsou před hráčem PŘÍSNĚ SKRYTÁ. Nesmíš je hráči vyžvanit v úvodním popisu lokace! Hráč na ně musí přijít sám pomocí průzkumu, dedukce nebo dialogů s NPC.\n"
-              # Automatický výpočet vzdálenosti při cestování, pokud AI zadá cíl
-              # (Tohle vyřešíme později, teď jen dáme AI mapu)
+        world_data = state_dict.get('world_data')
+        world_prompt_str = ""
+        if world_data:
+            world_prompt_str = f"\n[TOTO JE ŘÍZENÝ SANDBOX! Svět je pevně dán:]\nZápletka: {world_data.get('main_plot', '')}\nLokace: {json.dumps(world_data.get('locations', []), ensure_ascii=False)}\nKlíčová NPC: {json.dumps(world_data.get('key_npcs', []), ensure_ascii=False)}\n\n[KRITICKÉ PRAVIDLO PRO TAJEMSTVÍ]: Všechna 'tajemstvi_nebo_problem' a 'skryty_motiv' jsou před hráčem PŘÍSNĚ SKRYTÁ. Nesmíš je hráči vyžvanit v úvodním popisu lokace! Hráč na ně musí přijít sám pomocí průzkumu, dedukce nebo dialogů s NPC.\n"
+            # Automatický výpočet vzdálenosti při cestování, pokud AI zadá cíl
+            # (Tohle vyřešíme později, teď jen dáme AI mapu)
 
         
         travel_prompt = ""
