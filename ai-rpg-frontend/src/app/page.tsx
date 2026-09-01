@@ -83,6 +83,7 @@ const TypewriterText = ({ text, delay = 25, animate = false }: { text: string, d
 export default function Home() {
 
   const [gameState, setGameState] = useState<"menu" | "creation" | "playing">("menu");
+  const [actionsOpen, setActionsOpen] = useState(false);
   
   // Character Creation Form
   const [setApiKey] = useState("");
@@ -1086,7 +1087,14 @@ export default function Home() {
 
         {/* Suggested Actions or Combat Quick Actions */}
         {!loading && (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-col gap-2">
+            <button 
+              onClick={() => setActionsOpen(!actionsOpen)} 
+              className="md:hidden w-full bg-[#2b4c5e] border border-[#90a4ae] text-[#f4f1e1] px-4 py-2 rounded-sm text-sm hover:bg-[#455a64] transition-all font-bold flex justify-center items-center gap-2 shadow-md"
+            >
+              Vyrolovat akce {actionsOpen ? "▲" : "▼"}
+            </button>
+            <div className={`${actionsOpen ? 'flex' : 'hidden'} md:flex flex-wrap gap-2`}>
             {inCombat ? (
               <>
                 <button onClick={() => sendAction(`Útočím zbraní: ${inventory.find(i => i.id === equipped["hlavní ruka"])?.name || "Pěsti"}`)} className="bg-[#b74b4b] border border-[#b74b4b] text-[#f4f1e1] px-4 py-2 rounded-sm text-sm hover:bg-[#8a3333] transition-all shadow-md font-bold flex items-center gap-1 font-serif">
@@ -1127,6 +1135,7 @@ export default function Home() {
                 ))}
               </>
             )}
+          </div>
           </div>
         )}
 
