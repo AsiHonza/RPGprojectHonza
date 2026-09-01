@@ -1528,7 +1528,7 @@ export default function Home() {
       )}
 
       {/* Nativní HTML5 Přehrávač (Ambient Hudba) s lokálním m4a souborem */}
-      <audio ref={bgAudioRef} src="/ambient.m4a" loop />
+      <audio ref={bgAudioRef} src="/ambient.mp3" loop />
 
     </div>
   );
