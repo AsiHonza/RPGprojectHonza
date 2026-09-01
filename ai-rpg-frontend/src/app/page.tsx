@@ -329,6 +329,16 @@ export default function Home() {
     }
   };
 
+
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("aethelgard_session_email");
+    if (savedEmail) {
+      setEmail(savedEmail);
+      setIsLoggedIn(true);
+      fetchCharacters(savedEmail);
+    }
+  }, []);
+
   const loadGame = async (characterName: string) => {
     if (!email || !characterName) return alert("Přihlaste se a vyberte postavu!");
     setLoading(true);
