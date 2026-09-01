@@ -273,7 +273,8 @@ Vrať POUZE json ve formátu:
         "currentRegion": "Neznámé končiny",
         "pointsOfInterest": [],
         "level": 1,
-        "xp": 0
+        "xp": 0,
+        "journal": [f"Vytvořil jsi postavu {req.name} (Rasa: {req.race}, Třída: {req.dnd_class}). Tvé dobrodružství začíná."]
     }
     
     supabase.table("characters").insert({
