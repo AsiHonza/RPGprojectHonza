@@ -5,7 +5,7 @@ import { useState, useRef, useEffect } from "react";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
 import ReactPlayer from 'react-player';
-import { Send, Heart, Package, Sword, Shield, FlaskConical, Gem, Shirt, ScrollText, X, Volume2, VolumeX, User, Settings2, Sparkles, Skull, BookOpen, MapPin, Drumstick } from "lucide-react";
+import { Send, Heart, Package, Sword, Shield, FlaskConical, Gem, Shirt, ScrollText, X, Volume2, VolumeX, User, Settings2, Sparkles, Skull, BookOpen, MapPin, Drumstick, Mail } from "lucide-react";
 
 const getStringHash = (str: string) => {
   let h = 0;
