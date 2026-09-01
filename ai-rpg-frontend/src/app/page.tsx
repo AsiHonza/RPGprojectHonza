@@ -5,7 +5,7 @@ import { useState, useRef, useEffect } from "react";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
 import ReactPlayer from 'react-player';
-import { Send, Heart, Package, Sword, Shield, FlaskConical, Gem, Shirt, ScrollText, X, Volume2, VolumeX, User, Users, Settings2, Sparkles, Skull, BookOpen, MapPin, Drumstick, Mail, Loader2, Trash2 , Brain , Menu } from "lucide-react";
+import { Send, Heart, Package, Sword, Shield, FlaskConical, Gem, Shirt, ScrollText, X, Volume2, VolumeX, User, Users, Settings2, Map, Sparkles, Skull, BookOpen, MapPin, Drumstick, Mail, Loader2, Trash2 , Brain , Menu } from "lucide-react";
 
 const getStringHash = (str: string) => {
   let h = 0;
@@ -176,6 +176,8 @@ export default function Home() {
   const [travelDestination, setTravelDestination] = useState("");
   const [npcs, setNpcs] = useState<any[]>([]);
   const [npcsOpen, setNpcsOpen] = useState(false);
+  const [worldData, setWorldData] = useState<any>(null);
+  const [mapOpen, setMapOpen] = useState(false);
 
 
   const [pointsOfInterest, setPointsOfInterest] = useState<{nazev: string, ikona: string, ma_ukol: boolean}[]>([]);
@@ -359,13 +361,13 @@ export default function Home() {
           name: name,
           state: {
             hp, inventory, equipped, level, xp, skillPoints, skills, inCombat, enemies, quests,
-            locationType, currentRegion, pointsOfInterest, stats, rations, currentImage, currentImageError, currentLocationDesc, travel_mode: travelMode, travel_days_left: travelDaysLeft, travel_destination: travelDestination, zname_postavy: npcs
+            locationType, currentRegion, pointsOfInterest, stats, rations, currentImage, currentImageError, currentLocationDesc, travel_mode: travelMode, travel_days_left: travelDaysLeft, travel_destination: travelDestination, zname_postavy: npcs, world_data: worldData
           }
         }),
       }).catch(err => console.error("Autosave failed", err));
     }, 2000);
     return () => clearTimeout(timer);
-  }, [hp, inventory, equipped, level, xp, skillPoints, skills, inCombat, enemies, quests, locationType, currentRegion, pointsOfInterest, gameState, stats, gold, currentSpellSlots, maxSpellSlots, rations, currentImage, currentImageError, travelMode, travelDaysLeft, travelDestination, npcs]);
+  }, [hp, inventory, equipped, level, xp, skillPoints, skills, inCombat, enemies, quests, locationType, currentRegion, pointsOfInterest, gameState, stats, gold, currentSpellSlots, maxSpellSlots, rations, currentImage, currentImageError, travelMode, travelDaysLeft, travelDestination, npcs, worldData]);
 
   const playAudio = (text: string, voiceType: "narrator" | "npc_muz" | "npc_zena" = "narrator"): Promise<void> => {
     return new Promise((resolve) => {
@@ -587,6 +589,8 @@ export default function Home() {
         if (state.travel_days_left !== undefined) setTravelDaysLeft(state.travel_days_left);
         if (state.travel_destination !== undefined) setTravelDestination(state.travel_destination);
         if (state.zname_postavy) setNpcs(state.zname_postavy);
+        if (state.world_data) setWorldData(state.world_data);
+        else setWorldData(null);
 
 
         if (state.currentLocationDesc) setCurrentLocationDesc(state.currentLocationDesc);
@@ -639,6 +643,7 @@ export default function Home() {
         setTravelDaysLeft(state.travel_days_left || 0);
         setTravelDestination(state.travel_destination || "");
         setNpcs(state.zname_postavy || []);
+        setWorldData(state.world_data || null);
 
         
         const state = data.state || {};
@@ -1097,7 +1102,12 @@ export default function Home() {
                 {!unreadQuests && quests.filter(q => q.stav === 'aktivni').length > 0 && <span className="absolute -top-2 -right-2 w-4 h-4 bg-blue-500 text-white text-[10px] rounded-full flex items-center justify-center">{quests.filter(q => q.stav === 'aktivni').length}</span>}
               </button>
               
-                            <button onClick={() => setNpcsOpen(true)} className="flex items-center gap-1 font-bold text-[#2b4c5e] hover:text-[#b74b4b] transition cursor-pointer bg-[#e3dcc8] px-2 py-1 rounded border border-[#90a4ae]" title="Známé postavy">
+                                          {worldData && (
+                <button onClick={() => setMapOpen(true)} className="flex items-center gap-1 font-bold text-[#2b4c5e] hover:text-[#b74b4b] transition cursor-pointer bg-[#e3dcc8] px-2 py-1 rounded border border-[#90a4ae]" title="Mapa světa">
+                  <Map size={18} />
+                </button>
+              )}
+              <button onClick={() => setNpcsOpen(true)} className="flex items-center gap-1 font-bold text-[#2b4c5e] hover:text-[#b74b4b] transition cursor-pointer bg-[#e3dcc8] px-2 py-1 rounded border border-[#90a4ae]" title="Známé postavy">
                 <Users size={18} />
               </button>
               <button onClick={() => setInventoryOpen(true)} className="flex items-center gap-1 font-bold text-[#2b4c5e] hover:text-[#b74b4b] transition cursor-pointer bg-[#e3dcc8] px-2 py-1 rounded border border-[#90a4ae]" title="Batoh">
@@ -1387,7 +1397,12 @@ export default function Home() {
                 <button onClick={() => setSkillsOpen(true)} className="bg-[#1b262c] border border-[#90a4ae] text-[#90a4ae] px-4 py-2 rounded-sm text-sm hover:bg-[#90a4ae] hover:text-[#1b262c] transition-all shadow-md font-bold flex items-center gap-1 font-serif">
                   <Sparkles size={16} /> Použít dovednost
                 </button>
-                              <button onClick={() => setNpcsOpen(true)} className="flex items-center gap-1 font-bold text-[#2b4c5e] hover:text-[#b74b4b] transition cursor-pointer bg-[#e3dcc8] px-2 py-1 rounded border border-[#90a4ae]" title="Známé postavy">
+                                            {worldData && (
+                <button onClick={() => setMapOpen(true)} className="flex items-center gap-1 font-bold text-[#2b4c5e] hover:text-[#b74b4b] transition cursor-pointer bg-[#e3dcc8] px-2 py-1 rounded border border-[#90a4ae]" title="Mapa světa">
+                  <Map size={18} />
+                </button>
+              )}
+              <button onClick={() => setNpcsOpen(true)} className="flex items-center gap-1 font-bold text-[#2b4c5e] hover:text-[#b74b4b] transition cursor-pointer bg-[#e3dcc8] px-2 py-1 rounded border border-[#90a4ae]" title="Známé postavy">
                 <Users size={18} />
               </button>
               <button onClick={() => setInventoryOpen(true)} className="bg-[#1b262c] border border-[#90a4ae] text-[#90a4ae] px-4 py-2 rounded-sm text-sm hover:bg-[#90a4ae] hover:text-[#1b262c] transition-all shadow-md font-bold flex items-center gap-1 font-serif">
@@ -1662,6 +1677,60 @@ export default function Home() {
       )}
 
       
+        
+        {/* Map Modal */}
+        {mapOpen && worldData && (
+          <div className="absolute inset-0 bg-black/80 z-[100] flex items-center justify-center p-2 md:p-8">
+            <div className="bg-[#e3dcc8] w-full h-full max-h-screen max-w-6xl rounded shadow-2xl relative overflow-hidden border-4 border-[#1b262c] bg-[url('/assets/parchment.jpg')] bg-cover">
+              
+              <div className="absolute top-4 left-4 z-50 bg-[#f4f1e1]/90 px-4 py-2 rounded border border-[#90a4ae] shadow-lg pointer-events-none">
+                <h2 className="text-[#b74b4b] font-bold text-xl uppercase font-medieval tracking-widest drop-shadow">Světová mapa</h2>
+              </div>
+
+              <button onClick={() => setMapOpen(false)} className="absolute top-4 right-4 bg-[#1b262c] text-[#f4f1e1] p-2 rounded hover:bg-[#b74b4b] transition z-50 border border-[#90a4ae]">
+                <X size={24} />
+              </button>
+
+              <div className="relative w-full h-full min-h-[600px] p-10">
+                {/* Roads/Routes (SVG) */}
+                <svg className="absolute inset-0 w-full h-full pointer-events-none">
+                  {worldData.locations?.map((loc: any, i: number) => {
+                    return worldData.locations?.map((loc2: any, j: number) => {
+                      if (i < j) {
+                        const dx = loc.x - loc2.x;
+                        const dy = loc.y - loc2.y;
+                        const dist = Math.sqrt(dx*dx + dy*dy);
+                        if (dist < 40) { // Connect nodes closer than 40 units
+                          return <line key={`${i}-${j}`} x1={`${loc.x}%`} y1={`${loc.y}%`} x2={`${loc2.x}%`} y2={`${loc2.y}%`} stroke="#455a64" strokeWidth="2" strokeDasharray="4,6" opacity={0.6} />
+                        }
+                      }
+                      return null;
+                    });
+                  })}
+                </svg>
+
+                {/* Location Nodes */}
+                {worldData.locations?.map((loc: any, idx: number) => {
+                  const isCurrent = currentRegion?.toLowerCase().includes(loc.nazev?.toLowerCase()) || false;
+                  return (
+                    <div key={idx} className="absolute flex flex-col items-center justify-center -translate-x-1/2 -translate-y-1/2 group cursor-pointer z-20" style={{left: `${loc.x}%`, top: `${loc.y}%`}}>
+                      <div className={`w-4 h-4 md:w-6 md:h-6 rounded-full border-2 ${isCurrent ? 'bg-[#b74b4b] border-[#d4af37] shadow-[0_0_15px_#b74b4b] animate-pulse' : 'bg-[#1b262c] border-[#90a4ae]'} transition-transform duration-300 group-hover:scale-150 z-10`} />
+                      <span className="mt-1 text-xs md:text-sm font-bold text-[#1b262c] drop-shadow-[0_1px_1px_rgba(255,255,255,1)] font-medieval whitespace-nowrap bg-[#f4f1e1]/70 px-1 rounded transition-opacity">
+                        {loc.nazev}
+                      </span>
+                      <div className="hidden group-hover:block absolute top-full mt-2 w-48 md:w-64 bg-[#1b262c] text-[#f4f1e1] text-xs p-3 rounded z-30 shadow-xl border-2 border-[#b74b4b] text-left">
+                        <span className="font-bold text-[#d4af37] block mb-2 uppercase border-b border-[#455a64] pb-1">{String(loc.typ).replace('_', ' ')}</span>
+                        <p className="italic font-serif">{loc.popis}</p>
+                        {isCurrent && <p className="mt-2 text-green-400 font-bold uppercase text-[10px]">📍 Tvá současná poloha</p>}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* NPCs Modal */}
         {npcsOpen && (
           <div className="absolute inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
@@ -1670,7 +1739,12 @@ export default function Home() {
                 <div className="flex items-center gap-2 text-[#b74b4b] font-bold text-2xl uppercase tracking-widest font-medieval">
                   <Users size={28} /> Deník postav
                 </div>
-                <button onClick={() => setNpcsOpen(false)} className="text-[#2b4c5e] hover:text-[#b74b4b] transition">
+                              {worldData && (
+                <button onClick={() => setMapOpen(true)} className="flex items-center gap-1 font-bold text-[#2b4c5e] hover:text-[#b74b4b] transition cursor-pointer bg-[#e3dcc8] px-2 py-1 rounded border border-[#90a4ae]" title="Mapa světa">
+                  <Map size={18} />
+                </button>
+              )}
+              <button onClick={() => setNpcsOpen(false)} className="text-[#2b4c5e] hover:text-[#b74b4b] transition">
                   <X size={28} />
                 </button>
               </div>
