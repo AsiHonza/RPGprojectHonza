@@ -607,11 +607,11 @@ export default function Home() {
           if (data.zmeny_stavu.xp_zmena) {
              setXp(currentXp => {
                const newXp = currentXp + data.zmeny_stavu.xp_zmena;
-               if (newXp >= level * 100) {
+               if (newXp >= level * 300) {
                  // Level up!
                  setLevel(l => l + 1);
                  setSkillPoints(sp => sp + 1);
-                 return newXp - (level * 100);
+                 return newXp - (level * 300);
                }
                return newXp;
              });
@@ -941,7 +941,7 @@ export default function Home() {
         <div className="w-full bg-[#e3dcc8] h-2 mt-2 rounded-full overflow-hidden border border-[#90a4ae] relative">
           <div className="h-full bg-gradient-to-r from-[#d4af37] to-[#b59226] transition-all duration-500" style={{width: `${(xp / (level * 100)) * 100}%`}}></div>
         </div>
-        <div className="text-right text-[10px] text-[#455a64] -mt-1 font-bold"><span key={`xp-${xp}`} className="animate-flash">{xp}</span> / {level * 100} XP</div>
+        <div className="text-right text-[10px] text-[#455a64] -mt-1 font-bold"><span key={`xp-${xp}`} className="animate-flash">{xp}</span> / {level * 300} XP</div>
       </div>
 
       {/* 2-Column Main Container */}
