@@ -183,6 +183,20 @@ async def load_game(req: LoadGameRequest):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+
+class DeleteCharacterRequest(BaseModel):
+    email: str
+    name: str
+
+@app.post("/delete-character")
+async def delete_character(req: DeleteCharacterRequest):
+    try:
+        api_key = f"{req.email}#{req.name}"
+        supabase.table("characters").delete().eq("api_key", api_key).execute()
+        return {"status": "success"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 class SaveStateRequest(BaseModel):
     email: str
     name: str
@@ -425,6 +439,20 @@ SPECIFIKA POSTAVY A NABIZENE AKCE:
         return dm_json
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Chyba při komunikaci: {str(e)}")
+
+
+class DeleteCharacterRequest(BaseModel):
+    email: str
+    name: str
+
+@app.post("/delete-character")
+async def delete_character(req: DeleteCharacterRequest):
+    try:
+        api_key = f"{req.email}#{req.name}"
+        supabase.table("characters").delete().eq("api_key", api_key).execute()
+        return {"status": "success"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 class SaveStateRequest(BaseModel):
     email: str
