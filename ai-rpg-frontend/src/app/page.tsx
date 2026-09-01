@@ -531,6 +531,14 @@ export default function Home() {
         setXp(state.xp || 0);
         setSkillPoints(state.skillPoints || 0);
         setSkills(state.skills || []);
+        setAvailableSkills(state.available_skills || [
+            {id: "silny_uder", name: "Silný úder", desc: "Základní útok nablízko se zvýšeným poškozením (Aktivní)"},
+            {id: "ohniva_koule", name: "Ohnivá koule", desc: "Sešle zničující ohnivou kouli na cíl (Aktivní - Magie)"},
+            {id: "plizeni", name: "Stínový krok", desc: "Postava se přesune do stínů a získá výhodu na další útok (Aktivní)"},
+            {id: "lecive_slovo", name: "Léčivé slovo", desc: "Magicky obnoví trochu zdraví (Aktivní)"},
+            {id: "odolnost", name: "Železná kůže", desc: "V boji tě je těžší zranit. (Pasivní)"},
+            {id: "sermir", name: "Mistr meče", desc: "Vyšší šance na kritický zásah. (Pasivní)"}
+        ]);
         setRations(state.rations ?? 3);
         setInCombat(state.inCombat || false);
         setEnemies(state.enemies || []);
@@ -582,23 +590,19 @@ export default function Home() {
           { type: "dm", popis_okoli: data.popis_okoli, vypravec: data.intro_text }
         ]);
         setSuggestedActions(["Rozhlédnout se", "Zkontrolovat vybavení", "Vydat se vpřed"]);
-        setHp(100);
-          setCurrentLocationDesc(data.popis_okoli || "Neznámé místo.");
-          setCurrentRegion("Začátek cesty");
-        const startInv = [
-            {id: "starter_clothes", name: "Cestovní oblečení", type: "zbroj", slot: "hruď", description: "Obyčejné, ale teplé.", stats: "Obrana: 1", sell_price: 5, icon: "Shirt"},
-            {id: "starter_dagger", name: "Železná dýka", type: "zbraň", slot: "hlavní ruka", description: "Malá, ostrá dýka.", stats: "Poškození: 1d4", sell_price: 10, icon: "Sword"},
-            {id: "starter_potion", name: "Lektvar zdraví", type: "lektvar", slot: "žádný", description: "Léčí drobná zranění.", stats: "Doplní 10 HP", sell_price: 20, icon: "Potion"}
-        ];
-        setInventory(startInv);
-        setEquipped({
-            "hlava": null,
-            "hruď": "starter_clothes",
-            "hlavní ruka": "starter_dagger",
-            "druhá ruka": null,
-            "prsten": null,
-            "krk": null
-        });
+        setCurrentLocationDesc(data.popis_okoli || "Neznámé místo.");
+        setCurrentRegion("Začátek cesty");
+        
+        const state = data.state || {};
+        setHp(state.hp || 100);
+        setXp(state.xp || 0);
+        setLevel(state.level || 1);
+        setSkillPoints(state.skillPoints || 0);
+        setInventory(state.inventory || []);
+        setEquipped(state.equipped || {});
+        setSkills(state.skills || []);
+        setAvailableSkills(state.available_skills || []);
+        setJournal(state.journal || []);
         
         // AUTO-PLAY intro
         playAudioSequentially([{text: data.intro_text, type: "narrator"}]);
