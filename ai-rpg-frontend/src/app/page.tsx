@@ -138,7 +138,7 @@ export default function Home() {
   const [skillsOpen, setSkillsOpen] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
   const [questsOpen, setQuestsOpen] = useState(false);
-  const [musicPlaying, setMusicPlaying] = useState(false);
+  const [musicPlaying, setMusicPlaying] = useState(true);
   const [currentLocationImage, setCurrentLocationImage] = useState<string | null>(null);
   const [currentLocationDesc, setCurrentLocationDesc] = useState<string>("");
   const [locationType, setLocationType] = useState<string>("divocina");
@@ -164,6 +164,29 @@ export default function Home() {
         setMaxSpellSlots(slots);
     }
   }, [level, dndClass, maxSpellSlots]);
+  
+  // Global interaction listener for Autoplay Policy
+  useEffect(() => {
+    const handleFirstInteraction = () => {
+      if (musicPlaying && bgAudioRef.current && bgAudioRef.current.paused) {
+        bgAudioRef.current.play().catch(e => console.log("Autoplay still blocked:", e));
+      }
+      window.removeEventListener('click', handleFirstInteraction);
+      window.removeEventListener('touchstart', handleFirstInteraction);
+      window.removeEventListener('keydown', handleFirstInteraction);
+    };
+
+    window.addEventListener('click', handleFirstInteraction);
+    window.addEventListener('touchstart', handleFirstInteraction);
+    window.addEventListener('keydown', handleFirstInteraction);
+
+    return () => {
+      window.removeEventListener('click', handleFirstInteraction);
+      window.removeEventListener('touchstart', handleFirstInteraction);
+      window.removeEventListener('keydown', handleFirstInteraction);
+    };
+  }, [musicPlaying]);
+
   // Dynamic Music switching
   useEffect(() => {
     if (!musicPlaying || !bgAudioRef.current) return;
