@@ -129,6 +129,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [inventoryOpen, setInventoryOpen] = useState(false);
   const [journalOpen, setJournalOpen] = useState(false);
+  const [isOOC, setIsOOC] = useState(false);
   const [journal, setJournal] = useState<string[]>([]);
   const [hp, setHp] = useState(100);
   const [inventory, setInventory] = useState<any[]>([]);
@@ -614,7 +615,12 @@ export default function Home() {
   const sendAction = async (actionText: string) => {
     if (!actionText.trim() || loading) return;
     
-    setHistory(prev => [...prev, { type: "player", text: actionText }]);
+    let finalActionText = actionText;
+      if (isOOC) {
+          finalActionText = `[OOC/MYŠLENKA] ${actionText}`;
+      }
+      setHistory(prev => [...prev, { type: "player", text: isOOC ? `🧠 ${actionText}` : actionText }]);
+      setIsOOC(false);
     setCustomAction("");
     setSuggestedActions([]);
     setLoading(true);
@@ -627,7 +633,7 @@ export default function Home() {
           email: email,
           api_key: "DUMMY", 
           name: name,
-          action_text: actionText,
+          action_text: finalActionText,
           stats: stats,
           level: level,
           skills: skills
@@ -1296,24 +1302,31 @@ export default function Home() {
         )}
 
         {/* Custom Action Input */}
-        <div className="flex gap-2">
-          <input 
-            type="text" 
-            value={customAction}
-            onChange={e => setCustomAction(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && sendAction(customAction)}
-            disabled={loading}
-            className="flex-1 bg-[#1b262c] border-2 border-[#455a64] p-3 rounded-sm outline-none focus:border-[#d4af37] text-[#f4f1e1] placeholder:text-[#455a64] font-serif text-lg transition-colors shadow-inner"
-            placeholder={inCombat ? "Jakou taktiku zvolíš v boji?" : (locationType === "divocina" ? "Kam povedou tvé kroky přírodou?" : "Co udělá tvoje postava ve městě?")}
-          />
-          <button 
-            onClick={() => sendAction(customAction)}
-            disabled={loading || !customAction.trim()}
-            className="bg-[#b74b4b] text-[#f4f1e1] px-8 rounded-sm hover:bg-[#d46a6a] transition-all shadow-md disabled:opacity-50 disabled:hover:bg-[#b74b4b] flex items-center justify-center border border-[#8a3333]"
-          >
-            <Send size={24} />
-          </button>
-        </div>
+                    <div className="flex gap-2 relative">
+              <button
+                onClick={() => setIsOOC(!isOOC)}
+                className={`absolute left-3 top-1/2 -translate-y-1/2 transition ${isOOC ? 'text-[#b74b4b]' : 'text-[#455a64] hover:text-[#90a4ae]'}`}
+                title="Vnitřní myšlenka (OOC) - zastaví čas a herní události"
+              >
+                <Brain size={24} />
+              </button>
+              <input 
+                type="text" 
+                value={customAction}
+                onChange={(e) => setCustomAction(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && sendAction(customAction)}
+                placeholder={isOOC ? "Tvá vnitřní myšlenka... (čas stojí)" : "Kam povedou tvé kroky přírodou?"} 
+                className={`flex-1 ${isOOC ? 'bg-[#1e2a3b] text-[#a4c2f4] italic border-[#b74b4b]' : 'bg-[#1b262c] text-[#f4f1e1] border-[#455a64]'} pl-12 pr-3 py-3 rounded-lg border focus:outline-none focus:border-[#d4af37] placeholder-[#90a4ae] transition-colors`}
+                disabled={loading}
+              />
+              <button 
+                onClick={() => sendAction(customAction)}
+                className="bg-[#b74b4b] hover:bg-[#8c3a3a] text-[#f4f1e1] px-6 py-3 rounded-lg font-bold transition disabled:opacity-50 flex items-center justify-center border-b-4 border-black/30"
+                disabled={loading || !customAction.trim()}
+              >
+                {loading ? <Loader2 size={24} className="animate-spin" /> : <Send size={24} />}
+              </button>
+            </div>
       </div>
       {/* End Right Column */}
       </div>
