@@ -228,7 +228,7 @@ async def create_character(req: CharacterCreateRequest):
         raise HTTPException(status_code=400, detail="Character already exists.")
     
     try:
-        model = genai.GenerativeModel("gemini-2.5-flash")
+        client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
         prompt = f'''
 Jsi Pán jeskyně v textové RPG hře D&D. Hráč právě vytvořil novou postavu:
 Jméno: {req.name}
@@ -243,7 +243,13 @@ Vrať POUZE json ve formátu:
   "popis_okoli": "Stručný popis lokace (např. Temný les plný stínů a vlhka)"
 }}
         '''
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+            )
+        )
         import json
         
         try:
