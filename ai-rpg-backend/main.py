@@ -50,6 +50,12 @@ class PointOfInterest(BaseModel):
     ikona: str
     ma_ukol: bool
 
+class NPCRecord(BaseModel):
+    jmeno: str
+    lokace: str
+    popis: str
+    vztah: str = Field(description="Vztah k hráči (např. Přátelský, Neutrální, Nepřátelský, Zavázán, Zastrašený, atd.)")
+
 class StateChanges(BaseModel):
     zivoty_zmena: int = 0
     xp_zmena: int = Field(0)
@@ -62,6 +68,7 @@ class StateChanges(BaseModel):
     travel_mode_set: Optional[bool] = None
     travel_days_left_set: Optional[int] = None
     travel_destination_set: Optional[str] = None
+    zname_postavy_zmena: List[NPCRecord] = Field(default=[], description="Pokud hráč potká nové důležité NPC nebo se změní vztah s existujícím, přidej ho sem pro aktualizaci v paměti.")
 
 class NPCDialog(BaseModel):
     jmeno: str
@@ -216,12 +223,27 @@ async def save_state(req: SaveStateRequest):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+class WorldLocation(BaseModel):
+    id: str = Field(description="Unikátní ID bez diakritiky, např. 'mesto_vranov'")
+    typ: str = Field(description="'hlavni_mesto', 'mesto', 'vesnice', 'zajimavost'")
+    nazev: str
+    popis: str
+    x: int = Field(description="X souřadnice na mapě (0-100)")
+    y: int = Field(description="Y souřadnice na mapě (0-100)")
+
+class CampaignWorld(BaseModel):
+    main_plot: str = Field(description="Hlavní epická zápletka kampaně.")
+    locations: List[WorldLocation] = Field(description="1-2 hlavni_mesto, 3-4 mesto, 4-8 vesnice, 3-5 zajimavost (rozmístěné po celé mapě 0-100).")
+    key_npcs: List[NPCRecord] = Field(description="3-5 důležitých klíčových postav pro zápletku kampaně.")
+
 class CharacterCreateRequest(BaseModel):
     name: str
     dnd_class: str
     race: str
     stats: dict
     email: str
+    game_mode: str = "sandbox"
+
     api_key: str
 
 
@@ -441,6 +463,28 @@ Vrať POUZE json ve formátu:
     # Nacteni tridnich dat
     cls_data = CLASS_TEMPLATES.get(req.dnd_class, CLASS_TEMPLATES["Bojovník"]) # fallback
     
+
+    # Pokud hrac zvolil kampan, vygenerujeme svet
+    world_data = None
+    if req.game_mode == "campaign":
+        try:
+            import json
+            client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+            world_prompt = f"Vytvoř epický fantasy svět pro kampaň. Postava: {req.name}, Rasa: {req.race}, Třída: {req.dnd_class}. Vymysli epickou hlavní zápletku, unikátní mapu (seznam lokací s X a Y souřadnicemi 0-100) a klíčová NPC."
+            response = client.models.generate_content(
+                model='gemini-2.5-flash',
+                contents=world_prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    response_schema=CampaignWorld,
+                    temperature=0.9
+                )
+            )
+            world_data = json.loads(response.text)
+        except Exception as e:
+            print("World gen error:", e)
+            world_data = None
+
     state = {
         "hp": 100,
         "rations": 3,
@@ -522,6 +566,14 @@ async def play_action(req: PlayerActionRequest):
         state_dict = char_data.get('state', {})
         travel_days_left = state_dict.get("travel_days_left", 0)
         is_traveling = state_dict.get("travel_mode", False) or travel_days_left > 0
+
+          world_data = state_dict.get('world_data')
+          world_prompt_str = ""
+          if world_data:
+              world_prompt_str = f"\n[TOTO JE ŘÍZENÝ SANDBOX! Hráč se může pohybovat POUZE v rámci těchto lokací!]\nHlavní zápletka: {world_data.get('main_plot', '')}\nMapa lokací: {json.dumps(world_data.get('locations', []), ensure_ascii=False)}\n"
+              # Automatický výpočet vzdálenosti při cestování, pokud AI zadá cíl
+              # (Tohle vyřešíme později, teď jen dáme AI mapu)
+
         
         travel_prompt = ""
         if is_traveling:
@@ -548,8 +600,13 @@ async def play_action(req: PlayerActionRequest):
         # Pidn aktuln akce s kontextem
         context_action = f"""[Dlouhodob pam (relevantn fakta z minulosti):]
 {relevant_memories}
+  {world_prompt_str}
 
-[Aktuln stav hry - neukazovat hri, pouze pro informaci PJ:]
+
+[Známé postavy a vztahy (PAMATUJ SI!):]
+{json.dumps(char_data.get('state', {}).get('zname_postavy', []), ensure_ascii=False)}
+
+[Aktuální stav hry - neukazovat hráči, pouze pro informaci PJ:]
 {json.dumps(char_data.get('state', {}), ensure_ascii=False)}
 
 {travel_prompt}
