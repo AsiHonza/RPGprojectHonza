@@ -186,3 +186,4 @@ yarl==1.24.5
     #   supabase-functions
 yt-dlp==2026.8.19
     # via ai-rpg-backend (pyproject.toml)
+perlin-noise
