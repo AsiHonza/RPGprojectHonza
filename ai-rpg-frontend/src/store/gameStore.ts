@@ -44,6 +44,10 @@ interface GameState {
   setEquipped: (eq: any) => void;
   
   // Map and World
+  day: number;
+  setDay: (d: number | ((d: number) => number)) => void;
+  playerLocation: {q: number, r: number} | null;
+  setPlayerLocation: (loc: {q: number, r: number} | null) => void;
   worldData: any;
   journal: string[];
   setJournal: (journal: string[] | ((prev: string[]) => string[])) => void;
@@ -133,6 +137,10 @@ export const useGameStore = create<GameState>((set) => ({
   },
   setEquipped: (equipped) => set({ equipped }),
 
+  day: 1,
+  setDay: (d) => set((state) => ({ day: typeof d === 'function' ? d(state.day) : d })),
+  playerLocation: null,
+  setPlayerLocation: (loc) => set({ playerLocation: loc }),
   worldData: null,
   journal: [],
   setJournal: (journal) => set((state) => ({ journal: typeof journal === 'function' ? journal(state.journal) : journal })),

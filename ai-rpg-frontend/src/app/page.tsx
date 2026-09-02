@@ -70,7 +70,8 @@ const FormattedSystemLog = ({ text }: { text: string }) => {
 
 
 export default function Home() {
-  const { bgVolume, setBgVolume, currentTrack, setCurrentTrack, ttsVolume, setTtsVolume, musicPlaying, setMusicPlaying, unreadQuests, setUnreadQuests, gameState, setGameState, loading, setLoading, name, setName, dndClass, setDndClass, race, setRace, stats, setStats, keywords, setKeywords, gameMode, setGameMode, backstory, setBackstory, hp, setHp, level, setLevel, xp, setXp, gold, setGold, rations, setRations, skillPoints, setSkillPoints, inventory, setInventory, equipped, setEquipped, worldData, setWorldData, journal, setJournal, quests, setQuests, npcs, setNpcs, currentRegion, setCurrentRegion, locationType, setLocationType, currentSpellSlots, setCurrentSpellSlots, maxSpellSlots, setMaxSpellSlots, skills, setSkills, availableSkills, setAvailableSkills, inCombat, setInCombat, enemies, setEnemies } = useGameStore();
+  const { bgVolume, setBgVolume, currentTrack, setCurrentTrack, ttsVolume, setTtsVolume, musicPlaying, setMusicPlaying, unreadQuests, setUnreadQuests, gameState, setGameState, loading, setLoading, name, setName, dndClass, setDndClass, race, setRace, stats, setStats, keywords, setKeywords, gameMode, setGameMode, backstory, setBackstory, hp, setHp, level, setLevel, xp, setXp, gold, setGold, rations, setRations, skillPoints, setSkillPoints, inventory, setInventory, equipped, setEquipped, worldData, setWorldData, journal, setJournal, quests, setQuests, npcs, setNpcs, currentRegion, setCurrentRegion, locationType, setLocationType, currentSpellSlots, setCurrentSpellSlots, maxSpellSlots, setMaxSpellSlots, skills, setSkills, availableSkills, setAvailableSkills, inCombat, setInCombat, enemies, setEnemies , setPlayerLocation, setDay } = useGameStore();
+
 
   const [actionsOpen, setActionsOpen] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
@@ -582,6 +583,45 @@ export default function Home() {
 
   };
 
+
+  const handleTravel = async (q: number, r: number) => {
+    try {
+      setLoading(true);
+      const res = await fetch(`${API_URL}/travel`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email,
+          name: name,
+          target_q: q,
+          target_r: r
+        })
+      });
+      const data = await res.json();
+      if (data.status === "success") {
+        setPlayerLocation(data.state.playerLocation);
+        setDay(data.state.day);
+        setRations(data.state.rations);
+        setHp(data.state.hp);
+        
+        // Push the narrative text to history directly so the player sees it
+        setHistory(prev => [...prev, { type: "system", text: data.narrative }]);
+        
+        // Generate TTS for narrative
+        playAudio(data.narrative, "narrator");
+        
+        // Close map
+        setMapOpen(false);
+      } else {
+        alert("Chyba při cestování: " + data.detail);
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Chyba spojení.");
+    } finally {
+      setLoading(false);
+    }
+  };
   const sendAction = async (actionText: string) => {
     if (!actionText.trim() || loading) return;
     
@@ -1399,7 +1439,7 @@ export default function Home() {
       
         
         {/* Map Modal */}
-        <MapModal isOpen={mapOpen} onClose={() => setMapOpen(false)} setSelectedItem={setSelectedItem} />
+        <MapModal isOpen={mapOpen} onClose={() => setMapOpen(false)} setSelectedItem={setSelectedItem} onTravel={handleTravel} />
 
         {/* NPCs Modal */}
         <NpcsModal isOpen={npcsOpen} onClose={() => setNpcsOpen(false)} setMapOpen={setMapOpen} />

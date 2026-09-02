@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+﻿import codecs
+
+new_modal = """import React, { useState } from 'react';
 import { X, Map as MapIcon, Footprints } from 'lucide-react';
 import HexMap from '../../components/map/HexMap';
 import { useGameStore } from '../../store/gameStore';
@@ -129,3 +131,7 @@ export const MapModal = ({ isOpen, onClose, setSelectedItem, onTravel }: any) =>
     </div>
   );
 };
+"""
+
+with codecs.open('src/features/map/MapModal.tsx', 'w', 'utf-8') as f:
+    f.write(new_modal)

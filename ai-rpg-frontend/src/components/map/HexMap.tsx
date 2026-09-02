@@ -1,12 +1,13 @@
 import React, { useMemo, useState } from 'react';
 import { Grid, defineHex, rectangle, Orientation } from 'honeycomb-grid';
-import { Castle, Skull, MapPin, Mountain, Trees, Waves, Wind, Droplets, Flame, Home, Star, Eye } from 'lucide-react';
+import { User, Castle, Skull, MapPin, Mountain, Trees, Waves, Wind, Droplets, Flame, Home, Star, Eye } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const HEX_SIZE = 16;
 class CustomHex extends defineHex({ dimensions: HEX_SIZE, orientation: Orientation.POINTY }) {}
 
 interface HexMapProps {
+  playerLocation?: {q: number, r: number} | null;
   worldData: any;
   onHexClick?: (hex: any) => void;
   setSelectedItem: (item: any) => void;
@@ -16,7 +17,7 @@ export const MapModal = ({ isOpen, onClose, setSelectedItem }: any) => {
     // Moved to separate file to just rewrite HexMap.tsx safely
 }
 
-export default function HexMap({ worldData, onHexClick, setSelectedItem }: HexMapProps) {
+export default function HexMap({ worldData, onHexClick, setSelectedItem, playerLocation }: HexMapProps) {
   const [hoveredHex, setHoveredHex] = useState<any>(null);
 
   const enrichedGrid = useMemo(() => {
@@ -125,6 +126,21 @@ export default function HexMap({ worldData, onHexClick, setSelectedItem }: HexMa
                     </foreignObject>
                 )}
 
+
+                {/* Player Pawn */}
+                {playerLocation?.q === hexData.q && playerLocation?.r === hexData.r && (
+                  <foreignObject 
+                    x={x + HEX_SIZE - 12} 
+                    y={y + HEX_SIZE * 0.866 - 20} 
+                    width={24} 
+                    height={24}
+                    className="pointer-events-none overflow-visible z-50 animate-bounce"
+                  >
+                    <div className="flex items-center justify-center w-full h-full text-red-600 drop-shadow-[0_0_8px_rgba(220,38,38,0.9)]">
+                      <User size={24} strokeWidth={3} />
+                    </div>
+                  </foreignObject>
+                )}
                 {/* POI Icon */}
                 {hexData.poi && (
                   <foreignObject 
