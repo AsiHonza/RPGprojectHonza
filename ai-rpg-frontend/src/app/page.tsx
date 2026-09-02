@@ -2,6 +2,7 @@
 
 import HexMap from "../components/map/HexMap";
 import { useState, useRef, useEffect } from "react";
+import { useGameStore } from '../store/gameStore';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
@@ -10,6 +11,10 @@ import { InventoryPanel } from '../features/character/InventoryPanel';
 import ReactPlayer from 'react-player';
 import { Send, Heart, Package, Sword, Shield, FlaskConical, Gem, Shirt, ScrollText, X, Volume2, VolumeX, User, Users, Settings2, Map, Sparkles, Skull, BookOpen, MapPin, Drumstick, Mail, Loader2, Trash2 , Brain , Menu } from "lucide-react";
 import { CharacterCreation } from '../features/character/CharacterCreation';
+import { MapModal } from '../features/map/MapModal';
+import { QuestsModal } from '../features/character/QuestsModal';
+import { JournalModal } from '../features/character/JournalModal';
+import { NpcsModal } from '../features/character/NpcsModal';
 import { PATCH_NOTES } from '../data/patchNotes';
 
 const TypewriterText = ({ text, delay = 25, animate = false }: { text: string, delay?: number, animate?: boolean }) => {
@@ -60,8 +65,8 @@ const FormattedSystemLog = ({ text }: { text: string }) => {
 
 
 export default function Home() {
+  const { gameState, setGameState, loading, setLoading, name, setName, dndClass, setDndClass, race, setRace, stats, setStats, keywords, setKeywords, gameMode, setGameMode, backstory, setBackstory, hp, setHp, level, setLevel, xp, setXp, gold, setGold, rations, setRations, skillPoints, setSkillPoints, inventory, setInventory, equipped, setEquipped, worldData, setWorldData, journal, setJournal, quests, setQuests, npcs, setNpcs, currentRegion, setCurrentRegion, locationType, setLocationType, currentSpellSlots, setCurrentSpellSlots, maxSpellSlots, setMaxSpellSlots, skills, setSkills, availableSkills, setAvailableSkills, inCombat, setInCombat, enemies, setEnemies } = useGameStore();
 
-  const [gameState, setGameState] = useState<"menu" | "creation" | "playing">("menu");
   const [actionsOpen, setActionsOpen] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
   
@@ -69,34 +74,15 @@ export default function Home() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [name, setName] = useState("");
-  const [dndClass, setDndClass] = useState("Bojovník");
-  const [gameMode, setGameMode] = useState("sandbox");
-  const [race, setRace] = useState("Člověk");
-  const [stats, setStats] = useState({ str: 15, dex: 14, con: 13, intel: 12, wis: 10, cha: 8 });
-  const [keywords, setKeywords] = useState("");
-  const [backstory, setBackstory] = useState<{appearance: string, personality: string, backstory: string} | null>(null);
   
   // Game Play State
   const [savedCharacters, setSavedCharacters] = useState<any[]>([]);
   const [history, setHistory] = useState<any[]>([]);
   const [suggestedActions, setSuggestedActions] = useState<string[]>([]);
   const [customAction, setCustomAction] = useState("");
-  const [loading, setLoading] = useState(false);
   const [inventoryOpen, setInventoryOpen] = useState(false);
   const [journalOpen, setJournalOpen] = useState(false);
   const [isOOC, setIsOOC] = useState(false);
-  const [journal, setJournal] = useState<string[]>([]);
-  const [hp, setHp] = useState(100);
-  const [inventory, setInventory] = useState<any[]>([]);
-  const [equipped, setEquipped] = useState<any>({
-    "hlava": null,
-    "hruď": null,
-    "hlavní ruka": null,
-    "druhá ruka": null,
-    "prsten": null,
-    "krk": null
-  });
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [patchNotesOpen, setPatchNotesOpen] = useState(false);
@@ -105,34 +91,18 @@ export default function Home() {
   const [ttsVolume, setTtsVolume] = useState(1.0);
   
   // Nové stavy pro boj a RPG systém
-  const [level, setLevel] = useState(1);
-  const [xp, setXp] = useState(0);
-  const [skillPoints, setSkillPoints] = useState(0);
-  const [gold, setGold] = useState(15);
-  const [rations, setRations] = useState(3);
-  const [currentSpellSlots, setCurrentSpellSlots] = useState(0);
-  const [maxSpellSlots, setMaxSpellSlots] = useState(0);
-  const [skills, setSkills] = useState<{id: string, name: string, desc: string}[]>([]);
-  const [availableSkills, setAvailableSkills] = useState<any[]>([]);
-  const [inCombat, setInCombat] = useState(false);
-  const [enemies, setEnemies] = useState<{jmeno: string, hp: number, max_hp: number, status: string}[]>([]);
   
   // Quests
-  const [quests, setQuests] = useState<{id: string, nazev: string, popis: string, stav: string}[]>([]);
   const [skillsOpen, setSkillsOpen] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
   const [questsOpen, setQuestsOpen] = useState(false);
   const [musicPlaying, setMusicPlaying] = useState(true);
   const [currentLocationImage, setCurrentLocationImage] = useState<string | null>(null);
   const [currentLocationDesc, setCurrentLocationDesc] = useState<string>("");
-  const [locationType, setLocationType] = useState<string>("divocina");
-  const [currentRegion, setCurrentRegion] = useState<string>("Neznámé končiny");
   const [travelMode, setTravelMode] = useState(false);
   const [travelDaysLeft, setTravelDaysLeft] = useState(0);
   const [travelDestination, setTravelDestination] = useState("");
-  const [npcs, setNpcs] = useState<any[]>([]);
   const [npcsOpen, setNpcsOpen] = useState(false);
-  const [worldData, setWorldData] = useState<any>(null);
   const [mapOpen, setMapOpen] = useState(false);
 
 
@@ -1444,36 +1414,7 @@ export default function Home() {
       
       
       {/* Journal Modal */}
-      {journalOpen && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <div className="w-full max-w-2xl bg-[#2b4c5e] rounded-lg border-4 border-[#90a4ae] shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
-            <div className="bg-[#e3dcc8] p-4 flex justify-between items-center border-b-4 border-[#90a4ae]">
-              <div className="flex items-center gap-2 text-[#b74b4b] font-bold text-2xl uppercase tracking-widest">
-                <ScrollText size={28} /> Deník postavy
-              </div>
-              <button onClick={() => setJournalOpen(false)} className="text-[#2b4c5e] hover:text-[#b74b4b] transition">
-                <X size={28} />
-              </button>
-            </div>
-            <div className="p-6 bg-[#1e3746] overflow-y-auto">
-              <div className="mb-6 pb-4 border-b border-[#455a64]">
-                <h3 className="text-[#d4af37] font-bold text-xl mb-2 font-medieval">Identita</h3>
-                <p className="text-[#f4f1e1] italic text-lg">Jméno: {name} | Rasa: {race} | Třída: {dndClass}</p>
-              </div>
-              <h3 className="text-[#d4af37] font-bold text-xl mb-4 font-medieval">Příběh a vývoj událostí</h3>
-              <div className="flex flex-col gap-4">
-                {journal.map((entry, i) => (
-                  <div key={i} className="bg-[#1b262c] p-4 rounded-lg border border-[#455a64] text-[#90a4ae] italic shadow-inner">
-                    <div className="text-xs text-[#b74b4b] font-bold uppercase mb-1">Kapitola {i + 1}</div>
-                    {entry}
-                  </div>
-                ))}
-                {journal.length === 0 && <div className="text-center text-[#90a4ae] italic">Tvůj příběh se teprve začíná psát...</div>}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+        <JournalModal isOpen={journalOpen} onClose={() => setJournalOpen(false)} />
 
       {/* Skills Modal */}
       {skillsOpen && (
@@ -1554,116 +1495,15 @@ export default function Home() {
       )}
 
       {/* Quests Modal */}
-      {questsOpen && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <div className="w-full max-w-2xl bg-[#2b4c5e] rounded-lg border-4 border-[#90a4ae] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="bg-[#e3dcc8] p-4 flex justify-between items-center border-b-4 border-[#90a4ae]">
-              <div className="flex items-center gap-2 text-[#b74b4b] font-bold text-2xl uppercase tracking-widest">
-                <BookOpen size={28} /> Deník úkolů
-              </div>
-              <button onClick={() => setQuestsOpen(false)} className="text-[#2b4c5e] hover:text-[#b74b4b] transition">
-                <X size={28} />
-              </button>
-            </div>
-            <div className="p-6 overflow-y-auto custom-scrollbar flex-1 bg-[url('/assets/parchment.jpg')] bg-cover bg-center">
-              {quests.length === 0 ? (
-                <div className="text-center text-[#455a64] font-bold mt-10">Zatím nemáš žádné úkoly.</div>
-              ) : (
-                <div className="flex flex-col gap-4">
-                  {quests.map(quest => (
-                    <div key={quest.id} className={`p-4 border-2 rounded ${quest.stav === 'splneno' ? 'bg-[#2a3f2a]/90 border-[#4a7f4a] text-[#d4af37]' : quest.stav === 'selhani' ? 'bg-[#3f2a2a]/90 border-[#b74b4b] text-[#78909c]' : 'bg-[#1b262c]/90 border-[#90a4ae] text-[#f4f1e1]'}`}>
-                      <div className="flex justify-between items-start mb-2">
-                         <h3 className="font-bold text-xl">{quest.nazev}</h3>
-                         <span className={`text-xs font-bold uppercase px-2 py-1 rounded ${quest.stav === 'splneno' ? 'bg-[#4a7f4a] text-white' : quest.stav === 'selhani' ? 'bg-[#b74b4b] text-white' : 'bg-[#d4af37] text-black'}`}>
-                            {quest.stav === 'splneno' ? 'Splněno' : quest.stav === 'selhani' ? 'Selhání' : 'Aktivní'}
-                         </span>
-                      </div>
-                      <p className={quest.stav === 'aktivni' ? 'text-[#90a4ae]' : 'text-opacity-80'}>{quest.popis}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+        <QuestsModal isOpen={questsOpen} onClose={() => setQuestsOpen(false)} />
 
       
         
         {/* Map Modal */}
-        {mapOpen && worldData && (
-          <div className="absolute inset-0 bg-black/80 z-[100] flex items-center justify-center p-2 md:p-8">
-            <div className="bg-[#e3dcc8] w-full h-full max-h-screen max-w-6xl rounded shadow-2xl relative overflow-hidden border-4 border-[#1b262c] bg-[url('/assets/parchment.jpg')] bg-cover">
-              
-              <div className="absolute top-4 left-4 z-50 bg-[#f4f1e1]/90 px-4 py-2 rounded border border-[#90a4ae] shadow-lg pointer-events-none">
-                <h2 className="text-[#b74b4b] font-bold text-xl uppercase font-medieval tracking-widest drop-shadow">Světová mapa</h2>
-              </div>
-
-              <button onClick={() => setMapOpen(false)} className="absolute top-4 right-4 bg-[#1b262c] text-[#f4f1e1] p-2 rounded hover:bg-[#b74b4b] transition z-50 border border-[#90a4ae]">
-                <X size={24} />
-              </button>
-
-                <div className="relative w-full h-full min-h-[600px]">
-                  <HexMap 
-                    worldData={worldData} 
-                    onHexClick={(hex: any) => {
-                      if(hex.nazev) {
-                        setSelectedItem({
-                           id: `${hex.q}_${hex.r}`,
-                           name: hex.nazev,
-                           desc: hex.popis || (hex.is_poi ? "Zajímavé místo..." : "Divoká příroda"),
-                           type: hex.poi_type || hex.terrain
-                        });
-                      }
-                    }} 
-                  />
-                </div>
-            </div>
-          </div>
-        )}
+        <MapModal isOpen={mapOpen} onClose={() => setMapOpen(false)} setSelectedItem={setSelectedItem} />
 
         {/* NPCs Modal */}
-        {npcsOpen && (
-          <div className="absolute inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-            <div className="bg-[#f4f1e1] border-2 border-[#b74b4b] rounded max-w-2xl w-full max-h-[80vh] flex flex-col shadow-2xl overflow-hidden">
-              <div className="flex justify-between items-center p-4 border-b border-[#90a4ae] bg-[#e3dcc8]">
-                <div className="flex items-center gap-2 text-[#b74b4b] font-bold text-2xl uppercase tracking-widest font-medieval">
-                  <Users size={28} /> Deník postav
-                </div>
-                              {worldData && (
-                <button onClick={() => setMapOpen(true)} className="flex items-center gap-1 font-bold text-[#2b4c5e] hover:text-[#b74b4b] transition cursor-pointer bg-[#e3dcc8] px-2 py-1 rounded border border-[#90a4ae]" title="Mapa světa">
-                  <Map size={18} />
-                </button>
-              )}
-              <button onClick={() => setNpcsOpen(false)} className="text-[#2b4c5e] hover:text-[#b74b4b] transition">
-                  <X size={28} />
-                </button>
-              </div>
-              <div className="p-6 overflow-y-auto custom-scrollbar flex-1 bg-[url('/assets/parchment.jpg')] bg-cover bg-center">
-                {npcs.length === 0 ? (
-                  <div className="text-center text-[#455a64] py-8 italic font-serif">Zatím jsi nepotkal nikoho důležitého...</div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {npcs.map((npc, idx) => (
-                      <div key={idx} className="bg-[#1b262c]/80 border border-[#90a4ae] rounded p-4 flex flex-col gap-2 relative">
-                        <div className="flex justify-between items-start gap-2">
-                          <h3 className="text-[#d4af37] font-bold font-medieval text-lg uppercase">{npc.jmeno}</h3>
-                          <span className={`text-[10px] uppercase tracking-wider px-2 py-1 rounded border font-bold ${npc.vztah.toLowerCase().includes('přát') ? 'bg-green-900/50 text-green-400 border-green-500' : npc.vztah.toLowerCase().includes('nepř') ? 'bg-red-900/50 text-red-400 border-red-500' : 'bg-yellow-900/50 text-yellow-400 border-yellow-500'}`}>
-                            {npc.vztah}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1 text-[#90a4ae] text-xs">
-                          <MapPin size={12} /> {npc.lokace}
-                        </div>
-                        <p className="text-[#f4f1e1] text-sm font-serif italic mt-2">{npc.popis}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
+        <NpcsModal isOpen={npcsOpen} onClose={() => setNpcsOpen(false)} setMapOpen={setMapOpen} />
 
         {/* Inventory Modal */}
       <InventoryPanel 

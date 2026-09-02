@@ -25,26 +25,32 @@ interface GameState {
 
   // RPG Stats
   hp: number;
-  setHp: (hp: number) => void;
+  setHp: (hp: number | ((h: number) => number)) => void;
   level: number;
-  setLevel: (l: number) => void;
+  setLevel: (l: number | ((l: number) => number)) => void;
   xp: number;
-  setXp: (x: number) => void;
+  setXp: (x: number | ((x: number) => number)) => void;
   gold: number;
   setGold: (gold: number) => void;
   rations: number;
-  setRations: (r: number) => void;
+  setRations: (r: number | ((r: number) => number)) => void;
   skillPoints: number;
-  setSkillPoints: (s: number) => void;
+  setSkillPoints: (s: number | ((s: number) => number)) => void;
   
   // Inventory
   inventory: any[];
-  setInventory: (inv: any[]) => void;
+  setInventory: (inv: any[] | ((inv: any[]) => any[])) => void;
   equipped: any;
   setEquipped: (eq: any) => void;
   
   // Map and World
   worldData: any;
+  journal: string[];
+  setJournal: (journal: string[] | ((prev: string[]) => string[])) => void;
+  quests: any[];
+  setQuests: (quests: any[] | ((prev: any[]) => any[])) => void;
+  npcs: any[];
+  setNpcs: (npcs: any[] | ((prev: any[]) => any[])) => void;
   setWorldData: (data: any) => void;
   currentRegion: string;
   setCurrentRegion: (r: string) => void;
@@ -53,7 +59,7 @@ interface GameState {
   
   // Magic
   currentSpellSlots: number;
-  setCurrentSpellSlots: (s: number) => void;
+  setCurrentSpellSlots: (s: number | ((s: number) => number)) => void;
   maxSpellSlots: number;
   setMaxSpellSlots: (s: number) => void;
 
@@ -92,20 +98,20 @@ export const useGameStore = create<GameState>((set) => ({
   setBackstory: (backstory) => set({ backstory }),
 
   hp: 100,
-  setHp: (hp) => set({ hp }),
+  setHp: (hp) => set((state) => ({ hp: typeof hp === "function" ? hp(state.hp) : hp })),
   level: 1,
-  setLevel: (level) => set({ level }),
+  setLevel: (level) => set((state) => ({ level: typeof level === "function" ? level(state.level) : level })),
   xp: 0,
-  setXp: (xp) => set({ xp }),
+  setXp: (xp) => set((state) => ({ xp: typeof xp === "function" ? xp(state.xp) : xp })),
   gold: 15,
   setGold: (gold) => set({ gold }),
   rations: 3,
-  setRations: (rations) => set({ rations }),
+  setRations: (rations) => set((state) => ({ rations: typeof rations === "function" ? rations(state.rations) : rations })),
   skillPoints: 0,
-  setSkillPoints: (skillPoints) => set({ skillPoints }),
+  setSkillPoints: (skillPoints) => set((state) => ({ skillPoints: typeof skillPoints === "function" ? skillPoints(state.skillPoints) : skillPoints })),
 
   inventory: [],
-  setInventory: (inventory) => set({ inventory }),
+  setInventory: (inventory) => set((state) => ({ inventory: typeof inventory === "function" ? inventory(state.inventory) : inventory })),
   equipped: {
     "hlava": null,
     "hruď": null,
@@ -117,6 +123,12 @@ export const useGameStore = create<GameState>((set) => ({
   setEquipped: (equipped) => set({ equipped }),
 
   worldData: null,
+  journal: [],
+  setJournal: (journal) => set((state) => ({ journal: typeof journal === 'function' ? journal(state.journal) : journal })),
+  quests: [],
+  setQuests: (quests) => set((state) => ({ quests: typeof quests === 'function' ? quests(state.quests) : quests })),
+  npcs: [],
+  setNpcs: (npcs) => set((state) => ({ npcs: typeof npcs === 'function' ? npcs(state.npcs) : npcs })),
   setWorldData: (worldData) => set({ worldData }),
   currentRegion: "Neznámé končiny",
   setCurrentRegion: (currentRegion) => set({ currentRegion }),
@@ -124,7 +136,7 @@ export const useGameStore = create<GameState>((set) => ({
   setLocationType: (locationType) => set({ locationType }),
 
   currentSpellSlots: 0,
-  setCurrentSpellSlots: (currentSpellSlots) => set({ currentSpellSlots }),
+  setCurrentSpellSlots: (currentSpellSlots) => set((state) => ({ currentSpellSlots: typeof currentSpellSlots === "function" ? currentSpellSlots(state.currentSpellSlots) : currentSpellSlots })),
   maxSpellSlots: 0,
   setMaxSpellSlots: (maxSpellSlots) => set({ maxSpellSlots }),
 
