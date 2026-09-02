@@ -1,4 +1,6 @@
-import React, { useMemo, useState } from 'react';
+﻿import codecs
+
+hexmap = """import React, { useMemo, useState } from 'react';
 import { Grid, defineHex, rectangle } from 'honeycomb-grid';
 import { Castle, Skull, MapPin, Mountain, Trees, Waves, Wind, Droplets, Flame, Home, Star, Eye } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -191,3 +193,9 @@ export default function HexMap({ worldData, onHexClick, setSelectedItem }: HexMa
     </div>
   );
 }
+"""
+
+with codecs.open('src/components/map/HexMap.tsx', 'w', 'utf-8') as f:
+    f.write(hexmap)
+
+print("HexMap rewritten for High Fantasy")
