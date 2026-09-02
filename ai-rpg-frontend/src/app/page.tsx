@@ -544,44 +544,28 @@ export default function Home() {
   const startNewGame = async () => {
     if (!name) return alert("Zadejte jméno!");
     setLoading(true);
-    
-    
-        setGameState("playing");
 
-    setHistory([{ type: "system", text: `Postava ${name} vytvořena. Vstupuješ do světa...` }]);
-
-    
-      try {
-        const res = await fetch(`${API_URL}/create-character`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, dnd_class: dndClass, race, stats, email: email, api_key: "DUMMY", game_mode: gameMode }),
-        });
-        const data = await res.json();
+    try {
+      const res = await fetch(`${API_URL}/create-character`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, dnd_class: dndClass, race, stats, email: email, api_key: "DUMMY", game_mode: gameMode }),
+      });
+      const data = await res.json();
+      
+      if (res.ok) {
+        // Load the character to fetch full state including generated world_data
+        await loadGame(name);
         
-        if (res.ok) {
-          setHistory([
-            { type: "system", text: data.message },
-            { type: "dm", popis_okoli: data.popis_okoli, vypravec: data.intro_text }
-          ]);
-          setSuggestedActions(["Rozhlédnout se", "Zkontrolovat vybavení", "Vydat se vpřed"]);
-          setCurrentLocationDesc(data.popis_okoli || "Neznámé místo.");
-          setCurrentRegion("Začátek cesty");
-
-          // Load the character to fetch full state including generated world_data
-          await loadGame(name);
-          
-          setGameState("playing");
-        } else {
-          alert(data.detail || "Chyba při tvorbě.");
-          setGameState("menu");
-        }
-      } catch (e) {
-        alert("Nelze se připojit k serveru.");
-        setGameState("menu");
+        // Ensure UI updates properly to playing state
+        setGameState("playing");
+      } else {
+        alert(data.detail || "Chyba při tvorbě.");
       }
-      setLoading(false);
-
+    } catch (e) {
+      alert("Nelze se připojit k serveru.");
+    }
+    setLoading(false);
   };
 
 
@@ -1105,7 +1089,7 @@ export default function Home() {
                     </button>
                   ))}
                   {suggestedActions.map((act, i) => (
-                    <button key={`act-${i}`} onClick={() => sendAction(act)} className="bg-white/5 border border-white/20 text-gray-300 px-4 py-2 rounded-xl text-sm hover:bg-white/10 hover:text-white transition font-lora">
+                    <button key={`act-${i}`} onClick={() => sendAction(act)} className="bg-white/5 border border-white/20 text-gray-300 px-3 py-2 rounded-lg text-xs sm:text-sm text-left shadow-sm hover:bg-white/10 hover:text-white transition font-lora">
                       {act}
                     </button>
                   ))}
