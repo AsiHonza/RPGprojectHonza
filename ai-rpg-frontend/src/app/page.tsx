@@ -832,7 +832,7 @@ export default function Home() {
                 <div className="h-px w-32 bg-gradient-to-r from-transparent via-rpg-magic to-transparent mx-auto mt-2" />
               </div>
 
-              <div className="flex flex-wrap justify-center gap-6 max-w-5xl">
+              <div className="flex flex-nowrap overflow-x-auto snap-x snap-mandatory gap-6 w-[100vw] sm:w-full max-w-7xl pb-8 px-4 custom-scrollbar justify-start items-center">
                 {savedCharacters.map((char, idx) => (
                   <motion.div 
                     key={idx}
