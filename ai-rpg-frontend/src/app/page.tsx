@@ -5,60 +5,9 @@ import { useState, useRef, useEffect } from "react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
+import { ItemIcon } from '../components/ui/ItemIcon';
 import ReactPlayer from 'react-player';
 import { Send, Heart, Package, Sword, Shield, FlaskConical, Gem, Shirt, ScrollText, X, Volume2, VolumeX, User, Users, Settings2, Map, Sparkles, Skull, BookOpen, MapPin, Drumstick, Mail, Loader2, Trash2 , Brain , Menu } from "lucide-react";
-
-const getStringHash = (str: string) => {
-  let h = 0;
-  for(let i=0; i<str.length; i++) h = Math.imul(31, h) + str.charCodeAt(i) | 0;
-  return Math.abs(h);
-};
-
-const ItemIcon = ({ iconName, itemId = "", className = "", size = 40 }: { iconName: string, itemId?: string, className?: string, size?: number }) => {
-  const hash = getStringHash(itemId || iconName);
-  let imgPath = "";
-
-  switch(iconName) {
-    case 'Sword':
-      // Máme 5 klasických mečů v FreeFantasyStockArtV3
-      imgPath = `/items/FreeFantasyStockArtV3/sword_free${(hash % 5) + 1}.png`;
-      break;
-    case 'Shield':
-      // 4 štíty
-      imgPath = `/items/FreeFantasyStockArtV3/shield_free${(hash % 4) + 1}.png`;
-      break;
-    case 'Potion':
-      // 50 lektvarů v Complete Package
-      imgPath = `/items/Complete Package v1.2/Complete Package v1.2/Transparent/potion${(hash % 50) + 1}.png`;
-      break;
-    case 'Ring':
-      // 5 krystalů jako prsteny
-      imgPath = `/items/Complete Package v1.2/Complete Package v1.2/Transparent/crystal${(hash % 5) + 1}.png`;
-      break;
-    case 'Shirt':
-      // Využijeme válečné zástavy jako pláště/zbroje (jsou 3)
-      imgPath = `/items/FreeFantasyStockArtV3/war_banner_free${(hash % 3) + 1}.png`;
-      break;
-    case 'Scroll':
-      // 10 svitků v Complete Package
-      imgPath = `/items/Complete Package v1.2/Complete Package v1.2/Transparent/scroll${(hash % 10) + 1}.png`;
-      break;
-    default:
-      // Defaultní dýka
-      imgPath = `/items/FreeFantasyStockArtV3/dagger_free${(hash % 6) + 1}.png`;
-  }
-
-  return (
-    <div className={`flex items-center justify-center ${className}`} style={{ width: size, height: size }}>
-      <img 
-        src={imgPath} 
-        alt={iconName} 
-        className="max-w-full max-h-full object-contain filter drop-shadow-md"
-      />
-    </div>
-  );
-};
-
 
 const TypewriterText = ({ text, delay = 25, animate = false }: { text: string, delay?: number, animate?: boolean }) => {
   const [displayedText, setDisplayedText] = useState(animate ? "" : text);
