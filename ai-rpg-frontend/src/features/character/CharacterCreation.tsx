@@ -47,7 +47,7 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 bg-[url('https://www.transparenttextures.com/patterns/black-scales.png')] text-[#e5e7eb] flex flex-col items-center justify-center p-4 overflow-hidden relative">
+    <div className="min-h-screen bg-stone-900 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] text-[#e5e7eb] flex flex-col items-center justify-center p-4 overflow-hidden relative">
       
       {/* Background Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-rpg-magic/10 blur-[120px] rounded-full pointer-events-none" />
@@ -55,9 +55,9 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-4xl bg-black/60 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 p-4 sm:p-8 md:p-12 relative z-10"
+        className="w-full max-w-4xl bg-stone-900/60 backdrop-blur-xl rounded-2xl shadow-2xl border border-amber-500/20 p-4 sm:p-8 md:p-12 relative z-10"
       >
-        <div className="flex justify-between items-center mb-8 border-b border-white/10 pb-6">
+        <div className="flex justify-between items-center mb-8 border-b border-amber-500/20 pb-6">
           <h2 className="text-2xl sm:text-4xl text-center md:text-left font-cinzel text-rpg-magic drop-shadow-[0_0_10px_rgba(197,160,89,0.3)]">
             {step === 1 && "Zrození Hrdiny"}
             {step === 2 && "Cesta Meče a Magie"}
@@ -75,7 +75,7 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
             {step === 1 && (
               <motion.div key="step1" variants={pageVariants} initial="initial" animate="in" exit="out" className="space-y-8">
                 <div>
-                  <label className="block font-lora text-xl mb-4 text-gray-300">Jaké jméno ponese tvá legenda?</label>
+                  <label className="block font-lora text-xl mb-4 text-amber-50">Jaké jméno ponese tvá legenda?</label>
                   <input 
                     type="text" 
                     value={name} 
@@ -86,13 +86,13 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
                 </div>
 
                 <div>
-                  <label className="block font-lora text-xl mb-4 text-gray-300">Krev jakého rodu ti koluje v žilách?</label>
+                  <label className="block font-lora text-xl mb-4 text-amber-50">Krev jakého rodu ti koluje v žilách?</label>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
                     {races.map(r => (
                       <button 
                         key={r}
                         onClick={() => setRace(r)}
-                        className={`p-4 rounded-xl border flex flex-col items-center gap-3 transition-all ${race === r ? 'bg-rpg-magic/20 border-rpg-magic shadow-[0_0_15px_rgba(197,160,89,0.4)] text-rpg-magic' : 'border-white/10 text-gray-400 hover:bg-white/5 hover:border-white/30'}`}
+                        className={`p-4 rounded-xl border flex flex-col items-center gap-3 transition-all ${race === r ? 'bg-rpg-magic/20 border-rpg-magic shadow-[0_0_15px_rgba(197,160,89,0.4)] text-rpg-magic' : 'border-amber-500/20 text-amber-200/70 hover:bg-amber-500/5 hover:border-white/30'}`}
                       >
                         {getRaceIcon(r)}
                         <span className="font-cinzel tracking-widest">{r}</span>
@@ -106,13 +106,13 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
             {step === 2 && (
               <motion.div key="step2" variants={pageVariants} initial="initial" animate="in" exit="out" className="space-y-8">
                 <div>
-                  <label className="block font-lora text-xl mb-4 text-gray-300">Jakému řemeslu ses upsal?</label>
+                  <label className="block font-lora text-xl mb-4 text-amber-50">Jakému řemeslu ses upsal?</label>
                   <div className="grid grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 max-h-48 overflow-y-auto custom-scrollbar p-1">
                     {classes.map(c => (
                       <button 
                         key={c}
                         onClick={() => setDndClass(c)}
-                        className={`p-3 rounded-lg border flex flex-col items-center gap-2 transition-all ${dndClass === c ? 'bg-rpg-magic/20 border-rpg-magic shadow-[0_0_10px_rgba(197,160,89,0.4)] text-rpg-magic' : 'border-white/10 text-gray-400 hover:bg-white/5 hover:border-white/30'}`}
+                        className={`p-3 rounded-lg border flex flex-col items-center gap-2 transition-all ${dndClass === c ? 'bg-rpg-magic/20 border-rpg-magic shadow-[0_0_10px_rgba(197,160,89,0.4)] text-rpg-magic' : 'border-amber-500/20 text-amber-200/70 hover:bg-amber-500/5 hover:border-white/30'}`}
                       >
                         {getClassIcon(c)}
                         <span className="font-cinzel text-sm tracking-wide">{c}</span>
@@ -121,14 +121,14 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
                   </div>
                 </div>
 
-                <div className="bg-white/5 p-6 rounded-xl border border-white/10">
+                <div className="bg-amber-500/5 p-6 rounded-xl border border-amber-500/20">
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="font-cinzel text-rpg-magic text-lg flex items-center gap-2"><Settings2 size={18} /> Atributy (Standard Array)</h3>
                     <span className="text-xs text-gray-500 font-lora italic">Automaticky optimalizováno pro {dndClass}</span>
                   </div>
                   <div className="grid grid-cols-3 md:grid-cols-6 gap-4 text-center">
                     {Object.entries(stats).map(([stat, val]) => (
-                      <div key={stat} className="bg-black/40 p-3 rounded-lg border border-white/10">
+                      <div key={stat} className="bg-stone-900/40 p-3 rounded-lg border border-amber-500/20">
                         <div className="text-xs uppercase text-gray-500 font-bold tracking-widest mb-1">{stat}</div>
                         <div className="text-2xl font-cinzel text-white">{val}</div>
                       </div>
@@ -141,20 +141,20 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
             {step === 3 && (
               <motion.div key="step3" variants={pageVariants} initial="initial" animate="in" exit="out" className="space-y-6">
                 <div>
-                  <label className="block font-lora text-xl mb-4 text-gray-300">Prolog (Volitelný)</label>
+                  <label className="block font-lora text-xl mb-4 text-amber-50">Prolog (Volitelný)</label>
                   <p className="text-sm text-gray-500 mb-4 font-lora">Napiš pár slov o tom, jaký tvůj hrdina je (např. "zjizvený, hrubý, hledá pomstu za smrt bratra") a nech Vypravěče (AI) dopsat zbytek.</p>
                   
                   <div className="flex gap-4 mb-6">
                     <textarea 
                         value={keywords} 
                         onChange={e => setKeywords(e.target.value)}
-                        className="flex-1 p-4 bg-black/40 border border-white/20 rounded-xl outline-none focus:border-rpg-magic transition text-white font-lora resize-none h-24"
+                        className="flex-1 p-4 bg-stone-900/40 border border-white/20 rounded-xl outline-none focus:border-rpg-magic transition text-white font-lora resize-none h-24"
                         placeholder="Zadej klíčová slova k historii..."
                     />
                     <button 
                       onClick={generateBackstory} 
                       disabled={loading || !keywords} 
-                      className="px-6 bg-white/5 text-rpg-magic border border-rpg-magic/50 rounded-xl hover:bg-rpg-magic/20 transition disabled:opacity-50 flex flex-col items-center justify-center gap-2"
+                      className="px-6 bg-amber-500/5 text-rpg-magic border border-rpg-magic/50 rounded-xl hover:bg-rpg-magic/20 transition disabled:opacity-50 flex flex-col items-center justify-center gap-2"
                     >
                       <Sparkles size={20} />
                       <span className="font-cinzel text-sm">Napsat<br/>Osud</span>
@@ -162,7 +162,7 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
                   </div>
 
                   {backstory && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-5 bg-white/5 border border-rpg-magic/30 rounded-xl space-y-3 font-lora text-gray-300 text-sm leading-relaxed mb-6">
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-5 bg-amber-500/5 border border-rpg-magic/30 rounded-xl space-y-3 font-lora text-amber-50 text-sm leading-relaxed mb-6">
                       <p><strong className="text-rpg-magic font-cinzel">Vzhled:</strong> {backstory.appearance}</p>
                       <p><strong className="text-rpg-magic font-cinzel">Chování:</strong> {backstory.personality}</p>
                       <p><strong className="text-rpg-magic font-cinzel">Příběh:</strong> {backstory.backstory}</p>
@@ -171,12 +171,12 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <label className={`p-6 rounded-xl border-2 cursor-pointer transition flex flex-col ${gameMode === 'sandbox' ? 'border-rpg-magic bg-rpg-magic/10' : 'border-white/10 hover:border-white/30'}`}>
+                  <label className={`p-6 rounded-xl border-2 cursor-pointer transition flex flex-col ${gameMode === 'sandbox' ? 'border-rpg-magic bg-rpg-magic/10' : 'border-amber-500/20 hover:border-white/30'}`}>
                     <input type="radio" value="sandbox" checked={gameMode === 'sandbox'} onChange={() => setGameMode('sandbox')} className="hidden" />
                     <span className="font-cinzel text-xl text-white mb-2">Pustina (Sandbox)</span>
                     <span className="font-lora text-sm text-gray-500">Nekonečný, náhodně generovaný svět bez pevné zápletky. AI si vymýšlí vše za pochodu.</span>
                   </label>
-                  <label className={`p-6 rounded-xl border-2 cursor-pointer transition flex flex-col ${gameMode === 'campaign' ? 'border-rpg-magic bg-rpg-magic/10' : 'border-white/10 hover:border-white/30'}`}>
+                  <label className={`p-6 rounded-xl border-2 cursor-pointer transition flex flex-col ${gameMode === 'campaign' ? 'border-rpg-magic bg-rpg-magic/10' : 'border-amber-500/20 hover:border-white/30'}`}>
                     <input type="radio" value="campaign" checked={gameMode === 'campaign'} onChange={() => setGameMode('campaign')} className="hidden" />
                     <span className="font-cinzel text-xl text-white mb-2">Aelthgard (Kampaň)</span>
                     <span className="font-lora text-sm text-gray-500">Pevně vygenerovaná mapa, 7 království, epická zápletka a politika. Náš doporučený režim.</span>
@@ -188,11 +188,11 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
         </div>
 
         {/* Navigation Buttons */}
-        <div className="mt-8 flex justify-between items-center border-t border-white/10 pt-6">
+        <div className="mt-8 flex justify-between items-center border-t border-amber-500/20 pt-6">
           <button 
             onClick={handlePrev} 
             disabled={step === 1}
-            className="px-6 py-3 font-cinzel tracking-widest text-gray-400 hover:text-white transition disabled:opacity-0 flex items-center gap-2"
+            className="px-6 py-3 font-cinzel tracking-widest text-amber-200/70 hover:text-white transition disabled:opacity-0 flex items-center gap-2"
           >
             <ChevronLeft size={20} /> Zpět
           </button>
