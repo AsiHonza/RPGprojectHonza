@@ -489,25 +489,50 @@ Vrať POUZE json ve formátu:
             
             client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
             world_prompt = f"""
+NAVRHUJÍŠ WORLD BIBLE PRO HIGH FANTASY KÁMPAŇ (AELTHGARD).
 
-ABSOLUTNÍ PRAVIDLA SVĚTA (AELTHGARD):
-1. Tón: Mix Fable a Zaklínače. Vizuálně pohádkové a barevné (obří houby, krásné hrady), ale společensky dospělé, temné a zkorumpované (rasismus, hladomor, morální šeď, neexistuje čisté dobro).
-2. Magie: Nedá se naučit, je to vzácné "Probuzení" (Dar i Kletba). Obyčejní lidé se mágů bojí nebo je uctívají jako proroky.
-3. Zápletka: Blíží se proroctví "Tříštících se nebes". Bohové se začínají zjevovat náhodným obyčejným lidem (rolníkům i žebrákům).
-4. Rozkol: Bohové nejsou sjednocení, naopak - jdou si po krku. Lidé fanaticky následují různá božstva a bratr zabíjí bratra. Hlavní síly: Solarian (Řád, který se mění ve fašistický fanatismus), Vyldia (Příroda a Chaos, svoboda vykoupená krvavými oběťmi), Kull (Bůh stínů našeptávající, ať se lidé stanou bohy).
-DŮLEŽITÉ: Neprozrazuj toto lore hráči encyklopedicky. Aplikuj tuto atmosféru do jmen míst, hrozeb a tajemství!
-Vytvoř epický fantasy svět pro kampaň. Hráč: {req.name}, Rasa: {req.race}, Třída: {req.dnd_class}.
-Zde je generátorem vytvořená matematická struktura bodů zájmu (POI):
+ABSOLUTNÍ PRAVIDLA SVĚTA:
+1. Tón: Mix Fable a Zaklínače (Pohádkový vizuál, ale dospělé, krvavé a zkorumpované problémy).
+2. Magie: Nedá se učit. Je to "Probuzení", vzácný dar nebo kletba od bohů. Jsou to "Vyvolení".
+3. Zjevení: Bohové (Solarian - Řád a Krev, Vyldia - Příroda a Chaos, Kull - Stíny a Lži) se začínají zjevovat lidem.
+4. Království: Kontinent je rozdělen na 7 království. 
+
+Zde jsou základní archetypy 7 království (kingdom_id 1 až 7):
+1K: Upadající Impérium (Zkorumpovaná šlechta)
+2K: Teokracie (Náboženští fanatici Řádu)
+3K: Divoké Kmeny (Přeživší v bažinách/lesích, krevní rituály)
+4K: Obchodní Gildy (Žoldáci a peníze, žádný král)
+5K: Karanténní Zóna (Magická pustina, monstra)
+6K: Severní Hradba (Militarizovaná stráž před zlem)
+7K: Útočiště Vyvolených (Tajemní mágové a izolace)
+
+Tady je JSON se všemi body zájmu (POI) na vygenerované mapě:
 {json.dumps(math_world['pois'], ensure_ascii=False)}
 
-Vymysli hlavní epickou zápletku.
-K POI (bodům zájmu) ze zadání doplň:
-- typ lokace
-- jméno lokace
-- popis
-- hrozbu nebo tajemství
-DŮLEŽITÉ: Musíš přesně zachovat souřadnice 'q' a 'r', které mají body zájmu v zadání!
-Dále vymysli 3 klíčové NPC, které jsou s těmito lokacemi nebo se zápletkou spojené.
+Tvým úkolem je vrátit POUZE validní JSON s následující strukturou:
+{{
+  "main_plot": "Krátký popis epické zápletky (proroctví).",
+  "kingdoms": [
+    {{
+      "kingdom_id": 1,
+      "name": "Epické Jméno Království 1",
+      "ruler": "Kdo tam vládne",
+      "current_problem": "Stručný problém (např. mor, fanatismus)"
+    }},
+    ... pro všech 7 království
+  ],
+  "locations": [
+    {{
+      "q": (musí sedět z dodaného JSONu),
+      "r": (musí sedět z dodaného JSONu),
+      "type": "Capital/Village/Dungeon/Shrine/Ruin",
+      "kingdom_id": (přepsat ze zadání),
+      "nazev": "Jméno lokace",
+      "popis": "Krátký atmosférický popis (zapoj i bohy nebo archetyp království)"
+    }},
+    ... doplň VŠECHNY dodané POI
+  ]
+}}
 """
             response = client.models.generate_content(
                 model='gemini-3.5-flash',
@@ -521,11 +546,11 @@ Dále vymysli 3 klíčové NPC, které jsou s těmito lokacemi nebo se zápletko
             ai_data = json.loads(response.text)
             
             world_data = {
-                "hex_grid": math_world["grid"],
+                "hex_grid": math_world["hex_grid"],
                 "hex_radius": math_world["hex_radius"],
-                "locations": ai_data["locations"],
-                "main_plot": ai_data.get("main_plot", ""),
-                "key_npcs": ai_data.get("key_npcs", [])
+                "kingdoms": ai_data.get("kingdoms", []),
+                "locations": ai_data.get("locations", []),
+                "main_plot": ai_data.get("main_plot", "")
             }
         except Exception as e:
             print("World gen error:", e)
