@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+﻿import codecs
+
+new_content = """import React, { useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { Settings2, Sparkles, ChevronRight, ChevronLeft, Crown, Shield, Wand2, Axe, Ghost, Skull, Book, Flame } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -219,3 +221,7 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
     </div>
   );
 };
+"""
+
+with codecs.open('src/features/character/CharacterCreation.tsx', 'w', 'utf-8') as f:
+    f.write(new_content)

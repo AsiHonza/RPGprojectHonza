@@ -1,6 +1,7 @@
 "use client";
 
 import HexMap from "../components/map/HexMap";
+import { motion } from 'framer-motion';
 import { useState, useRef, useEffect } from "react";
 import { useGameStore } from '../store/gameStore';
 
@@ -9,7 +10,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 import { ItemIcon } from '../components/ui/ItemIcon';
 import { InventoryPanel } from '../features/character/InventoryPanel';
 import ReactPlayer from 'react-player';
-import { Send, Heart, Package, Sword, Shield, FlaskConical, Gem, Shirt, ScrollText, X, Volume2, VolumeX, User, Users, Settings2, Map, Sparkles, Skull, BookOpen, MapPin, Drumstick, Mail, Loader2, Trash2 , Brain , Menu } from "lucide-react";
+import { Send, Heart, Flame, Package, Sword, Shield, FlaskConical, Gem, Shirt, ScrollText, X, Volume2, VolumeX, User, Users, Settings2, Map, Sparkles, Skull, BookOpen, MapPin, Drumstick, Mail, Loader2, Trash2 , Brain , Menu } from "lucide-react";
 import { CharacterCreation } from '../features/character/CharacterCreation';
 import { MapModal } from '../features/map/MapModal';
 import { QuestsModal } from '../features/character/QuestsModal';
@@ -771,122 +772,130 @@ export default function Home() {
 
   if (gameState === "menu") {
     return (
-      <div className="min-h-screen bg-[#1b262c] flex items-center justify-center p-4 font-serif">
-        <div className="max-w-md w-full bg-[#f4f1e1] rounded shadow-2xl p-8 border border-[#90a4ae] relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-transparent via-[#b74b4b] to-transparent"></div>
-          <h1 className="text-4xl font-bold text-center text-[#2b4c5e] mb-2 tracking-wider font-medieval">AETHELGARD</h1>
-          <p className="text-center text-[#455a64] italic mb-8">AI Dungeons & Dragons RPG</p>
-          
-          <div className="space-y-4">
-            {!isLoggedIn ? (
-              <>
+      <div className="min-h-screen bg-black text-white flex items-center justify-center p-4 font-serif relative overflow-hidden bg-[url('https://www.transparenttextures.com/patterns/black-scales.png')]">
+        
+        {/* Deep background fog */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/80 to-black z-0 pointer-events-none" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-rpg-magic/10 blur-[120px] rounded-full z-0 pointer-events-none" />
+
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="max-w-4xl w-full z-10 relative flex flex-col items-center"
+        >
+          <div className="mb-12 text-center">
+            <h1 className="text-6xl md:text-8xl font-bold text-rpg-magic tracking-[0.2em] font-cinzel drop-shadow-[0_0_20px_rgba(197,160,89,0.5)]">
+              AELTHGARD
+            </h1>
+            <p className="text-gray-400 font-lora text-xl tracking-widest mt-4 uppercase">AI Dungeons & Dragons RPG</p>
+          </div>
+
+          {!isLoggedIn ? (
+            <div className="w-full max-w-sm bg-black/40 backdrop-blur-md p-8 rounded-2xl border border-white/10 shadow-2xl">
+              <div className="space-y-6">
                 <div>
-                  <label className="block font-bold mb-1 text-sm text-[#2b4c5e]">E-mail</label>
                   <input 
                     type="email" 
                     value={email} 
                     onChange={e => setEmail(e.target.value)} 
-                    className="w-full p-2 bg-[#e3dcc8] border border-[#90a4ae] rounded outline-none focus:ring-2 focus:ring-[#b74b4b] mb-4 text-[#2b4c5e]" 
-                    placeholder="tvuj@email.cz" 
+                    className="w-full p-3 bg-transparent border-b-2 border-white/20 focus:border-rpg-magic outline-none text-white font-lora text-lg transition placeholder-white/30" 
+                    placeholder="E-mail" 
                   />
                 </div>
                 <div>
-                  <label className="block font-bold mb-1 text-sm text-[#2b4c5e]">Heslo</label>
                   <input 
                     type="password" 
                     value={password} 
                     onChange={e => setPassword(e.target.value)} 
-                    className="w-full p-2 bg-[#e3dcc8] border border-[#90a4ae] rounded outline-none focus:ring-2 focus:ring-[#b74b4b] mb-4 text-[#2b4c5e]" 
+                    className="w-full p-3 bg-transparent border-b-2 border-white/20 focus:border-rpg-magic outline-none text-white font-lora text-lg transition placeholder-white/30" 
                     placeholder="Heslo" 
                   />
                 </div>
-                <div className="flex flex-col gap-4">
-                  <button 
-                    onClick={() => handleAuth(isRegistering)}
-                    disabled={loading || !email || !password}
-                    className="w-full py-3 bg-[#b74b4b] border-2 border-[#b74b4b] text-[#f4f1e1] font-bold rounded hover:bg-[#d46a6a] transition uppercase tracking-widest shadow-lg disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    {loading && <Loader2 size={20} className="animate-spin" />}
-                    {isRegistering ? "Vytvořit účet" : "Přihlásit do hry"}
-                  </button>
-                  <div className="text-center">
-                    <button 
-                      onClick={() => setIsRegistering(!isRegistering)}
-                      className="text-[#455a64] hover:text-[#b74b4b] text-sm underline transition"
-                    >
-                      {isRegistering ? "Už máš účet? Přihlas se." : "Ještě nemáš účet? Zaregistruj se."}
-                    </button>
-                  </div>
-                </div>
-              </>
-            ) : savedCharacters.length === 0 ? (
-              <div className="text-center">
-                <p className="text-[#2b4c5e] mb-4 font-bold">Přihlášen jako: {email}</p>
+                
                 <button 
-                  onClick={() => setGameState("creation")}
-                  className="w-full py-3 bg-[#b74b4b] border-2 border-[#b74b4b] text-[#f4f1e1] font-bold rounded hover:bg-[#d46a6a] transition uppercase tracking-widest"
+                  onClick={() => handleAuth(isRegistering)}
+                  disabled={loading || !email || !password}
+                  className="w-full py-4 bg-white/5 border border-rpg-magic/50 text-rpg-magic font-cinzel font-bold text-xl rounded-xl hover:bg-rpg-magic/20 hover:shadow-[0_0_15px_rgba(197,160,89,0.4)] transition uppercase tracking-widest disabled:opacity-50 flex items-center justify-center gap-3 mt-4"
                 >
-                  Vytvořit první postavu
+                  {loading && <Loader2 size={24} className="animate-spin" />}
+                  {isRegistering ? "Vytvořit Účet" : "Vstoupit"}
                 </button>
-              </div>
-            ) : (
-              <div className="space-y-2 mt-4">
-                <div className="text-center text-[#455a64] font-bold mb-2">Účet: {email}</div>
-                <h3 className="text-center text-[#b74b4b] font-bold mb-2 uppercase text-sm tracking-wider">Vyber postavu:</h3>
-                {savedCharacters.map((char, idx) => (
+                
+                <div className="text-center mt-4">
                   <button 
-                    key={idx}
-                    onClick={() => loadGame(char.name)}
-                    className="w-full p-3 bg-[#e3dcc8] border border-[#90a4ae] text-left rounded hover:border-[#b74b4b] transition group flex items-center gap-3"
+                    onClick={() => setIsRegistering(!isRegistering)}
+                    className="text-gray-500 hover:text-white font-lora transition"
                   >
-                    <div className="w-10 h-10 border border-[#b74b4b] rounded overflow-hidden flex-shrink-0 bg-[#2b4c5e]">
-                      <img src={`https://image.pollinations.ai/prompt/black%20and%20white%20ink%20drawing%20of%20a%20${encodeURIComponent(char.race)}%20${encodeURIComponent(char.dnd_class)}%20RPG%20character%20portrait?width=128&height=128&nologo=true&seed=42`} alt={char.name} className="w-full h-full object-cover opacity-80 group-hover:opacity-100" />
-                    </div>
-                    <div>
-                      <div className="font-bold text-[#2b4c5e] group-hover:text-[#b74b4b] transition">{char.name}</div>
-                      <div className="text-xs text-[#455a64]">{char.race} {char.dnd_class}</div>
-                    </div>
-                  
-                    <div className="ml-auto flex items-center">
-                      <div 
-                        onClick={(e) => deleteCharacter(e, char.name)}
-                        className="p-2 text-[#90a4ae] hover:text-[#b74b4b] hover:bg-[#f4f1e1] rounded transition"
-                        title="Smazat postavu"
-                      >
-                        <Trash2 size={20} />
+                    {isRegistering ? "Zpět k přihlášení" : "Zaregistrovat se"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : savedCharacters.length === 0 ? (
+            <div className="text-center w-full max-w-sm bg-black/40 backdrop-blur-md p-8 rounded-2xl border border-white/10 shadow-2xl">
+              <p className="text-gray-400 font-lora mb-6">Přihlášen: {email}</p>
+              <button 
+                onClick={() => setGameState("creation")}
+                className="w-full py-4 bg-rpg-blood border border-red-900/50 text-white font-cinzel font-bold text-xl rounded-xl hover:bg-red-800 hover:shadow-[0_0_20px_rgba(183,75,75,0.6)] transition uppercase tracking-widest"
+              >
+                Zrození Hrdiny
+              </button>
+            </div>
+          ) : (
+            <div className="w-full flex flex-col items-center gap-8">
+              <div className="text-center">
+                <h3 className="text-gray-400 font-lora text-lg">Tvé Legendy</h3>
+                <div className="h-px w-32 bg-gradient-to-r from-transparent via-rpg-magic to-transparent mx-auto mt-2" />
+              </div>
+
+              <div className="flex flex-wrap justify-center gap-6 max-w-5xl">
+                {savedCharacters.map((char, idx) => (
+                  <motion.div 
+                    key={idx}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.1 }}
+                    className="group relative w-64 h-96 bg-black/60 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden cursor-pointer hover:border-rpg-magic transition-all hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(197,160,89,0.3)]"
+                    onClick={() => loadGame(char.name)}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10" />
+                    
+                    <img 
+                      src={`https://image.pollinations.ai/prompt/dark%20fantasy%20portrait%20of%20a%20${encodeURIComponent(char.race)}%20${encodeURIComponent(char.dnd_class)}%20RPG%20character?width=512&height=768&nologo=true&seed=${char.name.length * 42}`} 
+                      alt={char.name} 
+                      className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-500" 
+                    />
+                    
+                    <div className="absolute inset-0 z-20 flex flex-col p-6">
+                      <div className="ml-auto">
+                        <button 
+                          onClick={(e) => deleteCharacter(e, char.name)}
+                          className="p-2 text-white/30 hover:text-rpg-blood hover:bg-red-900/30 rounded-full transition"
+                          title="Smazat postavu"
+                        >
+                          <Flame size={20} />
+                        </button>
+                      </div>
+                      
+                      <div className="mt-auto">
+                        <h4 className="text-2xl font-cinzel font-bold text-white group-hover:text-rpg-magic transition drop-shadow-lg">{char.name}</h4>
+                        <div className="text-rpg-magic font-lora italic mt-1 drop-shadow-md">{char.race} {char.dnd_class}</div>
                       </div>
                     </div>
-</button>
+                  </motion.div>
                 ))}
               </div>
-            )}
 
-            {isLoggedIn && (
-              <>
-                <div className="relative py-2 mt-2">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-[#90a4ae]"></div>
-                  </div>
-                  <div className="relative flex justify-center">
-                    <span className="bg-[#f4f1e1] px-2 text-[#455a64] text-sm">nebo</span>
-                  </div>
-                </div>
-
-                <button 
-                  onClick={() => setGameState("creation")}
-                  className="w-full py-3 bg-[#2b4c5e] text-[#f4f1e1] font-bold rounded hover:bg-[#1e3746] transition uppercase tracking-widest shadow-lg"
-                >
-                  Založit novou postavu
-                </button>
-              </>
-            )}
-          </div>
-        <div className="mt-6 text-center">
-          <a href="mailto:janmlcak6@gmail.com?subject=Zpětná vazba - Aethelgard" className="text-[#90a4ae] hover:text-[#e3dcc8] transition text-sm flex items-center justify-center gap-2">
-            <Mail size={16} /> Máte nápad nebo problém? Napište mi.
-          </a>
-        </div>
-        </div>
+              <button 
+                onClick={() => setGameState("creation")}
+                className="mt-4 px-8 py-3 bg-transparent border border-white/20 text-white font-cinzel rounded-xl hover:bg-white/5 hover:border-white/50 transition uppercase tracking-widest text-sm flex items-center gap-2"
+              >
+                <Sparkles size={16} />
+                Vytvořit Novou Legendu
+              </button>
+            </div>
+          )}
+        </motion.div>
       </div>
     );
   }
@@ -948,425 +957,178 @@ export default function Home() {
         </div>
       )}
 
-      {/* Player Header */}
-      <div className="w-full max-w-7xl bg-[#f4f1e1] border border-[#90a4ae] rounded-lg p-2 md:p-4 shadow-lg flex flex-col gap-2 shrink-0">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-[#b74b4b] rounded-full flex items-center justify-center text-[#f4f1e1] relative">
-              <User size={24} />
-              <div className="absolute -bottom-2 -right-2 bg-[#d4af37] text-[#1b262c] text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center border-2 border-[#f4f1e1]">
-                {level}
-              </div>
-            </div>
-            <div>
-              <h2 className="font-bold text-xl text-[#2b4c5e] font-medieval">{name}</h2>
-              <p className="text-sm text-[#455a64] font-serif">{race} {dndClass}</p>
-            </div>
-          </div>
-          <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-4 text-[#2b4c5e]">
-            {/* Status (HP & Food) */}
-            <div className="flex items-center gap-4 text-sm sm:text-base mr-0 sm:mr-4">
-              <div className="flex items-center gap-1 font-bold text-[#b74b4b]"><Drumstick size={18} /> <span key={`food-${rations}`} className="animate-flash">{rations}</span></div>
-              <div className="flex items-center gap-1 font-bold text-[#b74b4b]"><Heart size={18} /> <span>{hp}/100</span></div>
-            </div>
-            
-            {/* Action Buttons */}
-            <div className="flex flex-wrap sm:flex-nowrap justify-end gap-2 relative">
-              <button onClick={() => setStatsOpen(true)} className="hidden sm:flex items-center gap-1 font-bold text-[#2b4c5e] hover:text-[#b74b4b] transition cursor-pointer bg-[#e3dcc8] px-2 py-1 rounded border border-[#90a4ae] relative" title="Vlastnosti postavy">
-                <User size={18} />
-                {skillPoints > 0 && <span className="absolute -top-2 -right-2 w-4 h-4 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center animate-bounce">{skillPoints}</span>}
-              </button>
-              
-              <button onClick={() => setSkillsOpen(true)} className="flex items-center gap-1 font-bold text-[#2b4c5e] hover:text-[#b74b4b] transition cursor-pointer bg-[#e3dcc8] px-2 py-1 rounded border border-[#90a4ae] relative" title="Bojové dovednosti">
-                <Sparkles size={18} />
-              </button>
-              
-              <button onClick={() => { setQuestsOpen(true); setUnreadQuests(false); }} className={`relative flex items-center gap-1 font-bold transition cursor-pointer bg-[#e3dcc8] px-2 py-1 rounded border ${unreadQuests ? 'text-[#d4af37] border-[#d4af37] shadow-[0_0_10px_#d4af37]' : 'text-[#2b4c5e] hover:text-[#b74b4b] border-[#90a4ae]'}`} title="Úkoly">
-                <BookOpen size={18} />
-                {unreadQuests && <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border border-[#f4f1e1] animate-pulse"></span>}
-                {!unreadQuests && quests.filter(q => q.stav === 'aktivni').length > 0 && <span className="absolute -top-2 -right-2 w-4 h-4 bg-blue-500 text-white text-[10px] rounded-full flex items-center justify-center">{quests.filter(q => q.stav === 'aktivni').length}</span>}
-              </button>
-              
-                                          {worldData && (
-                <button onClick={() => setMapOpen(true)} className="flex items-center gap-1 font-bold text-[#2b4c5e] hover:text-[#b74b4b] transition cursor-pointer bg-[#e3dcc8] px-2 py-1 rounded border border-[#90a4ae]" title="Mapa světa">
-                  <Map size={18} />
-                </button>
-              )}
-              <button onClick={() => setNpcsOpen(true)} className="flex items-center gap-1 font-bold text-[#2b4c5e] hover:text-[#b74b4b] transition cursor-pointer bg-[#e3dcc8] px-2 py-1 rounded border border-[#90a4ae]" title="Známé postavy">
-                <Users size={18} />
-              </button>
-              <button onClick={() => setInventoryOpen(true)} className="flex items-center gap-1 font-bold text-[#2b4c5e] hover:text-[#b74b4b] transition cursor-pointer bg-[#e3dcc8] px-2 py-1 rounded border border-[#90a4ae]" title="Batoh">
-                <Package size={18} />
-              </button>
-
-              <button onClick={() => setJournalOpen(true)} className="hidden sm:flex items-center gap-1 font-bold text-[#2b4c5e] hover:text-[#b74b4b] transition cursor-pointer bg-[#e3dcc8] px-2 py-1 rounded border border-[#90a4ae] relative" title="Deník příběhu">
-                <ScrollText size={18} />
-              </button>
-              <button onClick={() => setMusicPlaying(!musicPlaying)} className="hidden sm:flex items-center gap-1 font-bold text-[#2b4c5e] hover:text-[#b74b4b] transition cursor-pointer bg-[#e3dcc8] px-2 py-1 rounded border border-[#90a4ae]" title="Hudba">
-                {musicPlaying ? <Volume2 size={18} /> : <VolumeX size={18} />}
-              </button>
-                          {/* Patch Notes Button */}
-            <button onClick={() => setPatchNotesOpen(true)} className="text-[#b74b4b] hover:text-[#d4af37] transition flex items-center gap-1 font-bold bg-[#1b262c] px-2 py-1 rounded border border-[#90a4ae]" title="Novinky ve hře">
-              <ScrollText size={20} />
-              <span className="hidden sm:inline text-xs uppercase">Novinky</span>
-            </button>
-            <button onClick={() => setSettingsOpen(true)} className="hidden sm:flex items-center gap-1 font-bold text-[#2b4c5e] hover:text-[#b74b4b] transition cursor-pointer bg-[#e3dcc8] px-2 py-1 rounded border border-[#90a4ae]" title="Nastavení">
-                <Settings2 size={18} />
-              </button>
-
-              {/* Mobile Hamburger */}
-              <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="sm:hidden flex items-center gap-1 font-bold text-[#f4f1e1] hover:text-[#d4af37] transition cursor-pointer bg-[#2b4c5e] px-2 py-1 rounded border border-[#455a64]">
-                <Menu size={18} />
-              </button>
-
-              {/* Mobile Dropdown */}
-              {mobileMenuOpen && (
-                <div className="absolute right-0 top-10 w-48 bg-[#f4f1e1] border-2 border-[#90a4ae] rounded shadow-xl p-2 flex flex-col gap-2 z-50 sm:hidden">
-                  <button onClick={() => { setStatsOpen(true); setMobileMenuOpen(false); }} className="flex justify-between items-center text-[#2b4c5e] hover:bg-[#e3dcc8] p-2 rounded transition">
-                    <span className="font-bold flex items-center gap-2"><User size={18} /> Vlastnosti</span>
-                    {skillPoints > 0 && <span className="w-5 h-5 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center animate-bounce">{skillPoints}</span>}
-                  </button>
-                  <button onClick={() => { setJournalOpen(true); setMobileMenuOpen(false); }} className="flex items-center gap-2 text-[#2b4c5e] hover:bg-[#e3dcc8] p-2 rounded transition font-bold text-left">
-                    <ScrollText size={18} /> Deník
-                  </button>
-                  <button onClick={() => { setMusicPlaying(!musicPlaying); setMobileMenuOpen(false); }} className="flex items-center gap-2 text-[#2b4c5e] hover:bg-[#e3dcc8] p-2 rounded transition font-bold text-left">
-                    {musicPlaying ? <Volume2 size={18} /> : <VolumeX size={18} />} Hudba
-                  </button>
-                  <button onClick={() => { setSettingsOpen(true); setMobileMenuOpen(false); }} className="flex items-center gap-2 text-[#2b4c5e] hover:bg-[#e3dcc8] p-2 rounded transition font-bold text-left">
-                    <Settings2 size={18} /> Nastavení
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-        
-        {/* XP Bar */}
-        <div className="w-full bg-[#e3dcc8] h-2 mt-2 rounded-full overflow-hidden border border-[#90a4ae] relative">
-          <div className="h-full bg-gradient-to-r from-[#d4af37] to-[#b59226] transition-all duration-500" style={{width: `${(xp / (level * 100)) * 100}%`}}></div>
-        </div>
-        <div className="text-right text-[10px] text-[#455a64] -mt-1 font-bold"><span key={`xp-${xp}`} className="animate-flash">{xp}</span> / {level * 300} XP</div>
+      {/* --- AELTHGARD IMMERSIVE GAMEPLAY UI --- */}
+      
+      {/* Background Layer */}
+      <div className="absolute inset-0 z-0">
+        <div 
+          className="absolute inset-0 bg-cover bg-center transition-all duration-1000"
+          style={{ backgroundImage: `url(${currentLocationImage || 'https://www.transparenttextures.com/patterns/black-scales.png'})` }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/40 backdrop-blur-sm" />
       </div>
 
-      {/* 2-Column Main Container */}
-      <div className="w-full max-w-7xl flex-1 flex flex-col lg:flex-row gap-4 overflow-hidden">
+      <div className="w-full max-w-7xl flex flex-col h-full relative z-10 p-2 md:p-6 pb-0">
         
-        {/* Left Column: Visuals (Hidden on mobile) */}
-        <div className="hidden lg:flex flex-col w-1/3 bg-[#1b262c] border-2 border-[#455a64] rounded-lg shadow-lg overflow-hidden relative">
-           {/* Region Header */}
-           <div className="absolute top-0 left-0 w-full bg-gradient-to-b from-black/90 via-black/50 to-transparent p-6 z-10 text-center pointer-events-none">
-                            {travelMode || travelDaysLeft > 0 ? (
-                <div className="flex flex-col items-center">
-                   <span className="text-white font-bold text-sm tracking-widest uppercase drop-shadow-md">Putování do:</span>
-                   <span className="text-[#d4af37] font-bold text-2xl uppercase tracking-widest drop-shadow-[0_2px_4px_rgba(0,0,0,1)] font-medieval">{travelDestination}</span>
-                   <div className="mt-2 bg-[#1b262c] border border-[#d4af37] px-3 py-1 rounded-full flex gap-2 items-center shadow-lg">
-                      <span className="text-white font-bold text-xs uppercase tracking-wider">Cesta:</span>
-                      <span className="text-red-400 font-bold animate-pulse">{travelDaysLeft} dní</span>
-                   </div>
-                </div>
-              ) : (
-                <span className="text-[#d4af37] font-bold text-2xl uppercase tracking-widest drop-shadow-[0_2px_4px_rgba(0,0,0,1)] font-medieval">{currentRegion}</span>
-              )}
-           </div>
-           {currentLocationImage ? (
-              <div className="w-full h-2/3 border-b-4 border-[#b74b4b] overflow-hidden">
-                 <img 
-                    src={currentLocationImage} 
-                    className="w-full h-full object-cover" 
-                    alt="Location" 
-                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                 />
+        {/* Top HUD */}
+        <div className="flex justify-between items-start mb-4">
+          
+          <div className="flex items-center gap-4 bg-black/40 backdrop-blur-md p-3 rounded-2xl border border-white/10 shadow-lg">
+            <div className="w-16 h-16 rounded-xl overflow-hidden border border-rpg-magic shadow-[0_0_15px_rgba(197,160,89,0.3)] shrink-0">
+              <img src={`https://image.pollinations.ai/prompt/dark%20fantasy%20portrait%20of%20a%20${encodeURIComponent(race)}%20${encodeURIComponent(dndClass)}%20RPG%20character?width=128&height=128&nologo=true&seed=42`} alt={name} className="w-full h-full object-cover" />
+            </div>
+            <div className="flex flex-col">
+              <h2 className="text-2xl font-cinzel text-white font-bold drop-shadow-md">{name}</h2>
+              <div className="text-rpg-magic font-lora text-sm flex gap-3">
+                <span>Úroveň {level}</span>
+                <span className="opacity-50">|</span>
+                <span>{race} {dndClass}</span>
               </div>
-           ) : (
-              <div className="w-full h-2/3 flex flex-col items-center justify-center text-[#455a64] border-b-4 border-[#b74b4b] bg-[#0f1619]">
-                <span className="text-xl font-medieval tracking-widest">Neznámé končiny</span>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-end gap-3 max-w-[50%]">
+            <div className="flex items-center gap-2 bg-black/40 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10" title="Životy">
+              <Heart size={20} className="text-rpg-blood" />
+              <div className="font-cinzel text-white text-lg font-bold">
+                <span className={hp <= 20 ? 'text-rpg-blood animate-pulse' : ''}>{hp}</span><span className="text-gray-500 text-sm">/100</span>
               </div>
-           )}
-           <div className="p-6 flex-1 overflow-y-auto bg-[#1e3746] text-[#e3dcc8] text-sm leading-relaxed border-t border-[#b74b4b]/30 shadow-inner">
-              {inCombat ? (
-                <div className="flex flex-col gap-4">
-                  <div className="text-[#b74b4b] font-bold font-medieval text-2xl mb-2 uppercase tracking-wider border-b border-[#b74b4b]/50 pb-2 flex justify-center items-center gap-2">
-                    <Skull size={24} /> Boj
-                  </div>
-                  {enemies.map((enemy, idx) => (
-                    <div key={idx} className="flex flex-col gap-1 bg-[#1b262c] p-3 rounded-lg border-2 border-[#b74b4b]/50 shadow-md">
-                      <div className="text-[#f4f1e1] font-bold text-lg flex justify-between">
-                        <span>{enemy.jmeno}</span>
-                        <span className="text-red-400">{enemy.hp}/{enemy.max_hp}</span>
-                      </div>
-                      <div className="w-full bg-[#0f1619] h-3 rounded-full overflow-hidden border border-[#455a64] mt-1 mb-1">
-                        <div className="h-full bg-red-600 transition-all duration-300" style={{width: `${(enemy.hp / enemy.max_hp) * 100}%`}}></div>
-                      </div>
-                      <div className="text-[#90a4ae] text-sm italic text-center">{enemy.status}</div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <>
-                  <div className="text-[#d4af37] font-bold font-medieval text-2xl mb-4 uppercase tracking-wider border-b border-[#455a64] pb-2 text-center">Místo</div>
-                  <div className="italic font-serif text-lg">
-                    {currentLocationDesc || "Nevidíš nic zvláštního..."}
-                  </div>
-                </>
-              )}
-           </div>
+            </div>
+            
+            <div className="flex items-center gap-2 bg-black/40 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10" title="Zásoby">
+              <Drumstick size={20} className={rations < 2 ? "text-rpg-blood animate-pulse" : "text-orange-400"} />
+              <div className="font-cinzel text-white text-lg font-bold">{rations}</div>
+            </div>
+
+            <div className="flex items-center gap-2 bg-black/40 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10" title="Zlato">
+              <div className="w-5 h-5 bg-yellow-500 rounded-full flex items-center justify-center font-bold text-black text-xs shadow-[0_0_8px_rgba(234,179,8,0.5)]">Z</div>
+              <div className="font-cinzel text-white text-lg font-bold">{gold}</div>
+            </div>
+          </div>
+
         </div>
 
-        {/* Right Column: Chat and Actions */}
-        <div className="flex-1 flex flex-col overflow-hidden rounded-lg shadow-lg border border-[#90a4ae] relative">
-
-      {/* Main Game Log */}
-      <div className="w-full max-w-4xl mx-auto bg-[#f4f1e1] flex-1 overflow-y-auto p-3 md:p-8 border-x border-[#90a4ae] shadow-lg flex flex-col gap-4 md:gap-6" style={{ backgroundImage: "url('https://www.transparenttextures.com/patterns/aged-paper.png')" }}>
-        
-        {history.map((msg, i) => (
-          <div key={i} className={`flex flex-col ${msg.type === "player" ? "items-end" : "items-start"}`}>
+        {/* Story Log (Middle) */}
+        <div className="flex-1 overflow-hidden relative mb-4">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-lg border border-white/10 rounded-2xl shadow-2xl p-6 overflow-y-auto custom-scrollbar flex flex-col gap-6" >
             
-            {msg.type === "system" && (
-              <div className="w-full text-center italic text-[#b74b4b] text-sm my-4 border-b border-[#90a4ae] pb-2">
-                — {msg.text} —
-              </div>
-            )}
-
-            {msg.type === "player" && (
-              <div className="flex gap-4 items-end self-end max-w-[90%]">
-                <div className="bg-[#2b4c5e] text-[#f4f1e1] px-4 py-2 rounded-lg shadow-md flex-1">
-                  <span className="opacity-50 text-xs uppercase block mb-1">Tvá akce</span>
-                  {msg.text}
-                </div>
-                <div className="w-16 h-16 border-2 border-[#b74b4b] rounded overflow-hidden shadow-lg bg-[#e3dcc8] flex-shrink-0">
-                  <img src={`https://image.pollinations.ai/prompt/black%20and%20white%20ink%20drawing%20of%20a%20${encodeURIComponent(race)}%20${encodeURIComponent(dndClass)}%20RPG%20character%20portrait?width=256&height=256&nologo=true&seed=42`} alt="Player" className="w-full h-full object-cover" />
-                </div>
-              </div>
-            )}
-
-            {msg.type === "dm" && (
-              <div className="flex flex-col gap-3 w-full max-w-[90%]">
-                {/* Obrázek lokace (Zelený rámeček na náčrtu uživatele) */}
-                {msg.image_prompt && (
-                  <div className="lg:hidden w-full h-56 border-4 border-[#2b4c5e] rounded shadow-lg overflow-hidden mb-2">
-                    <img src={`https://image.pollinations.ai/prompt/${encodeURIComponent(msg.image_prompt)}?width=768&height=432&nologo=true&seed=42`} alt="Location" className="w-full h-full object-cover" />
-                  </div>
-                )}
-
-                {/* Popis prostředí (Kurzíva) */}
-                {msg.popis_okoli && (
-                  <div className="lg:hidden italic text-[#455a64] leading-relaxed text-lg border-l-4 border-[#90a4ae] pl-4">
-                    {msg.popis_okoli}
-                  </div>
-                )}
-                
-                {/* Přímý výsledek akce */}
-                {msg.vypravec && (
-                  <div className="text-[#1b262c] font-medium leading-relaxed group relative">
-                    <button 
-                      onClick={() => playAudio(msg.vypravec, "narrator")} 
-                      className="absolute -left-8 top-1 opacity-0 group-hover:opacity-100 transition text-[#b74b4b]"
-                      title="Přehrát hlas vypravěče"
-                    >
-                      <Volume2 size={20} />
+            {history.map((msg, i) => (
+              <div key={i} className={`flex ${msg.type === "player" ? "justify-end" : "justify-start"}`}>
+                <div className={`max-w-[85%] md:max-w-[75%] p-5 rounded-2xl ${
+                  msg.type === "player" 
+                    ? "bg-white/5 border border-white/10 text-gray-300 font-lora" 
+                    : msg.type === "system" 
+                      ? "bg-black border border-white/5 text-gray-400 font-cinzel text-sm italic"
+                      : "bg-black/60 border border-rpg-magic/30 text-white font-lora shadow-[0_0_15px_rgba(197,160,89,0.1)]"
+                }`}>
+                  {msg.type === "model" && (
+                    <button onClick={() => playAudio(msg.text, 'narrator')} className="float-right ml-4 text-gray-500 hover:text-rpg-magic transition">
+                      <Volume2 size={18} />
                     </button>
-                    {msg.vypravec}
-                  </div>
-                )}
-
-                {/* System Log (Herní mechaniky – hody, XP, poškození) */}
-                {msg.system_log && (
-                  <div className="mt-2 bg-[#e3dcc8] border-2 border-[#90a4ae] rounded-md px-4 py-3 font-mono text-sm text-[#2b4c5e] leading-relaxed shadow-sm">
-                    <div className="text-[#b74b4b] font-bold uppercase tracking-widest text-[11px] mb-2 flex items-center gap-1 border-b border-[#90a4ae] pb-1">
-                      <span>⚙</span> Herní mechaniky
+                  )}
+                  {msg.type === "system" ? <FormattedSystemLog text={msg.text} /> : (
+                    <div className="leading-relaxed text-lg">
+                      {msg.type === "model" ? <TypewriterText text={msg.text} animate={i === history.length - 1} /> : msg.text}
                     </div>
-                    <FormattedSystemLog text={msg.system_log} />
-                  </div>
-                )}
-
-                {/* Zpětná kompatibilita pro staré uložení (jedno NPC) */}
-                {msg.npc_mluvi?.aktivni && (
-                  <div className="bg-[#e3dcc8] p-4 rounded-lg shadow-sm border border-[#90a4ae] mt-2 relative group">
-                    <button onClick={() => playAudio(msg.npc_mluvi.text, msg.npc_mluvi.pohlavi === "zena" ? "npc_zena" : "npc_muz")} className="absolute right-4 top-4 opacity-0 group-hover:opacity-100 transition text-[#b74b4b]"><Volume2 size={20} /></button>
-                    <div className="absolute w-3 h-3 bg-[#e3dcc8] border-l border-t border-[#90a4ae] -top-[7px] left-8 transform rotate-45"></div>
-                    <span className="font-bold text-[#b74b4b] block mb-1">{msg.npc_mluvi.jmeno || "Neznámý"}:</span>
-                    <span className="text-[#2b4c5e]">"<TypewriterText text={msg.npc_mluvi.text} animate={i === history.length - 1} />"</span>
-                  </div>
-                )}
-
-                {/* Nový seznam NPC dialogů s portréty (Žlutý rámeček na náčrtu uživatele) */}
-                {msg.npc_dialogy && msg.npc_dialogy.length > 0 && msg.npc_dialogy.map((npc: any, nIdx: number) => {
-                  let seed = 42;
-                  if (npc.jmeno) {
-                    let h = 0;
-                    for(let i=0; i<npc.jmeno.length; i++) h = Math.imul(31, h) + npc.jmeno.charCodeAt(i) | 0;
-                    seed = Math.abs(h);
-                  }
-                  
-                  const isPlayer = name && npc.jmeno && npc.jmeno.toLowerCase() === name.toLowerCase();
-
-                  if (isPlayer) {
-                    return (
-                      <div key={nIdx} className="flex gap-4 items-start self-end w-full mt-2 flex-row-reverse max-w-[90%]">
-                        <div className="w-16 h-16 border-2 border-[#b74b4b] rounded overflow-hidden shadow-sm bg-[#e3dcc8] flex-shrink-0 mt-2">
-                          <img src={`https://image.pollinations.ai/prompt/black%20and%20white%20ink%20drawing%20of%20a%20${encodeURIComponent(race)}%20${encodeURIComponent(dndClass)}%20RPG%20character%20portrait?width=256&height=256&nologo=true&seed=42`} alt={npc.jmeno} className="w-full h-full object-cover" />
-                        </div>
-                        <div className="bg-[#2b4c5e] text-[#f4f1e1] p-4 rounded-lg shadow-md relative group flex-1">
-                          <button onClick={() => playAudio(npc.text, 'narrator')} className="absolute left-4 top-4 opacity-0 group-hover:opacity-100 transition text-[#e3dcc8] hover:text-white"><Volume2 size={20} /></button>
-                          <div className="absolute w-3 h-3 bg-[#2b4c5e] top-6 -right-[6px] transform rotate-45"></div>
-                          <span className="font-bold text-[#e3dcc8] block mb-1">{npc.jmeno}:</span>
-                          <span className="opacity-90">"<TypewriterText text={npc.text} animate={i === history.length - 1} />"</span>
-                        </div>
-                      </div>
-                    );
-                  }
-
-                  return (
-                    <div key={nIdx} className="flex gap-4 items-start w-full mt-2">
-                      <div className="w-16 h-16 border-2 border-[#90a4ae] rounded overflow-hidden shadow-sm bg-[#e3dcc8] flex-shrink-0 mt-2">
-                        <img src={`https://image.pollinations.ai/prompt/${encodeURIComponent('black and white ink drawing portrait sketch of ' + (npc.image_prompt || npc.jmeno))}?width=256&height=256&nologo=true&seed=${seed}`} alt={npc.jmeno} className="w-full h-full object-cover" />
-                      </div>
-                      <div className="bg-[#e3dcc8] p-4 rounded-lg shadow-sm border border-[#90a4ae] relative group flex-1">
-                        <button onClick={() => playAudio(npc.text, npc.pohlavi === 'muz' ? 'npc_muz' : 'npc_zena')} className="absolute right-4 top-4 opacity-0 group-hover:opacity-100 transition text-[#b74b4b]"><Volume2 size={20} /></button>
-                        <div className="absolute w-3 h-3 bg-[#e3dcc8] border-b border-l border-[#90a4ae] top-6 -left-[7px] transform rotate-45"></div>
-                        <span className="font-bold text-[#b74b4b] block mb-1">{npc.jmeno || "Neznámá"}:</span>
-                        <span className="text-[#2b4c5e]">"<TypewriterText text={npc.text} animate={i === history.length - 1} />"</span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {msg.type === "error" && (
-              <div className="bg-red-100 text-red-800 p-3 rounded text-sm w-full font-sans">
-                ⚠️ {msg.text}
-              </div>
-            )}
-            
-          </div>
-        ))}
-        {loading && (
-          <div className="flex items-center gap-2 text-[#455a64] italic">
-            <span className="animate-pulse">Pán jeskyně přemýšlí...</span>
-          </div>
-        )}
-        
-            {loading && (
-              <div className="flex gap-4 animate-fade-in-up">
-                <div className="w-12 h-12 flex-shrink-0 border-2 border-[#90a4ae] bg-[#2b4c5e] rounded-lg flex items-center justify-center font-bold text-[#90a4ae] text-xl font-medieval">
-                  DM
+                  )}
                 </div>
-                <div className="bg-[#e3dcc8] border-2 border-[#90a4ae] p-4 rounded-lg flex items-center gap-2 text-[#455a64] italic">
-                  <span>Pán jeskyně přemýšlí</span>
-                  <span className="flex gap-1">
-                    <span className="thinking-dot">.</span>
-                    <span className="thinking-dot">.</span>
-                    <span className="thinking-dot">.</span>
-                  </span>
+              </div>
+            ))}
+
+            {loading && (
+              <div className="flex justify-start animate-fade-in-up">
+                <div className="bg-black/60 border border-rpg-magic/30 p-5 rounded-2xl flex items-center gap-3 text-rpg-magic italic font-lora">
+                  <Sparkles className="animate-spin" size={20} />
+                  <span>Vypravěč spřádá osud...</span>
                 </div>
               </div>
             )}
             <div ref={chatEndRef} />
-
-      </div>
-
-      {/* Action Area (Footer of Right Column) */}
-      <div className="w-full bg-[#1e3746] border-t-4 border-[#b74b4b] p-3 md:p-5 flex flex-col gap-3 md:gap-5 shadow-[0_-4px_20px_rgba(0,0,0,0.5)] z-10 shrink-0">
-
-        {/* Suggested Actions or Combat Quick Actions */}
-        {!loading && (
-          <div className="flex flex-col gap-2">
-            <button 
-              onClick={() => setActionsOpen(!actionsOpen)} 
-              className="md:hidden w-full bg-[#2b4c5e] border border-[#90a4ae] text-[#f4f1e1] px-4 py-2 rounded-sm text-sm hover:bg-[#455a64] transition-all font-bold flex justify-center items-center gap-2 shadow-md"
-            >
-              Vyrolovat akce {actionsOpen ? "▲" : "▼"}
-            </button>
-            <div className={`${actionsOpen ? 'flex' : 'hidden'} md:flex flex-wrap gap-2`}>
-            {inCombat ? (
-              <>
-                <button onClick={() => sendAction(`Útočím zbraní: ${inventory.find(i => i.id === equipped["hlavní ruka"])?.name || "Pěsti"}`)} className="bg-[#b74b4b] border border-[#b74b4b] text-[#f4f1e1] px-4 py-2 rounded-sm text-sm hover:bg-[#8a3333] transition-all shadow-md font-bold flex items-center gap-1 font-serif">
-                  <Sword size={16} /> Útok zbraní
-                </button>
-                <button onClick={() => setSkillsOpen(true)} className="bg-[#1b262c] border border-[#90a4ae] text-[#90a4ae] px-4 py-2 rounded-sm text-sm hover:bg-[#90a4ae] hover:text-[#1b262c] transition-all shadow-md font-bold flex items-center gap-1 font-serif">
-                  <Sparkles size={16} /> Použít dovednost
-                </button>
-                                            {worldData && (
-                <button onClick={() => setMapOpen(true)} className="flex items-center gap-1 font-bold text-[#2b4c5e] hover:text-[#b74b4b] transition cursor-pointer bg-[#e3dcc8] px-2 py-1 rounded border border-[#90a4ae]" title="Mapa světa">
-                  <Map size={18} />
-                </button>
-              )}
-              <button onClick={() => setNpcsOpen(true)} className="flex items-center gap-1 font-bold text-[#2b4c5e] hover:text-[#b74b4b] transition cursor-pointer bg-[#e3dcc8] px-2 py-1 rounded border border-[#90a4ae]" title="Známé postavy">
-                <Users size={18} />
-              </button>
-              <button onClick={() => setInventoryOpen(true)} className="bg-[#1b262c] border border-[#90a4ae] text-[#90a4ae] px-4 py-2 rounded-sm text-sm hover:bg-[#90a4ae] hover:text-[#1b262c] transition-all shadow-md font-bold flex items-center gap-1 font-serif">
-                  <Package size={16} /> Batoh
-                </button>
-                <button onClick={() => sendAction("Pokusím se z boje utéct!")} className="bg-[#1b262c] border border-[#455a64] text-[#78909c] px-4 py-2 rounded-sm text-sm hover:bg-[#2b4c5e] hover:text-[#f4f1e1] transition-all shadow-md italic font-serif">
-                  Útěk
-                </button>
-              </>
-            ) : (
-              <>
-                {/* Points of Interest (City Locations) */}
-                {locationType === 'mesto' && pointsOfInterest.map((poi, i) => (
-                  <button 
-                    key={`poi-${i}`} 
-                    onClick={() => sendAction(`Jdu prozkoumat: ${poi.nazev}`)}
-                    className="bg-[#d4af37] text-[#1b262c] font-bold px-4 py-2 rounded-sm text-sm hover:bg-[#f4f1e1] transition-all shadow-md border border-[#d4af37] font-serif flex items-center gap-1"
-                  >
-                    <MapPin size={16} className="opacity-70" /> {poi.nazev}
-                  </button>
-                ))}
-                
-                {/* Regular Suggested Actions */}
-                {suggestedActions.map((act, i) => (
-                  <button 
-                    key={`act-${i}`} 
-                    onClick={() => sendAction(act)}
-                    className="bg-[#1b262c] border border-[#90a4ae] text-[#e3dcc8] px-4 py-2 rounded-sm text-sm hover:bg-[#90a4ae] hover:text-[#1b262c] transition-all shadow-md font-serif"
-                  >
-                    {act}
-                  </button>
-                ))}
-              </>
-            )}
-          </div>
-          </div>
-        )}
-
-        {/* Magical Input */}
-        <div className="relative mt-2">
-          {/* Decorative magical border */}
-          <div className="absolute -inset-1 bg-gradient-to-r from-transparent via-rpg-magic/20 to-transparent rounded-xl blur-sm"></div>
-          
-          <div className="relative flex gap-2 bg-[#111827]/90 backdrop-blur-md p-2 rounded-xl border border-rpg-magic/30 shadow-[0_0_20px_rgba(0,0,0,0.5)]">
-            <button
-              onClick={() => setIsOOC(!isOOC)}
-              className={`px-3 transition-colors rounded-lg flex items-center justify-center ${isOOC ? 'bg-indigo-900/50 text-indigo-300 border border-indigo-500/50 shadow-[0_0_10px_rgba(99,102,241,0.3)]' : 'text-[#455a64] hover:text-rpg-magic bg-[#1b262c] border border-transparent hover:border-rpg-magic/30'}`}
-              title="Vnitřní myšlenka (OOC) - zastaví čas a herní události"
-            >
-              <Brain size={20} className={isOOC ? "animate-pulse" : ""} />
-            </button>
-            <input 
-              type="text" 
-              value={customAction}
-              onChange={(e) => setCustomAction(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && sendAction(customAction)}
-              placeholder={isOOC ? "Přemýšlím nad..." : "Co uděláš dál?"} 
-              className={`flex-1 font-lora text-[17px] ${isOOC ? 'bg-indigo-950/30 text-indigo-200 italic placeholder-indigo-400/50' : 'bg-transparent text-rpg-paper placeholder-rpg-muted/50'} px-2 py-3 focus:outline-none transition-colors`}
-              disabled={loading}
-            />
-            <button 
-              onClick={() => sendAction(customAction)}
-              className="bg-gradient-to-br from-red-800 to-rpg-blood hover:from-red-700 hover:to-red-900 text-rpg-paper px-6 py-2 rounded-lg font-cinzel font-bold tracking-wider transition-all disabled:opacity-50 flex items-center justify-center border border-rpg-blood/50 shadow-[0_0_10px_rgba(183,75,75,0.4)] hover:shadow-[0_0_15px_rgba(183,75,75,0.8)] relative overflow-hidden group"
-              disabled={loading || !customAction.trim()}
-            >
-              <span className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></span>
-              {loading ? <Loader2 size={24} className="animate-spin" /> : <Send size={20} />}
-            </button>
           </div>
         </div>
-      </div>
-      {/* End Right Column */}
-      </div>
-      {/* End 2-Column Container */}
+
+        {/* Bottom Actions & Input */}
+        <div className="shrink-0 flex flex-col gap-4 pb-4">
+          
+          {/* Action Buttons & Dock */}
+          <div className="flex flex-wrap justify-between items-end gap-4">
+            
+            {/* Contextual Actions */}
+            <div className="flex flex-wrap gap-2 flex-1">
+              {inCombat ? (
+                <>
+                  <button onClick={() => sendAction(`Útočím zbraní: ${inventory.find(i => i.id === equipped["hlavní ruka"])?.name || "Pěsti"}`)} className="bg-rpg-blood/20 border border-rpg-blood text-white px-4 py-2 rounded-xl text-sm hover:bg-rpg-blood transition shadow-[0_0_10px_rgba(183,75,75,0.2)] font-cinzel flex items-center gap-2">
+                    <Sword size={16} /> Útok
+                  </button>
+                  <button onClick={() => setSkillsOpen(true)} className="bg-white/5 border border-white/20 text-white px-4 py-2 rounded-xl text-sm hover:bg-white/10 transition font-cinzel flex items-center gap-2">
+                    <Sparkles size={16} /> Dovednost
+                  </button>
+                  <button onClick={() => sendAction("Pokusím se z boje utéct!")} className="bg-black/40 border border-gray-600 text-gray-400 px-4 py-2 rounded-xl text-sm hover:text-white transition font-cinzel italic">
+                    Útěk
+                  </button>
+                </>
+              ) : (
+                <>
+                  {locationType === 'mesto' && pointsOfInterest.map((poi, i) => (
+                    <button key={`poi-${i}`} onClick={() => sendAction(`Jdu prozkoumat: ${poi.nazev}`)} className="bg-rpg-magic/10 border border-rpg-magic/50 text-rpg-magic px-4 py-2 rounded-xl text-sm hover:bg-rpg-magic hover:text-black transition font-cinzel flex items-center gap-2 shadow-[0_0_10px_rgba(197,160,89,0.2)]">
+                      <MapPin size={16} /> {poi.nazev}
+                    </button>
+                  ))}
+                  {suggestedActions.map((act, i) => (
+                    <button key={`act-${i}`} onClick={() => sendAction(act)} className="bg-white/5 border border-white/20 text-gray-300 px-4 py-2 rounded-xl text-sm hover:bg-white/10 hover:text-white transition font-lora">
+                      {act}
+                    </button>
+                  ))}
+                </>
+              )}
+            </div>
+
+            {/* Menu Dock */}
+            <div className="flex gap-2 bg-black/60 backdrop-blur-md border border-white/10 p-2 rounded-2xl shadow-xl">
+              <button onClick={() => setStatsOpen(true)} className="p-3 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition" title="Vlastnosti"><User size={20} /></button>
+              <button onClick={() => setInventoryOpen(true)} className="p-3 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition" title="Batoh"><Package size={20} /></button>
+              <button onClick={() => setJournalOpen(true)} className="p-3 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition relative" title="Deník">
+                <BookOpen size={20} />
+                {unreadQuests && <span className="absolute top-2 right-2 w-2 h-2 bg-rpg-blood rounded-full animate-pulse" />}
+              </button>
+              <button onClick={() => setNpcsOpen(true)} className="p-3 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition" title="Postavy"><Users size={20} /></button>
+              {worldData && <button onClick={() => setMapOpen(true)} className="p-3 text-rpg-magic hover:bg-rpg-magic/20 rounded-xl transition" title="Mapa"><Map size={20} /></button>}
+              <button onClick={() => setSettingsOpen(true)} className="p-3 text-gray-500 hover:text-white hover:bg-white/10 rounded-xl transition"><Settings2 size={20} /></button>
+            </div>
+
+          </div>
+
+          {/* Magical Input Box */}
+          <div className="relative">
+            <div className="absolute -inset-1 bg-gradient-to-r from-transparent via-rpg-magic/20 to-transparent rounded-2xl blur-md" />
+            <div className="relative flex gap-3 bg-black/80 backdrop-blur-xl p-3 rounded-2xl border border-rpg-magic/30 shadow-[0_0_30px_rgba(0,0,0,0.8)]">
+              <button
+                onClick={() => setIsOOC(!isOOC)}
+                className={`p-4 transition-all rounded-xl flex items-center justify-center ${isOOC ? 'bg-indigo-900/40 text-indigo-300 border border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.2)]' : 'text-gray-500 hover:text-rpg-magic bg-white/5 border border-transparent'}`}
+                title="OOC (Myšlenka)"
+              >
+                <Brain size={24} className={isOOC ? "animate-pulse" : ""} />
+              </button>
+              <input 
+                type="text" 
+                value={customAction}
+                onChange={(e) => setCustomAction(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && sendAction(customAction)}
+                placeholder={isOOC ? "Přemýšlím nad..." : "Co uděláš dál?"} 
+                className={`flex-1 font-lora text-xl bg-transparent px-4 py-2 outline-none transition-colors ${isOOC ? 'text-indigo-200 placeholder-indigo-900' : 'text-white placeholder-gray-600'}`}
+                disabled={loading}
+              />
+              <button 
+                onClick={() => sendAction(customAction)}
+                className="bg-rpg-blood hover:bg-red-800 text-white px-8 py-2 rounded-xl font-cinzel font-bold text-lg tracking-widest transition-all disabled:opacity-50 flex items-center justify-center shadow-[0_0_15px_rgba(183,75,75,0.4)]"
+                disabled={loading || !customAction.trim()}
+              >
+                {loading ? <Loader2 size={24} className="animate-spin" /> : "Vydat se"}
+              </button>
+            </div>
+          </div>
+
+        </div>
       </div>
 
       {/* Stats Modal */}
