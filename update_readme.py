@@ -1,4 +1,6 @@
-# Aelthgard: AI Dungeons & Dragons RPG (v2.0)
+﻿import codecs
+
+new_readme = """# Aelthgard: AI Dungeons & Dragons RPG (v2.0)
 
 Aelthgard je next-gen textové RPG poháněné umělou inteligencí, které přináší dynamický a nekonečný zážitek inspirovaný stolními hrami na hrdiny (D&D). Pánem jeskyně (Dungeon Masterem) je zde Gemini AI, která reaguje na jakoukoliv tvoji akci, posouvá příběh a řídí herní svět.
 
@@ -26,3 +28,7 @@ Aelthgard je next-gen textové RPG poháněné umělou inteligencí, které při
 5. **Přežití:** Nakupuj zásoby u obchodníků a lov v lesích. Cestování nehostinnou krajinou stojí peníze i dny!
 
 Vítej v Aelthgardu. Tvé legendární dobrodružství právě začíná.
+"""
+
+with codecs.open('README.md', 'w', 'utf-8') as f:
+    f.write(new_readme)
