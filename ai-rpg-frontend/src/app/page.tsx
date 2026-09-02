@@ -772,10 +772,10 @@ export default function Home() {
 
   if (gameState === "menu") {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center p-4 font-serif relative overflow-hidden bg-[url('https://www.transparenttextures.com/patterns/black-scales.png')]">
+      <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-4 font-serif relative overflow-hidden bg-[url('https://www.transparenttextures.com/patterns/black-scales.png')]">
         
         {/* Deep background fog */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/80 to-black z-0 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-900/20 via-slate-950/80 to-slate-950 z-0 pointer-events-none" />
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-rpg-magic/10 blur-[120px] rounded-full z-0 pointer-events-none" />
 
         <motion.div 
@@ -784,7 +784,7 @@ export default function Home() {
           className="max-w-4xl w-full z-10 relative flex flex-col items-center"
         >
           <div className="mb-12 text-center">
-            <h1 className="text-6xl md:text-8xl font-bold text-rpg-magic tracking-[0.2em] font-cinzel drop-shadow-[0_0_20px_rgba(197,160,89,0.5)]">
+            <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold text-rpg-magic tracking-widest md:tracking-[0.2em] font-cinzel drop-shadow-[0_0_20px_rgba(197,160,89,0.5)]">
               AELTHGARD
             </h1>
             <p className="text-gray-400 font-lora text-xl tracking-widest mt-4 uppercase">AI Dungeons & Dragons RPG</p>
@@ -861,7 +861,7 @@ export default function Home() {
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10" />
                     
                     <img 
-                      src={`https://image.pollinations.ai/prompt/dark%20fantasy%20portrait%20of%20a%20${encodeURIComponent(char.race)}%20${encodeURIComponent(char.dnd_class)}%20RPG%20character?width=512&height=768&nologo=true&seed=${char.name.length * 42}`} 
+                      src={`https://image.pollinations.ai/prompt/epic%20high%20fantasy%20portrait%20of%20a%20${encodeURIComponent(char.race)}%20${encodeURIComponent(char.dnd_class)}%20RPG%20character?width=512&height=768&nologo=true&seed=${char.name.length * 42}`} 
                       alt={char.name} 
                       className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-500" 
                     />
@@ -965,17 +965,17 @@ export default function Home() {
           className="absolute inset-0 bg-cover bg-center transition-all duration-1000"
           style={{ backgroundImage: `url(${currentLocationImage || 'https://www.transparenttextures.com/patterns/black-scales.png'})` }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/40 backdrop-blur-sm" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/70 to-slate-900/40 backdrop-blur-sm" />
       </div>
 
       <div className="w-full max-w-7xl flex flex-col h-full relative z-10 p-2 md:p-6 pb-0">
         
         {/* Top HUD */}
-        <div className="flex justify-between items-start mb-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
           
           <div className="flex items-center gap-4 bg-black/40 backdrop-blur-md p-3 rounded-2xl border border-white/10 shadow-lg">
             <div className="w-16 h-16 rounded-xl overflow-hidden border border-rpg-magic shadow-[0_0_15px_rgba(197,160,89,0.3)] shrink-0">
-              <img src={`https://image.pollinations.ai/prompt/dark%20fantasy%20portrait%20of%20a%20${encodeURIComponent(race)}%20${encodeURIComponent(dndClass)}%20RPG%20character?width=128&height=128&nologo=true&seed=42`} alt={name} className="w-full h-full object-cover" />
+              <img src={`https://image.pollinations.ai/prompt/epic%20high%20fantasy%20portrait%20of%20a%20${encodeURIComponent(race)}%20${encodeURIComponent(dndClass)}%20RPG%20character?width=128&height=128&nologo=true&seed=42`} alt={name} className="w-full h-full object-cover" />
             </div>
             <div className="flex flex-col">
               <h2 className="text-2xl font-cinzel text-white font-bold drop-shadow-md">{name}</h2>
@@ -987,7 +987,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-end gap-3 max-w-[50%]">
+          <div className="flex flex-wrap items-center justify-start md:justify-end gap-2 md:gap-3 max-w-full md:max-w-[50%]">
             <div className="flex items-center gap-2 bg-black/40 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10" title="Životy">
               <Heart size={20} className="text-rpg-blood" />
               <div className="font-cinzel text-white text-lg font-bold">
@@ -1018,7 +1018,7 @@ export default function Home() {
                   msg.type === "player" 
                     ? "bg-white/5 border border-white/10 text-gray-300 font-lora" 
                     : msg.type === "system" 
-                      ? "bg-black border border-white/5 text-gray-400 font-cinzel text-sm italic"
+                      ? "bg-slate-900 border border-white/5 text-gray-400 font-cinzel text-sm italic"
                       : "bg-black/60 border border-rpg-magic/30 text-white font-lora shadow-[0_0_15px_rgba(197,160,89,0.1)]"
                 }`}>
                   {msg.type === "model" && (
@@ -1101,7 +1101,7 @@ export default function Home() {
           {/* Magical Input Box */}
           <div className="relative">
             <div className="absolute -inset-1 bg-gradient-to-r from-transparent via-rpg-magic/20 to-transparent rounded-2xl blur-md" />
-            <div className="relative flex gap-3 bg-black/80 backdrop-blur-xl p-3 rounded-2xl border border-rpg-magic/30 shadow-[0_0_30px_rgba(0,0,0,0.8)]">
+            <div className="relative flex flex-wrap sm:flex-nowrap gap-2 sm:gap-3 bg-slate-900/90 backdrop-blur-xl p-2 sm:p-3 rounded-2xl border border-rpg-magic/30 shadow-[0_0_30px_rgba(0,0,0,0.8)]">
               <button
                 onClick={() => setIsOOC(!isOOC)}
                 className={`p-4 transition-all rounded-xl flex items-center justify-center ${isOOC ? 'bg-indigo-900/40 text-indigo-300 border border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.2)]' : 'text-gray-500 hover:text-rpg-magic bg-white/5 border border-transparent'}`}
@@ -1120,7 +1120,7 @@ export default function Home() {
               />
               <button 
                 onClick={() => sendAction(customAction)}
-                className="bg-rpg-blood hover:bg-red-800 text-white px-8 py-2 rounded-xl font-cinzel font-bold text-lg tracking-widest transition-all disabled:opacity-50 flex items-center justify-center shadow-[0_0_15px_rgba(183,75,75,0.4)]"
+                className="bg-rpg-blood hover:bg-red-800 text-white px-4 sm:px-8 py-2 sm:py-3 w-full sm:w-auto rounded-xl font-cinzel font-bold text-lg tracking-widest transition-all disabled:opacity-50 flex items-center justify-center shadow-[0_0_15px_rgba(183,75,75,0.4)]"
                 disabled={loading || !customAction.trim()}
               >
                 {loading ? <Loader2 size={24} className="animate-spin" /> : "Vydat se"}

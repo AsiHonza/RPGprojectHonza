@@ -47,7 +47,7 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] bg-[url('https://www.transparenttextures.com/patterns/black-scales.png')] text-[#e5e7eb] flex flex-col items-center justify-center p-4 overflow-hidden relative">
+    <div className="min-h-screen bg-slate-950 bg-[url('https://www.transparenttextures.com/patterns/black-scales.png')] text-[#e5e7eb] flex flex-col items-center justify-center p-4 overflow-hidden relative">
       
       {/* Background Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-rpg-magic/10 blur-[120px] rounded-full pointer-events-none" />
@@ -55,10 +55,10 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-4xl bg-black/60 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 p-8 md:p-12 relative z-10"
+        className="w-full max-w-4xl bg-black/60 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 p-4 sm:p-8 md:p-12 relative z-10"
       >
         <div className="flex justify-between items-center mb-8 border-b border-white/10 pb-6">
-          <h2 className="text-4xl font-cinzel text-rpg-magic drop-shadow-[0_0_10px_rgba(197,160,89,0.3)]">
+          <h2 className="text-2xl sm:text-4xl text-center md:text-left font-cinzel text-rpg-magic drop-shadow-[0_0_10px_rgba(197,160,89,0.3)]">
             {step === 1 && "Zrození Hrdiny"}
             {step === 2 && "Cesta Meče a Magie"}
             {step === 3 && "Kniha Osudu"}
@@ -87,7 +87,7 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
 
                 <div>
                   <label className="block font-lora text-xl mb-4 text-gray-300">Krev jakého rodu ti koluje v žilách?</label>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
                     {races.map(r => (
                       <button 
                         key={r}
@@ -107,7 +107,7 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
               <motion.div key="step2" variants={pageVariants} initial="initial" animate="in" exit="out" className="space-y-8">
                 <div>
                   <label className="block font-lora text-xl mb-4 text-gray-300">Jakému řemeslu ses upsal?</label>
-                  <div className="grid grid-cols-3 md:grid-cols-4 gap-3 max-h-48 overflow-y-auto custom-scrollbar p-1">
+                  <div className="grid grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 max-h-48 overflow-y-auto custom-scrollbar p-1">
                     {classes.map(c => (
                       <button 
                         key={c}
