@@ -22,7 +22,8 @@ export const MapModal = ({ isOpen, onClose, setSelectedItem }: any) => {
 
                 <div className="relative w-full h-full min-h-[600px]">
                   <HexMap 
-                    worldData={worldData} 
+                    worldData={worldData}
+                    setSelectedItem={setSelectedItem}
                     onHexClick={(hex: any) => {
                       if(hex.nazev) {
                         setSelectedItem({

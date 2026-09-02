@@ -1,10 +1,10 @@
 import React, { useMemo, useState } from 'react';
-import { Grid, defineHex, rectangle } from 'honeycomb-grid';
+import { Grid, defineHex, rectangle, Orientation } from 'honeycomb-grid';
 import { Castle, Skull, MapPin, Mountain, Trees, Waves, Wind, Droplets, Flame, Home, Star, Eye } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const HEX_SIZE = 16;
-class CustomHex extends defineHex({ dimensions: HEX_SIZE, orientation: 'pointy' }) {}
+class CustomHex extends defineHex({ dimensions: HEX_SIZE, orientation: Orientation.POINTY }) {}
 
 interface HexMapProps {
   worldData: any;

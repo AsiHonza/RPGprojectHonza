@@ -1,58 +1,22 @@
 ﻿import codecs
 
-with codecs.open('src/app/page.tsx', 'r', 'utf-8') as f:
-    content = f.read()
+# Fix HexMap.tsx
+lines = codecs.open('src/components/map/HexMap.tsx', 'r', 'utf-8').readlines()
+for i, l in enumerate(lines):
+    if "import { Grid, defineHex, rectangle } from 'honeycomb-grid';" in l:
+        lines[i] = "import { Grid, defineHex, rectangle, Orientation } from 'honeycomb-grid';\n"
+    if "class CustomHex extends defineHex({ dimensions: HEX_SIZE, orientation: 'pointy' }) {}" in l:
+        lines[i] = "class CustomHex extends defineHex({ dimensions: HEX_SIZE, orientation: Orientation.POINTY }) {}\n"
 
-# 1. Add state variable
-state_marker = 'const [history, setHistory] = useState<any[]>([]);'
-state_insertion = 'const [savedCharacters, setSavedCharacters] = useState<any[]>([]);\n  '
-content = content.replace(state_marker, state_insertion + state_marker)
+with codecs.open('src/components/map/HexMap.tsx', 'w', 'utf-8') as f:
+    f.write("".join(lines))
 
-loadGame_marker = '  const loadGame = async () => {'
-listChars_func = '''
-  const fetchCharacters = async () => {
-    if (!apiKey) return alert("Zadejte API klíč!");
-    setLoading(true);
-    try {
-      const res = await fetch("http://127.0.0.1:8000/list-characters", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ api_key: apiKey.trim() }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setSavedCharacters(data.characters || []);
-      } else {
-        alert(data.detail || "Chyba při načítání postav.");
-      }
-    } catch (e) {
-      alert("Chyba připojení k serveru.");
-    }
-    setLoading(false);
-  };
+# Fix MapModal.tsx
+lines2 = codecs.open('src/features/map/MapModal.tsx', 'r', 'utf-8').readlines()
+for i, l in enumerate(lines2):
+    if "<HexMap" in l and "worldData={worldData}" in l:
+        if "setSelectedItem" not in l:
+            lines2[i] = l.replace("/>", " setSelectedItem={setSelectedItem} />")
 
-  const loadGame = async (characterName: string) => {
-    if (!apiKey || !characterName) return alert("Zadejte API klíč a jméno!");
-    setLoading(true);
-    try {
-      const res = await fetch("http://127.0.0.1:8000/load-game", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ api_key: apiKey.trim(), name: characterName }),
-      });'''
-
-old_loadGame_block = '''  const loadGame = async () => {
-    if (!apiKey) return alert("Zadejte API klíč pro načtení pozice!");
-    setLoading(true);
-    try {
-      const res = await fetch("http://127.0.0.1:8000/load-game", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ api_key: apiKey.trim() }),
-      });'''
-
-content = content.replace(old_loadGame_block, listChars_func)
-
-with codecs.open('src/app/page.tsx', 'w', 'utf-8') as f:
-    f.write(content)
-print("Frontend updated - Part 1.")
+with codecs.open('src/features/map/MapModal.tsx', 'w', 'utf-8') as f:
+    f.write("".join(lines2))
