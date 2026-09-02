@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+﻿import codecs
+
+header = """import React, { useState } from 'react';
 import { User, ScrollText, Volume2, VolumeX, Settings2, Menu, Map, Users, Package, MapPin, Sparkles, Heart, Drumstick, BookOpen } from 'lucide-react';
 import { useGameStore } from '../../store/gameStore';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -149,3 +151,9 @@ export const PlayerHeader = ({
     </div>
   );
 };
+"""
+
+with codecs.open('src/features/ui/PlayerHeader.tsx', 'w', 'utf-8') as f:
+    f.write(header)
+
+print("PlayerHeader rewritten with framer-motion and new UI")

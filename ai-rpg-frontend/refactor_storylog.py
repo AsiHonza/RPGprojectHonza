@@ -1,4 +1,6 @@
-import React from 'react';
+﻿import codecs
+
+storylog = """import React from 'react';
 import { Volume2 } from 'lucide-react';
 import { useGameStore } from '../../store/gameStore';
 import { TypewriterText } from '../../components/ui/TypewriterText';
@@ -70,3 +72,9 @@ export const StoryLog = ({ history, playAudio }: { history: any[], playAudio: (t
     </>
   );
 };
+"""
+
+with codecs.open('src/features/character/StoryLog.tsx', 'w', 'utf-8') as f:
+    f.write(storylog)
+
+print("StoryLog rewritten with framer-motion and High Fantasy styling")

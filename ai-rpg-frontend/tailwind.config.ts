@@ -4,6 +4,7 @@ const config: Config = {
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/features/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
@@ -12,15 +13,16 @@ const config: Config = {
         background: "var(--background)",
         foreground: "var(--foreground)",
         rpg: {
-          paper: '#f4ecd8',    // Barva pozadí textů (pergamen)
-          obsidian: '#1b262c', // Tmavé pozadí panelů
-          blood: '#b74b4b',    // HP a zranění
-          magic: '#d4af37',    // Zlato / magie
-          muted: '#90a4ae'     // Šedé texty
+          paper: '#f4ecd8',
+          obsidian: '#1b262c',
+          blood: '#b74b4b',
+          magic: '#c5a059',
+          muted: '#90a4ae'
         }
       },
       fontFamily: {
-        medieval: ['Cinzel', 'serif'], // Pro nadpisy (přidáme do layout.tsx jestli bude chybět)
+        cinzel: ['var(--font-cinzel)', 'serif'],
+        lora: ['var(--font-lora)', 'serif'],
       }
     },
   },

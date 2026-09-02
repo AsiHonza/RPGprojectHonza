@@ -18,7 +18,7 @@ export const FormattedSystemLog = ({ text }: { text: string }) => {
       <div key={idx} className="mb-1 last:mb-0" dangerouslySetInnerHTML={{ __html: html }} />
     );
   });
-  return <div className="font-serif text-base text-[#2b4c5e]">{lines}</div>;
+  return <div className="font-lora text-base text-[#2b4c5e]">{lines}</div>;
 };
 
 
