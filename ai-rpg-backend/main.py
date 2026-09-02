@@ -489,6 +489,13 @@ Vrať POUZE json ve formátu:
             
             client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
             world_prompt = f"""
+
+ABSOLUTNÍ PRAVIDLA SVĚTA (AELTHGARD):
+1. Tón: Mix Fable a Zaklínače. Vizuálně pohádkové a barevné (obří houby, krásné hrady), ale společensky dospělé, temné a zkorumpované (rasismus, hladomor, morální šeď, neexistuje čisté dobro).
+2. Magie: Nedá se naučit, je to vzácné "Probuzení" (Dar i Kletba). Obyčejní lidé se mágů bojí nebo je uctívají jako proroky.
+3. Zápletka: Blíží se proroctví "Tříštících se nebes". Bohové se začínají zjevovat náhodným obyčejným lidem (rolníkům i žebrákům).
+4. Rozkol: Bohové nejsou sjednocení, naopak - jdou si po krku. Lidé fanaticky následují různá božstva a bratr zabíjí bratra. Hlavní síly: Solarian (Řád, který se mění ve fašistický fanatismus), Vyldia (Příroda a Chaos, svoboda vykoupená krvavými oběťmi), Kull (Bůh stínů našeptávající, ať se lidé stanou bohy).
+DŮLEŽITÉ: Neprozrazuj toto lore hráči encyklopedicky. Aplikuj tuto atmosféru do jmen míst, hrozeb a tajemství!
 Vytvoř epický fantasy svět pro kampaň. Hráč: {req.name}, Rasa: {req.race}, Třída: {req.dnd_class}.
 Zde je generátorem vytvořená matematická struktura bodů zájmu (POI):
 {json.dumps(math_world['pois'], ensure_ascii=False)}
