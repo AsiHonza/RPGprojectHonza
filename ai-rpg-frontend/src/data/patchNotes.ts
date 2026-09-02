@@ -1,5 +1,24 @@
 export const PATCH_NOTES = [
   {
+    version: "Beta 0.8",
+    date: "Září 2026",
+    title: "AAA High Fantasy UI Upgrade",
+    changes: [
+      {
+        category: "Grafika a Animace",
+        items: [
+          "Přechod na AAA minimalismus - obrazovka je nyní čistá a zaměřená na příběh a ilustrace.",
+          "Zavedena podpora filmových animací přes Framer Motion (plynulé fade-in efekty, rozmazání pozadí).",
+          "Změna typografie na Google Fonts 'Cinzel' (velkolepé nadpisy) a 'Lora' (skvěle čitelný knižní příběh).",
+          "Tlačítka z hlavní obrazovky přesunuta do nového elegantního vysouvacího 'Master Menu'.",
+          "HP a XP se nyní zobrazují formou elegantních plnících se gradientních linek vedle avataru.",
+          "Předělán herní deník (StoryLog) do podoby nádherných průsvitných karet se silným fantasy nádechem a inkoustovými akcenty.",
+          "Magické pole pro psaní příkazů - plovoucí, stínované okraje s levitujícími detaily."
+        ]
+      }
+    ]
+  },
+  {
     version: "Beta 0.7",
     date: "Září 2026",
     title: "Kompletní přesun UI z page.tsx",
