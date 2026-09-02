@@ -55,8 +55,8 @@ export const MapModal = ({ isOpen, onClose, setSelectedItem, onTravel }: any) =>
   }
 
   return (
-    <div className="absolute inset-0 bg-black/80 z-[100] flex items-center justify-center p-2 md:p-8">
-      <div className="bg-[#e3dcc8] w-full h-full max-h-screen max-w-6xl rounded shadow-2xl relative overflow-hidden border-4 border-[#1b262c] bg-[url('https://www.transparenttextures.com/patterns/aged-paper.png')] bg-cover">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black">
+      <div className="bg-[#e3dcc8] w-full h-full max-h-screen relative overflow-hidden w-full h-full border-4 border-[#1b262c] bg-[url('https://www.transparenttextures.com/patterns/aged-paper.png')] bg-cover">
         
         {/* Header */}
         <div className="absolute top-4 left-4 z-50 bg-[#f4f1e1]/90 px-4 py-2 rounded border border-[#90a4ae] shadow-lg pointer-events-none flex flex-col gap-1">

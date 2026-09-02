@@ -426,12 +426,75 @@ async def create_character(req: CharacterCreateRequest):
     if res.data:
         raise HTTPException(status_code=400, detail="Character already exists.")
     
+    # 1. Vygenerujeme svet
+    world_data = None
+    if req.game_mode == "campaign":
+        try:
+            import json
+            import world_generator
+            
+            math_world = world_generator.generate_world_data()
+            
+            client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+            world_prompt = f"""
+NAVRHUJEŠ WORLD BIBLE PRO HIGH FANTASY KAMPAŇ (AELTHGARD).
+
+ABSOLUTNÍ PRAVIDLA SVĚTA:
+1. Tón: Mix Fable a Zaklínače (Pohádkový vizuál, ale dospělé, krvavé a zkorumpované problémy).
+2. Magie: Nedá se učit. Je to "Probuzení", vzácný dar nebo kletba od bohů. Jsou to "Vyvolení".
+3. Zjevení: Bohové (Solarian - Řád a Krev, Vyldia - Příroda a Chaos, Kull - Stíny a Lži) se začínají zjevovat lidem.
+4. Království: Kontinent je rozdělen na 7 království. 
+
+Zde jsou základní archetypy 7 království (kingdom_id 1 až 7):
+1K: Upadající Impérium (Zkorumpovaná šlechta)
+2K: Teokracie (Náboženští fanatici Řádu)
+3K: Divoké Kmeny (Přeživší v bažinách/lesích, krevní rituály)
+4K: Obchodní Gildy (Žoldáci a peníze, žádný král)
+5K: Karanténní Zóna (Magická pustina, monstra)
+6K: Severní Hradba (Militarizovaná stráž před zlem)
+7K: Útočiště Vyvolených (Tajemní mágové a izolace)
+
+Tady je JSON se všemi body zájmu (POI) na vygenerované mapě:
+{json.dumps(math_world['pois'], ensure_ascii=False)}
+
+Tvým úkolem je vrátit POUZE validní JSON s následující strukturou:
+{{
+  "main_plot": "Krátký popis hlavní zápletky světa (1 odstavec)",
+  "locations": [
+    {{"id": 1, "name": "Město X", "description": "Popis města a co se tam děje", "ruler": "Kdo tam vládne"}}
+  ],
+  "key_npcs": [
+    {{"name": "Jméno", "role": "Frakce/Role", "motive": "Co chce?"}}
+  ]
+}}
+"""
+            response = client.models.generate_content(
+                model='gemini-3.5-flash',
+                contents=world_prompt,
+                config=types.GenerateContentConfig(response_mime_type="application/json")
+            )
+            clean_text = response.text.strip().removeprefix('```json').removesuffix('```').strip()
+            ai_world_data = json.loads(clean_text)
+            
+            # Merge math world and AI lore
+            world_data = {
+                "hexes": math_world["hexes"],
+                "pois": math_world["pois"],
+                "main_plot": ai_world_data.get("main_plot"),
+                "locations": ai_world_data.get("locations"),
+                "key_npcs": ai_world_data.get("key_npcs")
+            }
+        except Exception as e:
+            world_data = None
+            print(f"World gen failed: {e}")
+
+    # 2. Vygenerujeme Intro pomoci sveta
     try:
         client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
         world_context = ""
         if world_data:
             import json
-            world_context = f"\n\n[HRAJE SE PŘÍBĚHOVÁ KAMPAŇ]: Zamotej postavu rovnou do vygenerované zápletky tohoto světa!\nZápletka: {world_data.get('main_plot')}\nMísto startu: Napiš intro odehrávající se v jedné z těchto lokací: {json.dumps(world_data.get('locations'), ensure_ascii=False)}\nZmíň v intru letmo klíčové NPC: {json.dumps(world_data.get('key_npcs'), ensure_ascii=False)}"
+            world_context = f"\n\n[HRAJE SE PŘÍBĚHOVÁ KAMPAŇ]: Zamotej postavu rovnou do vygenerované zápletky tohoto světa!\nZápletka: {world_data.get('main_plot')}\nMísto startu: Napiš intro odehrávající se v jedné z těchto lokací: {json.dumps(world_data.get('locations'), ensure_ascii=False)}\nZmiň v intru letmo klíčové NPC: {json.dumps(world_data.get('key_npcs'), ensure_ascii=False)}"
         
         prompt = f'''
 Jsi Pán jeskyně v textové RPG hře D&D. Hráč právě vytvořil novou postavu:
@@ -458,7 +521,6 @@ Vrať POUZE json ve formátu:
         import json
         
         try:
-            # Clean possible markdown block
             clean_text = response.text.strip().removeprefix('```json').removesuffix('```').strip()
             data = json.loads(clean_text)
             intro_text = data.get("intro_text", "Mlha se rozestupuje...")
@@ -468,112 +530,41 @@ Vrať POUZE json ve formátu:
             popis_okoli = "Neznámé místo."
             
     except Exception as e:
-        intro_text = "Vítej ve světě Aethelgard. Mlha se pomalu rozestupuje a tvé dobrodružství právě začíná..."
+        intro_text = "Vítej ve světě Aelthgard. Mlha se pomalu rozestupuje a tvé dobrodružství právě začíná..."
         popis_okoli = "Zamlžený hvozd."
         
     initial_history = [
         {"role": "model", "text": f'''{{"aktualni_region": "Začátek cesty", "popis_okoli": "{popis_okoli}", "vypravec": "{intro_text}", "nabizene_akce": ["Rozhlédnout se", "Zkontrolovat vybavení", "Vydat se vpřed"]}}'''}
     ]
+
     # Nacteni tridnich dat
     cls_data = CLASS_TEMPLATES.get(req.dnd_class, CLASS_TEMPLATES["Bojovník"]) # fallback
-    
 
-    # Pokud hrac zvolil kampan, vygenerujeme svet
-    world_data = None
-    if req.game_mode == "campaign":
-        try:
-            import json
-            import world_generator
-            
-            math_world = world_generator.generate_world_data()
-            
-            client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
-            world_prompt = f"""
-NAVRHUJÍŠ WORLD BIBLE PRO HIGH FANTASY KÁMPAŇ (AELTHGARD).
-
-ABSOLUTNÍ PRAVIDLA SVĚTA:
-1. Tón: Mix Fable a Zaklínače (Pohádkový vizuál, ale dospělé, krvavé a zkorumpované problémy).
-2. Magie: Nedá se učit. Je to "Probuzení", vzácný dar nebo kletba od bohů. Jsou to "Vyvolení".
-3. Zjevení: Bohové (Solarian - Řád a Krev, Vyldia - Příroda a Chaos, Kull - Stíny a Lži) se začínají zjevovat lidem.
-4. Království: Kontinent je rozdělen na 7 království. 
-
-Zde jsou základní archetypy 7 království (kingdom_id 1 až 7):
-1K: Upadající Impérium (Zkorumpovaná šlechta)
-2K: Teokracie (Náboženští fanatici Řádu)
-3K: Divoké Kmeny (Přeživší v bažinách/lesích, krevní rituály)
-4K: Obchodní Gildy (Žoldáci a peníze, žádný král)
-5K: Karanténní Zóna (Magická pustina, monstra)
-6K: Severní Hradba (Militarizovaná stráž před zlem)
-7K: Útočiště Vyvolených (Tajemní mágové a izolace)
-
-Tady je JSON se všemi body zájmu (POI) na vygenerované mapě:
-{json.dumps(math_world['pois'], ensure_ascii=False)}
-
-Tvým úkolem je vrátit POUZE validní JSON s následující strukturou:
-{{
-  "main_plot": "Krátký popis epické zápletky (proroctví).",
-  "kingdoms": [
-    {{
-      "kingdom_id": 1,
-      "name": "Epické Jméno Království 1",
-      "ruler": "Kdo tam vládne",
-      "current_problem": "Stručný problém (např. mor, fanatismus)"
-    }},
-    ... pro všech 7 království
-  ],
-  "locations": [
-    {{
-      "q": (musí sedět z dodaného JSONu),
-      "r": (musí sedět z dodaného JSONu),
-      "type": "Capital/Village/Dungeon/Shrine/Ruin",
-      "kingdom_id": (přepsat ze zadání),
-      "nazev": "Jméno lokace",
-      "popis": "Krátký atmosférický popis (zapoj i bohy nebo archetyp království)"
-    }},
-    ... doplň VŠECHNY dodané POI
-  ]
-}}
-"""
-            response = client.models.generate_content(
-                model='gemini-3.5-flash',
-                contents=world_prompt,
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json",
-                    response_schema=CampaignWorld,
-                    temperature=0.9
-                )
-            )
-            ai_data = json.loads(response.text)
-            
-            world_data = {
-                "hex_grid": math_world["hex_grid"],
-                "hex_radius": math_world["hex_radius"],
-                "kingdoms": ai_data.get("kingdoms", []),
-                "locations": ai_data.get("locations", []),
-                "main_plot": ai_data.get("main_plot", "")
-            }
-        except Exception as e:
-            print("World gen error:", e)
-            world_data = None
+    initial_location = None
+    if world_data and world_data.get("hexes"):
+        # Put player somewhere near the center (0,0) or a starting village
+        # Find hex (0,0) or closest
+        center_hex = next((h for h in world_data["hexes"] if h["q"] == 0 and h["r"] == 0), world_data["hexes"][0])
+        initial_location = {"q": center_hex["q"], "r": center_hex["r"], "biome": center_hex["biome"]}
 
     state = {
         "hp": 100,
-        "rations": 3,
-        "inventory": cls_data["inventory"],
-        "equipped": cls_data["equipped"],
-        "available_skills": cls_data["available_skills"],
-        "skills": cls_data["starting_skills"],
-        "quests": [],
-        "locationType": "divocina",
-        "currentRegion": "Neznámé končiny",
-        "pointsOfInterest": [],
+        "max_hp": 100,
         "level": 1,
         "xp": 0,
-        "journal": [f"Vytvořil jsi postavu {req.name} (Rasa: {req.race}, Třída: {req.dnd_class}). Tvé dobrodružství začíná."],
-        "zname_postavy": [],
-          "world_data": world_data,
-          "day": 1,
-          "playerLocation": {"q": math_world["pois"][0]["q"], "r": math_world["pois"][0]["r"]} if world_data else None
+        "inventory": cls_data["starting_equipment"],
+        "gold": 15,
+        "skills": cls_data["skills"],
+        "active_quests": [],
+        "completed_quests": [],
+        "stats": req.stats,
+        "equipped": {
+            "hlavní ruka": cls_data["starting_equipment"][0]["id"] if cls_data["starting_equipment"] else None,
+            "zbroj": cls_data["starting_equipment"][1]["id"] if len(cls_data["starting_equipment"]) > 1 else None
+        },
+        "world_data": world_data,
+        "player_location": initial_location,
+        "rations": 3
     }
     
     supabase.table("characters").insert({
@@ -586,6 +577,7 @@ Tvým úkolem je vrátit POUZE validní JSON s následující strukturou:
     }).execute()
     
     return {"status": "success", "api_key": api_key, "message": "Úspěšně ses probudil v novém těle.", "intro_text": intro_text, "popis_okoli": popis_okoli, "state": state}
+
 
 class PlayerActionRequest(BaseModel):
     api_key: str
