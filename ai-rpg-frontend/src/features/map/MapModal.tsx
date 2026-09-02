@@ -45,8 +45,10 @@ export const MapModal = ({ isOpen, onClose, setSelectedItem, onTravel }: any) =>
       travelError = "Už jsi tady.";
     } else if (dist > 1) {
       travelError = "Můžeš cestovat jen o 1 hex.";
-    } else if (['Ocean', 'Mountains'].includes(selectedHex.terrain)) {
-      travelError = "Neprostupný terén.";
+    } else if (['Ocean'].includes(selectedHex.terrain)) {
+      travelError = "Neprostupný oceán.";
+    } else if (['Swamp', 'Wasteland', 'Desert', 'Mountains'].includes(selectedHex.terrain) && rations < 2) {
+      travelError = "Do nehostinného terénu potřebuješ alespoň 2 zásoby jídla (Zemřel bys hlady).";
     } else {
       canTravel = true;
     }
