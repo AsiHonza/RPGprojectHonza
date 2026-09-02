@@ -73,6 +73,17 @@ interface GameState {
   inCombat: boolean;
   setInCombat: (c: boolean) => void;
   enemies: any[];
+  // Audio
+  bgVolume: number;
+  setBgVolume: (v: number) => void;
+  ttsVolume: number;
+  setTtsVolume: (v: number) => void;
+  currentTrack: string;
+  setCurrentTrack: (t: string) => void;
+  musicPlaying: boolean;
+  unreadQuests: boolean;
+  setUnreadQuests: (u: boolean | ((u: boolean) => boolean)) => void;
+  setMusicPlaying: (p: boolean) => void;
   setEnemies: (e: any[]) => void;
 }
 
@@ -148,5 +159,15 @@ export const useGameStore = create<GameState>((set) => ({
   inCombat: false,
   setInCombat: (inCombat) => set({ inCombat }),
   enemies: [],
+  bgVolume: 0.2,
+  setBgVolume: (bgVolume) => set({ bgVolume }),
+  ttsVolume: 1.0,
+  setTtsVolume: (ttsVolume) => set({ ttsVolume }),
+  currentTrack: '/ambient.mp3',
+  setCurrentTrack: (currentTrack) => set({ currentTrack }),
+  musicPlaying: true,
+  unreadQuests: false,
+  setUnreadQuests: (unreadQuests) => set((state) => ({ unreadQuests: typeof unreadQuests === "function" ? unreadQuests(state.unreadQuests) : unreadQuests })),
+  setMusicPlaying: (musicPlaying) => set({ musicPlaying }),
   setEnemies: (enemies) => set({ enemies }),
 }));

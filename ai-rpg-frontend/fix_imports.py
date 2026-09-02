@@ -2,29 +2,27 @@
 
 lines = codecs.open('src/app/page.tsx', 'r', 'utf-8').readlines()
 
-has_creation = False
-has_patch = False
-import_idx = -1
+new_imports = """import { PlayerHeader } from '../features/ui/PlayerHeader';
+import { PatchNotesModal } from '../features/ui/PatchNotesModal';
+import { SettingsModal } from '../features/ui/SettingsModal';
+import { StatsModal } from '../features/character/StatsModal';
+import { SkillsModal } from '../features/character/SkillsModal';
+"""
 
-for i, l in enumerate(lines):
-    if "import { CharacterCreation }" in l:
-        has_creation = True
-    if "import { PATCH_NOTES }" in l:
-        has_patch = True
-    if "import " in l and "lucide-react" in l:
-        import_idx = i
+# Check missing ones
+imports_to_add = []
+for imp in new_imports.split('\n'):
+    if not imp: continue
+    mod_name = imp.split('} from')[0].split('{')[1].strip()
+    if not any(mod_name in l for l in lines[:50]):
+        imports_to_add.append(imp + '\n')
 
-new_lines = []
-for l in lines:
-    if "import { CharacterCreation }" in l or "import { PATCH_NOTES }" in l:
-        continue
-    new_lines.append(l)
-
-if import_idx != -1:
-    new_lines.insert(import_idx+1, "import { CharacterCreation } from '../features/character/CharacterCreation';\n")
-    new_lines.insert(import_idx+2, "import { PATCH_NOTES } from '../data/patchNotes';\n")
+if imports_to_add:
+    for i, l in enumerate(lines):
+        if "import { NpcsModal }" in l:
+            for imp in imports_to_add:
+                lines.insert(i+1, imp)
+            break
 
 with codecs.open('src/app/page.tsx', 'w', 'utf-8') as f:
-    f.write("".join(new_lines))
-    
-print("Imports fixed")
+    f.write("".join(lines))

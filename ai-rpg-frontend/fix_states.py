@@ -1,15 +1,19 @@
 ﻿import codecs
 
-with codecs.open("src/app/page.tsx", "r", "utf-8") as f:
-    lines = f.readlines()
+lines = codecs.open('src/app/page.tsx', 'r', 'utf-8').readlines()
 
 new_lines = []
-for line in lines:
-    new_lines.append(line)
-    if "const [pointsOfInterest, setPointsOfInterest] = useState" in line:
-        new_lines.append('  const [currentImage, setCurrentImage] = useState<string | null>(null);\n')
-        new_lines.append('  const [currentImageError, setCurrentImageError] = useState<string | null>(null);\n')
+for l in lines:
+    if "const [bgVolume, setBgVolume] = useState" in l: continue
+    if "const [currentTrack, setCurrentTrack] = useState" in l: continue
+    if "const [ttsVolume, setTtsVolume] = useState" in l: continue
+    if "const [musicPlaying, setMusicPlaying] = useState" in l: continue
+    if "const [unreadQuests, setUnreadQuests] = useState" in l: continue
+    
+    if "const { name, level" in l:
+        l = l.replace("const { name", "const { bgVolume, setBgVolume, currentTrack, setCurrentTrack, ttsVolume, setTtsVolume, musicPlaying, setMusicPlaying, unreadQuests, setUnreadQuests, name")
+        
+    new_lines.append(l)
 
-with codecs.open("src/app/page.tsx", "w", "utf-8") as f:
-    f.writelines(new_lines)
-print("States fixed!")
+with codecs.open('src/app/page.tsx', 'w', 'utf-8') as f:
+    f.write("".join(new_lines))
