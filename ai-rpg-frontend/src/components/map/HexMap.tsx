@@ -60,6 +60,7 @@ export default function HexMap({ worldData, onHexClick }: HexMapProps) {
       case 'Swamp': return 'fill-[#3d4536]';
       case 'Desert': return 'fill-[#c2b280]';
       case 'Hills': return 'fill-[#687352]';
+      case 'Wasteland': return 'fill-[#43234a]'; // Mrtvá zóna
       default: return 'fill-[#90a4ae]';
     }
   };
