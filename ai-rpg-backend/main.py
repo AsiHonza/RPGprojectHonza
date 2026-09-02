@@ -909,8 +909,11 @@ async def travel_action(req: TravelRequest):
     if not target_hex:
         raise HTTPException(status_code=400, detail="Mimo mapu.")
         
-    if target_hex["terrain"] in ["Ocean", "Mountains"]:
-        raise HTTPException(status_code=400, detail="Tento terén je neprostupný.")
+    if target_hex["terrain"] in ["Ocean"]:
+        raise HTTPException(status_code=400, detail="Oceán je neprostupný.")
+        
+    if target_hex["terrain"] in ["Swamp", "Wasteland", "Desert", "Mountains"] and state.get("rations", 0) < 2:
+        raise HTTPException(status_code=400, detail="Nemůžeš vstoupit do tohoto terénu s méně než 2 zásobami jídla.")
         
     # Deduct resources
     if state.get("rations", 0) < 1:
