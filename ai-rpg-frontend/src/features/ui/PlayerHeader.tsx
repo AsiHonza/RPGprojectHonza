@@ -116,11 +116,9 @@ export const PlayerHeader = ({
             </div>
 
             <div className="p-2 flex flex-col gap-1">
-              {worldData && (
-                <button onClick={() => { setMapOpen(true); setMenuOpen(false); }} className="flex items-center gap-3 p-3 rounded hover:bg-[#2b4c5e] text-rpg-paper transition-colors text-left w-full">
+                              <button onClick={() => { setMapOpen(true); setMenuOpen(false); }} className="flex items-center gap-3 p-3 rounded hover:bg-[#2b4c5e] text-rpg-paper transition-colors text-left w-full">
                   <Map size={20} className="text-rpg-magic" /> Mapa světa
                 </button>
-              )}
               <button onClick={() => { setInventoryOpen(true); setMenuOpen(false); }} className="flex items-center gap-3 p-3 rounded hover:bg-[#2b4c5e] text-rpg-paper transition-colors text-left w-full">
                 <Package size={20} className="text-[#a8b8c2]" /> Batoh a Vybavení
               </button>
