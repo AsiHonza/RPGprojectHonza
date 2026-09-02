@@ -1,4 +1,20 @@
 export const PATCH_NOTES = [
+  {
+    version: "Beta 0.7",
+    date: "Září 2026",
+    title: "Kompletní přesun UI z page.tsx",
+    changes: [
+      {
+        category: "Architektura",
+        items: [
+          "Úplně vyčištěný hlavní soubor hry (page.tsx) od balastu uživatelského rozhraní.",
+          "Vyčleněny zbylé moduly: Vlastnosti (StatsModal), Dovednosti (SkillsModal), Nastavení (SettingsModal) a Horní Navigační Lišta (PlayerHeader).",
+          "Audio přehrávač (hlasitost, hudba, zvuky) a notifikace přesunuty pod hlavičku globálního Zustand Game Store.",
+          "Aplikace je nyní 100% Modulární Feature-Sliced Design. Dokončena velká refaktorizace, připraveno na designové animace."
+        ]
+      }
+    ]
+  },
 
   {
     "version": "Beta 0.5 - Architektura & Království",
