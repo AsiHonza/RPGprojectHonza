@@ -954,46 +954,58 @@ export default function Home() {
 
       <div className="w-full max-w-7xl flex flex-col h-full relative z-10 p-2 md:p-6 pb-0">
         
+
         {/* Top HUD */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+        <div className="flex flex-col gap-2 mb-2 w-full max-w-5xl mx-auto z-10">
           
-          <div className="flex items-center gap-4 bg-black/40 backdrop-blur-md p-3 rounded-2xl border border-white/10 shadow-lg">
-            <div className="w-16 h-16 rounded-xl overflow-hidden border border-rpg-magic shadow-[0_0_15px_rgba(197,160,89,0.3)] shrink-0">
-              <img src={`https://image.pollinations.ai/prompt/epic%20high%20fantasy%20portrait%20of%20a%20${encodeURIComponent(race)}%20${encodeURIComponent(dndClass)}%20RPG%20character?width=128&height=128&nologo=true&seed=42`} alt={name} className="w-full h-full object-cover" />
-            </div>
-            <div className="flex flex-col">
-              <h2 className="text-2xl font-cinzel text-white font-bold drop-shadow-md">{name}</h2>
-              <div className="text-rpg-magic font-lora text-sm flex gap-3">
-                <span>Úroveň {level}</span>
-                <span className="opacity-50">|</span>
-                <span>{race} {dndClass}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-start md:justify-end gap-2 md:gap-3 max-w-full md:max-w-[50%]">
-            <div className="flex items-center gap-2 bg-black/40 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10" title="Životy">
-              <Heart size={20} className="text-rpg-blood" />
-              <div className="font-cinzel text-white text-lg font-bold">
-                <span className={hp <= 20 ? 'text-rpg-blood animate-pulse' : ''}>{hp}</span><span className="text-gray-500 text-sm">/100</span>
-              </div>
-            </div>
+          <div className="flex items-center justify-between bg-black/40 backdrop-blur-md p-2 rounded-2xl border border-white/10 shadow-lg">
             
-            <div className="flex items-center gap-2 bg-black/40 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10" title="Zásoby">
-              <Drumstick size={20} className={rations < 2 ? "text-rpg-blood animate-pulse" : "text-orange-400"} />
-              <div className="font-cinzel text-white text-lg font-bold">{rations}</div>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl overflow-hidden border border-rpg-magic shadow-[0_0_10px_rgba(197,160,89,0.3)] shrink-0 hidden sm:block">
+                <img src={`https://image.pollinations.ai/prompt/epic%20high%20fantasy%20portrait%20of%20a%20${encodeURIComponent(race)}%20${encodeURIComponent(dndClass)}%20RPG%20character?width=128&height=128&nologo=true&seed=42`} alt={name} className="w-full h-full object-cover" />
+              </div>
+              <div className="flex flex-col">
+                <h2 className="text-lg sm:text-xl font-cinzel text-white font-bold drop-shadow-md leading-tight">{name} <span className="text-rpg-magic text-xs">Lv.{level}</span></h2>
+                <div className="text-gray-400 font-lora text-xs">
+                  {race} {dndClass}
+                </div>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2 bg-black/40 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10" title="Zlato">
-              <div className="w-5 h-5 bg-yellow-500 rounded-full flex items-center justify-center font-bold text-black text-xs shadow-[0_0_8px_rgba(234,179,8,0.5)]">Z</div>
-              <div className="font-cinzel text-white text-lg font-bold">{gold}</div>
+            <div className="flex items-center gap-2 sm:gap-4">
+              <div className="flex items-center gap-1 sm:gap-2" title="Životy">
+                <Heart size={16} className="text-rpg-blood" />
+                <div className="font-cinzel text-white text-sm sm:text-base font-bold">
+                  <span className={hp <= 20 ? 'text-rpg-blood animate-pulse' : ''}>{hp}</span><span className="text-gray-500 text-xs">/100</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-1 sm:gap-2" title="Zásoby">
+                <Drumstick size={16} className={rations < 2 ? "text-rpg-blood animate-pulse" : "text-orange-400"} />
+                <div className="font-cinzel text-white text-sm sm:text-base font-bold">{rations}</div>
+              </div>
+              <div className="flex items-center gap-1 sm:gap-2" title="Zlato">
+                <div className="w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center font-bold text-black text-[10px] shadow-[0_0_8px_rgba(234,179,8,0.5)]">Z</div>
+                <div className="font-cinzel text-white text-sm sm:text-base font-bold">{gold}</div>
+              </div>
             </div>
+
           </div>
 
+          <div className="flex gap-1 sm:gap-2 bg-black/40 backdrop-blur-md border border-white/10 p-1 sm:p-2 rounded-2xl shadow-xl overflow-x-auto custom-scrollbar hide-scrollbar snap-x flex-nowrap">
+            <button onClick={() => setStatsOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-3 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition flex items-center gap-2 text-sm font-cinzel"><User size={18} /> <span className="hidden sm:inline">Vlastnosti</span></button>
+            <button onClick={() => setInventoryOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-3 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition flex items-center gap-2 text-sm font-cinzel"><Package size={18} /> <span className="hidden sm:inline">Batoh</span></button>
+            <button onClick={() => setJournalOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-3 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition flex items-center gap-2 text-sm font-cinzel relative">
+              <BookOpen size={18} /> <span className="hidden sm:inline">Deník</span>
+              {unreadQuests && <span className="absolute top-1 right-1 w-2 h-2 bg-rpg-blood rounded-full animate-pulse" />}
+            </button>
+            <button onClick={() => setNpcsOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-3 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition flex items-center gap-2 text-sm font-cinzel"><Users size={18} /> <span className="hidden sm:inline">Postavy</span></button>
+            <button onClick={() => setMapOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-3 text-rpg-magic hover:bg-rpg-magic/20 rounded-xl transition flex items-center gap-2 text-sm font-cinzel"><Map size={18} /> <span className="hidden sm:inline">Mapa</span></button>
+            <button onClick={() => setSettingsOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-3 text-gray-500 hover:text-white hover:bg-white/10 rounded-xl transition"><Settings2 size={18} /></button>
+          </div>
+          
         </div>
-
         {/* Story Log (Middle) */}
-        <div className="flex-1 overflow-hidden relative mb-4">
+        <div className="flex-1 overflow-hidden relative mb-4 w-full max-w-5xl mx-auto z-10">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-lg border border-white/10 rounded-2xl shadow-2xl p-6 overflow-y-auto custom-scrollbar flex flex-col gap-6" >
             
             {history.map((msg, i) => (
@@ -1074,22 +1086,22 @@ export default function Home() {
                   <button onClick={() => sendAction(`Útočím zbraní: ${inventory.find(i => i.id === equipped["hlavní ruka"])?.name || "Pěsti"}`)} className="bg-rpg-blood/20 border border-rpg-blood text-white px-4 py-2 rounded-xl text-sm hover:bg-rpg-blood transition shadow-[0_0_10px_rgba(183,75,75,0.2)] font-cinzel flex items-center gap-2">
                     <Sword size={16} /> Útok
                   </button>
-                  <button onClick={() => setSkillsOpen(true)} className="bg-white/5 border border-white/20 text-white px-4 py-2 rounded-xl text-sm hover:bg-white/10 transition font-cinzel flex items-center gap-2">
+                  <button onClick={() => setSkillsOpen(true)} className="flex-shrink-0 snap-start whitespace-nowrap bg-white/5 border border-white/20 text-white px-4 py-3 rounded-xl text-sm hover:bg-white/10 transition font-cinzel flex items-center gap-2">
                     <Sparkles size={16} /> Dovednost
                   </button>
-                  <button onClick={() => sendAction("Pokusím se z boje utéct!")} className="bg-black/40 border border-gray-600 text-gray-400 px-4 py-2 rounded-xl text-sm hover:text-white transition font-cinzel italic">
+                  <button onClick={() => sendAction("Pokusím se z boje utéct!")} className="flex-shrink-0 snap-start whitespace-nowrap bg-black/40 border border-gray-600 text-gray-400 px-4 py-3 rounded-xl text-sm hover:text-white transition font-cinzel italic">
                     Útěk
                   </button>
                 </>
               ) : (
                 <>
                   {locationType === 'mesto' && pointsOfInterest.map((poi, i) => (
-                    <button key={`poi-${i}`} onClick={() => sendAction(`Jdu prozkoumat: ${poi.nazev}`)} className="bg-rpg-magic/10 border border-rpg-magic/50 text-rpg-magic px-4 py-2 rounded-xl text-sm hover:bg-rpg-magic hover:text-black transition font-cinzel flex items-center gap-2 shadow-[0_0_10px_rgba(197,160,89,0.2)]">
+                    <button key={`poi-${i}`} onClick={() => sendAction(`Jdu prozkoumat: ${poi.nazev}`)} className="flex-shrink-0 snap-start whitespace-nowrap bg-rpg-magic/10 border border-rpg-magic/50 text-rpg-magic px-4 py-3 rounded-xl text-sm hover:bg-rpg-magic hover:text-black transition font-cinzel flex items-center gap-2 shadow-[0_0_10px_rgba(197,160,89,0.2)]">
                       <MapPin size={16} /> {poi.nazev}
                     </button>
                   ))}
                   {suggestedActions.map((act, i) => (
-                    <button key={`act-${i}`} onClick={() => sendAction(act)} className="bg-white/5 border border-white/20 text-gray-300 px-3 py-2 rounded-lg text-xs sm:text-sm text-left shadow-sm hover:bg-white/10 hover:text-white transition font-lora">
+                    <button key={`act-${i}`} onClick={() => sendAction(act)} className="flex-shrink-0 snap-start bg-white/5 border border-white/20 text-gray-300 px-4 py-3 rounded-xl text-sm whitespace-nowrap shadow-sm max-w-[85vw] overflow-hidden text-ellipsis hover:bg-white/10 hover:text-white transition font-lora">
                       {act}
                     </button>
                   ))}
@@ -1097,18 +1109,6 @@ export default function Home() {
               )}
             </div>
 
-            {/* Menu Dock */}
-            <div className="flex gap-2 bg-black/60 backdrop-blur-md border border-white/10 p-2 rounded-2xl shadow-xl">
-              <button onClick={() => setStatsOpen(true)} className="p-3 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition" title="Vlastnosti"><User size={20} /></button>
-              <button onClick={() => setInventoryOpen(true)} className="p-3 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition" title="Batoh"><Package size={20} /></button>
-              <button onClick={() => setJournalOpen(true)} className="p-3 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition relative" title="Deník">
-                <BookOpen size={20} />
-                {unreadQuests && <span className="absolute top-2 right-2 w-2 h-2 bg-rpg-blood rounded-full animate-pulse" />}
-              </button>
-              <button onClick={() => setNpcsOpen(true)} className="p-3 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition" title="Postavy"><Users size={20} /></button>
-              <button onClick={() => setMapOpen(true)} className="p-3 text-rpg-magic hover:bg-rpg-magic/20 rounded-xl transition" title="Mapa"><Map size={20} /></button>
-              <button onClick={() => setSettingsOpen(true)} className="p-3 text-gray-500 hover:text-white hover:bg-white/10 rounded-xl transition"><Settings2 size={20} /></button>
-            </div>
 
           </div>
 
