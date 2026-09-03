@@ -46,6 +46,9 @@ export const PlayerHeader = ({
               <h2 className="font-bold text-xl text-rpg-paper font-cinzel tracking-wider drop-shadow-md leading-none">{name}</h2>
               <span className="text-xs text-rpg-muted font-lora italic leading-none">{race} {dndClass}</span>
             </div>
+            <div className="text-sm text-[#2b4c5e] font-cinzel mb-1 flex items-center gap-1 font-bold mt-1">
+              <MapPin size={14} /> {currentRegion || "Neznámá lokace"}
+            </div>
             
             {/* HP Bar */}
             <div className="w-full bg-[#f4ecd8] h-2.5 rounded-full overflow-hidden border border-[#2b4c5e] relative mb-1 shadow-inner">

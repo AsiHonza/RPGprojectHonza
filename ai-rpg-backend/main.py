@@ -495,7 +495,15 @@ Tvým úkolem je vrátit POUZE validní JSON (žádný markdown, žádné koment
         world_context = ""
         if world_data:
             import json
-            world_context = f"\n\n[HRAJE SE PŘÍBĚHOVÁ KAMPAŇ]: Zamotej postavu rovnou do vygenerované zápletky tohoto světa!\nZápletka: {world_data.get('main_plot')}\nMísto startu: Napiš intro odehrávající se v jedné z těchto lokací: {json.dumps(world_data.get('locations'), ensure_ascii=False)}\nZmiň v intru letmo klíčové NPC: {json.dumps(world_data.get('key_npcs'), ensure_ascii=False)}"
+
+            kingdom_names = {
+                1: "Valerijské Impérium", 2: "Svatá Říše Solariova", 3: "Kmeny z Hlubokých hvozdů",
+                4: "Svobodná města", 5: "Karanténní Zóna", 6: "Železný Práh", 7: "Tajemné Útočiště"
+            }
+            start_kingdom_id = initial_location.get("kingdom_id") if initial_location else 1
+            start_kingdom_name = kingdom_names.get(start_kingdom_id, "Neznámé království")
+            
+            world_context = f"\n\n[HRAJE SE PŘÍBĚHOVÁ KAMPAŇ]: Zamotej postavu rovnou do vygenerované zápletky tohoto světa!\nZápletka: {world_data.get('main_plot')}\nMísto startu: Hráč právě začíná ve frakci/království {start_kingdom_name} (Souřadnice: {initial_location['q']}, {initial_location['r']}). Vypravěč by měl na začátku tuto lokaci představit a uvést, proč tam postava je.\nZmiň v intru letmo některé z klíčových NPC: {json.dumps(world_data.get('key_npcs'), ensure_ascii=False)}"
         
         prompt = f'''
 Jsi Pán jeskyně v textové RPG hře D&D. Hráč právě vytvořil novou postavu:
@@ -541,12 +549,15 @@ Vrať POUZE json ve formátu:
     cls_data = CLASS_TEMPLATES.get(req.dnd_class, CLASS_TEMPLATES["Bojovník"]) # fallback
 
     initial_location = None
-    if world_data and world_data.get("hex_grid"):
-        # Put player somewhere near the center (0,0) or a starting village
-        # Find hex (0,0) or closest
-        center_hex = next((h for h in world_data["hex_grid"] if h["q"] == 0 and h["r"] == 0), world_data["hex_grid"][0])
-        initial_location = {"q": center_hex["q"], "r": center_hex["r"], "biome": center_hex.get("terrain", "Plains")}
-
+    if world_data and world_data.get("pois"):
+        import random
+        capitals = [p for p in world_data["pois"] if p.get("type") == "Capital"]
+        if capitals:
+            start_poi = random.choice(capitals)
+            initial_location = {"q": start_poi["q"], "r": start_poi["r"], "biome": start_poi.get("terrain", "Plains"), "kingdom_id": start_poi.get("kingdom_id")}
+        else:
+            center_hex = world_data.get("hex_grid", [{}])[0]
+            initial_location = {"q": center_hex.get("q",0), "r": center_hex.get("r",0), "biome": center_hex.get("terrain", "Plains")}
     state = {
         "hp": 100,
         "max_hp": 100,
@@ -560,7 +571,7 @@ Vrať POUZE json ve formátu:
         "stats": req.stats,
         "equipped": cls_data["equipped"],
         "world_data": world_data,
-        "player_location": initial_location,
+        "playerLocation": initial_location,
         "rations": 3
     }
     

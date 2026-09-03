@@ -109,7 +109,29 @@ export default function HexMap({ worldData, onHexClick, setSelectedItem, playerL
 
   return (
     <div className="w-full h-full relative bg-[#e3dcc8] bg-[url('https://www.transparenttextures.com/patterns/aged-paper.png')] overflow-hidden border-4 border-rpg-obsidian rounded shadow-inner">
-      <TransformWrapper initialScale={1.5} minScale={0.3} maxScale={4} centerOnInit={true} wheel={{ step: 0.025 }}>
+      <TransformWrapper initialScale={1.5} minScale={0.3} maxScale={4} centerOnInit={true} wheel={{ step: 0.025 }} limitToBounds={false}>
+        {({ zoomIn, zoomOut, resetTransform, setTransform }) => (
+          <>
+            <div className="absolute bottom-4 right-4 flex flex-col gap-2 z-50">
+              <button onClick={() => zoomIn()} className="w-10 h-10 bg-rpg-obsidian border border-[#455a64] rounded flex items-center justify-center text-rpg-paper hover:bg-[#2b4c5e] hover:border-rpg-magic shadow-lg transition-all text-xl font-bold">+</button>
+              <button onClick={() => zoomOut()} className="w-10 h-10 bg-rpg-obsidian border border-[#455a64] rounded flex items-center justify-center text-rpg-paper hover:bg-[#2b4c5e] hover:border-rpg-magic shadow-lg transition-all text-xl font-bold">-</button>
+              <button onClick={() => {
+                if (playerLocation) {
+                  const targetHex = grid.toArray().find(h => h.q === playerLocation.q && h.r === playerLocation.r);
+                  if (targetHex) {
+                    const px = targetHex.x + offsetX;
+                    const py = targetHex.y + offsetY;
+                    const scale = 2;
+                    const wrapper = document.querySelector(".react-transform-wrapper");
+                    const cx = wrapper ? wrapper.clientWidth / 2 : 400;
+                    const cy = wrapper ? wrapper.clientHeight / 2 : 400;
+                    setTransform(-px * scale + cx, -py * scale + cy, scale, 500);
+                  }
+                }
+              }} className="w-10 h-10 bg-[#2b4c5e] border border-rpg-magic rounded flex items-center justify-center text-rpg-paper hover:bg-rpg-magic hover:text-slate-900 shadow-lg transition-all" title="Centrovat na hráče">
+                <User size={20} />
+              </button>
+            </div>
         <TransformComponent wrapperClass="w-full h-full" contentClass="w-full h-full flex items-center justify-center">
       <svg 
         width={width} 
@@ -175,6 +197,8 @@ export default function HexMap({ worldData, onHexClick, setSelectedItem, playerL
         </g>
       </svg>
         </TransformComponent>
+          </>
+        )}
       </TransformWrapper>
       
       {/* Tooltip */}

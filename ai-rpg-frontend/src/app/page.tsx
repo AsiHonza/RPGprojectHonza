@@ -640,7 +640,7 @@ export default function Home() {
       });
       const data = await res.json();
       if (data.status === "success") {
-        setPlayerLocation(data.state.playerLocation);
+        setPlayerLocation(data.state.playerLocation || data.state.player_location);
         setDay(data.state.day);
         setRations(data.state.rations);
         setHp(data.state.hp);
