@@ -26,6 +26,16 @@ import { PATCH_NOTES } from '../data/patchNotes';
 const TypewriterText = ({ text, delay = 25, animate = false }: { text: string, delay?: number, animate?: boolean }) => {
   const [displayedText, setDisplayedText] = useState(animate ? "" : text);
 
+
+  useEffect(() => {
+    const playAudio = () => {
+      if (musicPlaying && bgAudioRef.current && bgAudioRef.current.paused) {
+        bgAudioRef.current.play().catch(() => {});
+      }
+    };
+    document.addEventListener('click', playAudio);
+    return () => document.removeEventListener('click', playAudio);
+  }, [musicPlaying]);
   useEffect(() => {
     if (!animate) {
       setDisplayedText(text);
@@ -1300,7 +1310,7 @@ export default function Home() {
       )}
 
       {/* Nativní HTML5 Přehrávač (Ambient Hudba) s lokálním m4a souborem */}
-      <audio id="bg-audio" ref={bgAudioRef} src={currentTrack} loop onError={() => { if (currentTrack !== "/ambient.mp3") setCurrentTrack("/ambient.mp3"); }} />
+      <audio id="bg-audio" ref={bgAudioRef} src={currentTrack} loop autoPlay onError={() => { if (currentTrack !== "/ambient.mp3") setCurrentTrack("/ambient.mp3"); }} />
 
     </div>
   );
