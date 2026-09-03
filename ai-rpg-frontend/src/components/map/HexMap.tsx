@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Grid, defineHex, rectangle, Orientation } from 'honeycomb-grid';
 import { User, Castle, Skull, MapPin, Mountain, Trees, Waves, Wind, Droplets, Flame, Home, Star, Eye } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
 const HEX_SIZE = 16;
 class CustomHex extends defineHex({ dimensions: HEX_SIZE, orientation: Orientation.POINTY }) {}
@@ -74,12 +75,12 @@ export default function HexMap({ worldData, onHexClick, setSelectedItem, playerL
 
   const getTerrainIcon = (terrain: string) => {
     switch (terrain) {
-      case 'Oceán': return <Waves size={14} className="text-[#2b4c5e]/40" />;
-      case 'Hory': return <Mountain size={16} className="text-[#455a64]/60" />;
-      case 'Les': return <Trees size={16} className="text-[#2d4c1e]/60" />;
-      case 'Bažina': return <Droplets size={14} className="text-[#3d4536]/60" />;
-      case 'Pustina': return <Flame size={14} className="text-[#b74b4b]/40" />;
-      case 'Pláně': return null; // Clean parchment
+        case 'Ocean': return <Waves size={20} className="text-[#1a364a]" />;
+        case 'Mountains': return <Mountain size={22} className="text-[#2b3a42]" />;
+        case 'Forest': return <Trees size={22} className="text-[#1b3012]" />;
+        case 'Swamp': return <Droplets size={20} className="text-[#282d23]" />;
+        case 'Wasteland': return <Flame size={20} className="text-[#8b3535]" />;
+        case 'Plains': return null;
       default: return null;
     }
   };
@@ -87,12 +88,12 @@ export default function HexMap({ worldData, onHexClick, setSelectedItem, playerL
   const getPoiIcon = (poi: string) => {
     if (!poi) return null;
     switch (poi) {
-      case 'Hlavní Město': return <Castle size={20} className="text-rpg-magic drop-shadow-[0_0_5px_rgba(197,160,89,0.8)]" />;
-      case 'Vesnice': return <Home size={16} className="text-rpg-paper drop-shadow-md" />;
-      case 'Temnice': return <Skull size={18} className="text-rpg-blood drop-shadow-[0_0_5px_rgba(183,75,75,0.8)]" />;
-      case 'Svatyně': return <Star size={16} className="text-indigo-800 drop-shadow-[0_0_5px_rgba(165,180,252,0.8)]" />;
-      case 'Ruina': return <Eye size={16} className="text-[#90a4ae] drop-shadow-md" />;
-      default: return <MapPin size={16} className="text-rpg-paper" />;
+      case 'Capital': return <Castle size={24} className="text-rpg-magic drop-shadow-[0_0_5px_rgba(197,160,89,0.9)]" />;
+      case 'Village': return <Home size={22} className="text-slate-700 drop-shadow-md" />;
+      case 'Dungeon': return <Skull size={22} className="text-rpg-blood drop-shadow-[0_0_5px_rgba(183,75,75,0.9)]" />;
+      case 'Shrine': return <Star size={22} className="text-indigo-800 drop-shadow-[0_0_5px_rgba(165,180,252,0.9)]" />;
+      case 'Ruin': return <Eye size={22} className="text-[#455a64] drop-shadow-md" />;
+      default: return <MapPin size={20} className="text-slate-800" />;
     }
   };
 
@@ -107,7 +108,9 @@ export default function HexMap({ worldData, onHexClick, setSelectedItem, playerL
   const offsetY = -minY + 50;
 
   return (
-    <div className="w-full h-full relative bg-[#e3dcc8] bg-[url('https://www.transparenttextures.com/patterns/aged-paper.png')] overflow-auto custom-scrollbar border-4 border-rpg-obsidian rounded shadow-inner">
+    <div className="w-full h-full relative bg-[#e3dcc8] bg-[url('https://www.transparenttextures.com/patterns/aged-paper.png')] overflow-hidden border-4 border-rpg-obsidian rounded shadow-inner">
+      <TransformWrapper initialScale={1.5} minScale={0.3} maxScale={4} centerOnInit={true} wheel={{ step: 0.1 }}>
+        <TransformComponent wrapperClass="w-full h-full" contentClass="w-full h-full flex items-center justify-center">
       <svg 
         width={width} 
         height={height} 
@@ -136,7 +139,7 @@ export default function HexMap({ worldData, onHexClick, setSelectedItem, playerL
                 
                 {/* Terrain Ink Icon */}
                 {!hexData.poi && (
-                    <g transform={`translate(${x - 8}, ${y - 8})`} className="pointer-events-none opacity-70 mix-blend-multiply">
+                    <g transform={`translate(${x - 10}, ${y - 10})`} className="pointer-events-none drop-shadow-[0_1px_1px_rgba(255,255,255,0.6)]">
                       {getTerrainIcon(hexData.terrain)}
                     </g>
                   )}
@@ -171,6 +174,8 @@ export default function HexMap({ worldData, onHexClick, setSelectedItem, playerL
           })}
         </g>
       </svg>
+        </TransformComponent>
+      </TransformWrapper>
       
       {/* Tooltip */}
       <AnimatePresence>
