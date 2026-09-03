@@ -589,8 +589,18 @@ export default function Home() {
         if (state.world_data) setWorldData(state.world_data);
         else setWorldData(null);
 
-        if (state.playerLocation || state.player_location) {
-          setPlayerLocation(state.playerLocation || state.player_location);
+        let pLoc = state.playerLocation || state.player_location;
+        if (!pLoc && state.world_data) {
+          const cap = state.world_data.pois?.find((p: any) => p.type === "Capital") || state.world_data.pois?.[0];
+          if (cap) {
+            pLoc = { q: cap.q, r: cap.r, kingdom_id: cap.kingdom_id, biome: cap.terrain };
+          } else if (state.world_data.hex_grid?.[0]) {
+            const h = state.world_data.hex_grid[0];
+            pLoc = { q: h.q, r: h.r, kingdom_id: h.kingdom_id, biome: h.terrain };
+          }
+        }
+        if (pLoc) {
+          setPlayerLocation(pLoc);
         }
 
 
@@ -1132,7 +1142,18 @@ export default function Home() {
             </button>
             <button onClick={() => setNpcsOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-3 text-slate-700 hover:text-[#2d3748] hover:bg-white/70 rounded-xl transition flex items-center gap-2 text-sm font-cinzel"><Users size={18} /> <span className="hidden sm:inline">Postavy</span></button>
             <button onClick={() => setMapOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-3 text-rpg-magic hover:bg-rpg-magic/20 rounded-xl transition flex items-center gap-2 text-sm font-cinzel"><Map size={18} /> <span className="hidden sm:inline">Mapa</span></button>
-            <button onClick={() => setSettingsOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-3 text-slate-600 hover:text-[#2d3748] hover:bg-white/70 rounded-xl transition"><Settings2 size={18} /></button>
+            <button onClick={() => setSettingsOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-3 text-slate-600 hover:text-[#2d3748] hover:bg-white/70 rounded-xl transition" title="Nastavení"><Settings2 size={18} /></button>
+            <button 
+              onClick={() => {
+                localStorage.removeItem("aethelgard_active_char");
+                setGameState("menu");
+                fetchCharacters(email);
+              }} 
+              className="flex-shrink-0 snap-start p-2 sm:p-3 text-red-700 hover:text-red-900 hover:bg-red-50/80 rounded-xl transition flex items-center gap-1.5 text-sm font-cinzel font-bold border border-red-900/20" 
+              title="Zpět do výběru hrdinů"
+            >
+              <Users size={18} /> <span className="hidden sm:inline">Výběr hrdiny</span>
+            </button>
           </div>
           
         </div>
@@ -1207,15 +1228,22 @@ export default function Home() {
                 <div className="text-xs font-cinzel text-slate-500 uppercase tracking-widest font-bold">
                   Možné volby:
                 </div>
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2.5">
                   {suggestedActions.map((act, i) => (
                     <button
                       key={`chat-act-${i}`}
                       onClick={() => sendAction(act)}
-                      className="w-full text-left bg-white/75 hover:bg-[#fffdf7] border border-amber-900/15 hover:border-rpg-magic hover:shadow-[0_2px_12px_rgba(197,160,89,0.3)] px-4 py-3 rounded-xl text-slate-800 hover:text-slate-950 transition-all font-lora text-sm sm:text-base flex items-center justify-between group"
+                      className="w-full text-left bg-[#fcfaf2] hover:bg-amber-100/90 border-2 border-amber-900/15 hover:border-amber-600 hover:shadow-[0_4px_16px_rgba(180,83,9,0.25)] px-4 sm:px-5 py-3.5 rounded-xl text-slate-800 hover:text-amber-950 transition-all font-lora text-sm sm:text-base flex items-center justify-between group cursor-pointer"
                     >
-                      <span>{act}</span>
-                      <span className="text-rpg-magic opacity-0 group-hover:opacity-100 transition-opacity font-cinzel text-xs font-bold shrink-0 ml-2">Zvolit &rarr;</span>
+                      <div className="flex items-center gap-3">
+                        <span className="w-6 h-6 rounded-full bg-amber-900/10 group-hover:bg-amber-700 group-hover:text-white flex items-center justify-center text-xs font-cinzel font-bold text-amber-900 transition-colors shrink-0">
+                          {i + 1}
+                        </span>
+                        <span className="font-medium group-hover:font-bold transition-all">{act}</span>
+                      </div>
+                      <span className="opacity-0 group-hover:opacity-100 transition-all bg-amber-700 text-white px-3 py-1 rounded-lg font-cinzel text-xs font-bold shrink-0 ml-3 shadow-sm flex items-center gap-1 group-hover:translate-x-1">
+                        Zvolit &rarr;
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -1247,15 +1275,27 @@ export default function Home() {
                 </>
               ) : (
                 <>
-                  {locationType === 'mesto' && pointsOfInterest.map((poi, i) => (
-                    <button key={`poi-${i}`} onClick={() => sendAction(`Jdu prozkoumat: ${poi.nazev}`)} className="flex-shrink-0 snap-start whitespace-nowrap bg-rpg-magic/10 border border-rpg-magic/50 text-rpg-magic px-4 py-3 rounded-xl text-sm hover:bg-rpg-magic hover:text-black transition font-cinzel flex items-center gap-2 shadow-[0_0_10px_rgba(197,160,89,0.2)]">
-                      <MapPin size={16} /> {poi.nazev}
-                    </button>
-                  ))}
+                  {locationType === 'mesto' && pointsOfInterest.length > 0 && (
+                    <div className="flex flex-wrap items-center gap-2 py-1">
+                      <span className="text-xs font-cinzel font-bold text-amber-950 flex items-center gap-1 uppercase tracking-wider mr-1">
+                        <MapPin size={14} className="text-amber-700" /> Lokace v okolí:
+                      </span>
+                      {pointsOfInterest.map((poi, i) => (
+                        <button 
+                          key={`poi-${i}`} 
+                          onClick={() => sendAction(`Jdu prozkoumat: ${poi.nazev}`)} 
+                          className="bg-[#f2ece1] hover:bg-amber-100 border border-amber-900/30 hover:border-amber-700 text-slate-900 hover:text-amber-950 px-3.5 py-2 rounded-xl text-xs font-cinzel font-bold transition-all shadow-sm flex items-center gap-1.5"
+                        >
+                          <MapPin size={14} className="text-amber-700" />
+                          <span>{poi.nazev}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                   {/* On mobile only show horizontal chips, on desktop they are inside the story window */}
                   <div className="md:hidden flex flex-nowrap gap-2">
                     {suggestedActions.map((act, i) => (
-                      <button key={`act-${i}`} onClick={() => sendAction(act)} className="flex-shrink-0 snap-start bg-white/50 border border-amber-900/20 text-slate-800 px-4 py-3 rounded-xl text-sm whitespace-nowrap shadow-sm max-w-[85vw] overflow-hidden text-ellipsis hover:bg-white/70 hover:text-[#2d3748] transition font-lora">
+                      <button key={`act-${i}`} onClick={() => sendAction(act)} className="flex-shrink-0 snap-start bg-[#fcfaf2] border border-amber-900/20 text-slate-800 px-4 py-3 rounded-xl text-sm whitespace-nowrap shadow-sm max-w-[85vw] overflow-hidden text-ellipsis hover:bg-amber-100 hover:text-amber-950 transition font-lora">
                         {act}
                       </button>
                     ))}

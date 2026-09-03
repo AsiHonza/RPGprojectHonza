@@ -97,31 +97,76 @@ export default function HexMap({ worldData, onHexClick, setSelectedItem, playerL
     }
   };
 
-  const minX = Math.min(...hexes.map(h => h.corners[3].x));
-  const maxX = Math.max(...hexes.map(h => h.corners[0].x));
-  const minY = Math.min(...hexes.map(h => h.corners[4].y));
-  const maxY = Math.max(...hexes.map(h => h.corners[1].y));
+   const activeLocation = useMemo(() => {
+    if (playerLocation && playerLocation.q !== undefined && playerLocation.r !== undefined) {
+      return playerLocation;
+    }
+    if (worldData?.pois) {
+      const cap = worldData.pois.find((p: any) => p.type === 'Capital') || worldData.pois[0];
+      if (cap) return { q: cap.q, r: cap.r };
+    }
+    if (worldData?.hex_grid?.[0]) {
+      return { q: worldData.hex_grid[0].q, r: worldData.hex_grid[0].r };
+    }
+    return null;
+  }, [playerLocation, worldData]);
+
+  let allCornersX: number[] = [];
+  let allCornersY: number[] = [];
+  for (const h of hexes) {
+    for (const c of h.corners) {
+      allCornersX.push(c.x);
+      allCornersY.push(c.y);
+    }
+  }
+  const minX = allCornersX.length ? Math.min(...allCornersX) : -400;
+  const maxX = allCornersX.length ? Math.max(...allCornersX) : 400;
+  const minY = allCornersY.length ? Math.min(...allCornersY) : -400;
+  const maxY = allCornersY.length ? Math.max(...allCornersY) : 400;
   
-  const width = (maxX - minX) + 100;
-  const height = (maxY - minY) + 100;
-  const offsetX = -minX + 50;
-  const offsetY = -minY + 50;
+  const width = (maxX - minX) + 120;
+  const height = (maxY - minY) + 120;
+  const offsetX = -minX + 60;
+  const offsetY = -minY + 60;
 
   return (
     <div className="w-full h-full relative bg-[#e3dcc8] bg-[url('https://www.transparenttextures.com/patterns/aged-paper.png')] overflow-hidden border-4 border-rpg-obsidian rounded shadow-inner">
-      <TransformWrapper initialScale={1.2} minScale={0.3} maxScale={4} centerOnInit={true} wheel={{ step: 0.025 }} limitToBounds={false}>
+      <TransformWrapper 
+        initialScale={1.8} 
+        minScale={0.4} 
+        maxScale={5} 
+        centerOnInit={false} 
+        wheel={{ step: 0.03 }} 
+        limitToBounds={false}
+        onInit={(ref) => {
+          if (activeLocation) {
+            const targetHex = grid.toArray().find(h => h.q === activeLocation.q && h.r === activeLocation.r);
+            if (targetHex) {
+              const px = targetHex.x + offsetX;
+              const py = targetHex.y + offsetY;
+              const scale = 1.8;
+              const wrapper = document.querySelector(".react-transform-wrapper");
+              const cx = wrapper ? wrapper.clientWidth / 2 : (typeof window !== 'undefined' ? window.innerWidth / 2 : 500);
+              const cy = wrapper ? wrapper.clientHeight / 2 : (typeof window !== 'undefined' ? window.innerHeight / 2 : 400);
+              ref.setTransform(-px * scale + cx, -py * scale + cy, scale, 0);
+              return;
+            }
+          }
+          ref.centerView(1.8, 0);
+        }}
+      >
         {({ zoomIn, zoomOut, resetTransform, setTransform }) => (
           <>
             <div className="absolute bottom-4 right-4 flex flex-col gap-2 z-50">
               <button onClick={() => zoomIn()} className="w-10 h-10 bg-rpg-obsidian border border-[#455a64] rounded flex items-center justify-center text-rpg-paper hover:bg-[#2b4c5e] hover:border-rpg-magic shadow-lg transition-all text-xl font-bold">+</button>
               <button onClick={() => zoomOut()} className="w-10 h-10 bg-rpg-obsidian border border-[#455a64] rounded flex items-center justify-center text-rpg-paper hover:bg-[#2b4c5e] hover:border-rpg-magic shadow-lg transition-all text-xl font-bold">-</button>
               <button onClick={() => {
-                if (playerLocation) {
-                  const targetHex = grid.toArray().find(h => h.q === playerLocation.q && h.r === playerLocation.r);
+                if (activeLocation) {
+                  const targetHex = grid.toArray().find(h => h.q === activeLocation.q && h.r === activeLocation.r);
                   if (targetHex) {
                     const px = targetHex.x + offsetX;
                     const py = targetHex.y + offsetY;
-                    const scale = 2;
+                    const scale = 2.0;
                     const wrapper = document.querySelector(".react-transform-wrapper");
                     const cx = wrapper ? wrapper.clientWidth / 2 : 400;
                     const cy = wrapper ? wrapper.clientHeight / 2 : 400;
@@ -157,7 +202,7 @@ export default function HexMap({ worldData, onHexClick, setSelectedItem, playerL
                 {/* Kingdom Watercolor Tint */}
                 <polygon 
                   points={points}
-                  className={`${getKingdomColor(hexData.kingdom_id)} ${(playerLocation?.q === hexData.q && playerLocation?.r === hexData.r) ? "stroke-amber-400 stroke-[3] drop-shadow-[0_0_10px_rgba(245,158,11,1)]" : "stroke-[#455a64]/30 stroke-[1]"} transition-all duration-300 group-hover:stroke-rpg-magic group-hover:stroke-2 group-hover:fill-rpg-magic/10 cursor-pointer`}
+                  className={`${getKingdomColor(hexData.kingdom_id)} ${(activeLocation?.q === hexData.q && activeLocation?.r === hexData.r) ? "stroke-amber-400 stroke-[3] drop-shadow-[0_0_10px_rgba(245,158,11,1)]" : "stroke-[#455a64]/30 stroke-[1]"} transition-all duration-300 group-hover:stroke-rpg-magic group-hover:stroke-2 group-hover:fill-rpg-magic/10 cursor-pointer`}
                 />
                 
                 {/* Terrain Ink Icon */}
@@ -168,33 +213,39 @@ export default function HexMap({ worldData, onHexClick, setSelectedItem, playerL
                   )}
 
 
-                {/* Distinctive Pulsing Border for Player Location (No Icon) */}
-                {playerLocation?.q === hexData.q && playerLocation?.r === hexData.r && (
-                  <g className="pointer-events-none">
+                {/* Distinctive Pulsing Border and Beacon for Player Location */}
+                {activeLocation?.q === hexData.q && activeLocation?.r === hexData.r && (
+                  <g className="pointer-events-none z-50">
                     <polygon 
                       points={points}
-                      className="fill-amber-400/25 stroke-amber-400 stroke-[3.5] animate-pulse drop-shadow-[0_0_12px_rgba(245,158,11,1)]"
+                      className="fill-amber-400/35 stroke-amber-400 stroke-[4] animate-pulse drop-shadow-[0_0_15px_rgba(245,158,11,1)]"
                     />
                     <polygon 
                       points={points}
-                      stroke="#fef08a"
-                      strokeWidth="2"
+                      stroke="#ffffff"
+                      strokeWidth="2.5"
                       strokeDasharray="6 3"
                       fill="none"
-                      className="opacity-90 drop-shadow-[0_0_8px_rgba(254,240,138,0.9)]"
+                      className="opacity-95 drop-shadow-[0_0_8px_rgba(255,255,255,1)]"
                     />
                     <circle 
                       cx={x} 
                       cy={y} 
-                      r="6" 
-                      className="fill-amber-400 animate-ping opacity-75"
+                      r="8" 
+                      className="fill-amber-400 animate-ping opacity-80"
                     />
                     <circle 
                       cx={x} 
                       cy={y} 
-                      r="4" 
-                      className="fill-amber-300 drop-shadow-[0_0_8px_rgba(245,158,11,1)]"
+                      r="5" 
+                      className="fill-amber-300 stroke-2 stroke-amber-700 drop-shadow-[0_0_10px_rgba(245,158,11,1)]"
                     />
+                    <g transform={`translate(${x}, ${y - 18})`}>
+                      <rect x="-26" y="-12" width="52" height="14" rx="4" className="fill-amber-600 stroke-yellow-200 stroke-1 shadow-lg" />
+                      <text x="0" y="-2" textAnchor="middle" className="text-[8px] font-cinzel font-bold fill-white uppercase tracking-wider">
+                        ZDE JSI TY
+                      </text>
+                    </g>
                   </g>
                 )}
                 {/* POI Icon */}

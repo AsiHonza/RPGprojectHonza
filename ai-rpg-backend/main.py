@@ -197,7 +197,22 @@ async def load_game(req: LoadGameRequest):
             db_res = supabase.table("characters").select("*").eq("api_key", api_key).execute()
             if not db_res.data:
                 raise HTTPException(status_code=404, detail="Character not found.")
-        return {"status": "success", "character": db_res.data[0]}
+        char_data = db_res.data[0]
+        state = char_data.get("state") or {}
+        if not state.get("playerLocation") and state.get("world_data"):
+            w_data = state.get("world_data")
+            cap = next((p for p in w_data.get("pois", []) if p.get("type") == "Capital"), None)
+            if cap:
+                state["playerLocation"] = {"q": cap["q"], "r": cap["r"], "kingdom_id": cap.get("kingdom_id"), "biome": cap.get("terrain", "Plains")}
+            elif w_data.get("hex_grid"):
+                first_h = w_data["hex_grid"][0]
+                state["playerLocation"] = {"q": first_h["q"], "r": first_h["r"], "kingdom_id": first_h.get("kingdom_id"), "biome": first_h.get("terrain", "Plains")}
+            try:
+                supabase.table("characters").update({"state": state}).eq("api_key", char_data["api_key"]).execute()
+            except Exception as se:
+                print("Could not auto-save repaired location:", se)
+            char_data["state"] = state
+        return {"status": "success", "character": char_data}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
