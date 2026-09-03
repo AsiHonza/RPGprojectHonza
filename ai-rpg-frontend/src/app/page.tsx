@@ -23,6 +23,7 @@ import { PatchNotesModal } from '../features/ui/PatchNotesModal';
 import { PlayerHeader } from '../features/ui/PlayerHeader';
 import { PATCH_NOTES } from '../data/patchNotes';
 import { SeamlessVideo } from '../components/ui/SeamlessVideo';
+import { CharacterCarousel } from '../components/character/CharacterCarousel';
 
 const getAvatarVideo = (r?: string) => {
   if (!r) return null;
@@ -940,75 +941,25 @@ export default function Home() {
               )}
             </div>
           ) : (
-            <div className="w-full flex flex-col items-center gap-4 sm:gap-8">
-              <div className="text-center">
-                <h3 className="text-slate-700 font-lora text-lg">Tvé Legendy</h3>
-                <div className="h-px w-32 bg-gradient-to-r from-transparent via-rpg-magic to-transparent mx-auto mt-2" />
-              </div>
-
-              <div className="flex flex-nowrap overflow-x-auto snap-x snap-mandatory gap-6 w-[100vw] sm:w-full max-w-7xl pb-4 sm:pb-8 px-4 custom-scrollbar justify-start items-center">
-                {savedCharacters.map((char, idx) => (
-                  <motion.div 
-                    key={idx}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.1 }}
-                    className="group relative w-64 h-96 shrink-0 bg-[#f9f6e6]/80 backdrop-blur-md border border-amber-900/10 rounded-2xl overflow-hidden cursor-pointer hover:border-rpg-magic transition-all hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(197,160,89,0.3)]"
-                    onClick={() => loadGame(char.name)}
-                  >
-                    <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#f9f6e6] via-[#f9f6e6]/70 to-transparent z-10 pointer-events-none" />
-                    
-                    {getAvatarVideo(char.race) ? (
-                      <SeamlessVideo 
-                        src={getAvatarVideo(char.race)!} 
-                        className="absolute inset-0 w-full h-full opacity-90 group-hover:opacity-100 transition-opacity duration-500" 
-                      />
-                    ) : (
-                      <img 
-                        src={`https://image.pollinations.ai/prompt/vibrant%20fable%20style%20magical%20fantasy%20portrait%20of%20a%20${encodeURIComponent(char.race)}%20${encodeURIComponent(char.dnd_class)}%20RPG%20character?width=512&height=768&nologo=true&seed=${char.name.length * 42}`} 
-                        alt={char.name} 
-                        className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500" 
-                      />
-                    )}
-                    
-                    <div className="absolute inset-0 z-20 flex flex-col p-6">
-                      <div className="absolute top-4 right-4 z-50">
-                        <button 
-                          onClick={(e) => deleteCharacter(e, char.name)}
-                          className="p-2 text-[#2d3748]/50 hover:text-rpg-blood hover:bg-red-900/30 rounded-full transition"
-                          title="Smazat postavu"
-                        >
-                          <Flame size={20} />
-                        </button>
-                      </div>
-                      
-                      <div className="mt-auto">
-                        <h4 className="text-2xl font-cinzel font-bold text-[#2d3748] group-hover:text-rpg-magic transition drop-shadow-lg">{char.name}</h4>
-                        <div className="text-rpg-magic font-lora italic mt-1 drop-shadow-md">{char.race} {char.dnd_class}</div>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
+            <div className="w-full flex flex-col items-center">
+              <CharacterCarousel
+                characters={savedCharacters}
+                onSelectCharacter={(charName) => loadGame(charName)}
+                onDeleteCharacter={(e, charName) => deleteCharacter(e, charName)}
+                onCreateNew={() => setGameState("creation")}
+                getAvatarVideo={getAvatarVideo}
+              />
 
               <button 
-                onClick={() => setGameState("creation")}
-                className="mt-4 px-8 py-3 bg-white border-2 border-rpg-magic/50 shadow-md hover:shadow-[0_0_15px_rgba(217,119,6,0.3)] text-[#2d3748] font-cinzel rounded-xl hover:bg-white/50 hover:border-amber-900/50 transition uppercase tracking-widest text-sm flex items-center gap-2"
+                onClick={() => {
+                  localStorage.removeItem("aethelgard_session_email");
+                  localStorage.removeItem("aethelgard_active_char");
+                  window.location.reload();
+                }}
+                className="mt-6 px-6 py-2 text-slate-500 font-lora hover:text-slate-800 transition text-sm flex items-center gap-2 cursor-pointer"
               >
-                <Sparkles size={16} />
-                Vytvořit Novou Legendu
+                Odhlásit se
               </button>
-
-                <button 
-                  onClick={() => {
-                    localStorage.removeItem("aethelgard_session_email");
-                    localStorage.removeItem("aethelgard_active_char");
-                    window.location.reload();
-                  }}
-                  className="mt-4 px-8 py-2 text-slate-500 font-lora hover:text-slate-800 transition text-sm flex items-center gap-2"
-                >
-                  Odhlásit se
-                </button>
             </div>
           )}
         </motion.div>
