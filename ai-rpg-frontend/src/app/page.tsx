@@ -487,7 +487,7 @@ export default function Home() {
         
         let lastSuggestedActions: string[] = [];
         let lastImage = null;
-        let lastDesc = "";
+          let lastAudioQueue: {text: string, type: "narrator"|"npc_muz"|"npc_zena"}[] = [];
         
         const loadedHistory = data.character.history.map((msg: any) => {
           if (msg.role === "user") {
@@ -499,6 +499,9 @@ export default function Home() {
               if (dm_data.nabizene_akce) lastSuggestedActions = dm_data.nabizene_akce;
               if (dm_data.image_prompt) lastImage = dm_data.image_prompt;
               if (dm_data.popis_okoli) lastDesc = dm_data.popis_okoli;
+                lastAudioQueue = [];
+                if (dm_data.vypravec) lastAudioQueue.push({text: dm_data.vypravec, type: "narrator"});
+                if (dm_data.npc_dialogy) dm_data.npc_dialogy.forEach((n: any) => { if (n.text) lastAudioQueue.push({text: n.text, type: n.pohlavi === "muz" ? "npc_muz" : "npc_zena"}) });
               
               return {
                 type: "dm",
@@ -576,8 +579,8 @@ export default function Home() {
 
         setGameState("playing");
         
-        if (lastDesc) {
-            playAudioSequentially([{text: lastDesc, type: "narrator"}]);
+          if (lastAudioQueue.length > 0) {
+            playAudioSequentially(lastAudioQueue);
         }
       } else {
         alert(data.detail || "Chyba při načítání pozice.");
