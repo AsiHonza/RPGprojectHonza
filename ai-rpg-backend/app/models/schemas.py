@@ -133,15 +133,25 @@ class CharacterCreateRequest(BaseModel):
     api_key: str
 
 class PlayerActionRequest(BaseModel):
-    api_key: str
-    action: str
+    email: str
+    name: str
+    action: Optional[str] = None
+    action_text: Optional[str] = None
+    api_key: Optional[str] = "DUMMY"
+    level: Optional[int] = 1
+    stats: Optional[Dict[str, Any]] = None
+    skills: Optional[List[Any]] = None
 
 class TravelRequest(BaseModel):
-    api_key: str
-    destination_q: int
-    destination_r: int
-    kingdom_id: str
-    biome: str
+    email: str
+    name: str
+    target_q: int
+    target_r: int
+    api_key: Optional[str] = "DUMMY"
+    destination_q: Optional[int] = None
+    destination_r: Optional[int] = None
+    kingdom_id: Optional[str] = None
+    biome: Optional[str] = None
 
 
 def clean_schema(schema: dict):

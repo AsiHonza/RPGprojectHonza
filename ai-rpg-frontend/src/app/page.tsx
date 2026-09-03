@@ -753,6 +753,7 @@ export default function Home() {
           email: email,
           api_key: "DUMMY", 
           name: name,
+          action: finalActionText,
           action_text: finalActionText,
           stats: stats,
           level: level,
@@ -1318,14 +1319,6 @@ export default function Home() {
                       ))}
                     </div>
                   )}
-                  {/* On mobile only show horizontal chips, on desktop they are inside the story window */}
-                  <div className="md:hidden flex flex-nowrap gap-2">
-                    {suggestedActions.map((act, i) => (
-                      <button key={`act-${i}`} onClick={() => sendAction(act)} className="flex-shrink-0 snap-start bg-[#fcfaf2] border border-amber-900/20 text-slate-800 px-4 py-3 rounded-xl text-sm whitespace-nowrap shadow-sm max-w-[85vw] overflow-hidden text-ellipsis hover:bg-amber-100 hover:text-amber-950 transition font-lora">
-                        {act}
-                      </button>
-                    ))}
-                  </div>
                 </>
               )}
             </div>
@@ -1335,14 +1328,14 @@ export default function Home() {
 
           {/* Magical Input Box */}
           <div className="relative">
-            <div className="absolute -inset-1 bg-gradient-to-r from-transparent via-rpg-magic/20 to-transparent rounded-2xl blur-md" />
-            <div className="relative flex flex-wrap sm:flex-nowrap gap-2 sm:gap-3 bg-white/90 backdrop-blur-xl p-2 sm:p-3 rounded-2xl border border-rpg-magic/30 shadow-[0_0_30px_rgba(0,0,0,0.8)]">
+            <div className="absolute -inset-1 bg-gradient-to-r from-transparent via-rpg-magic/20 to-transparent rounded-2xl blur-md pointer-events-none" />
+            <div className="relative flex flex-row items-center gap-2 sm:gap-3 bg-white/90 backdrop-blur-xl p-2 sm:p-3 rounded-2xl border border-rpg-magic/30 shadow-[0_0_30px_rgba(0,0,0,0.8)]">
               <button
                 onClick={() => setIsOOC(!isOOC)}
-                className={`p-4 transition-all rounded-xl flex items-center justify-center ${isOOC ? 'bg-indigo-900/40 text-indigo-800 border border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.2)]' : 'text-slate-600 hover:text-rpg-magic bg-white/50 border border-transparent'}`}
+                className={`p-2.5 sm:p-3.5 transition-all rounded-xl flex items-center justify-center shrink-0 cursor-pointer ${isOOC ? 'bg-indigo-900/40 text-indigo-800 border border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.2)]' : 'text-slate-600 hover:text-rpg-magic bg-white/50 border border-transparent'}`}
                 title="OOC (Myšlenka)"
               >
-                <Brain size={24} className={isOOC ? "animate-pulse" : ""} />
+                <Brain size={22} className={isOOC ? "animate-pulse text-indigo-600" : ""} />
               </button>
               <input 
                 type="text" 
@@ -1350,18 +1343,18 @@ export default function Home() {
                 onChange={(e) => setCustomAction(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && sendAction(customAction)}
                 placeholder={isOOC ? "Přemýšlím nad..." : "Co uděláš dál?"} 
-                className={`flex-1 font-lora text-xl bg-transparent px-4 py-2 outline-none transition-colors ${isOOC ? 'text-indigo-900 placeholder-indigo-900' : 'text-[#2d3748] placeholder-gray-600'}`}
+                className={`flex-1 min-w-0 font-lora text-sm sm:text-lg bg-transparent px-2 sm:px-3 py-2 outline-none transition-colors ${isOOC ? 'text-indigo-900 placeholder-indigo-400' : 'text-[#2d3748] placeholder-gray-500'}`}
                 disabled={loading}
               />
               <button 
                 onClick={() => sendAction(customAction)}
-                className="bg-rpg-blood hover:bg-red-800 text-white px-4 sm:px-8 py-2 sm:py-3 w-full sm:w-auto rounded-xl font-cinzel font-bold text-lg tracking-widest transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(183,75,75,0.4)]"
+                className="bg-rpg-blood hover:bg-red-800 text-white px-3.5 sm:px-8 py-2.5 sm:py-3 shrink-0 rounded-xl font-cinzel font-bold text-sm sm:text-base tracking-wider sm:tracking-widest transition-all disabled:opacity-40 flex items-center justify-center gap-1.5 sm:gap-2 shadow-[0_0_15px_rgba(183,75,75,0.4)] cursor-pointer"
                 disabled={loading || !customAction.trim()}
               >
                 {loading ? (
                   <>
-                    <Loader2 size={22} className="animate-spin text-white" />
-                    <span className="text-sm">Spřádám...</span>
+                    <Loader2 size={18} className="animate-spin text-white" />
+                    <span className="hidden sm:inline text-xs sm:text-sm">Spřádám...</span>
                   </>
                 ) : (
                   "Vydat se"

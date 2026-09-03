@@ -98,6 +98,9 @@ async def play_action(req: PlayerActionRequest):
         armor_item = next((i for i in equipped_items if i.get('slot') == 'hruď' or i.get('type') == 'zbroj'), None)
         shield_item = next((i for i in equipped_items if i.get('slot') == 'druhá ruka' and i.get('type') == 'zbroj'), None)
         
+        req_level = req.level or 1
+        action_str = req.action_text or req.action or ""
+
         atk_bonus = sum(int(i.get('attack_bonus', 0)) for i in equipped_items)
         def_bonus = sum(int(i.get('defense_bonus', 0)) for i in equipped_items)
         str_val = int(base_stats.get('str', 10))
@@ -109,7 +112,7 @@ async def play_action(req: PlayerActionRequest):
 
         combat_stats_summary = f"""
 [AKTUÁLNÍ BOJOVÉ VYBAVENÍ A EFEKTIVNÍ STATY HRÁČE]:
-- Úroveň: {req.level} | Životy: {state_dict.get('hp', 100)} / {state_dict.get('max_hp', 100)}
+- Úroveň: {req_level} | Životy: {state_dict.get('hp', 100)} / {state_dict.get('max_hp', 100)}
 - Vybavená zbraň: {weapon_item.get('name') if weapon_item else 'Holé ruce'} (Bonus k útoku ze zbraně: +{atk_bonus})
 - Vybavená zbroj a štít: {', '.join([i.get('name') for i in [armor_item, shield_item] if i]) or 'Běžný oděv'} (Bonus k obraně ze zbroje: +{def_bonus})
 - Celkový Útok hráče: +{total_attack} (Při útoku hráče virtuálně hoď d20 + {total_attack} proti AC nepřítele)
@@ -117,9 +120,9 @@ async def play_action(req: PlayerActionRequest):
 ZÁVAZNÉ PRAVIDLO: V každém souboji striktně použij tyto hodnoty v `system_log` a popiš zásah či odražení rány s ohledem na toto vybavení!
 """
 
-        context_action = f"[Dlouhodobá paměť (relevantní fakta z minulosti):]\n{relevant_memories}\n{world_prompt_str}\n\n{spatial_grounding}\n\n{combat_stats_summary}\n\n{travel_prompt}\n\n[Akce hráče:]\n{req.action_text}\n"
+        context_action = f"[Dlouhodobá paměť (relevantní fakta z minulosti):]\n{relevant_memories}\n{world_prompt_str}\n\n{spatial_grounding}\n\n{combat_stats_summary}\n\n{travel_prompt}\n\n[Akce hráče:]\n{action_str}\n"
         contents.append(types.Content(role='user', parts=[types.Part.from_text(text=context_action)]))
-        system_prompt = f"""Jsi Pán jeskyně ve fantasy světě Aethelgard. Hráč je momentálně na {req.level}. úrovni.
+        system_prompt = f"""Jsi Pán jeskyně ve fantasy světě Aethelgard. Hráč je momentálně na {req_level}. úrovni.
 
 PRAVIDLA D&D 5e, OBTÍŽNOST (DC) A SELHÁNÍ:
 - **Nešetři hráče!** Pokud dělá riskantní akci (průzkum, přesvědčování, skok), VŽDY urči adekvátní Obtížnost (DC). 
@@ -248,7 +251,7 @@ ZÁZNAMY PRO FRONTEND:
                 npc_name = dialog.get('jmeno')
                 if npc_name and (not any((n.get('jmeno', '').lower() == npc_name.lower() for n in known_npcs))):
                     known_npcs.append({'jmeno': npc_name, 'pohlavi': dialog.get('pohlavi', 'muz'), 'lokace_nazev': curr_region, 'souradnice': {'q': curr_q, 'r': curr_r}, 'je_spolecnik': False})
-        updated_history = history + [{'role': 'user', 'text': req.action_text}, {'role': 'model', 'text': response.text}]
+        updated_history = history + [{'role': 'user', 'text': action_str}, {'role': 'model', 'text': response.text}]
         supabase.table('characters').update({'history': updated_history, 'state': state_dict}).eq('api_key', db_key).execute()
         return dm_json
     except Exception as e:
