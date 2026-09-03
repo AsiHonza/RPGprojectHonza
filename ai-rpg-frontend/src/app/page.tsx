@@ -842,7 +842,7 @@ export default function Home() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: idx * 0.1 }}
-                    className="group relative w-64 h-96 bg-black/60 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden cursor-pointer hover:border-rpg-magic transition-all hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(197,160,89,0.3)]"
+                    className="group relative w-64 h-96 shrink-0 bg-black/60 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden cursor-pointer hover:border-rpg-magic transition-all hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(197,160,89,0.3)]"
                     onClick={() => loadGame(char.name)}
                   >
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10" />
@@ -955,13 +955,13 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/70 to-slate-900/40 backdrop-blur-sm" />
       </div>
 
-      <div className="w-full max-w-7xl flex flex-col h-full relative z-10 p-2 md:p-6 pb-0">
+      <div className="w-full max-w-7xl flex flex-col h-full relative z-10 p-2 md:p-8 pb-0">
         
 
         {/* Top HUD */}
-        <div className="flex flex-col gap-2 mb-2 w-full max-w-5xl mx-auto z-10">
+        <div className="flex flex-col gap-2 md:gap-4 mb-2 md:mb-4 w-full max-w-5xl mx-auto z-10">
           
-          <div className="flex items-center justify-between bg-black/40 backdrop-blur-md p-2 rounded-2xl border border-white/10 shadow-lg">
+          <div className="flex items-center justify-between bg-black/40 backdrop-blur-md p-2 md:p-4 rounded-2xl border border-white/10 shadow-lg">
             
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl overflow-hidden border border-rpg-magic shadow-[0_0_10px_rgba(197,160,89,0.3)] shrink-0 hidden sm:block">
@@ -994,7 +994,7 @@ export default function Home() {
 
           </div>
 
-          <div className="flex gap-1 sm:gap-2 bg-black/40 backdrop-blur-md border border-white/10 p-1 sm:p-2 rounded-2xl shadow-xl overflow-x-auto custom-scrollbar hide-scrollbar snap-x flex-nowrap">
+          <div className="flex gap-1 sm:gap-4 bg-black/40 backdrop-blur-md border border-white/10 p-1 sm:p-2 md:p-3 rounded-2xl shadow-xl overflow-x-auto custom-scrollbar hide-scrollbar snap-x flex-nowrap md:justify-center">
             <button onClick={() => setStatsOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-3 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition flex items-center gap-2 text-sm font-cinzel"><User size={18} /> <span className="hidden sm:inline">Vlastnosti</span></button>
             <button onClick={() => setInventoryOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-3 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition flex items-center gap-2 text-sm font-cinzel"><Package size={18} /> <span className="hidden sm:inline">Batoh</span></button>
             <button onClick={() => setJournalOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-3 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition flex items-center gap-2 text-sm font-cinzel relative">

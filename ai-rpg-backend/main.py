@@ -545,7 +545,7 @@ Vrať POUZE json ve formátu:
         # Put player somewhere near the center (0,0) or a starting village
         # Find hex (0,0) or closest
         center_hex = next((h for h in world_data["hexes"] if h["q"] == 0 and h["r"] == 0), world_data["hexes"][0])
-        initial_location = {"q": center_hex["q"], "r": center_hex["r"], "biome": center_hex["biome"]}
+        initial_location = {"q": center_hex["q"], "r": center_hex["r"], "biome": center_hex.get("terrain", "Plains")}
 
     state = {
         "hp": 100,
