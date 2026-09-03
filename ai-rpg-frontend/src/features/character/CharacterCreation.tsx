@@ -47,8 +47,9 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
   };
 
   return (
-    <div className="min-h-screen bg-[#e5dfc5] bg-[url('https://www.transparenttextures.com/patterns/black-scales.png')] text-slate-900 flex flex-col items-center justify-center p-4 overflow-y-auto overflow-x-hidden relative">
+    <div className="min-h-screen bg-black text-slate-900 flex flex-col items-center justify-center p-4 overflow-y-auto overflow-x-hidden relative">
       
+        <video src="/video/bg1.mp4" autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none opacity-60" />
       {/* Background Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-rpg-magic/10 blur-[120px] rounded-full pointer-events-none" />
 

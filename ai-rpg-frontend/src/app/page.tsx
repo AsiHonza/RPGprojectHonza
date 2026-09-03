@@ -28,15 +28,6 @@ const TypewriterText = ({ text, delay = 25, animate = false }: { text: string, d
 
 
   useEffect(() => {
-    const playAudio = () => {
-      if (musicPlaying && bgAudioRef.current && bgAudioRef.current.paused) {
-        bgAudioRef.current.play().catch(() => {});
-      }
-    };
-    document.addEventListener('click', playAudio);
-    return () => document.removeEventListener('click', playAudio);
-  }, [musicPlaying]);
-  useEffect(() => {
     if (!animate) {
       setDisplayedText(text);
       return;
@@ -821,9 +812,10 @@ export default function Home() {
 
   if (gameState === "menu") {
     return (
-      <div className="min-h-screen bg-[#e5dfc5] text-[#2d3748] flex items-center justify-center p-4 font-serif relative overflow-hidden bg-[url('https://www.transparenttextures.com/patterns/black-scales.png')]">
+      <div className="min-h-screen text-[#2d3748] flex items-center justify-center p-4 font-serif relative overflow-hidden bg-black">
         
         {/* Deep background fog */}
+        <video src="/video/bg1.mp4" autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none opacity-60" />
         <div className="absolute inset-0 bg-gradient-to-b from-[#e5dfc5]/20 via-[#f9f6e6]/80 to-[#f9f6e6] z-0 pointer-events-none" />
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-rpg-magic/10 blur-[120px] rounded-full z-0 pointer-events-none" />
 

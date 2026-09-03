@@ -171,7 +171,7 @@ export const useGameStore = create<GameState>((set) => ({
   setBgVolume: (bgVolume) => set({ bgVolume }),
   ttsVolume: 1.0,
   setTtsVolume: (ttsVolume) => set({ ttsVolume }),
-  currentTrack: '/ambient.mp3',
+  currentTrack: '/music/theme.mp3',
   setCurrentTrack: (currentTrack) => set({ currentTrack }),
   musicPlaying: true,
   unreadQuests: false,
