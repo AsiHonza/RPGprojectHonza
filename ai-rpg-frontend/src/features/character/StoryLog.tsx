@@ -47,7 +47,7 @@ export const StoryLog = ({ history, playAudio }: { history: any[], playAudio: (t
               <div className="flex-1 bg-gradient-to-br from-[#111827] to-rpg-obsidian text-rpg-paper px-6 py-5 rounded-xl rounded-tl-none shadow-[0_10px_30px_rgba(0,0,0,0.5)] border border-[#2b4c5e] relative group">
                 <span className="opacity-50 text-[10px] uppercase block mb-3 font-cinzel tracking-widest text-[#90a4ae]">Vypravěč</span>
                 
-                <div className="text-[17px] leading-loose font-lora text-[#e5e7eb] drop-shadow-sm">
+                <div className="text-[17px] leading-loose font-lora text-slate-900 drop-shadow-sm">
                   {i === history.length - 1 ? (
                     <TypewriterText text={msg.text} animate={true} />
                   ) : (

@@ -47,7 +47,7 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
   };
 
   return (
-    <div className="min-h-screen bg-[#e5dfc5] bg-[url('https://www.transparenttextures.com/patterns/black-scales.png')] text-[#e5e7eb] flex flex-col items-center justify-center p-4 overflow-hidden relative">
+    <div className="min-h-screen bg-[#e5dfc5] bg-[url('https://www.transparenttextures.com/patterns/black-scales.png')] text-slate-900 flex flex-col items-center justify-center p-4 overflow-hidden relative">
       
       {/* Background Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-rpg-magic/10 blur-[120px] rounded-full pointer-events-none" />
@@ -80,7 +80,7 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
                     type="text" 
                     value={name} 
                     onChange={e => setName(e.target.value)} 
-                    className="w-full bg-transparent border-b-2 border-amber-900/20 focus:border-rpg-magic outline-none px-4 py-3 text-3xl font-cinzel text-slate-900 transition placeholder-white/20" 
+                    className="w-full bg-transparent border-b-2 border-amber-900/20 focus:border-rpg-magic outline-none px-4 py-3 text-3xl font-cinzel text-slate-900 transition placeholder-slate-400" 
                     placeholder="Např. Kaelen ze Severu" 
                   />
                 </div>
@@ -92,7 +92,7 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
                       <button 
                         key={r}
                         onClick={() => setRace(r)}
-                        className={`p-4 rounded-xl border flex flex-col items-center gap-3 transition-all ${race === r ? 'bg-rpg-magic/20 border-rpg-magic shadow-[0_0_15px_rgba(197,160,89,0.4)] text-rpg-magic' : 'border-amber-900/10 text-slate-700 hover:bg-white/50 hover:border-amber-900/30'}`}
+                        className={`p-4 rounded-xl border flex flex-col items-center gap-3 transition-all ${race === r ? 'bg-rpg-magic/20 border-rpg-magic shadow-[0_0_15px_rgba(197,160,89,0.4)] text-amber-800 font-bold bg-amber-100' : 'border-amber-900/10 text-slate-700 hover:bg-white/50 hover:border-amber-900/30'}`}
                       >
                         {getRaceIcon(r)}
                         <span className="font-cinzel tracking-widest">{r}</span>
@@ -112,7 +112,7 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
                       <button 
                         key={c}
                         onClick={() => setDndClass(c)}
-                        className={`p-3 rounded-lg border flex flex-col items-center gap-2 transition-all ${dndClass === c ? 'bg-rpg-magic/20 border-rpg-magic shadow-[0_0_10px_rgba(197,160,89,0.4)] text-rpg-magic' : 'border-amber-900/10 text-slate-700 hover:bg-white/50 hover:border-amber-900/30'}`}
+                        className={`p-3 rounded-lg border flex flex-col items-center gap-2 transition-all ${dndClass === c ? 'bg-rpg-magic/20 border-rpg-magic shadow-[0_0_10px_rgba(197,160,89,0.4)] text-amber-800 font-bold bg-amber-100' : 'border-amber-900/10 text-slate-700 hover:bg-white/50 hover:border-amber-900/30'}`}
                       >
                         {getClassIcon(c)}
                         <span className="font-cinzel text-sm tracking-wide">{c}</span>
@@ -154,7 +154,7 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
                     <button 
                       onClick={generateBackstory} 
                       disabled={loading || !keywords} 
-                      className="px-6 bg-white/50 text-rpg-magic border border-rpg-magic/50 rounded-xl hover:bg-rpg-magic/20 transition disabled:opacity-50 flex flex-col items-center justify-center gap-2"
+                      className="px-6 bg-white/50 text-amber-800 font-bold bg-amber-100 border border-rpg-magic/50 rounded-xl hover:bg-rpg-magic/20 transition disabled:opacity-50 flex flex-col items-center justify-center gap-2"
                     >
                       <Sparkles size={20} />
                       <span className="font-cinzel text-sm">Napsat<br/>Osud</span>

@@ -189,7 +189,7 @@ export default function HexMap({ worldData, onHexClick, setSelectedItem, playerL
                 </>
             ) : (
                 <>
-                    <h3 className="font-cinzel font-bold text-[#e5e7eb] text-md capitalize">
+                    <h3 className="font-cinzel font-bold text-slate-900 text-md capitalize">
                         {hoveredHex.terrain}
                     </h3>
                     {hoveredHex.kingdom_id && <p className="font-lora text-rpg-muted text-xs mt-1">Království {hoveredHex.kingdom_id}</p>}

@@ -41,7 +41,7 @@ export const PatchNotesModal = ({ isOpen, onClose }: any) => {
                   
                   <ul className="space-y-4">
                     {patch.changes.map((change: any, cIdx: number) => (
-                      <li key={cIdx} className="text-[#e5e7eb] flex flex-col gap-1 text-[15px] leading-relaxed">
+                      <li key={cIdx} className="text-slate-900 flex flex-col gap-1 text-[15px] leading-relaxed">
                         <span className="font-bold text-rpg-magic font-cinzel tracking-wider text-sm">{change.category}</span>
                         <ul className="list-disc list-inside space-y-2 ml-2">
                           {change.items.map((item: string, iIdx: number) => (
