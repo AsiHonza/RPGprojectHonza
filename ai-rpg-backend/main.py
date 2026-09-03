@@ -446,13 +446,15 @@ ABSOLUTNÍ PRAVIDLA SVĚTA:
 4. Království: Kontinent je rozdělen na 7 království. 
 
 Zde jsou základní archetypy 7 království (kingdom_id 1 až 7):
-1K: Upadající Impérium (Zkorumpovaná šlechta)
-2K: Teokracie (Náboženští fanatici Řádu)
-3K: Divoké Kmeny (Přeživší v bažinách/lesích, krevní rituály)
-4K: Obchodní Gildy (Žoldáci a peníze, žádný král)
-5K: Karanténní Zóna (Magická pustina, monstra)
-6K: Severní Hradba (Militarizovaná stráž před zlem)
-7K: Útočiště Vyvolených (Tajemní mágové a izolace)
+  1K (Valerijské Impérium): Upadající Impérium (Zkorumpovaná šlechta)
+  2K (Svatá říše Solariova): Teokracie (Náboženští fanatici Řádu)
+  3K (Kmeny z Hlubokých hvozdů): Divoké Kmeny (Přeživší v bažinách/lesích, krevní rituály)
+  4K (Svobodná města): Obchodní Gildy (Žoldáci a peníze, žádný král)
+  5K (Karanténní Zóna): Magická pustina, zamořená monstry
+  6K (Železný Práh): Severní Hradba (Militarizovaná stráž před zlem)
+  7K (Tajemné Útočiště): Izolované útočiště Vyvolených (Mágové)
+
+  DŮLEŽITÉ: Ve výstupech (názvech lokací ani popisech) NIKDY nepoužívej generické názvy jako "Království 6". Místo toho vždy použij název dané frakce/území z tohoto seznamu (např. Železný Práh).
 
 Tady je JSON se všemi body zájmu (POI) na vygenerované mapě:
 {json.dumps(math_world['pois'], ensure_ascii=False)}
@@ -478,7 +480,7 @@ Tvým úkolem je vrátit POUZE validní JSON (žádný markdown, žádné koment
             
             # Merge math world and AI lore
             world_data = {
-                "hexes": math_world.get("hex_grid", []),
+                "hex_grid": math_world.get("hex_grid", []),
                 "pois": math_world["pois"],
                 "main_plot": ai_world_data.get("main_plot"),
                 "locations": ai_world_data.get("locations"),
@@ -539,10 +541,10 @@ Vrať POUZE json ve formátu:
     cls_data = CLASS_TEMPLATES.get(req.dnd_class, CLASS_TEMPLATES["Bojovník"]) # fallback
 
     initial_location = None
-    if world_data and world_data.get("hexes"):
+    if world_data and world_data.get("hex_grid"):
         # Put player somewhere near the center (0,0) or a starting village
         # Find hex (0,0) or closest
-        center_hex = next((h for h in world_data["hexes"] if h["q"] == 0 and h["r"] == 0), world_data["hexes"][0])
+        center_hex = next((h for h in world_data["hex_grid"] if h["q"] == 0 and h["r"] == 0), world_data["hex_grid"][0])
         initial_location = {"q": center_hex["q"], "r": center_hex["r"], "biome": center_hex.get("terrain", "Plains")}
 
     state = {
