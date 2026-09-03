@@ -47,7 +47,7 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
   };
 
   return (
-    <div className="min-h-screen bg-[#e5dfc5] bg-[url('https://www.transparenttextures.com/patterns/black-scales.png')] text-slate-900 flex flex-col items-center justify-center p-4 overflow-hidden relative">
+    <div className="min-h-screen bg-[#e5dfc5] bg-[url('https://www.transparenttextures.com/patterns/black-scales.png')] text-slate-900 flex flex-col items-center justify-center p-4 overflow-y-auto overflow-x-hidden relative">
       
       {/* Background Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-rpg-magic/10 blur-[120px] rounded-full pointer-events-none" />
@@ -87,7 +87,7 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
 
                 <div>
                   <label className="block font-lora text-xl mb-4 text-slate-800">Krev jakého rodu ti koluje v žilách?</label>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
+                  <div className="flex overflow-x-auto snap-x md:grid md:grid-cols-4 gap-2 sm:gap-4 pb-2 custom-scrollbar">
                     {races.map(r => (
                       <button 
                         key={r}
@@ -107,7 +107,7 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
               <motion.div key="step2" variants={pageVariants} initial="initial" animate="in" exit="out" className="space-y-8">
                 <div>
                   <label className="block font-lora text-xl mb-4 text-slate-800">Jakému řemeslu ses upsal?</label>
-                  <div className="grid grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 max-h-48 overflow-y-auto custom-scrollbar p-1">
+                  <div className="flex overflow-x-auto snap-x md:grid md:grid-cols-4 gap-2 sm:gap-3 md:max-h-48 md:overflow-y-auto custom-scrollbar p-1 pb-4">
                     {classes.map(c => (
                       <button 
                         key={c}
@@ -126,9 +126,9 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
                     <h3 className="font-cinzel text-rpg-magic text-lg flex items-center gap-2"><Settings2 size={18} /> Atributy (Standard Array)</h3>
                     <span className="text-xs text-slate-600 font-lora italic">Automaticky optimalizováno pro {dndClass}</span>
                   </div>
-                  <div className="grid grid-cols-3 md:grid-cols-6 gap-4 text-center">
+                  <div className="flex overflow-x-auto snap-x md:grid md:grid-cols-6 gap-2 sm:gap-4 text-center pb-2 custom-scrollbar">
                     {Object.entries(stats).map(([stat, val]) => (
-                      <div key={stat} className="bg-[#f9f6e6]/70 p-3 rounded-lg border border-amber-900/10">
+                      <div key={stat} className="shrink-0 snap-center min-w-[80px] md:min-w-0 bg-[#f9f6e6]/70 p-3 rounded-lg border border-amber-900/10">
                         <div className="text-xs uppercase text-slate-600 font-bold tracking-widest mb-1">{stat}</div>
                         <div className="text-2xl font-cinzel text-slate-900">{val}</div>
                       </div>

@@ -815,11 +815,11 @@ export default function Home() {
           animate={{ opacity: 1, scale: 1 }}
           className="max-w-4xl w-full z-10 relative flex flex-col items-center"
         >
-          <div className="mb-12 text-center">
+          <div className="mb-6 sm:mb-12 text-center">
             <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold text-rpg-magic tracking-widest md:tracking-[0.2em] font-cinzel drop-shadow-[0_0_20px_rgba(197,160,89,0.5)]">
               AELTHGARD
             </h1>
-            <p className="text-slate-700 font-lora text-xl tracking-widest mt-4 uppercase">AI Dungeons & Dragons RPG</p>
+            <p className="text-slate-700 font-lora text-sm sm:text-xl tracking-widest mt-2 sm:mt-4 uppercase">AI Dungeons & Dragons RPG</p>
           </div>
 
           {!isLoggedIn ? (
@@ -874,13 +874,13 @@ export default function Home() {
               </button>
             </div>
           ) : (
-            <div className="w-full flex flex-col items-center gap-8">
+            <div className="w-full flex flex-col items-center gap-4 sm:gap-8">
               <div className="text-center">
                 <h3 className="text-slate-700 font-lora text-lg">Tvé Legendy</h3>
                 <div className="h-px w-32 bg-gradient-to-r from-transparent via-rpg-magic to-transparent mx-auto mt-2" />
               </div>
 
-              <div className="flex flex-nowrap overflow-x-auto snap-x snap-mandatory gap-6 w-[100vw] sm:w-full max-w-7xl pb-8 px-4 custom-scrollbar justify-start items-center">
+              <div className="flex flex-nowrap overflow-x-auto snap-x snap-mandatory gap-6 w-[100vw] sm:w-full max-w-7xl pb-4 sm:pb-8 px-4 custom-scrollbar justify-start items-center">
                 {savedCharacters.map((char, idx) => (
                   <motion.div 
                     key={idx}
