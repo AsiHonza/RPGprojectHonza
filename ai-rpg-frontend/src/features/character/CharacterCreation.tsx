@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
-import { Settings2, Sparkles, ChevronRight, ChevronLeft, Crown, Shield, Wand2, Axe, Ghost, Skull, Book, Flame } from 'lucide-react';
+import { Settings2, Sparkles, ChevronRight, ChevronLeft, Crown, Shield, Wand2, Axe, Ghost, Skull, Book, Flame, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const CharacterCreation = ({ startNewGame, loading, backstory, generateBackstory, onClose }: any) => {
@@ -64,10 +64,21 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
             {step === 2 && "Cesta Meče a Magie"}
             {step === 3 && "Kniha Osudu"}
           </h2>
-          <div className="flex gap-2">
-            {[1, 2, 3].map(i => (
-              <div key={i} className={`h-2 w-12 rounded-full transition-all duration-500 ${step >= i ? 'bg-rpg-magic shadow-[0_0_8px_rgba(197,160,89,0.8)]' : 'bg-white/70'}`} />
-            ))}
+          <div className="flex items-center gap-4">
+            <div className="flex gap-2">
+              {[1, 2, 3].map(i => (
+                <div key={i} className={`h-2 w-12 rounded-full transition-all duration-500 ${step >= i ? 'bg-rpg-magic shadow-[0_0_8px_rgba(197,160,89,0.8)]' : 'bg-white/70'}`} />
+              ))}
+            </div>
+            {onClose && (
+              <button 
+                onClick={onClose} 
+                className="p-1 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-black/5 transition"
+                title="Zavřít a zpět do menu"
+              >
+                <X size={24} />
+              </button>
+            )}
           </div>
         </div>
 
@@ -191,11 +202,10 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
         {/* Navigation Buttons */}
         <div className="mt-8 flex justify-between items-center border-t border-amber-900/10 pt-6">
           <button 
-            onClick={handlePrev} 
-            disabled={step === 1}
-            className="px-6 py-3 font-cinzel tracking-widest text-slate-700 hover:text-slate-900 transition disabled:opacity-0 flex items-center gap-2"
+            onClick={step === 1 ? onClose : handlePrev} 
+            className="px-6 py-3 font-cinzel tracking-widest text-slate-700 hover:text-slate-900 transition flex items-center gap-2"
           >
-            <ChevronLeft size={20} /> Zpět
+            <ChevronLeft size={20} /> {step === 1 ? "Zpět do menu" : "Zpět"}
           </button>
           
           {step < 3 ? (

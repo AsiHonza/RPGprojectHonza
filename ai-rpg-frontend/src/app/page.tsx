@@ -10,7 +10,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 import { ItemIcon } from '../components/ui/ItemIcon';
 import { InventoryPanel } from '../features/character/InventoryPanel';
 import ReactPlayer from 'react-player';
-import { Send, Heart, Flame, Package, Sword, Shield, FlaskConical, Gem, Shirt, ScrollText, X, Volume2, VolumeX, User, Users, Settings2, Map, Sparkles, Skull, BookOpen, MapPin, Drumstick, Mail, Loader2, Trash2 , Brain , Menu } from "lucide-react";
+import { Send, Heart, Flame, Package, Sword, Shield, FlaskConical, Gem, Shirt, ScrollText, X, Volume2, VolumeX, User, Users, Settings2, Map, Sparkles, Skull, BookOpen, MapPin, Drumstick, Mail, Loader2, Trash2 , Brain , Menu, RotateCcw } from "lucide-react";
 import { CharacterCreation } from '../features/character/CharacterCreation';
 import { MapModal } from '../features/map/MapModal';
 import { QuestsModal } from '../features/character/QuestsModal';
@@ -614,7 +614,7 @@ export default function Home() {
         
         // Ensure UI updates properly to playing state
         setGameState("playing");
-        localStorage.setItem("aethelgard_active_char", characterName);
+        localStorage.setItem("aethelgard_active_char", name);
       } else {
         alert(data.detail || "Chyba při tvorbě.");
       }
@@ -874,13 +874,41 @@ export default function Home() {
             </div>
           ) : savedCharacters.length === 0 ? (
             <div className="text-center w-full max-w-sm bg-[#f9f6e6]/60 backdrop-blur-md p-8 rounded-2xl border border-amber-900/10 shadow-2xl">
-              <p className="text-slate-700 font-lora mb-6">Přihlášen: {email}</p>
-              <button 
-                onClick={() => setGameState("creation")}
-                className="w-full py-4 bg-rpg-blood border border-red-900/50 text-[#2d3748] font-cinzel font-bold text-xl rounded-xl hover:bg-red-800 hover:shadow-[0_0_20px_rgba(183,75,75,0.6)] transition uppercase tracking-widest"
-              >
-                Zrození Hrdiny
-              </button>
+              <p className="text-slate-700 font-lora mb-2 text-sm">Přihlášen: <span className="font-bold text-slate-900">{email}</span></p>
+              {loading ? (
+                <div className="py-8 flex flex-col items-center gap-3 text-rpg-magic font-cinzel">
+                  <Loader2 size={32} className="animate-spin" />
+                  <span>Načítám tvé hrdiny...</span>
+                </div>
+              ) : (
+                <>
+                  <p className="text-xs text-slate-500 font-lora mb-6">Zatím nemáš vytvořenou žádnou postavu pro tento e-mail.</p>
+                  <button 
+                    onClick={() => setGameState("creation")}
+                    className="w-full py-4 bg-rpg-blood border border-red-900/50 text-[#2d3748] font-cinzel font-bold text-xl rounded-xl hover:bg-red-800 hover:shadow-[0_0_20px_rgba(183,75,75,0.6)] transition uppercase tracking-widest"
+                  >
+                    Zrození Hrdiny
+                  </button>
+                  <div className="flex justify-between items-center mt-5 pt-3 border-t border-amber-900/10">
+                    <button 
+                      onClick={() => fetchCharacters(email)}
+                      className="text-xs text-slate-600 hover:text-slate-900 font-lora transition flex items-center gap-1.5"
+                    >
+                      <RotateCcw size={13} /> Obnovit postavy
+                    </button>
+                    <button 
+                      onClick={() => {
+                        localStorage.removeItem("aethelgard_session_email");
+                        localStorage.removeItem("aethelgard_active_char");
+                        window.location.reload();
+                      }}
+                      className="text-xs text-red-600 hover:text-red-800 font-lora transition"
+                    >
+                      Odhlásit se
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           ) : (
             <div className="w-full flex flex-col items-center gap-4 sm:gap-8">

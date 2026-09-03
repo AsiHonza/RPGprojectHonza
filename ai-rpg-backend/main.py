@@ -175,7 +175,8 @@ class ListCharactersRequest(BaseModel):
 @app.post("/list-characters")
 async def list_characters(req: ListCharactersRequest):
     try:
-        db_res = supabase.table("characters").select("api_key, name, race, dnd_class, stats, state").ilike("api_key", f"{req.email}#%").execute()
+        clean_email = req.email.strip()
+        db_res = supabase.table("characters").select("api_key, name, race, dnd_class, stats, state").ilike("api_key", f"{clean_email}#%").execute()
         return {"status": "success", "characters": db_res.data}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -187,10 +188,15 @@ class LoadGameRequest(BaseModel):
 @app.post("/load-game")
 async def load_game(req: LoadGameRequest):
     try:
-        api_key = f"{req.email}#{req.name}"
-        db_res = supabase.table("characters").select("*").eq("api_key", api_key).execute()
+        clean_email = req.email.strip()
+        clean_name = req.name.strip()
+        api_key = f"{clean_email}#{clean_name}"
+        db_res = supabase.table("characters").select("*").ilike("api_key", api_key).execute()
         if not db_res.data:
-            raise HTTPException(status_code=404, detail="Character not found.")
+            # Fallback exact match
+            db_res = supabase.table("characters").select("*").eq("api_key", api_key).execute()
+            if not db_res.data:
+                raise HTTPException(status_code=404, detail="Character not found.")
         return {"status": "success", "character": db_res.data[0]}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
