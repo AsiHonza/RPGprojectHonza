@@ -435,7 +435,7 @@ async def create_character(req: CharacterCreateRequest):
             
             math_world = world_generator.generate_world_data()
             
-            client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+            client = genai.Client(api_key=req.api_key if req.api_key and "DUMMY" not in req.api_key else os.environ.get("GEMINI_API_KEY"))
             world_prompt = f"""
 NAVRHUJEŠ WORLD BIBLE PRO HIGH FANTASY KAMPAŇ (AELTHGARD).
 
@@ -490,7 +490,7 @@ Tvým úkolem je vrátit POUZE validní JSON s následující strukturou:
 
     # 2. Vygenerujeme Intro pomoci sveta
     try:
-        client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+        client = genai.Client(api_key=req.api_key if req.api_key and "DUMMY" not in req.api_key else os.environ.get("GEMINI_API_KEY"))
         world_context = ""
         if world_data:
             import json
@@ -920,7 +920,7 @@ async def travel_action(req: TravelRequest):
     # Check for POI
     poi = next((l for l in locations if l["q"] == req.target_q and l["r"] == req.target_r), None)
     
-    client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+    client = genai.Client(api_key=req.api_key if req.api_key and "DUMMY" not in req.api_key else os.environ.get("GEMINI_API_KEY"))
     
     import random
     encounter = random.random() < 0.25 # 25% chance of random encounter
