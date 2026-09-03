@@ -489,6 +489,19 @@ Tvým úkolem je vrátit POUZE validní JSON (žádný markdown, žádné koment
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Chyba při generování světa: {str(e)}")
 
+    # 1b. Určíme startovní pozici hráče (hlavní město náhodného království)
+    initial_location = None
+    start_kingdom_name = "Začátek cesty"
+    if world_data and world_data.get("pois"):
+        import random
+        capitals = [p for p in world_data["pois"] if p.get("type") == "Capital"]
+        if capitals:
+            start_poi = random.choice(capitals)
+            initial_location = {"q": start_poi["q"], "r": start_poi["r"], "biome": start_poi.get("terrain", "Plains"), "kingdom_id": start_poi.get("kingdom_id")}
+        else:
+            center_hex = world_data.get("hex_grid", [{}])[0]
+            initial_location = {"q": center_hex.get("q", 0), "r": center_hex.get("r", 0), "biome": center_hex.get("terrain", "Plains")}
+
     # 2. Vygenerujeme Intro pomoci sveta
     try:
         client = genai.Client(api_key=req.api_key if req.api_key and "DUMMY" not in req.api_key else os.environ.get("GEMINI_API_KEY"))
@@ -542,22 +555,12 @@ Vrať POUZE json ve formátu:
         raise HTTPException(status_code=500, detail=f"Chyba při generování intro textu: {str(e)}")
         
     initial_history = [
-        {"role": "model", "text": json.dumps({"aktualni_region": "Začátek cesty", "popis_okoli": popis_okoli, "vypravec": intro_text, "nabizene_akce": ["Rozhlédnout se", "Zkontrolovat vybavení", "Vydat se vpřed"]}, ensure_ascii=False)}
+        {"role": "model", "text": json.dumps({"aktualni_region": start_kingdom_name if world_data else "Začátek cesty", "popis_okoli": popis_okoli, "vypravec": intro_text, "nabizene_akce": ["Rozhlédnout se", "Zkontrolovat vybavení", "Vydat se vpřed"]}, ensure_ascii=False)}
     ]
 
     # Nacteni tridnich dat
     cls_data = CLASS_TEMPLATES.get(req.dnd_class, CLASS_TEMPLATES["Bojovník"]) # fallback
 
-    initial_location = None
-    if world_data and world_data.get("pois"):
-        import random
-        capitals = [p for p in world_data["pois"] if p.get("type") == "Capital"]
-        if capitals:
-            start_poi = random.choice(capitals)
-            initial_location = {"q": start_poi["q"], "r": start_poi["r"], "biome": start_poi.get("terrain", "Plains"), "kingdom_id": start_poi.get("kingdom_id")}
-        else:
-            center_hex = world_data.get("hex_grid", [{}])[0]
-            initial_location = {"q": center_hex.get("q",0), "r": center_hex.get("r",0), "biome": center_hex.get("terrain", "Plains")}
     state = {
         "hp": 100,
         "max_hp": 100,
