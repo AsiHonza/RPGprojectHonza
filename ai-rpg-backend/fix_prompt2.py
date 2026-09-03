@@ -1,18 +1,33 @@
-ï»¿import codecs
+import re
 
-with codecs.open("main.py", "r", "utf-8") as f:
-    lines = f.readlines()
+with open('app/routers/game.py', 'r', encoding='utf-8') as f:
+    text = f.read()
 
-new_lines = []
-for line in lines:
-    if "popis_okoli" in line and "image_prompt" in line:
-        new_lines.append('- Do \'image_prompt\' detailnÄ› popiÅ¡te aktuÃ¡lnÃ­ scÃ©nu (bez textu). VÅ½DY NA KONEC PÅ˜IDEJTE TENTO STYL: "style of detailed 2D painterly fantasy concept art, bright vibrant colors, majestic epic scale, cozy atmosphere, studio ghibli meets classic D&D illustrations". Do \'popis_okoli\' struÄnÄ› popiÅ¡te situaci.\n')
-    elif "black and white ink drawing portrait" in line:
-        line = line.replace("black and white ink drawing portrait", "detailed 2D painterly fantasy portrait, vibrant colors")
-        new_lines.append(line)
-    else:
-        new_lines.append(line)
+# Fix the json dump to include quests, npcs, journal, but exclude history and world data.
+old_dump = '''json.dumps({
+    k: v for k, v in char_data.get('state', {}).items() 
+    if k not in ['worldData', 'history', 'quests', 'npcs', 'journal']
+}, ensure_ascii=False)'''
 
-with codecs.open("main.py", "w", "utf-8") as f:
-    f.writelines(new_lines)
-print("Prompt completely fixed!")
+new_dump = '''json.dumps({
+    k: v for k, v in char_data.get('state', {}).items() 
+    if k not in ['worldData', 'world_data', 'history']
+}, ensure_ascii=False)'''
+
+text = text.replace(old_dump, new_dump)
+
+# Optimize world_prompt_str to not include EVERY location and EVERY NPC in the entire world.
+# Find the world_prompt_str block
+pattern = r"world_prompt_str = f\"\\n\[TOTO JE.*?\\n\""
+replacement = '''
+            # Filter locations to only the current region to save massive amounts of tokens
+            current_region = state_dict.get('currentRegion') or state_dict.get('aktualni_region')
+            local_locations = [loc for loc in world_data.get('locations', []) if loc.get('nazev') == current_region]
+            
+            world_prompt_str = f"\\n[TOTO JE ØÍZENİ SANDBOX! Svìt je pevnì dán:]\\nZápletka: {world_data.get('main_plot', '')}\\nAktuální lokace info: {json.dumps(local_locations, ensure_ascii=False)}\\n\\n[KRITICKÉ PRAVIDLO PRO TAJEMSTVÍ]: Všechna 'tajemstvi_nebo_problem' a 'skryty_motiv' jsou pøed hráèem PØÍSNÌ SKRYTÁ. Nesmíš je hráèi vyvanit v úvodním popisu lokace! Hráè na nì musí pøijít sám pomocí prùzkumu, dedukce nebo dialogù s NPC.\\n"
+'''
+
+text = re.sub(pattern, replacement.strip(), text, flags=re.DOTALL)
+
+with open('app/routers/game.py', 'w', encoding='utf-8') as f:
+    f.write(text)
