@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import { User, ScrollText, Volume2, VolumeX, Settings2, Menu, Map, Users, Package, MapPin, Sparkles, Heart, Drumstick, BookOpen } from 'lucide-react';
 import { useGameStore } from '../../store/gameStore';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -14,6 +14,21 @@ export const PlayerHeader = ({
   setQuestsOpen,
   setSkillsOpen
 }: any) => {
+
+  const getAvatarVideo = (r: string) => {
+    if (!r) return null;
+    const lower = r.toLowerCase();
+    if (lower.includes('člověk') || lower.includes('clovek')) return '/video/avatars/clovek.mp4';
+    if (lower.includes('elf')) return '/video/avatars/elf.mp4';
+    if (lower.includes('trpasl')) return '/video/avatars/trpaslik.mp4';
+    if (lower.includes('půlč') || lower.includes('pulc')) return '/video/avatars/pulcik.mp4';
+    if (lower.includes('drak')) return '/video/avatars/drakorozeny.mp4';
+    if (lower.includes('tiefling')) return '/video/avatars/tiefling.mp4';
+    if (lower.includes('ork') || lower.includes('orc')) return '/video/avatars/pulork.mp4';
+    if (lower.includes('gnóm') || lower.includes('gnom')) return '/video/avatars/gnom.mp4';
+    return null;
+  };
+  const [avatarError, setAvatarError] = useState(false);
   const { 
     name, level, race, dndClass, hp, xp, 
     musicPlaying, setMusicPlaying, unreadQuests, setUnreadQuests,
@@ -34,7 +49,17 @@ export const PlayerHeader = ({
         <div className="flex items-center gap-4 flex-1">
           {/* Avatar */}
           <div className="w-14 h-14 bg-gradient-to-br from-[#2b4c5e] to-rpg-obsidian border-2 border-rpg-magic rounded-full flex items-center justify-center text-rpg-paper relative shadow-[0_0_15px_rgba(212,175,55,0.2)]">
-            <User size={28} />
+
+            {getAvatarVideo(race) && !avatarError ? (
+              <video 
+                src={getAvatarVideo(race)!} 
+                autoPlay loop muted playsInline 
+                className="w-full h-full object-cover rounded-full"
+                onError={() => setAvatarError(true)}
+              />
+            ) : (
+              <User size={28} />
+            )}
             <div className="absolute -bottom-1 -right-1 bg-rpg-obsidian text-rpg-magic text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center border border-rpg-magic shadow-lg">
               {level}
             </div>
