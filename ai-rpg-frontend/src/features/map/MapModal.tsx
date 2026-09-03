@@ -10,6 +10,18 @@ function hexDistance(q1: number, r1: number, q2: number, r2: number) {
 
 export const MapModal = ({ isOpen, onClose, setSelectedItem, onTravel }: any) => {
   const { worldData, playerLocation, day, rations } = useGameStore();
+
+  const translateTerrain = (t: string) => {
+    switch(t) {
+      case 'Ocean': return 'Oceán';
+      case 'Mountains': return 'Hory';
+      case 'Forest': return 'Les';
+      case 'Swamp': return 'Bažina';
+      case 'Wasteland': return 'Pustina';
+      case 'Plains': return 'Pláně';
+      default: return t;
+    }
+  };
   const [selectedHex, setSelectedHex] = useState<any>(null);
 
   if (!isOpen) return null;
@@ -109,14 +121,14 @@ export const MapModal = ({ isOpen, onClose, setSelectedItem, onTravel }: any) =>
               </div>
               
               <div className="text-slate-800 font-lora text-sm mb-4">
-                <p><strong>Terén:</strong> {selectedHex.terrain}</p>
+                <p><strong>Terén:</strong> {translateTerrain(selectedHex.terrain)}</p>
                 <p className="mt-1">{selectedHex.popis || "Pustý kraj bez zajímavostí."}</p>
               </div>
 
               {dist > 0 && (
                 <div className="bg-[#f9f6e6]/70 p-3 rounded border border-gray-700 mb-4 text-sm font-lora">
                   <p className="text-slate-800 mb-1">Náklady na cestu:</p>
-                  <ul className="text-rpg-blood">
+                  <ul className="text-amber-900 font-bold">
                     <li>⏱ 1 Den</li>
                     <li>🍖 1 Zásoba (Jídlo)</li>
                   </ul>

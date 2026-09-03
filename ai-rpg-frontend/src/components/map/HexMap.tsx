@@ -36,6 +36,29 @@ export default function HexMap({ worldData, onHexClick, setSelectedItem, playerL
   const grid = new Grid(CustomHex, hexes);
 
   // Pastel watercolor tints for 7 kingdoms
+
+  const translateTerrain = (t: string) => {
+    switch(t) {
+      case 'Ocean': return 'Oceán';
+      case 'Mountains': return 'Hory';
+      case 'Forest': return 'Les';
+      case 'Swamp': return 'Bažina';
+      case 'Wasteland': return 'Pustina';
+      case 'Plains': return 'Pláně';
+      default: return t;
+    }
+  };
+
+  const translatePoi = (p: string) => {
+    switch(p) {
+      case 'Capital': return 'Hlavní Město';
+      case 'Village': return 'Vesnice';
+      case 'Dungeon': return 'Temnice';
+      case 'Shrine': return 'Svatyně';
+      case 'Ruin': return 'Ruina';
+      default: return p;
+    }
+  };
   const getKingdomColor = (k_id: number | null) => {
     switch (k_id) {
       case 1: return 'fill-red-900/20'; // Aurelie
@@ -51,12 +74,12 @@ export default function HexMap({ worldData, onHexClick, setSelectedItem, playerL
 
   const getTerrainIcon = (terrain: string) => {
     switch (terrain) {
-      case 'Ocean': return <Waves size={14} className="text-[#2b4c5e]/40" />;
-      case 'Mountains': return <Mountain size={16} className="text-[#455a64]/60" />;
-      case 'Forest': return <Trees size={16} className="text-[#2d4c1e]/60" />;
-      case 'Swamp': return <Droplets size={14} className="text-[#3d4536]/60" />;
-      case 'Wasteland': return <Flame size={14} className="text-[#b74b4b]/40" />;
-      case 'Plains': return null; // Clean parchment
+      case 'Oceán': return <Waves size={14} className="text-[#2b4c5e]/40" />;
+      case 'Hory': return <Mountain size={16} className="text-[#455a64]/60" />;
+      case 'Les': return <Trees size={16} className="text-[#2d4c1e]/60" />;
+      case 'Bažina': return <Droplets size={14} className="text-[#3d4536]/60" />;
+      case 'Pustina': return <Flame size={14} className="text-[#b74b4b]/40" />;
+      case 'Pláně': return null; // Clean parchment
       default: return null;
     }
   };
@@ -64,11 +87,11 @@ export default function HexMap({ worldData, onHexClick, setSelectedItem, playerL
   const getPoiIcon = (poi: string) => {
     if (!poi) return null;
     switch (poi) {
-      case 'Capital': return <Castle size={20} className="text-rpg-magic drop-shadow-[0_0_5px_rgba(197,160,89,0.8)]" />;
-      case 'Village': return <Home size={16} className="text-rpg-paper drop-shadow-md" />;
-      case 'Dungeon': return <Skull size={18} className="text-rpg-blood drop-shadow-[0_0_5px_rgba(183,75,75,0.8)]" />;
-      case 'Shrine': return <Star size={16} className="text-indigo-800 drop-shadow-[0_0_5px_rgba(165,180,252,0.8)]" />;
-      case 'Ruin': return <Eye size={16} className="text-[#90a4ae] drop-shadow-md" />;
+      case 'Hlavní Město': return <Castle size={20} className="text-rpg-magic drop-shadow-[0_0_5px_rgba(197,160,89,0.8)]" />;
+      case 'Vesnice': return <Home size={16} className="text-rpg-paper drop-shadow-md" />;
+      case 'Temnice': return <Skull size={18} className="text-rpg-blood drop-shadow-[0_0_5px_rgba(183,75,75,0.8)]" />;
+      case 'Svatyně': return <Star size={16} className="text-indigo-800 drop-shadow-[0_0_5px_rgba(165,180,252,0.8)]" />;
+      case 'Ruina': return <Eye size={16} className="text-[#90a4ae] drop-shadow-md" />;
       default: return <MapPin size={16} className="text-rpg-paper" />;
     }
   };
@@ -108,16 +131,16 @@ export default function HexMap({ worldData, onHexClick, setSelectedItem, playerL
                 {/* Kingdom Watercolor Tint */}
                 <polygon 
                   points={points}
-                  className={`${getKingdomColor(hexData.kingdom_id)} stroke-[#455a64]/20 stroke-[0.5] transition-all duration-300 group-hover:stroke-rpg-magic group-hover:stroke-2 group-hover:fill-rpg-magic/10 cursor-pointer`}
+                  className={`${getKingdomColor(hexData.kingdom_id)} ${(playerLocation?.q === hexData.q && playerLocation?.r === hexData.r) ? "stroke-red-600 stroke-[2] drop-shadow-[0_0_8px_rgba(220,38,38,0.8)]" : "stroke-[#455a64]/30 stroke-[1]"} transition-all duration-300 group-hover:stroke-rpg-magic group-hover:stroke-2 group-hover:fill-rpg-magic/10 cursor-pointer`}
                 />
                 
                 {/* Terrain Ink Icon */}
                 {!hexData.poi && (
                     <foreignObject 
-                    x={x + HEX_SIZE - 8} 
-                    y={y + HEX_SIZE * 0.866 - 8} 
-                    width={16} 
-                    height={16}
+                    x={x}
+                    y={y}
+                    width={28}
+                    height={32}
                     className="pointer-events-none overflow-visible opacity-70"
                     >
                     <div className="flex items-center justify-center w-full h-full">
@@ -130,10 +153,10 @@ export default function HexMap({ worldData, onHexClick, setSelectedItem, playerL
                 {/* Player Pawn */}
                 {playerLocation?.q === hexData.q && playerLocation?.r === hexData.r && (
                   <foreignObject 
-                    x={x + HEX_SIZE - 12} 
-                    y={y + HEX_SIZE * 0.866 - 20} 
-                    width={24} 
-                    height={24}
+                    x={x}
+                    y={y}
+                    width={28}
+                    height={32}
                     className="pointer-events-none overflow-visible z-50 animate-bounce"
                   >
                     <div className="flex items-center justify-center w-full h-full text-red-600 drop-shadow-[0_0_8px_rgba(220,38,38,0.9)]">
@@ -144,10 +167,10 @@ export default function HexMap({ worldData, onHexClick, setSelectedItem, playerL
                 {/* POI Icon */}
                 {hexData.poi && (
                   <foreignObject 
-                    x={x + HEX_SIZE - 12} 
-                    y={y + HEX_SIZE * 0.866 - 12} 
-                    width={24} 
-                    height={24}
+                    x={x}
+                    y={y}
+                    width={28}
+                    height={32}
                     className="pointer-events-none overflow-visible"
                   >
                     <div className="flex items-center justify-center w-full h-full">
@@ -159,8 +182,8 @@ export default function HexMap({ worldData, onHexClick, setSelectedItem, playerL
                 {/* Map Name Overlay (Only for Kingdoms or Capitals to avoid clutter) */}
                 {hexData.nazev && hexData.poi === 'Capital' && (
                   <text 
-                    x={x + HEX_SIZE} 
-                    y={y + HEX_SIZE * 0.866 + 18} 
+                    x={x + 13.85}
+                    y={y + 16 + 14}
                     textAnchor="middle" 
                     className="text-[7px] font-cinzel font-bold fill-[#111827] drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)] pointer-events-none uppercase tracking-widest"
                   >
@@ -190,7 +213,7 @@ export default function HexMap({ worldData, onHexClick, setSelectedItem, playerL
             ) : (
                 <>
                     <h3 className="font-cinzel font-bold text-slate-900 text-md capitalize">
-                        {hoveredHex.terrain}
+                        {translateTerrain(hoveredHex.terrain)}
                     </h3>
                     {hoveredHex.kingdom_id && <p className="font-lora text-rpg-muted text-xs mt-1">Království {hoveredHex.kingdom_id}</p>}
                 </>
@@ -198,7 +221,7 @@ export default function HexMap({ worldData, onHexClick, setSelectedItem, playerL
             
             {hoveredHex.poi && (
               <div className="mt-2 text-xs font-bold uppercase tracking-widest text-[#90a4ae] border-t border-[#2b4c5e] pt-2">
-                {hoveredHex.poi}
+                {translatePoi(hoveredHex.poi)}
               </div>
             )}
           </motion.div>

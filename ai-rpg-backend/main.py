@@ -534,7 +534,7 @@ Vrať POUZE json ve formátu:
         raise HTTPException(status_code=500, detail=f"Chyba při generování intro textu: {str(e)}")
         
     initial_history = [
-        {"role": "model", "text": f'''{{"aktualni_region": "Začátek cesty", "popis_okoli": "{popis_okoli}", "vypravec": "{intro_text}", "nabizene_akce": ["Rozhlédnout se", "Zkontrolovat vybavení", "Vydat se vpřed"]}}'''}
+        {"role": "model", "text": json.dumps({"aktualni_region": "Začátek cesty", "popis_okoli": popis_okoli, "vypravec": intro_text, "nabizene_akce": ["Rozhlédnout se", "Zkontrolovat vybavení", "Vydat se vpřed"]}, ensure_ascii=False)}
     ]
 
     # Nacteni tridnich dat
