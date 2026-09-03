@@ -136,48 +136,24 @@ export default function HexMap({ worldData, onHexClick, setSelectedItem, playerL
                 
                 {/* Terrain Ink Icon */}
                 {!hexData.poi && (
-                    <foreignObject 
-                      x={x - 14}
-                      y={y - 16}
-                    width={28}
-                    height={32}
-                    className="pointer-events-none overflow-visible opacity-70"
-                    >
-                    <div className="flex items-center justify-center w-full h-full">
-                        {getTerrainIcon(hexData.terrain)}
-                    </div>
-                    </foreignObject>
-                )}
+                    <g transform={`translate(${x - 8}, ${y - 8})`} className="pointer-events-none opacity-70 mix-blend-multiply">
+                      {getTerrainIcon(hexData.terrain)}
+                    </g>
+                  )}
 
 
                 {/* Player Pawn */}
                 {playerLocation?.q === hexData.q && playerLocation?.r === hexData.r && (
-                  <foreignObject 
-                      x={x - 14}
-                      y={y - 16}
-                    width={28}
-                    height={32}
-                    className="pointer-events-none overflow-visible z-50 animate-bounce"
-                  >
-                    <div className="flex items-center justify-center w-full h-full text-red-600 drop-shadow-[0_0_8px_rgba(220,38,38,0.9)]">
+                    <g transform={`translate(${x - 12}, ${y - 12})`} className="pointer-events-none z-50 animate-bounce text-red-600 drop-shadow-[0_0_8px_rgba(220,38,38,0.9)]">
                       <User size={24} strokeWidth={3} />
-                    </div>
-                  </foreignObject>
-                )}
+                    </g>
+                  )}
                 {/* POI Icon */}
                 {hexData.poi && (
-                  <foreignObject 
-                      x={x - 14}
-                      y={y - 16}
-                    width={28}
-                    height={32}
-                    className="pointer-events-none overflow-visible"
-                  >
-                    <div className="flex items-center justify-center w-full h-full">
+                    <g transform={`translate(${x - 10}, ${y - 10})`} className="pointer-events-none z-10">
                       {getPoiIcon(hexData.poi)}
-                    </div>
-                  </foreignObject>
-                )}
+                    </g>
+                  )}
                 
                 {/* Map Name Overlay (Only for Kingdoms or Capitals to avoid clutter) */}
                 {hexData.nazev && hexData.poi === 'Capital' && (
