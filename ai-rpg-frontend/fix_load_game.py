@@ -1,70 +1,17 @@
 ﻿import codecs
 
-with codecs.open("src/app/page.tsx", "r", "utf-8") as f:
-    content = f.read()
+lines = codecs.open('src/app/page.tsx', 'r', 'utf-8').readlines()
 
-old_state_load = """        const state = data.character.state || {};
-        setHp(state.hp || 100);
-        if (state.gold !== undefined) setGold(state.gold);
-        if (state.currentSpellSlots !== undefined) setCurrentSpellSlots(state.currentSpellSlots);
-        if (state.maxSpellSlots !== undefined) setMaxSpellSlots(state.maxSpellSlots);
-        setInventory(state.inventory || []);
-        setEquipped(state.equipped || {
-          "hlava": null,
-          "hruď": null,
-          "hlavní ruka": null,
-          "druhá ruka": null,
-          "prsten": null,
-          "krk": null
-        });"""
+for i, l in enumerate(lines):
+    if 'const loadGame = async (characterName: string) => {' in l:
+        lines[i] = '  const loadGame = async (characterName: string, overrideEmail: string = email) => {\n'
+    if 'if (!email || !characterName)' in l and 'alert(' in l:
+        lines[i] = '    if (!overrideEmail || !characterName) return alert("Přihlaste se a vyberte postavu!");\n'
+    if 'body: JSON.stringify({ email: email, api_key: "DUMMY", name: characterName }),' in l:
+        lines[i] = '        body: JSON.stringify({ email: overrideEmail, api_key: "DUMMY", name: characterName }),\n'
+    if 'setGameState("playing");' in l and 'loadGame' in "".join(lines[max(0, i-100):i]):
+        lines.insert(i+1, '        localStorage.setItem("aethelgard_active_char", characterName);\n')
+        break
 
-new_state_load = """        const state = data.character.state || {};
-        setHp(state.hp || 100);
-        if (state.gold !== undefined) setGold(state.gold);
-        if (state.currentSpellSlots !== undefined) setCurrentSpellSlots(state.currentSpellSlots);
-        if (state.maxSpellSlots !== undefined) setMaxSpellSlots(state.maxSpellSlots);
-        setInventory(state.inventory || []);
-        setEquipped(state.equipped || {
-          "hlava": null,
-          "hruď": null,
-          "hlavní ruka": null,
-          "druhá ruka": null,
-          "prsten": null,
-          "krk": null
-        });
-        setLevel(state.level || 1);
-        setXp(state.xp || 0);
-        setSkillPoints(state.skillPoints || 0);
-        setSkills(state.skills || []);
-        setInCombat(state.inCombat || false);
-        setEnemies(state.enemies || []);
-        setQuests(state.quests || []);
-        if (state.stats) setStats(state.stats);
-        if (state.locationType) setLocationType(state.locationType);
-        if (state.currentRegion) setCurrentRegion(state.currentRegion);
-        if (state.pointsOfInterest) setPointsOfInterest(state.pointsOfInterest);
-"""
-
-# The strings might have encoding issues with "hruď" in powershell vs "hru" in file
-# Let's replace just around `setInventory(state.inventory || []);`
-# Wait, I'll use regex.
-import re
-new_additional = """
-        setLevel(state.level || 1);
-        setXp(state.xp || 0);
-        setSkillPoints(state.skillPoints || 0);
-        setSkills(state.skills || []);
-        setInCombat(state.inCombat || false);
-        setEnemies(state.enemies || []);
-        setQuests(state.quests || []);
-        if (state.stats) setStats(state.stats);
-        if (state.locationType) setLocationType(state.locationType);
-        if (state.currentRegion) setCurrentRegion(state.currentRegion);
-        if (state.pointsOfInterest) setPointsOfInterest(state.pointsOfInterest);
-"""
-
-content = content.replace('setGameState("playing");', new_additional + '\n        setGameState("playing");')
-
-with codecs.open("src/app/page.tsx", "w", "utf-8") as f:
-    f.write(content)
-print("loadGame state restored!")
+with codecs.open('src/app/page.tsx', 'w', 'utf-8') as f:
+    f.write("".join(lines))

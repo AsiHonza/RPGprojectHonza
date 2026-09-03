@@ -40,6 +40,15 @@ export const SettingsModal = ({ isOpen, onClose }: any) => {
                   className="w-full accent-[#b74b4b]"
                 />
               
+
+              <div className="pt-4 mt-2 border-t border-[#90a4ae]">
+                <button onClick={() => {
+                  localStorage.removeItem("aethelgard_active_char");
+                  window.location.reload();
+                }} className="w-full py-2 border-2 border-amber-900/50 text-slate-800 rounded font-bold hover:bg-amber-900/10 transition flex justify-center items-center gap-2">
+                  Zpět do menu (Odejít ze hry)
+                </button>
+              </div>
               <div className="pt-4 mt-6 border-t border-[#90a4ae]">
                 <a href="mailto:janmlcak6@gmail.com?subject=Zpětná vazba - Aethelgard" className="w-full py-2 bg-[#2b4c5e] text-[#f4f1e1] rounded font-bold hover:bg-[#1e3746] transition flex justify-center items-center gap-2">
                   <Mail size={18} /> Odeslat zpětnou vazbu

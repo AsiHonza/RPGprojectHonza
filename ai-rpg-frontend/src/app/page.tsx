@@ -369,6 +369,7 @@ export default function Home() {
       if (!res.ok) throw new Error(data.detail || "Authentication failed");
       
       setIsLoggedIn(true);
+      localStorage.setItem("aethelgard_session_email", email);
       fetchCharacters(email);
     } catch (error: any) {
       alert("Chyba přihlášení: " + error.message);
@@ -398,10 +399,17 @@ export default function Home() {
 
   useEffect(() => {
     const savedEmail = localStorage.getItem("aethelgard_session_email");
+    const savedChar = localStorage.getItem("aethelgard_active_char");
+    
     if (savedEmail) {
       setEmail(savedEmail);
       setIsLoggedIn(true);
       fetchCharacters(savedEmail);
+      
+      if (savedChar) {
+        // Auto resume game!
+        loadGame(savedChar, savedEmail);
+      }
     }
   }, []);
 
@@ -425,14 +433,14 @@ export default function Home() {
     }
   };
 
-  const loadGame = async (characterName: string) => {
-    if (!email || !characterName) return alert("Přihlaste se a vyberte postavu!");
+  const loadGame = async (characterName: string, overrideEmail: string = email) => {
+    if (!overrideEmail || !characterName) return alert("Přihlaste se a vyberte postavu!");
     setLoading(true);
     try {
       const res = await fetch(`${API_URL}/load-game`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email, api_key: "DUMMY", name: characterName }),
+        body: JSON.stringify({ email: overrideEmail, api_key: "DUMMY", name: characterName }),
       });
       const data = await res.json();
       
@@ -562,6 +570,7 @@ export default function Home() {
         
         // Ensure UI updates properly to playing state
         setGameState("playing");
+        localStorage.setItem("aethelgard_active_char", characterName);
       } else {
         alert(data.detail || "Chyba při tvorbě.");
       }
@@ -880,6 +889,17 @@ export default function Home() {
                 <Sparkles size={16} />
                 Vytvořit Novou Legendu
               </button>
+
+                <button 
+                  onClick={() => {
+                    localStorage.removeItem("aethelgard_session_email");
+                    localStorage.removeItem("aethelgard_active_char");
+                    window.location.reload();
+                  }}
+                  className="mt-4 px-8 py-2 text-slate-500 font-lora hover:text-slate-800 transition text-sm flex items-center gap-2"
+                >
+                  Odhlásit se
+                </button>
             </div>
           )}
         </motion.div>

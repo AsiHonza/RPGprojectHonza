@@ -1,27 +1,22 @@
 ﻿import codecs
 
-with codecs.open("src/app/page.tsx", "r", "utf-8") as f:
-    content = f.read()
+lines = codecs.open('src/features/ui/SettingsModal.tsx', 'r', 'utf-8').readlines()
 
-settings_addition = """              <div>
-                <label className="flex justify-between text-[#3d2b1f] font-bold mb-2">
-                  <span>Gemini API Klíč</span>
-                </label>
-                <input 
-                  type="password"
-                  value={apiKey}
-                  onChange={e => setApiKey(e.target.value)}
-                  className="w-full bg-[#e8dcc4] text-[#3d2b1f] border border-[#c4a47c] rounded p-2"
-                  placeholder="Zadejte Gemini klíč..."
-                />
-                <p className="text-xs text-[#8b1e1e] mt-1">Nutné pro hru.</p>
-              </div>"""
+new_logic = """
+              <div className="pt-4 mt-2 border-t border-[#90a4ae]">
+                <button onClick={() => {
+                  localStorage.removeItem("aethelgard_active_char");
+                  window.location.reload();
+                }} className="w-full py-2 border-2 border-amber-900/50 text-slate-800 rounded font-bold hover:bg-amber-900/10 transition flex justify-center items-center gap-2">
+                  Zpět do menu (Odejít ze hry)
+                </button>
+              </div>
+"""
 
-content = content.replace(
-    '            <div className="space-y-6">\n              <div>\n                <label className="flex justify-between text-[#3d2b1f] font-bold mb-2">',
-    '            <div className="space-y-6">\n' + settings_addition + '\n              <div>\n                <label className="flex justify-between text-[#3d2b1f] font-bold mb-2">'
-)
+for i, l in enumerate(lines):
+    if '<div className="pt-4 mt-6 border-t border-[#90a4ae]">' in l:
+        lines.insert(i, new_logic)
+        break
 
-with codecs.open("src/app/page.tsx", "w", "utf-8") as f:
-    f.write(content)
-print("Settings updated!")
+with codecs.open('src/features/ui/SettingsModal.tsx', 'w', 'utf-8') as f:
+    f.write("".join(lines))
