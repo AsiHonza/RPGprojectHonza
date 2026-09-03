@@ -850,7 +850,7 @@ export default function Home() {
 
   if (gameState === "menu") {
     return (
-      <div className="min-h-screen w-full max-w-full text-[#2d3748] flex flex-col items-center justify-center p-4 font-serif relative overflow-x-hidden bg-black">
+      <div className="h-[100dvh] max-h-[100dvh] w-full max-w-full text-[#2d3748] flex flex-col items-center justify-center p-2 sm:p-4 font-serif relative overflow-hidden bg-[#e5dfc5]">
         
         {/* Deep background fog */}
         <SeamlessVideo src="/video/bg1.mp4" className="absolute inset-0 w-full h-full z-0 pointer-events-none opacity-60" />
@@ -860,13 +860,13 @@ export default function Home() {
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="max-w-5xl w-full z-10 relative flex flex-col items-center mx-auto my-auto"
+          className="max-w-5xl w-full z-10 relative flex flex-col items-center mx-auto my-auto shrink-0"
         >
-          <div className="mb-6 sm:mb-12 text-center">
-            <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold text-rpg-magic tracking-widest md:tracking-[0.2em] font-cinzel drop-shadow-[0_0_20px_rgba(197,160,89,0.5)]">
+          <div className="mb-2 sm:mb-3 text-center shrink-0">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-rpg-magic tracking-widest md:tracking-[0.2em] font-cinzel drop-shadow-[0_0_20px_rgba(197,160,89,0.5)]">
               AELTHGARD
             </h1>
-            <p className="text-slate-700 font-lora text-sm sm:text-xl tracking-widest mt-2 sm:mt-4 uppercase">AI Dungeons & Dragons RPG</p>
+            <p className="text-slate-700 font-lora text-xs sm:text-sm tracking-widest mt-1 uppercase">AI Dungeons & Dragons RPG</p>
           </div>
 
           {!isLoggedIn ? (
@@ -964,7 +964,7 @@ export default function Home() {
                   localStorage.removeItem("aethelgard_active_char");
                   window.location.reload();
                 }}
-                className="mt-6 px-6 py-2 text-slate-500 font-lora hover:text-slate-800 transition text-sm flex items-center gap-2 cursor-pointer"
+                className="mt-2 px-4 py-1 text-slate-500 font-lora hover:text-slate-800 transition text-xs flex items-center gap-1 cursor-pointer shrink-0"
               >
                 Odhlásit se
               </button>

@@ -75,15 +75,15 @@ export const CharacterCarousel: React.FC<CharacterCarouselProps> = ({
   }
 
   return (
-    <div className="w-full max-w-full flex flex-col items-center select-none overflow-hidden">
+    <div className="w-full max-w-full flex flex-col items-center select-none overflow-hidden shrink-0">
       {/* Title */}
-      <div className="text-center mb-4 sm:mb-6">
-        <h3 className="text-slate-800 font-cinzel font-bold text-xl sm:text-2xl tracking-wider">Tvé Legendy</h3>
-        <div className="h-0.5 w-24 bg-gradient-to-r from-transparent via-amber-600 to-transparent mx-auto mt-1" />
+      <div className="text-center mb-2 sm:mb-3">
+        <h3 className="text-slate-800 font-cinzel font-bold text-lg sm:text-xl tracking-wider">Tvé Legendy</h3>
+        <div className="h-0.5 w-20 bg-gradient-to-r from-transparent via-amber-600 to-transparent mx-auto mt-0.5" />
       </div>
 
       {/* Stage Container */}
-      <div className="relative w-full max-w-4xl h-[440px] sm:h-[490px] flex items-center justify-center overflow-hidden">
+      <div className="relative w-full max-w-4xl h-[370px] sm:h-[410px] flex items-center justify-center overflow-hidden">
         
         {/* Left Arrow Button */}
         {characters.length > 1 && (
@@ -187,14 +187,14 @@ export const CharacterCarousel: React.FC<CharacterCarouselProps> = ({
                     setCurrentIndex(idx);
                   }
                 }}
-                className={`absolute w-64 sm:w-72 h-[380px] sm:h-[420px] rounded-2xl overflow-hidden cursor-pointer transition-shadow select-none ${
+                className={`absolute w-56 sm:w-64 h-[320px] sm:h-[350px] rounded-2xl overflow-hidden cursor-pointer transition-shadow select-none ${
                   isFocused
-                    ? 'border-2 border-amber-600 shadow-[0_15px_40px_rgba(180,83,9,0.35)] ring-4 ring-amber-400/30'
+                    ? 'border-2 border-amber-600 shadow-[0_12px_35px_rgba(180,83,9,0.35)] ring-4 ring-amber-400/30'
                     : 'border border-amber-900/20 shadow-md hover:opacity-80'
                 } bg-[#f9f6e6]`}
               >
                 {/* Clean Bottom Gradient */}
-                <div className="absolute bottom-0 left-0 right-0 h-36 bg-gradient-to-t from-[#f9f6e6] via-[#f9f6e6]/80 to-transparent z-10 pointer-events-none" />
+                <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-[#f9f6e6] via-[#f9f6e6]/80 to-transparent z-10 pointer-events-none" />
 
                 {/* Portrait Content */}
                 {getAvatarVideo(char.race) ? (
@@ -219,7 +219,7 @@ export const CharacterCarousel: React.FC<CharacterCarouselProps> = ({
                 )}
 
                 {/* Card Foreground Elements */}
-                <div className="absolute inset-0 z-20 flex flex-col p-5 sm:p-6 justify-between pointer-events-none">
+                <div className="absolute inset-0 z-20 flex flex-col p-4 sm:p-5 justify-between pointer-events-none">
                   {/* Top Bar: Delete Button */}
                   <div className="flex justify-end pointer-events-auto">
                     <button
@@ -227,20 +227,20 @@ export const CharacterCarousel: React.FC<CharacterCarouselProps> = ({
                         e.stopPropagation();
                         onDeleteCharacter(e, char.name);
                       }}
-                      className="p-2 text-slate-700/60 hover:text-red-700 hover:bg-red-100/70 rounded-full transition-all shadow-sm"
+                      className="p-1.5 text-slate-700/60 hover:text-red-700 hover:bg-red-100/70 rounded-full transition-all shadow-sm"
                       title="Smazat postavu"
                     >
-                      <Flame size={20} />
+                      <Flame size={18} />
                     </button>
                   </div>
 
                   {/* Bottom Info & Play Prompt */}
-                  <div className="pointer-events-auto flex flex-col gap-2">
+                  <div className="pointer-events-auto flex flex-col gap-1.5">
                     <div>
-                      <h4 className="text-2xl sm:text-3xl font-cinzel font-bold text-slate-900 leading-tight drop-shadow-sm">
+                      <h4 className="text-xl sm:text-2xl font-cinzel font-bold text-slate-900 leading-tight drop-shadow-sm">
                         {char.name}
                       </h4>
-                      <div className="text-amber-800 font-lora italic text-sm sm:text-base font-semibold">
+                      <div className="text-amber-800 font-lora italic text-xs sm:text-sm font-semibold">
                         {char.race} {char.dnd_class}
                       </div>
                     </div>
@@ -251,9 +251,9 @@ export const CharacterCarousel: React.FC<CharacterCarouselProps> = ({
                           e.stopPropagation();
                           onSelectCharacter(char.name);
                         }}
-                        className="w-full mt-1 py-2.5 bg-amber-700 hover:bg-amber-800 text-white rounded-xl font-cinzel font-bold text-xs uppercase tracking-widest shadow-md transition-all flex items-center justify-center gap-1.5 hover:scale-[1.02] active:scale-[0.98]"
+                        className="w-full mt-1 py-2 bg-amber-700 hover:bg-amber-800 text-white rounded-xl font-cinzel font-bold text-xs uppercase tracking-widest shadow-md transition-all flex items-center justify-center gap-1.5 hover:scale-[1.02] active:scale-[0.98]"
                       >
-                        <Sword size={15} /> Vstoupit do hry
+                        <Sword size={14} /> Vstoupit do hry
                       </button>
                     )}
                   </div>
@@ -266,13 +266,13 @@ export const CharacterCarousel: React.FC<CharacterCarouselProps> = ({
 
       {/* Dots Indicator */}
       {characters.length > 1 && (
-        <div className="flex items-center gap-2 mt-2 mb-4">
+        <div className="flex items-center gap-2 mt-1 mb-2 shrink-0">
           {characters.map((_, i) => (
             <button
               key={i}
               onClick={() => setCurrentIndex(i)}
               className={`transition-all rounded-full ${
-                i === currentIndex ? 'w-6 h-2 bg-amber-700 shadow-sm' : 'w-2 h-2 bg-amber-900/30 hover:bg-amber-900/60'
+                i === currentIndex ? 'w-5 h-1.5 bg-amber-700 shadow-sm' : 'w-1.5 h-1.5 bg-amber-900/30 hover:bg-amber-900/60'
               }`}
             />
           ))}
@@ -282,7 +282,7 @@ export const CharacterCarousel: React.FC<CharacterCarouselProps> = ({
       {/* Create New Legend Button */}
       <button
         onClick={onCreateNew}
-        className="mt-2 px-8 py-3 bg-[#fcfaf2] border-2 border-amber-900/30 hover:border-amber-700 shadow-md hover:shadow-[0_4px_16px_rgba(180,83,9,0.25)] text-slate-800 hover:text-amber-950 font-cinzel font-bold rounded-xl transition-all uppercase tracking-widest text-xs sm:text-sm flex items-center gap-2 cursor-pointer hover:scale-105 active:scale-95"
+        className="mt-1 px-6 py-2.5 bg-[#fcfaf2] border-2 border-amber-900/30 hover:border-amber-700 shadow-md hover:shadow-[0_4px_16px_rgba(180,83,9,0.25)] text-slate-800 hover:text-amber-950 font-cinzel font-bold rounded-xl transition-all uppercase tracking-widest text-xs flex items-center gap-2 cursor-pointer hover:scale-105 active:scale-95 shrink-0"
       >
         <Sparkles size={16} className="text-amber-700" />
         Vytvořit Novou Legendu
