@@ -663,9 +663,15 @@ export default function Home() {
   };
 
 
-  const handleTravel = async (q: number, r: number) => {
+  const handleTravel = async (q: number, r: number, targetHex?: any) => {
+    // 1. Immediately close map and set loading on main screen
+    setMapOpen(false);
+    setLoading(true);
+
+    const destLabel = targetHex?.nazev || targetHex?.terrain || "Nová oblast";
+    setHistory(prev => [...prev, { type: "player", text: `🗺️ Vydávám se na cestu: ${destLabel}` }]);
+
     try {
-      setLoading(true);
       const res = await fetch(`${API_URL}/travel`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -678,25 +684,41 @@ export default function Home() {
       });
       const data = await res.json();
       if (data.status === "success") {
-        setPlayerLocation(data.state.playerLocation || data.state.player_location);
-        setDay(data.state.day);
-        setRations(data.state.rations);
-        setHp(data.state.hp);
+        if (data.state) {
+          setPlayerLocation(data.state.playerLocation || data.state.player_location);
+          if (data.state.day !== undefined) setDay(data.state.day);
+          if (data.state.rations !== undefined) setRations(data.state.rations);
+          if (data.state.hp !== undefined) setHp(data.state.hp);
+        }
         
-        // Push the narrative text to history directly so the player sees it
-        setHistory(prev => [...prev, { type: "system", text: data.narrative }]);
+        // Push the narrative to history as DM entry with narrator text, environment description, and system log
+        setHistory(prev => [...prev, { 
+          type: "dm", 
+          vypravec: data.narrative,
+          popis_okoli: data.popis_okoli || `Oblast: ${data.terrain_name || 'Divočina'}`,
+          system_log: data.system_log || null
+        }]);
+
+        if (data.nabizene_akce && data.nabizene_akce.length > 0) {
+          setSuggestedActions(data.nabizene_akce);
+        } else {
+          setSuggestedActions(["Prozkoumat okolí", "Rozdělat tábor a odpočinout si", "Připravit se k další cestě"]);
+        }
+
+        if (data.image_prompt) {
+          setCurrentLocationImage(`https://image.pollinations.ai/prompt/${encodeURIComponent(data.image_prompt)}?width=800&height=600&nologo=true`);
+        }
         
-        // Generate TTS for narrative
-        playAudio(data.narrative, "narrator");
-        
-        // Close map
-        setMapOpen(false);
+        // Generate TTS audio for narrative
+        if (data.narrative) {
+          playAudio(data.narrative, "narrator");
+        }
       } else {
-        alert("Chyba při cestování: " + data.detail);
+        setHistory(prev => [...prev, { type: "error", text: `Cestování se nezdařilo: ${data.detail || "Chyba serveru"}` }]);
       }
     } catch (e) {
       console.error(e);
-      alert("Chyba spojení.");
+      setHistory(prev => [...prev, { type: "error", text: "Chyba spojení se serverem při cestování." }]);
     } finally {
       setLoading(false);
     }

@@ -928,122 +928,139 @@ def hex_distance(q1, r1, q2, r2):
 
 @app.post("/travel")
 async def travel_action(req: TravelRequest):
-    db_key = f"{req.email}#{req.name}"
-    db_res = supabase.table("characters").select("state, history").eq("api_key", db_key).execute()
-    if not db_res.data:
-        raise HTTPException(status_code=404, detail="Character not found.")
+    try:
+        db_key = f"{req.email}#{req.name}"
+        db_res = supabase.table("characters").select("state, history").eq("api_key", db_key).execute()
+        if not db_res.data:
+            raise HTTPException(status_code=404, detail="Postava nenalezena.")
+            
+        char_data = db_res.data[0]
+        state = char_data.get("state", {})
+        history = char_data.get("history", [])
+        world_data = state.get("world_data", {})
+        locations = world_data.get("locations", [])
+        hex_grid = world_data.get("hex_grid", [])
         
-    char_data = db_res.data[0]
-    state = char_data.get("state", {})
-    history = char_data.get("history", [])
-    
-    current_loc = state.get("playerLocation")
-    if not current_loc:
-        raise HTTPException(status_code=400, detail="Neznámá pozice hráče.")
-        
-    dist = hex_distance(current_loc["q"], current_loc["r"], req.target_q, req.target_r)
-    if dist > 1:
-        raise HTTPException(status_code=400, detail="Můžeš cestovat jen o 1 hex!")
-        
-    world_data = state.get("world_data", {})
-    locations = world_data.get("locations", [])
-    hex_grid = world_data.get("hex_grid", [])
-    
-    target_hex = next((h for h in hex_grid if h["q"] == req.target_q and h["r"] == req.target_r), None)
-    if not target_hex:
-        raise HTTPException(status_code=400, detail="Mimo mapu.")
-        
-    if target_hex["terrain"] in ["Ocean"]:
-        raise HTTPException(status_code=400, detail="Oceán je neprostupný.")
-        
-    if target_hex["terrain"] in ["Swamp", "Wasteland", "Desert", "Mountains"] and state.get("rations", 0) < 2:
-        raise HTTPException(status_code=400, detail="Nemůžeš vstoupit do tohoto terénu s méně než 2 zásobami jídla.")
-        
-    # Deduct resources
-    if state.get("rations", 0) < 1:
-        # Penalize HP if out of food
-        state["hp"] = max(1, state.get("hp", 100) - 10)
-    else:
-        state["rations"] = state.get("rations", 0) - 1
-        
-    state["day"] = state.get("day", 1) + 1
-    state["playerLocation"] = {"q": req.target_q, "r": req.target_r}
-    
-    # Check for POI in already generated lore locations
-    poi = next((l for l in locations if l.get("id") == f"{req.target_q}_{req.target_r}" or (l.get("q") == req.target_q and l.get("r") == req.target_r)), None)
-    
-    # If not in lore locations, check if it's a raw math POI
-    raw_poi = None
-    if not poi and world_data.get("pois"):
-        raw_poi = next((p for p in world_data["pois"] if p["q"] == req.target_q and p["r"] == req.target_r), None)
-    
-    client = genai.Client(api_key=req.api_key if getattr(req, "api_key", None) and "DUMMY" not in req.api_key else os.environ.get("GEMINI_API_KEY"))
-    
-    import random
-    import json
-    encounter = random.random() < 0.25 # 25% chance of random encounter
-    
-    narrative_text = ""
-    
-    if poi:
-        prompt = f'''Hráč (rasa: {state.get("race")}, třída: {state.get("dnd_class")}) dorazil do již známé lokace:
-Název: {poi.get("name", poi.get("nazev", "Neznámé místo"))}
-Popis: {poi.get("description", poi.get("popis", ""))}
-Napiš atmosférický první odstavec (pohled vypravěče), jak hráč přichází na toto místo. Max 4 věty. Nenuť ho do akce, jen popiš příchod a atmosféru.'''
-        resp = client.models.generate_content(model='gemini-3.6-flash', contents=prompt)
-        narrative_text = resp.text.strip()
-        
-    elif raw_poi:
-        # Dynamically generate lore for this new POI!
-        prompt = f'''Hráč (rasa: {state.get("race")}, třída: {state.get("dnd_class")}) právě objevil na mapě nové místo, které ještě nemá historii.
-Typ místa: {raw_poi.get("type")}
-Terén: {raw_poi.get("terrain")}
-Království ID: {raw_poi.get("kingdom_id")}
-Hlavní zápletka světa: {world_data.get("main_plot", "")}
+        current_loc = state.get("playerLocation")
+        if not current_loc and world_data:
+            cap = next((p for p in world_data.get("pois", []) if p.get("type") == "Capital"), None)
+            if cap:
+                current_loc = {"q": cap["q"], "r": cap["r"], "kingdom_id": cap.get("kingdom_id"), "biome": cap.get("terrain", "Plains")}
+            elif hex_grid:
+                first_h = hex_grid[0]
+                current_loc = {"q": first_h["q"], "r": first_h["r"], "kingdom_id": first_h.get("kingdom_id"), "biome": first_h.get("terrain", "Plains")}
+            state["playerLocation"] = current_loc
 
-Vrať POUZE validní JSON s následující strukturou (žádný markdown, žádné komentáře):
+        if not current_loc:
+            raise HTTPException(status_code=400, detail="Neznámá pozice hráče na mapě.")
+            
+        dist = hex_distance(current_loc["q"], current_loc["r"], req.target_q, req.target_r)
+        if dist > 1:
+            raise HTTPException(status_code=400, detail="Můžeš cestovat jen o 1 hex!")
+            
+        target_hex = next((h for h in hex_grid if h["q"] == req.target_q and h["r"] == req.target_r), None)
+        if not target_hex:
+            raise HTTPException(status_code=400, detail="Cíl leží mimo známou mapu.")
+            
+        if target_hex.get("terrain") in ["Ocean"]:
+            raise HTTPException(status_code=400, detail="Oceán je neprostupný.")
+            
+        if target_hex.get("terrain") in ["Swamp", "Wasteland", "Desert", "Mountains"] and state.get("rations", 0) < 2:
+            raise HTTPException(status_code=400, detail="Do nehostinného terénu potřebuješ alespoň 2 dávky zásob jídla.")
+            
+        # Deduct resources & rules of travel
+        system_logs = []
+        if state.get("rations", 0) < 1:
+            penalty = 10
+            state["hp"] = max(1, state.get("hp", 100) - penalty)
+            system_logs.append(f"Hladovění při cestě: -{penalty} HP (žádné zásoby jídla!).")
+        else:
+            state["rations"] = max(0, state.get("rations", 1) - 1)
+            system_logs.append("Spotřebována 1 dávka jídla na den cesty.")
+            
+        state["day"] = state.get("day", 1) + 1
+        system_logs.append(f"Uplynul 1 den cesty (Den {state['day']}).")
+        
+        # Update player location
+        state["playerLocation"] = {
+            "q": req.target_q,
+            "r": req.target_r,
+            "kingdom_id": target_hex.get("kingdom_id"),
+            "biome": target_hex.get("terrain", "Plains")
+        }
+        
+        # Check for POI
+        poi = next((l for l in locations if l.get("id") == f"{req.target_q}_{req.target_r}" or (l.get("q") == req.target_q and l.get("r") == req.target_r)), None)
+        raw_poi = None
+        if not poi and world_data.get("pois"):
+            raw_poi = next((p for p in world_data["pois"] if p["q"] == req.target_q and p["r"] == req.target_r), None)
+            
+        dest_name = (poi.get("name") or poi.get("nazev")) if poi else (raw_poi.get("name") if raw_poi else f"{target_hex.get('terrain', 'Divočina')}")
+        
+        client = genai.Client(api_key=req.api_key if getattr(req, "api_key", None) and "DUMMY" not in req.api_key else os.environ.get("GEMINI_API_KEY"))
+        
+        prompt = f"""Hráč v D&D RPG (rasa: {state.get('race', 'Člověk')}, povolání: {state.get('dnd_class', 'Bojovník')}) se právě přesunul na mapě:
+Cílový terén: {target_hex.get('terrain')}
+Známý bod zájmu (POI): {json.dumps(poi or raw_poi, ensure_ascii=False) if (poi or raw_poi) else 'Běžná divočina/krajina'}
+Hlavní zápletka světa: {world_data.get('main_plot', '')}
+
+Vytvoř atmosférický popis cesty a příchodu pro Vypravěče a nabídni 3 smysluplné akce.
+Vrať POUZE validní JSON:
 {{
-  "location": {{
-    "id": "{req.target_q}_{req.target_r}",
-    "q": {req.target_q},
-    "r": {req.target_r},
-    "name": "Vymysli epický název",
-    "description": "Vymysli popis a co se tu děje, navázáno na zápletku nebo typ místa",
-    "ruler": "Kdo tam vládne nebo co tam žije"
-  }},
-  "intro_text": "Napiš atmosférický první odstavec (pohled vypravěče), jak hráč přichází na toto místo. Max 4 věty."
-}}'''
+  "vypravec": "Atmosférické vylíčení cesty z pohledu vypravěče (3-4 věty). Co hráč cestou viděl, jaké bylo počasí a jaké tajemství či překážka se objevila při příchodu.",
+  "popis_okoli": "Stručný popis nové oblasti (1-2 věty).",
+  "nabizene_akce": ["První logická akce (průzkum / opatrnost)", "Druhá akce (využití schopnosti / kempování)", "Třetí odvážná akce"],
+  "image_prompt": "vibrant fantasy landscape concept art of {target_hex.get('terrain')} in Aethelgard, detailed 2D painterly style, high quality"
+}}"""
+
         try:
             resp = client.models.generate_content(
-                model='gemini-3.6-flash', 
+                model='gemini-2.5-flash',
                 contents=prompt,
-                config={"response_mime_type": "application/json"}
+                config=types.GenerateContentConfig(response_mime_type="application/json")
             )
             clean_text = resp.text.strip().removeprefix('```json').removesuffix('```').strip()
-            data = json.loads(clean_text)
-            new_loc = data.get("location")
-            if new_loc:
-                locations.append(new_loc)
-                world_data["locations"] = locations
-                state["world_data"] = world_data
-            narrative_text = data.get("intro_text", f"Dorazil jsi do {new_loc.get('name') if new_loc else 'neznámého místa'}.")
-        except Exception as e:
-            narrative_text = f"Dorazil jsi na místo: {raw_poi.get('type')}. ({str(e)})"
-            
-    elif encounter:
-        prompt = f'''Hráč (rasa: {state.get("race")}, třída: {state.get("dnd_class")}) cestuje divočinou. Terén: {target_hex["terrain"]}.
-Vygeneruj NÁHODNÉ SETKÁNÍ. Může to být útok (goblini, bandité, vlci) nebo neutrální/zajímavá událost (potulný kupec, prastará socha).
-Napiš to z pohledu Vypravěče a nech situaci otevřenou, ať hráč může reagovat. Max 4 věty.'''
-        resp = client.models.generate_content(model='gemini-3.6-flash', contents=prompt)
-    else:
-        narrative_text = f"Cesta přes {target_hex['terrain']} proběhla klidně. Utábořil ses a odpočinul si."
+            ai_data = json.loads(clean_text)
+        except Exception as ge:
+            print("Gemini travel generate error:", ge)
+            ai_data = {
+                "vypravec": f"Po celodenní cestě jsi dorazil do oblasti {target_hex.get('terrain', 'divočiny')}. Krajina kolem tebe je tichá, vítr šelestí v trávě a na obzoru se stahují mračna.",
+                "popis_okoli": f"Krajina: {target_hex.get('terrain', 'Pláně')}.",
+                "nabizene_akce": ["Důkladně prozkoumat nejbližší okolí", "Rozdělat tábor a odpočinout si", "Připravit si zbraň a postupovat obezřetně"],
+                "image_prompt": f"fantasy landscape {target_hex.get('terrain')}"
+            }
 
-    history.append({"role": "user", "content": f"[CESTOVÁNÍ] Přesun na hex ({req.target_q}, {req.target_r})"}) 
-    history.append({"role": "model", "content": narrative_text})
-    
-    supabase.table("characters").update({
-        "state": state,
-        "history": history
-    }).eq("api_key", db_key).execute()
-    
-    return {"status": "success", "state": state, "narrative": narrative_text}
+        narrative_text = ai_data.get("vypravec", "")
+        popis_okoli = ai_data.get("popis_okoli", f"Oblast: {target_hex.get('terrain')}")
+        nabizene_akce = ai_data.get("nabizene_akce", ["Prozkoumat okolí", "Rozdělat tábor", "Jít dál"])
+        image_prompt = ai_data.get("image_prompt", "")
+        system_log_text = " | ".join(system_logs)
+
+        # Append to narrative history
+        history.append({"role": "user", "content": f"[CESTOVÁNÍ] Cesta do: {dest_name} ({req.target_q}, {req.target_r})"})
+        history.append({"role": "model", "content": narrative_text})
+
+        state["currentLocationDesc"] = popis_okoli
+        state["popis_okoli"] = popis_okoli
+
+        supabase.table("characters").update({
+            "state": state,
+            "history": history
+        }).eq("api_key", db_key).execute()
+
+        return {
+            "status": "success",
+            "state": state,
+            "narrative": narrative_text,
+            "popis_okoli": popis_okoli,
+            "nabizene_akce": nabizene_akce,
+            "image_prompt": image_prompt,
+            "system_log": system_log_text,
+            "destination_name": dest_name,
+            "terrain_name": target_hex.get("terrain")
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print("Travel error:", e)
+        raise HTTPException(status_code=500, detail=str(e))
