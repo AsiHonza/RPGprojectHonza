@@ -1299,7 +1299,7 @@ export default function Home() {
       )}
 
       {/* Nativní HTML5 Přehrávač (Ambient Hudba) s lokálním m4a souborem */}
-      <audio ref={bgAudioRef} src={currentTrack} loop onError={() => { if (currentTrack !== "/ambient.mp3") setCurrentTrack("/ambient.mp3"); }} />
+      <audio id="bg-audio" ref={bgAudioRef} src={currentTrack} loop onError={() => { if (currentTrack !== "/ambient.mp3") setCurrentTrack("/ambient.mp3"); }} />
 
     </div>
   );

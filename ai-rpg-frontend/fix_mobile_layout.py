@@ -1,44 +1,32 @@
 ﻿import codecs
-import re
 
-with codecs.open("src/app/page.tsx", "r", "utf-8") as f:
-    content = f.read()
+lines = codecs.open('src/features/character/CharacterCreation.tsx', 'r', 'utf-8').readlines()
 
-# 1. Fix Player Header
-content = content.replace(
-    '<div className="w-full max-w-7xl bg-[#f4f1e1] border border-[#90a4ae] rounded-lg p-4 shadow-lg flex flex-col gap-2">',
-    '<div className="w-full max-w-7xl bg-[#f4f1e1] border border-[#90a4ae] rounded-lg p-2 md:p-4 shadow-lg flex flex-col gap-2 shrink-0">'
-)
+for i, l in enumerate(lines):
+    # Fix Races Grid to be horizontal scroll on mobile
+    if '<div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">' in l:
+        lines[i] = '                  <div className="flex overflow-x-auto snap-x md:grid md:grid-cols-4 gap-2 sm:gap-4 pb-2 custom-scrollbar">\n'
+    if 'key={r}' in l and 'button' in lines[i-1] and 'className=' in lines[i+1]:
+        # Need to add shrink-0 snap-center min-w-[120px] to buttons in race
+        if 'className={`p-4 rounded-xl border-2' in lines[i+1]:
+            lines[i+1] = lines[i+1].replace('className={`p-4 rounded-xl border-2', 'className={`shrink-0 snap-center min-w-[140px] md:min-w-0 p-4 rounded-xl border-2')
 
-# 2. Main Game Log - remove minHeight: "60vh" and ensure it shrinks
-content = content.replace(
-    'style={{ backgroundImage: "url(\'https://www.transparenttextures.com/patterns/aged-paper.png\')", minHeight: "60vh" }}>',
-    'style={{ backgroundImage: "url(\'https://www.transparenttextures.com/patterns/aged-paper.png\')" }}>'
-)
-content = content.replace(
-    'className="w-full max-w-4xl bg-[#f4f1e1] flex-1 overflow-y-auto p-4 md:p-8 border-x border-[#90a4ae] shadow-lg flex flex-col gap-6"',
-    'className="w-full max-w-4xl mx-auto bg-[#f4f1e1] flex-1 overflow-y-auto p-3 md:p-8 border-x border-[#90a4ae] shadow-lg flex flex-col gap-4 md:gap-6"'
-)
+    # Fix Classes Grid to be horizontal scroll on mobile
+    if '<div className="grid grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 max-h-48 overflow-y-auto custom-scrollbar p-1">' in l:
+        lines[i] = '                  <div className="flex overflow-x-auto snap-x md:grid md:grid-cols-4 gap-2 sm:gap-3 md:max-h-48 md:overflow-y-auto custom-scrollbar p-1 pb-4">\n'
+    if 'key={c}' in l and 'button' in lines[i-1] and 'className=' in lines[i+1]:
+        if 'className={`p-3 rounded-xl border-2' in lines[i+1]:
+            lines[i+1] = lines[i+1].replace('className={`p-3 rounded-xl border-2', 'className={`shrink-0 snap-center min-w-[120px] md:min-w-0 p-3 rounded-xl border-2')
 
-# 3. Action Area - make it shrink-0 and responsive padding
-content = content.replace(
-    '<div className="w-full bg-[#1e3746] border-t-4 border-[#b74b4b] p-5 flex flex-col gap-5 shadow-[0_-4px_20px_rgba(0,0,0,0.5)] z-10">',
-    '<div className="w-full bg-[#1e3746] border-t-4 border-[#b74b4b] p-3 md:p-5 flex flex-col gap-3 md:gap-5 shadow-[0_-4px_20px_rgba(0,0,0,0.5)] z-10 shrink-0">'
-)
+    # Fix Attributes Grid
+    if '<div className="grid grid-cols-3 md:grid-cols-6 gap-4 text-center">' in l:
+        lines[i] = '                  <div className="flex overflow-x-auto snap-x md:grid md:grid-cols-6 gap-2 sm:gap-4 text-center pb-2 custom-scrollbar">\n'
+    if 'key={stat} className="bg-[#f9f6e6]/70 p-3 rounded-lg border border-amber-900/10"' in l:
+        lines[i] = lines[i].replace('className="bg-[#f9f6e6]/70 p-3', 'className="shrink-0 snap-center min-w-[80px] md:min-w-0 bg-[#f9f6e6]/70 p-3')
 
-# 4. Global Wrapper - reduce gap/padding on mobile
-content = content.replace(
-    '<div className="h-[100dvh] max-h-[100dvh] overflow-hidden bg-[#1b262c] p-2 md:p-6 font-serif flex flex-col items-center relative">',
-    '<div className="h-[100dvh] max-h-[100dvh] overflow-hidden bg-[#1b262c] p-1 md:p-6 gap-2 md:gap-4 font-serif flex flex-col items-center relative">'
-)
+    # Make overall wrapper scrollable instead of hidden
+    if '<div className="min-h-screen bg-[#e5dfc5] bg-[url(\'https://www.transparenttextures.com/patterns/black-scales.png\')] text-slate-900 flex flex-col items-center justify-center p-4 overflow-hidden relative">' in l:
+        lines[i] = l.replace('overflow-hidden', 'overflow-y-auto overflow-x-hidden')
 
-# 5. Right column parent - fix layout
-content = content.replace(
-    '<div className="flex-1 flex flex-col overflow-hidden rounded-lg shadow-lg border border-[#90a4ae]">',
-    '<div className="flex-1 flex flex-col overflow-hidden rounded-lg shadow-lg border border-[#90a4ae] relative">'
-)
-
-with codecs.open("src/app/page.tsx", "w", "utf-8") as f:
-    f.write(content)
-
-print("Mobile layout fixed!")
+with codecs.open('src/features/character/CharacterCreation.tsx', 'w', 'utf-8') as f:
+    f.write("".join(lines))
