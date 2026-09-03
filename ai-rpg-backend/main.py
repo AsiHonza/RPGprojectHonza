@@ -939,8 +939,7 @@ Napiš atmosférický první odstavec (pohled vypravěče), jak hráč přicház
 Vygeneruj NÁHODNÉ SETKÁNÍ. Může to být útok (goblini, bandité, vlci) nebo neutrální/zajímavá událost (potulný kupec, prastará socha).
 Napiš to z pohledu Vypravěče a nech situaci otevřenou, ať hráč může reagovat. Max 4 věty.'''
         resp = client.models.generate_content(model='gemini-3.5-flash', contents=prompt)
-        narrative_text = f"[NÁHODNÉ SETKÁNÍ na cestě]
-{resp.text.strip()}"
+        narrative_text = f"[NÁHODNÉ SETKÁNÍ na cestě]\n{resp.text.strip()}"
     else:
         narrative_text = f"Cesta přes {target_hex['terrain']} proběhla klidně. Utábořil ses a odpočinul si."
 
