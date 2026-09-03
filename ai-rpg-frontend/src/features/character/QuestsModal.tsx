@@ -8,7 +8,7 @@ export const QuestsModal = ({ isOpen, onClose }: any) => {
   if (!isOpen) return null;
 
   return (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-[#e5dfc5] flex items-center justify-center z-50 p-4">
           <div className="w-full max-w-2xl bg-[#2b4c5e] rounded-lg border-4 border-[#90a4ae] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div className="bg-[#e3dcc8] p-4 flex justify-between items-center border-b-4 border-[#90a4ae]">
               <div className="flex items-center gap-2 text-[#b74b4b] font-bold text-2xl uppercase tracking-widest">
@@ -27,7 +27,7 @@ export const QuestsModal = ({ isOpen, onClose }: any) => {
                     <div key={quest.id} className={`p-4 border-2 rounded ${quest.stav === 'splneno' ? 'bg-[#2a3f2a]/90 border-[#4a7f4a] text-[#d4af37]' : quest.stav === 'selhani' ? 'bg-[#3f2a2a]/90 border-[#b74b4b] text-[#78909c]' : 'bg-[#1b262c]/90 border-[#90a4ae] text-[#f4f1e1]'}`}>
                       <div className="flex justify-between items-start mb-2">
                          <h3 className="font-bold text-xl">{quest.nazev}</h3>
-                         <span className={`text-xs font-bold uppercase px-2 py-1 rounded ${quest.stav === 'splneno' ? 'bg-[#4a7f4a] text-white' : quest.stav === 'selhani' ? 'bg-[#b74b4b] text-white' : 'bg-[#d4af37] text-black'}`}>
+                         <span className={`text-xs font-bold uppercase px-2 py-1 rounded ${quest.stav === 'splneno' ? 'bg-[#4a7f4a] text-slate-900' : quest.stav === 'selhani' ? 'bg-[#b74b4b] text-slate-900' : 'bg-[#d4af37] text-black'}`}>
                             {quest.stav === 'splneno' ? 'Splněno' : quest.stav === 'selhani' ? 'Selhání' : 'Aktivní'}
                          </span>
                       </div>

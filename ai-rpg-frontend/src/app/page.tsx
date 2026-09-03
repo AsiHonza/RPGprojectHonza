@@ -62,7 +62,7 @@ const FormattedSystemLog = ({ text }: { text: string }) => {
         .replace(/(Zásah!)/g, '<span class="font-bold border-b border-red-400 text-red-700">$1</span>')
         .replace(/(Hod na .*?:)/gi, '<span class="text-rpg-magic font-bold">$1</span>')
         .replace(/(Aktivní akce:)/gi, '<span class="text-blue-300 font-bold">$1</span>')
-        .replace(/(Výsledek:)/gi, '<span class="text-gray-200 font-bold">$1</span>');
+        .replace(/(Výsledek:)/gi, '<span class="text-slate-900 font-bold">$1</span>');
       
       return (
         <div key={idx} className="mb-1 last:mb-0" dangerouslySetInnerHTML={{ __html: html }} />
@@ -1048,7 +1048,7 @@ export default function Home() {
                                 <span className="font-bold text-rpg-magic font-cinzel">{npc.jmeno}</span>
                                 <button onClick={() => playAudio(npc.replika, npc.jmeno.toLowerCase().includes('žen') ? 'npc_zena' : 'npc_muz')} className="text-slate-600 hover:text-[#2d3748]"><Volume2 size={16} /></button>
                               </div>
-                              <div className="text-gray-200">"{npc.replika}"</div>
+                              <div className="text-slate-900">"{npc.replika}"</div>
                             </div>
                           ))}
                         </div>
@@ -1092,7 +1092,7 @@ export default function Home() {
                   <button onClick={() => setSkillsOpen(true)} className="flex-shrink-0 snap-start whitespace-nowrap bg-white/50 border border-amber-900/20 text-[#2d3748] px-4 py-3 rounded-xl text-sm hover:bg-white/70 transition font-cinzel flex items-center gap-2">
                     <Sparkles size={16} /> Dovednost
                   </button>
-                  <button onClick={() => sendAction("Pokusím se z boje utéct!")} className="flex-shrink-0 snap-start whitespace-nowrap bg-[#f9f6e6]/60 border border-gray-600 text-slate-700 px-4 py-3 rounded-xl text-sm hover:text-[#2d3748] transition font-cinzel italic">
+                  <button onClick={() => sendAction("Pokusím se z boje utéct!")} className="flex-shrink-0 snap-start whitespace-nowrap bg-[#f9f6e6]/60 border border-amber-900/20 text-slate-700 px-4 py-3 rounded-xl text-sm hover:text-[#2d3748] transition font-cinzel italic">
                     Útěk
                   </button>
                 </>
@@ -1132,7 +1132,7 @@ export default function Home() {
                 onChange={(e) => setCustomAction(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && sendAction(customAction)}
                 placeholder={isOOC ? "Přemýšlím nad..." : "Co uděláš dál?"} 
-                className={`flex-1 font-lora text-xl bg-transparent px-4 py-2 outline-none transition-colors ${isOOC ? 'text-indigo-200 placeholder-indigo-900' : 'text-[#2d3748] placeholder-gray-600'}`}
+                className={`flex-1 font-lora text-xl bg-transparent px-4 py-2 outline-none transition-colors ${isOOC ? 'text-indigo-900 placeholder-indigo-900' : 'text-[#2d3748] placeholder-gray-600'}`}
                 disabled={loading}
               />
               <button 

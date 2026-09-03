@@ -64,7 +64,7 @@ export const MapModal = ({ isOpen, onClose, setSelectedItem, onTravel }: any) =>
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#f9f6e6]">
       <div className="bg-[#e3dcc8] w-full h-full max-h-screen relative overflow-hidden w-full h-full border-4 border-[#1b262c] bg-[url('https://www.transparenttextures.com/patterns/aged-paper.png')] bg-cover">
         
         {/* Header */}
@@ -97,7 +97,7 @@ export const MapModal = ({ isOpen, onClose, setSelectedItem, onTravel }: any) =>
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 20 }}
-              className="absolute right-4 top-20 w-80 bg-[#111827]/95 backdrop-blur-sm border-2 border-rpg-magic p-4 rounded-xl shadow-2xl z-50"
+              className="absolute right-4 top-20 w-80 bg-[#f4ecd8]/95 backdrop-blur-sm border-2 border-rpg-magic p-4 rounded-xl shadow-2xl z-50"
             >
               <div className="flex justify-between items-start mb-2">
                 <h3 className="font-cinzel font-bold text-rpg-magic text-xl">

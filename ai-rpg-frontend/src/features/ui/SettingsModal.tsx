@@ -8,7 +8,7 @@ export const SettingsModal = ({ isOpen, onClose }: any) => {
   if (!isOpen) return null;
 
   return (
-        <div className="absolute inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+        <div className="absolute inset-0 bg-white/90 z-50 flex items-center justify-center p-4">
           <div className="bg-[#f4f1e1] border-2 border-[#b74b4b] rounded p-6 max-w-sm w-full shadow-2xl">
             <div className="flex justify-between items-center mb-6 border-b border-[#90a4ae] pb-2">
               <h2 className="text-2xl font-bold text-[#2b4c5e] flex items-center gap-2"><Settings2 size={24} /> Nastavení</h2>

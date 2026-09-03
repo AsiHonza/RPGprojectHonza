@@ -67,7 +67,7 @@ export default function HexMap({ worldData, onHexClick, setSelectedItem, playerL
       case 'Capital': return <Castle size={20} className="text-rpg-magic drop-shadow-[0_0_5px_rgba(197,160,89,0.8)]" />;
       case 'Village': return <Home size={16} className="text-rpg-paper drop-shadow-md" />;
       case 'Dungeon': return <Skull size={18} className="text-rpg-blood drop-shadow-[0_0_5px_rgba(183,75,75,0.8)]" />;
-      case 'Shrine': return <Star size={16} className="text-indigo-300 drop-shadow-[0_0_5px_rgba(165,180,252,0.8)]" />;
+      case 'Shrine': return <Star size={16} className="text-indigo-800 drop-shadow-[0_0_5px_rgba(165,180,252,0.8)]" />;
       case 'Ruin': return <Eye size={16} className="text-[#90a4ae] drop-shadow-md" />;
       default: return <MapPin size={16} className="text-rpg-paper" />;
     }
@@ -180,7 +180,7 @@ export default function HexMap({ worldData, onHexClick, setSelectedItem, playerL
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#111827]/90 backdrop-blur-sm border border-rpg-magic p-4 rounded-xl shadow-2xl pointer-events-none max-w-sm w-full z-50 text-center"
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#f4ecd8]/90 backdrop-blur-sm border border-rpg-magic p-4 rounded-xl shadow-2xl pointer-events-none max-w-sm w-full z-50 text-center"
           >
             {hoveredHex.nazev ? (
                 <>

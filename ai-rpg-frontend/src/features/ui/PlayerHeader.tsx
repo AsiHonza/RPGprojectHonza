@@ -48,18 +48,18 @@ export const PlayerHeader = ({
             </div>
             
             {/* HP Bar */}
-            <div className="w-full bg-[#111827] h-2.5 rounded-full overflow-hidden border border-[#2b4c5e] relative mb-1 shadow-inner">
+            <div className="w-full bg-[#f4ecd8] h-2.5 rounded-full overflow-hidden border border-[#2b4c5e] relative mb-1 shadow-inner">
               <motion.div 
                 className="h-full bg-gradient-to-r from-red-800 to-rpg-blood" 
                 initial={{ width: 0 }}
                 animate={{ width: `${hp}%` }}
                 transition={{ duration: 0.5 }}
               />
-              <span className="absolute inset-0 flex items-center justify-center text-[8px] font-bold text-white drop-shadow-md">{hp}/100</span>
+              <span className="absolute inset-0 flex items-center justify-center text-[8px] font-bold text-slate-900 drop-shadow-md">{hp}/100</span>
             </div>
 
             {/* XP Bar */}
-            <div className="w-full bg-[#111827] h-1.5 rounded-full overflow-hidden border border-[#2b4c5e] relative shadow-inner">
+            <div className="w-full bg-[#f4ecd8] h-1.5 rounded-full overflow-hidden border border-[#2b4c5e] relative shadow-inner">
               <motion.div 
                 className="h-full bg-gradient-to-r from-yellow-700 to-rpg-magic" 
                 initial={{ width: 0 }}
@@ -80,7 +80,7 @@ export const PlayerHeader = ({
           {/* Quick HUD Buttons (Desktop only for some) */}
           <button onClick={() => setStatsOpen(true)} className="relative p-2 rounded-full bg-[#2b4c5e]/50 hover:bg-[#2b4c5e] text-rpg-paper transition-all border border-[#455a64] hover:border-rpg-magic shadow-md" title="Vlastnosti postavy">
             <User size={20} />
-            {skillPoints > 0 && <span className="absolute -top-1 -right-1 w-4 h-4 bg-rpg-blood text-white text-[10px] rounded-full flex items-center justify-center animate-pulse">{skillPoints}</span>}
+            {skillPoints > 0 && <span className="absolute -top-1 -right-1 w-4 h-4 bg-rpg-blood text-slate-900 text-[10px] rounded-full flex items-center justify-center animate-pulse">{skillPoints}</span>}
           </button>
           
           <button onClick={() => setSkillsOpen(true)} className="relative p-2 rounded-full bg-[#2b4c5e]/50 hover:bg-[#2b4c5e] text-rpg-paper transition-all border border-[#455a64] hover:border-rpg-magic shadow-md" title="Bojové dovednosti">
@@ -110,7 +110,7 @@ export const PlayerHeader = ({
             className="absolute top-[80px] right-4 w-64 bg-rpg-obsidian border-2 border-[#455a64] rounded-lg shadow-2xl flex flex-col z-50 overflow-hidden font-cinzel"
           >
             {/* Mobile-only stats row */}
-            <div className="sm:hidden flex justify-between items-center p-4 bg-[#111827] border-b border-[#2b4c5e] text-rpg-muted">
+            <div className="sm:hidden flex justify-between items-center p-4 bg-[#f4ecd8] border-b border-[#2b4c5e] text-rpg-muted">
                <div className="flex items-center gap-2"><Drumstick size={16} className="text-orange-400" /> <span>{rations}</span></div>
                <div className="flex items-center gap-2 text-yellow-500 font-bold"><span className="text-xs">Zlaťáky:</span> <span>{gold}</span></div>
             </div>
@@ -130,7 +130,7 @@ export const PlayerHeader = ({
               </button>
             </div>
             
-            <div className="border-t border-[#455a64] p-2 flex flex-col gap-1 bg-[#111827]">
+            <div className="border-t border-[#455a64] p-2 flex flex-col gap-1 bg-[#f4ecd8]">
               <button onClick={() => setMusicPlaying(!musicPlaying)} className="flex items-center gap-3 p-3 rounded hover:bg-[#2b4c5e] text-rpg-muted hover:text-rpg-paper transition-colors text-left w-full">
                 {musicPlaying ? <Volume2 size={20} /> : <VolumeX size={20} />} Hudba a Zvuky
               </button>

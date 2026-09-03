@@ -155,7 +155,7 @@ async def generate_backstory(req: BackstoryRequest):
         prompt = f"Vytvoř D&D pozadí pro postavu. Jméno: {req.name}, Rasa: {req.race}, Povolání: {req.dnd_class}. Klíčová slova od hráče: {req.keywords}."
         
         response = client.models.generate_content(
-            model='gemini-3.5-flash',
+            model='gemini-2.5-flash',
             contents=prompt,
             config=types.GenerateContentConfig(
                 system_instruction="Jsi expert na D&D lore. Vygeneruj přesně 3 věci: appearance (vzhled), personality (chování) a backstory (historie).",
@@ -457,7 +457,7 @@ Zde jsou základní archetypy 7 království (kingdom_id 1 až 7):
 Tady je JSON se všemi body zájmu (POI) na vygenerované mapě:
 {json.dumps(math_world['pois'], ensure_ascii=False)}
 
-Tvým úkolem je vrátit POUZE validní JSON s následující strukturou:
+Tvým úkolem je vrátit POUZE validní JSON (žádný markdown, žádné komentáře). Vygeneruj MAXIMÁLNĚ 5 nejzajímavějších lokací a 5 klíčových NPC s následující strukturou:
 {{
   "main_plot": "Krátký popis hlavní zápletky světa (1 odstavec)",
   "locations": [
@@ -469,7 +469,7 @@ Tvým úkolem je vrátit POUZE validní JSON s následující strukturou:
 }}
 """
             response = client.models.generate_content(
-                model='gemini-3.5-flash',
+                model='gemini-2.5-flash',
                 contents=world_prompt,
                 config=types.GenerateContentConfig(response_mime_type="application/json")
             )
@@ -512,7 +512,7 @@ Vrať POUZE json ve formátu:
 }}
 '''
         response = client.models.generate_content(
-            model='gemini-3.5-flash',
+            model='gemini-2.5-flash',
             contents=prompt,
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",
@@ -732,7 +732,7 @@ SPECIFIKA POSTAVY A NABIZENE AKCE:
 """
 
         response = client.models.generate_content(
-            model='gemini-3.5-flash',
+            model='gemini-2.5-flash',
             contents=contents,
             config=types.GenerateContentConfig(
                 system_instruction=system_prompt,
@@ -929,13 +929,13 @@ async def travel_action(req: TravelRequest):
 Názav: {poi.get("nazev")}
 Popis: {poi.get("popis")}
 Napiš atmosférický první odstavec (pohled vypravěče), jak hráč přichází na toto místo. Max 4 věty. Nenuť ho do akce, jen popiš příchod a atmosféru.'''
-        resp = client.models.generate_content(model='gemini-3.5-flash', contents=prompt)
+        resp = client.models.generate_content(model='gemini-2.5-flash', contents=prompt)
         narrative_text = resp.text.strip()
     elif encounter:
         prompt = f'''Hráč (rasa: {state.get("race")}, třída: {state.get("dnd_class")}) cestuje divočinou. Terén: {target_hex["terrain"]}.
 Vygeneruj NÁHODNÉ SETKÁNÍ. Může to být útok (goblini, bandité, vlci) nebo neutrální/zajímavá událost (potulný kupec, prastará socha).
 Napiš to z pohledu Vypravěče a nech situaci otevřenou, ať hráč může reagovat. Max 4 věty.'''
-        resp = client.models.generate_content(model='gemini-3.5-flash', contents=prompt)
+        resp = client.models.generate_content(model='gemini-2.5-flash', contents=prompt)
         narrative_text = f"[NÁHODNÉ SETKÁNÍ na cestě]\n{resp.text.strip()}"
     else:
         narrative_text = f"Cesta přes {target_hex['terrain']} proběhla klidně. Utábořil ses a odpočinul si."

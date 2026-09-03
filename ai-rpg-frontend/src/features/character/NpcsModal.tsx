@@ -8,7 +8,7 @@ export const NpcsModal = ({ isOpen, onClose, setMapOpen }: any) => {
   if (!isOpen) return null;
 
   return (
-          <div className="absolute inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-white/90 z-50 flex items-center justify-center p-4">
             <div className="bg-[#f4f1e1] border-2 border-[#b74b4b] rounded max-w-2xl w-full max-h-[80vh] flex flex-col shadow-2xl overflow-hidden">
               <div className="flex justify-between items-center p-4 border-b border-[#90a4ae] bg-[#e3dcc8]">
                 <div className="flex items-center gap-2 text-[#b74b4b] font-bold text-2xl uppercase tracking-widest font-medieval">
