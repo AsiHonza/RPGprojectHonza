@@ -47,26 +47,29 @@ const TypewriterText = ({ text, delay = 25, animate = false }: { text: string, d
 
 // Helper component to colorize system logs
 const FormattedSystemLog = ({ text }: { text: string }) => {
-  // Split by lines first
-  const lines = text.split('\n').map((line, idx) => {
-    // Basic regex highlights
-    let html = line
-      .replace(/(Selhání\.|Selhání!)/gi, '<span class="text-red-600 font-bold">$1</span>')
-      .replace(/(Úspěch\.|Úspěch!|Kritický úspěch!)/gi, '<span class="text-green-600 font-bold">$1</span>')
-      .replace(/(Hráč ztrácí \d+ HP|ztrácíš \d+ HP|způsobuje \d+ bodů.*poškození)/gi, '<span class="text-red-600 font-bold">$1</span>')
-      .replace(/(d\d+\(\d+\))/g, '<span class="text-yellow-600 font-bold">$1</span>')
-      .replace(/(\d+ vs DC \d+)/g, '<span class="text-yellow-600 font-bold">$1</span>')
-      .replace(/(vs AC \d+)/g, '<span class="text-yellow-600 font-bold">$1</span>')
-      .replace(/(Útok vlka|Útok nepřítele|Útok skřeta|Útok orka)/gi, '<span class="text-red-500 font-bold">$1</span>')
-      .replace(/(Útok hráče.*?:)/gi, '<span class="text-green-500 font-bold">$1</span>')
-      .replace(/(Zásah!)/g, '<span class="font-bold border-b-2 border-red-400">$1</span>'); // Universal highlight for hits
-    
-    return (
-      <div key={idx} className="mb-1 last:mb-0" dangerouslySetInnerHTML={{ __html: html }} />
-    );
-  });
-  return <div className="font-serif text-base text-[#2b4c5e]">{lines}</div>;
-};
+    const lines = text.split('\n').map((line, idx) => {
+      let html = line
+        .replace(/(Kritický úspěch!|Kritický úspěch|Kritický úspěch\.)/gi, '<span class="text-green-400 font-bold uppercase tracking-wider">$1</span>')
+        .replace(/(Kritické selhání!|Kritické selhání|Kritický neúspěch)/gi, '<span class="text-red-500 font-bold uppercase tracking-wider">$1</span>')
+        .replace(/(Úspěch\.|Úspěch!|Úspěch:?)/gi, '<span class="text-green-400 font-bold">$1</span>')
+        .replace(/(Selhání\.|Selhání!|Selhání:?)/gi, '<span class="text-red-400 font-bold">$1</span>')
+        .replace(/(Hráč ztrácí \d+ HP|ztrácí \d+ HP|způsobuje \d+ bodů poškození|Ztrácí \d+ HP)/gi, '<span class="text-red-400 font-bold">$1</span>')
+        .replace(/(d\d+\(\d+\))/g, '<span class="text-yellow-400 font-bold">$1</span>')
+        .replace(/(\d+ vs DC \d+)/g, '<span class="text-yellow-400 font-bold">$1</span>')
+        .replace(/(vs AC \d+)/g, '<span class="text-yellow-400 font-bold">$1</span>')
+        .replace(/(Útok vlka|Útok nepřítele|Útok skřeta|Útok orka)/gi, '<span class="text-red-400 font-bold">$1</span>')
+        .replace(/(Útok hráče.*?:)/gi, '<span class="text-green-400 font-bold">$1</span>')
+        .replace(/(Zásah!)/g, '<span class="font-bold border-b border-red-400 text-red-400">$1</span>')
+        .replace(/(Hod na .*?:)/gi, '<span class="text-rpg-magic font-bold">$1</span>')
+        .replace(/(Aktivní akce:)/gi, '<span class="text-blue-300 font-bold">$1</span>')
+        .replace(/(Výsledek:)/gi, '<span class="text-gray-200 font-bold">$1</span>');
+      
+      return (
+        <div key={idx} className="mb-1 last:mb-0" dangerouslySetInnerHTML={{ __html: html }} />
+      );
+    });
+    return <div className="font-mono text-sm text-gray-300 leading-relaxed bg-black/40 p-4 rounded-xl border border-white/10 shadow-inner mt-2">{lines}</div>;
+  };
 
 
 
@@ -1021,7 +1024,7 @@ export default function Home() {
                     <div className="leading-relaxed text-lg">{msg.text}</div>
                   )}
                   {msg.type === "system" && <FormattedSystemLog text={msg.text} />}
-                  {msg.type === "error" && <div className="text-red-500 font-bold">Chyba: {msg.text}</div>}
+                  {msg.type === "error" && <div className="text-red-400 font-bold">Chyba: {msg.text}</div>}
                   {msg.type === "dm" && (
                     <div className="flex flex-col gap-4">
                       {msg.vypravec && (
@@ -1051,8 +1054,8 @@ export default function Home() {
                         </div>
                       )}
                       {msg.system_log && (
-                        <div className="text-xs text-gray-500 font-mono mt-2 opacity-70">
-                          {msg.system_log}
+                        <div className="text-xs font-mono mt-2 opacity-90 border-t border-white/10 pt-2">
+                          <FormattedSystemLog text={msg.system_log} />
                         </div>
                       )}
                     </div>
@@ -1080,7 +1083,7 @@ export default function Home() {
           <div className="flex flex-wrap justify-between items-end gap-4">
             
             {/* Contextual Actions */}
-            <div className="flex flex-wrap gap-2 flex-1">
+            <div className="flex flex-nowrap gap-2 flex-1 overflow-x-auto snap-x custom-scrollbar hide-scrollbar pb-2">
               {inCombat ? (
                 <>
                   <button onClick={() => sendAction(`Útočím zbraní: ${inventory.find(i => i.id === equipped["hlavní ruka"])?.name || "Pěsti"}`)} className="bg-rpg-blood/20 border border-rpg-blood text-white px-4 py-2 rounded-xl text-sm hover:bg-rpg-blood transition shadow-[0_0_10px_rgba(183,75,75,0.2)] font-cinzel flex items-center gap-2">
