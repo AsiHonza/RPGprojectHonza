@@ -1,4 +1,4 @@
-﻿import { create } from 'zustand';
+import { create } from 'zustand';
 
 interface GameState {
   // Application UI State
@@ -26,6 +26,8 @@ interface GameState {
   // RPG Stats
   hp: number;
   setHp: (hp: number | ((h: number) => number)) => void;
+  maxHp: number;
+  setMaxHp: (maxHp: number | ((h: number) => number)) => void;
   level: number;
   setLevel: (l: number | ((l: number) => number)) => void;
   xp: number;
@@ -128,6 +130,8 @@ export const useGameStore = create<GameState>((set) => ({
 
   hp: 100,
   setHp: (hp) => set((state) => ({ hp: typeof hp === "function" ? hp(state.hp) : hp })),
+  maxHp: 100,
+  setMaxHp: (maxHp) => set((state) => ({ maxHp: typeof maxHp === "function" ? maxHp(state.maxHp) : maxHp })),
   level: 1,
   setLevel: (level) => set((state) => ({ level: typeof level === "function" ? level(state.level) : level })),
   xp: 0,

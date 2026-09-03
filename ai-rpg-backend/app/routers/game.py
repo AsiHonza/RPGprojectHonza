@@ -89,11 +89,115 @@ async def play_action(req: PlayerActionRequest):
         distant_summary = ', '.join(distant_names) if distant_names else 'Žádné (žádné vzdálené postavy nebyly zaznamenány)'
         local_summary = json.dumps(local_npcs, ensure_ascii=False) if local_npcs else 'Žádné dříve známé postavy. Zde jsou pouze noví místní obyvatelé, pocestní nebo tvorové z tohoto kraje.'
         spatial_grounding = f'''\n======================================================================\n[AKTUÁLNÍ FYZICKÁ LOKACE HRÁČE]:\n- Místo/Region: {curr_region} (Souřadnice na mapě: [{curr_q}, {curr_r}])\n- Typ prostředí: {curr_loc_type} (Terén: {curr_biome})\n- Lokální orientační body / významná místa v tomto místě: {json.dumps(curr_pois, ensure_ascii=False)}\n- KDO JE ZDE FYZICKY PŘÍTOMEN:\n  {local_summary}\n- VZDÁLENÉ POSTAVY V JINÝCH MĚSTECH A LOKACÍCH (ZDE SE FYZICKY NENACHÁZÍ!):\n  {distant_summary}\n\n[KRITICKÉ PRAVIDLO PROSTOROVÉHO REALISMU A ZÁKAZ TELEPORTACE]:\n1. Hráč se fyzicky nachází v lokaci "{curr_region}". Všechny vzdálené postavy ({distant_summary}) zůstaly v předchozích městech/lokacích a jsou daleko!\n2. PŘÍSNÝ ZÁKAZ TELEPORTACE POSTAV: V polích 'nabizene_akce', 'vypravec' ani 'npc_dialogy' se NESMÍ objevit ŽÁDNÁ ze vzdálených postav (např. hostinský z opuštěného města), pokud hráč výslovně neodcestoval zpět na jejich souřadnice!\n3. 'nabizene_akce' MUSÍ VŽDY 100% odpovídat pouze bezprostřednímu okolí a situaci v místě "{curr_region}".\n4. Pokud je hráč v novém sídle (vesnice/město), vyplň do 'vyznamna_mista' pouze body z tohoto nového sídla. Pokud je v divočině/pláních/lese, uveď v 'vyznamna_mista' pouze přírodní orientační body (např. Skalní převis, Rozcestí) nebo nech prázdné. NIKDY tam nevracej budovy z předchozího města!\n======================================================================\n'''
-        context_action = f"[Dlouhodobá paměť (relevantní fakta z minulosti):]\n{relevant_memories}\n{world_prompt_str}\n\n{spatial_grounding}\n\n[Aktuální stav hry - pouze pro informaci PJ:]\n{json.dumps({k: v for k, v in char_data.get('state', {}).items() if k not in ['worldData', 'world_data', 'history']}, ensure_ascii=False)}\n\n{travel_prompt}\n\n[Akce hráče:]\n{req.action_text}\n"
+
+        equipped_map = state_dict.get('equipped', {})
+        inv_list = state_dict.get('inventory', [])
+        base_stats = state_dict.get('stats', {'str': 10, 'dex': 10, 'con': 10, 'intel': 10, 'wis': 10, 'cha': 10})
+        equipped_items = [item for item in inv_list if item.get('id') in equipped_map.values()]
+        weapon_item = next((i for i in equipped_items if i.get('slot') == 'hlavní ruka' or i.get('type') == 'zbraň'), None)
+        armor_item = next((i for i in equipped_items if i.get('slot') == 'hruď' or i.get('type') == 'zbroj'), None)
+        shield_item = next((i for i in equipped_items if i.get('slot') == 'druhá ruka' and i.get('type') == 'zbroj'), None)
+        
+        atk_bonus = sum(int(i.get('attack_bonus', 0)) for i in equipped_items)
+        def_bonus = sum(int(i.get('defense_bonus', 0)) for i in equipped_items)
+        str_val = int(base_stats.get('str', 10))
+        dex_val = int(base_stats.get('dex', 10))
+        str_mod = (str_val - 10) // 2
+        dex_mod = (dex_val - 10) // 2
+        total_attack = max(0, str_mod) + atk_bonus
+        total_ac = 10 + max(0, dex_mod) + def_bonus
+
+        combat_stats_summary = f"""
+[AKTUÁLNÍ BOJOVÉ VYBAVENÍ A EFEKTIVNÍ STATY HRÁČE]:
+- Úroveň: {req.level} | Životy: {state_dict.get('hp', 100)} / {state_dict.get('max_hp', 100)}
+- Vybavená zbraň: {weapon_item.get('name') if weapon_item else 'Holé ruce'} (Bonus k útoku ze zbraně: +{atk_bonus})
+- Vybavená zbroj a štít: {', '.join([i.get('name') for i in [armor_item, shield_item] if i]) or 'Běžný oděv'} (Bonus k obraně ze zbroje: +{def_bonus})
+- Celkový Útok hráče: +{total_attack} (Při útoku hráče virtuálně hoď d20 + {total_attack} proti AC nepřítele)
+- Celková Třída Zbroje (AC / Obrana hráče): {total_ac} (Útok nepřítele musí hodit d20 + bonus >= {total_ac}, aby hráče zasáhl!)
+ZÁVAZNÉ PRAVIDLO: V každém souboji striktně použij tyto hodnoty v `system_log` a popiš zásah či odražení rány s ohledem na toto vybavení!
+"""
+
+        context_action = f"[Dlouhodobá paměť (relevantní fakta z minulosti):]\n{relevant_memories}\n{world_prompt_str}\n\n{spatial_grounding}\n\n{combat_stats_summary}\n\n{travel_prompt}\n\n[Akce hráče:]\n{req.action_text}\n"
         contents.append(types.Content(role='user', parts=[types.Part.from_text(text=context_action)]))
-        system_prompt = f"""Jsi Pán jeskyně ve fantasy světě Aethelgard. Hráč je momentálně na {req.level}. úrovni.\n\nPRAVIDLA D&D 5e, OBTÍŽNOST (DC) A SELHÁNÍ:\n- **Nešetři hráče!** Pokud dělá riskantní akci (průzkum, přesvědčování, skok), VŽDY urči adekvátní Obtížnost (DC). \n- Běžně používej **DC 15 (Střední)** pro běžné překážky a **DC 20 (Těžké)** nebo **DC 25 (Velmi těžké)** pro složité úkoly (např. luštění prastarých nápisů v ruinách musí být minimálně DC 18!). Vyhni se dávání triviálních DC 10.\n- **Neboj se nechat hráče selhat!** Hra musí mít napětí a selhání tvoří příběh. Hráč musí nést následky (ztráta HP, spuštění pasti, rozčílení NPC).\n- Vždy na pozadí virtuálně "hoď d20" a přičti příslušný stat. Výsledek porovnej s tvým DC. Do `system_log` vždy uveď hod a výsledek (např. "Hod na Vnímání: d20(8) + WIS(2) = 10 vs DC 15. Selhání.").\n\nTAKTICKÝ BOJ A NEPŘÁTELÉ:\n- Neodepisuj nepřítele hned, boj je na kola. Sleduj jejich HP, ZRAŇUJ HRÁČE. Nepřátelé útočí zpět, využívají prostředí a nejsou hloupí! Hráč nesmí vyhrát každý souboj bez škrábnutí.\n- Nastav `v_boji` na true, pokud probíhá boj. Pečlivě vyplňuj seznam `nepratele` (jméno, hp, max_hp, status), aby to viděl hráč na obrazovce.\n\nRŮZNORODÁ A AUTENTICKÁ NPC:\n- Obyvatelstvo je různorodé (ženy, děti, starci, veteráni, podvodníci). Každé NPC má svou skrytou úroveň a logiku. \n- NPC NESOUHLASÍ s hráčem automaticky. Obyčejný sedlák před hrozbou uteče, ale elitní válečník hráče klidně zabije, pokud ho hráč urazí.\n\nODMĚNY A XP (EXTRÉMNĚ POMALÝ RŮST - DLOUHÁ KAMPAŇ):\n- Uděluj `xp_zmena` POUZE za velmi významné události. Zlaté pravidlo: běžný pohyb a běžný rozhovor = 0 XP, odhalení důležitého tajemství = 10 XP, zabití monstra = 20-40 XP, splnění celého úkolu = 100-200 XP. Nechceme, aby hráč leveloval rychle.\n\nMĚSTA A BEZPEČNÁ MÍSTA (Urban Encounters & Safe Zones):\n- Při spánku v hostinci nebo odpočinku NEGNERUJ pasti ani bojová přepadení (žádné nečekané pavučiny při spánku!). Nech hráče v klidu zotavit.\n- Náhodná setkání VE MĚSTĚ by měla být zajímavá, ale NEBOJOVÁ: např. žebrák s tajnou mapou, kapsář (test obratnosti), hádka dvou kupců, nebo NPC, které nabídne vedlejší quest.\n- Smrtící pasti, monstra a bojová přepadení patří VÝHRADNĚ do divočiny a dungeonů!\n\nVNITŘNÍ MYŠLENKY A KONTROLY (OOC):\n- Pokud text akce hráče začíná na [OOC/MYŠLENKA], znamená to, že si hráč pouze interně rekapituluje stav nebo o něčem přemýšlí. V takovém případě ZASTAV ČAS. Neposouvej děj, nevyvolávej žádné události ani reakce okolí. Zůstaň ve stávající scéně a pouze stručně popiš výsledek jeho úvahy či kontroly.\n\nVYPRÁVĚNÍ, MÍSTA A PUTOVÁNÍ (LOKACE):\n- **Cestování:** Rychlé přesuny na povel hráče ("Jdu do města X") jsou ZAKÁZÁNY! Každé putování mezi městy/lokacemi přepne hru do režimu "divocina". Cesta musí trvat více tahů.\n- **Náhodná setkání:** Během cesty MUSÍŠ generovat překážky: boje (vlci, bandité), logistické potíže (zlomené kolo, bouřka), příběhová setkání (potulný kupec, zraněný).\n- **Typ lokace a Region:** Do `typ_lokace` dej vždy 'mesto', 'vesnice', 'divocina', nebo 'dungeon'. Do `aktualni_region` dej hezký název oblasti, kde hráč zrovna je (např. 'Stříbrný les', 'Hlavní město').\n- **Významná místa (Město a UI):** Pokud je hráč v `mesto` nebo `vesnice`, MUSÍŠ vyplnit pole `vyznamna_mista` objekty (název, ikona, ma_ukol). Nastav `ma_ukol=True`, pokud se tam dá vzít quest (v UI se objeví vykřičník). V lese/pustině uveď pouze přírodní orientační body nebo nech prázdné!\n- **CESTOVÁNÍ A JÍDLO (Survival):** Když se hráč rozhodne cestovat (opustit město a jít jinam), PŘEPNI `typ_lokace` na 'divocina'. Změň `davky_jidla_zmena` na -1 (cesta stojí jídlo). Pokud hráč jídlo nemá, dej mu penalizaci (-10 HP, napiš to do system_log). Cestou VŽDY vygeneruj náhodné setkání (bandité, bouře, obchodník) a nenech ho dorazit hned do cíle!\n\nZÁZNAMY PRO FRONTEND:\n- Do 'image_prompt' detailně popište aktuální scénu (bez textu). VŽDY NA KONEC PŘIDEJTE TENTO STYL: "style of detailed 2D painterly fantasy concept art, bright vibrant colors, majestic epic scale, cozy atmosphere, studio ghibli meets classic D&D illustrations". Do 'popis_okoli' stručně popište situaci.\n- Do 'vypravec' pište (s velkým důrazem na epické, barevné, malířské fantasy popisy majestátních scenérií, detailů architektury a útulné atmosféry) POUZE beletristické vyprávění světa – jak se situace odvíjí, jak reagují NPC, atmosféru. NIKDY sem nepsat technické detaily (čísla hodů, XP, poškození).\n- Do 'system_log' zapiš VŠECHNY technické herní mechaniky odděleně: výsledky hodů kostkou (např. "Hod na Útok: d20=14 + STR 2 = 16 vs. Obrana 12 -> Zásah!"), způsobené/přijaté poškození, získané XP, level-up oznámení. Tento text se hráči NEBUDE číst nahlas.\n- Pro NPC použij VÝHRADNĚ 'npc_dialogy' (pohlavi="muz"/"zena", image_prompt="detailed 2D painterly fantasy portrait, vibrant colors"). PŘÍSNÝ ZÁKAZ: Pokud jakákoliv postava promluví (přímá řeč), NESMÍ to být v textu 'vypravec'. Vypravěč slouží POUZE pro popis děje (např. "Garrick se na tebe podíval."). Samotná věta, kterou Garrick řekne, už MUSÍ být odděleně vložena do 'npc_dialogy'. Pokud mluví více postav, vlož do 'npc_dialogy' více objektů.\n\nSPECIFIKA POSTAVY A NABIZENE AKCE:\n- TRIDA A RASA: Hracova trida a rasa hraji OBROVSKOU roli. Obchodnici by meli nabizet predmety/kouzla pro hracovu tridu, a NPC by na ni meli reagovat.\n- VZDY vygeneruj 3 az 5 "nabizenych akci" (v listu `nabizene_akce`), ktere davaji v dane situaci smysl (neomezuj se jen na 3, muze jich byt az 5).\n- Z techto nabizenych akci generuj alespon jednu tak, aby byla unikatni pro hracovu tridu (napr. Bard muze nekoho okouzlit pisni, Zlodej pacit, Barbar pouzit silu).\n- PROSTOROVÁ INTEGRITA: Všechny 'nabizene_akce', 'vypravec' i 'npc_dialogy' musí striktně respektovat aktuální fyzické místo hráče. Pokud hráč odešel z města/hostince, postavy z minulého města v této scéně NEEXISTUJÍ a nesmí být nabízeny!\n"""
+        system_prompt = f"""Jsi Pán jeskyně ve fantasy světě Aethelgard. Hráč je momentálně na {req.level}. úrovni.
+
+PRAVIDLA D&D 5e, OBTÍŽNOST (DC) A SELHÁNÍ:
+- **Nešetři hráče!** Pokud dělá riskantní akci (průzkum, přesvědčování, skok), VŽDY urči adekvátní Obtížnost (DC). 
+- Běžně používej **DC 15 (Střední)** pro běžné překážky a **DC 20 (Těžké)** nebo **DC 25 (Velmi těžké)** pro složité úkoly. Vyhni se dávání triviálních DC 10.
+- **Neboj se nechat hráče selhat!** Hra musí mít napětí a selhání tvoří příběh. Hráč musí nést následky (ztráta HP, spuštění pasti, rozčílení NPC).
+- Vždy na pozadí virtuálně "hoď d20" a přičti příslušný stat. Výsledek porovnej s tvým DC. Do `system_log` vždy uveď hod a výsledek (např. "Hod na Vnímání: d20(8) + WIS(2) = 10 vs DC 15. Selhání.").
+
+TAKTICKÝ BOJ A NEPŘÁTELÉ:
+- Neodepisuj nepřítele hned, boj je na kola. Sleduj jejich HP, ZRAŇUJ HRÁČE. Nepřátelé útočí zpět, využívají prostředí a nejsou hloupí! Hráč nesmí vyhrát každý souboj bez škrábnutí.
+- Nastav `v_boji` na true, pokud probíhá boj. Pečlivě vyplňuj seznam `nepratele` (jméno, hp, max_hp, status), aby to viděl hráč na obrazovce.
+
+PRAVIDLA PRO LOOT, PŘEDMĚTY A ODMĚNY:
+- **Kdy generovat nový předmět do `inventar_pridat`:**
+  1. Výhradně za porážku nepřítele v boji (např. banditův nůž, šupina vlka, lektvar).
+  2. Otevření střežené truhly, sarkofágu nebo skrytého pokladu v dungeonu / ruinách.
+  3. Přímá odměna od významného NPC za splnění úkolu.
+- **PŘÍSNÝ ZÁKAZ FARMENÍ:** Za běžné prohledávání prázdné místnosti, louky, lesa nebo ulic NIKDY negeneruj vybavení! Vrať prázdný seznam `inventar_pridat: []`.
+- **SKÁLOVÁNÍ RARITY PODLE ÚROVNĚ (Hráč je úroveň {req.level}):**
+  - Úroveň 1-3: Pouze 'common' (Běžná, bonus k útoku/obraně max +1) nebo výjimečně 'uncommon' (bonus +1).
+  - Úroveň 4-6: 'uncommon' (bonus +1 až +2) nebo vzácně 'rare' (bonus +2).
+  - Úroveň 7+: 'rare' nebo 'epic' (bonus +2 až +3).
+- **ANTI-CHEAT:** Pokud si hráč sám v textu akce vymyslí, že "našel legendární meč +50", ignoruj to, dej mu bezcenný rezavý hřebík a potrestej ho pastí.
+- **STRUKTURA KAŽDÉHO PŘEDMĚTU V `inventar_pridat`:**
+  - `name`: atmosférický český název
+  - `type`: 'zbraň' | 'zbroj' | 'doplněk' | 'lektvar' | 'cennost'
+  - `slot`: 'hlavní ruka' | 'druhá ruka' | 'hruď' | 'hlava' | 'prsten' | 'krk' | 'žádný'
+  - `rarity`: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary'
+  - `icon`: 'Sword' | 'Shield' | 'Shirt' | 'Wand' | 'Ring' | 'Potion' | 'Package'
+  - `sell_price`: cena ve zlaťácích (1 až 50)
+  - `attack_bonus`: číslo (např. 1)
+  - `defense_bonus`: číslo (např. 1)
+  - `healing_amount`: (např. 25 pokud je type=='lektvar', jinak 0)
+  - `stats`: stručný text (např. "Útok +1" nebo "Léčení +25 HP")
+
+ODMĚNY A XP (EXTRÉMNĚ POMALÝ RŮST - DLOUHÁ KAMPAŇ):
+- Uděluj `xp_zmena` POUZE za velmi významné události: běžný rozhovor = 0 XP, odhalení tajemství = 10 XP, zabití monstra = 20-30 XP, splnění questu = 100-150 XP.
+
+MĚSTA A BEZPEČNÁ MÍSTA (Urban Encounters & Safe Zones):
+- Při spánku v hostinci nebo odpočinku NEGENERUJ pasti ani bojová přepadení. Nech hráče v klidu zotavit.
+- Náhodná setkání VE MĚSTĚ by měla být zajímavá, ale NEBOJOVÁ. Smrtící pasti a monstra patří do divočiny a dungeonů!
+
+VNITŘNÍ MYŠLENKY A KONTROLY (OOC):
+- Pokud text akce začíná na [OOC/MYŠLENKA], ZASTAV ČAS. Pouze popiš výsledek úvahy.
+
+VYPRÁVĚNÍ, MÍSTA A PUTOVÁNÍ (LOKACE):
+- **Cestování:** Rychlé přesuny na povel hráče jsou ZAKÁZÁNY! Každé putování mezi lokacemi přepne hru do režimu "divocina" a trvá více tahů.
+- **Typ lokace a Region:** Do `typ_lokace` dej vždy 'mesto', 'vesnice', 'divocina', nebo 'dungeon'. Do `aktualni_region` dej hezký název oblasti.
+- **CESTOVÁNÍ A JÍDLO:** Když hráč cestuje, přepni do 'divocina' a odečti 1 jídlo (`davky_jidla_zmena`: -1).
+
+ZÁZNAMY PRO FRONTEND:
+- Do 'image_prompt' detailně popište aktuální scénu (bez textu). VŽDY NA KONEC PŘIDEJTE: "style of detailed 2D painterly fantasy concept art, bright vibrant colors, majestic epic scale, cozy atmosphere, studio ghibli meets classic D&D illustrations".
+- Do 'vypravec' pište POUZE beletristické vyprávění světa. NIKDY sem nepsat technické detaily (čísla hodů, XP, poškození).
+- Do 'system_log' zapiš VŠECHNY technické herní mechaniky odděleně: výsledky hodů d20, způsobené/přijaté poškození, získané XP, nalezený loot.
+- Pro NPC použij VÝHRADNĚ 'npc_dialogy' (pohlavi="muz"/"zena"). Přímá řeč NESMÍ být ve vypravěči!
+- VŽDY vygeneruj 3 až 5 logických 'nabizene_akce'.
+"""
         response = client.models.generate_content(model='gemini-3.6-flash', contents=contents, config=types.GenerateContentConfig(system_instruction=system_prompt, response_mime_type='application/json', response_schema=dm_schema_dict, temperature=0.7))
         dm_json = json.loads(response.text)
+
+        # Loot Sanitizer & Level Cap Enforcement
+        if dm_json.get('zmeny_stavu') and dm_json['zmeny_stavu'].get('inventar_pridat'):
+            max_stat_cap = 1 if req.level <= 3 else (2 if req.level <= 6 else 4)
+            cleaned_loot = []
+            for item in dm_json['zmeny_stavu']['inventar_pridat']:
+                if not isinstance(item, dict):
+                    continue
+                item_id = item.get('id') or str(uuid.uuid4())
+                item['id'] = item_id
+                item['attack_bonus'] = min(max_stat_cap, max(0, int(item.get('attack_bonus', 0))))
+                item['defense_bonus'] = min(max_stat_cap, max(0, int(item.get('defense_bonus', 0))))
+                if item.get('type') == 'lektvar' and not item.get('healing_amount'):
+                    item['healing_amount'] = 25
+                if not item.get('icon'):
+                    item['icon'] = 'Sword' if item.get('type') == 'zbraň' else ('Shield' if item.get('slot') == 'druhá ruka' else ('Potion' if item.get('type') == 'lektvar' else 'Package'))
+                if not item.get('rarity'):
+                    item['rarity'] = 'common'
+                cleaned_loot.append(item)
+            dm_json['zmeny_stavu']['inventar_pridat'] = cleaned_loot
         import unicodedata
         import re
         region = dm_json.get('aktualni_region', curr_region)

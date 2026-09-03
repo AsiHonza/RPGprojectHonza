@@ -91,7 +91,7 @@ const FormattedSystemLog = ({ text }: { text: string }) => {
 
 
 export default function Home() {
-  const { bgVolume, setBgVolume, currentTrack, setCurrentTrack, ttsVolume, setTtsVolume, musicPlaying, setMusicPlaying, unreadQuests, setUnreadQuests, gameState, setGameState, loading, setLoading, name, setName, dndClass, setDndClass, race, setRace, stats, setStats, keywords, setKeywords, gameMode, setGameMode, backstory, setBackstory, hp, setHp, level, setLevel, xp, setXp, gold, setGold, rations, setRations, skillPoints, setSkillPoints, inventory, setInventory, equipped, setEquipped, worldData, setWorldData, journal, setJournal, quests, setQuests, npcs, setNpcs, currentRegion, setCurrentRegion, locationType, setLocationType, currentSpellSlots, setCurrentSpellSlots, maxSpellSlots, setMaxSpellSlots, skills, setSkills, availableSkills, setAvailableSkills, inCombat, setInCombat, enemies, setEnemies , playerLocation, setPlayerLocation, setDay, history, setHistory, suggestedActions, setSuggestedActions, pointsOfInterest, setPointsOfInterest, currentLocationImage, setCurrentLocationImage, currentLocationDesc, setCurrentLocationDesc, currentImage, setCurrentImage } = useGameStore();
+  const { bgVolume, setBgVolume, currentTrack, setCurrentTrack, ttsVolume, setTtsVolume, musicPlaying, setMusicPlaying, unreadQuests, setUnreadQuests, gameState, setGameState, loading, setLoading, name, setName, dndClass, setDndClass, race, setRace, stats, setStats, keywords, setKeywords, gameMode, setGameMode, backstory, setBackstory, hp, setHp, maxHp, setMaxHp, level, setLevel, xp, setXp, gold, setGold, rations, setRations, skillPoints, setSkillPoints, inventory, setInventory, equipped, setEquipped, worldData, setWorldData, journal, setJournal, quests, setQuests, npcs, setNpcs, currentRegion, setCurrentRegion, locationType, setLocationType, currentSpellSlots, setCurrentSpellSlots, maxSpellSlots, setMaxSpellSlots, skills, setSkills, availableSkills, setAvailableSkills, inCombat, setInCombat, enemies, setEnemies , playerLocation, setPlayerLocation, setDay, history, setHistory, suggestedActions, setSuggestedActions, pointsOfInterest, setPointsOfInterest, currentLocationImage, setCurrentLocationImage, currentLocationDesc, setCurrentLocationDesc, currentImage, setCurrentImage } = useGameStore();
 
 
   const [actionsOpen, setActionsOpen] = useState(false);
@@ -346,14 +346,14 @@ export default function Home() {
           email: email,
           name: name,
           state: {
-            hp, inventory, equipped, level, xp, skillPoints, skills, inCombat, enemies, quests,
+            hp, max_hp: maxHp, inventory, equipped, level, xp, skillPoints, skills, inCombat, enemies, quests,
             locationType, currentRegion, pointsOfInterest, stats, rations, currentImage, currentImageError, currentLocationDesc, travel_mode: travelMode, travel_days_left: travelDaysLeft, travel_destination: travelDestination, zname_postavy: npcs, world_data: worldData, playerLocation: playerLocation
           }
         }),
       }).catch(err => console.error("Autosave failed", err));
     }, 2000);
     return () => clearTimeout(timer);
-  }, [hp, inventory, equipped, level, xp, skillPoints, skills, inCombat, enemies, quests, locationType, currentRegion, pointsOfInterest, gameState, stats, gold, currentSpellSlots, maxSpellSlots, rations, currentImage, currentImageError, travelMode, travelDaysLeft, travelDestination, npcs, worldData, playerLocation]);
+  }, [hp, maxHp, inventory, equipped, level, xp, skillPoints, skills, inCombat, enemies, quests, locationType, currentRegion, pointsOfInterest, gameState, stats, gold, currentSpellSlots, maxSpellSlots, rations, currentImage, currentImageError, travelMode, travelDaysLeft, travelDestination, npcs, worldData, playerLocation]);
 
   const playAudio = (text: string, voiceType: "narrator" | "npc_muz" | "npc_zena" = "narrator"): Promise<void> => {
     return new Promise((resolve) => {
@@ -551,6 +551,7 @@ export default function Home() {
         
         const state = data.character.state || {};
         setHp(state.hp || 100);
+        setMaxHp(state.max_hp || 100);
         if (state.gold !== undefined) setGold(state.gold);
         if (state.currentSpellSlots !== undefined) setCurrentSpellSlots(state.currentSpellSlots);
         if (state.maxSpellSlots !== undefined) setMaxSpellSlots(state.maxSpellSlots);
@@ -818,15 +819,25 @@ export default function Home() {
         else if (data.image_url || data.image_base64) setCurrentImageError(null);
 
         if (data.zmeny_stavu) {
-          if (data.zmeny_stavu.zivoty_zmena) setHp(h => Math.max(0, h + data.zmeny_stavu.zivoty_zmena));
+          if (data.zmeny_stavu.zivoty_zmena) setHp(h => Math.min(maxHp, Math.max(0, h + data.zmeny_stavu.zivoty_zmena)));
+          if (data.zmeny_stavu.zlato_zmena) setGold(g => Math.max(0, g + data.zmeny_stavu.zlato_zmena));
           if (data.zmeny_stavu.xp_zmena) {
              setXp(currentXp => {
                const newXp = currentXp + data.zmeny_stavu.xp_zmena;
-               if (newXp >= level * 300) {
-                 // Level up!
-                 setLevel(l => l + 1);
+               const xpNeeded = level * 500;
+               if (newXp >= xpNeeded) {
+                 const nextLevel = level + 1;
+                 const nextMaxHp = maxHp + 10;
+                 setLevel(nextLevel);
+                 setMaxHp(nextMaxHp);
+                 setHp(nextMaxHp); // Full heal on level-up
                  setSkillPoints(sp => sp + 1);
-                 return newXp - (level * 300);
+                 setQuestBanner({
+                   title: `POSTOUPIL JSI NA ÚROVEŇ ${nextLevel}!`,
+                   subtitle: `+10 Max HP (vyléčen na ${nextMaxHp} HP) a získal jsi 1 dovednostní bod!`
+                 });
+                 setTimeout(() => setQuestBanner(null), 7000);
+                 return newXp - xpNeeded;
                }
                return newXp;
              });

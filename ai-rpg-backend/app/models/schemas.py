@@ -4,11 +4,17 @@ import uuid
 
 class Item(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    name: str
-    description: str
-    type: str
-    slot: str
-    stats_bonus: dict = {}
+    name: str = Field(description="Název předmětu")
+    description: str = Field(default="", description="Krátký popis nebo historie předmětu")
+    type: str = Field(default="cennost", description="Typ: 'zbraň', 'zbroj', 'doplněk', 'lektvar', 'cennost'")
+    slot: str = Field(default="žádný", description="Slot: 'hlavní ruka', 'druhá ruka', 'hruď', 'hlava', 'prsten', 'krk', 'žádný'")
+    rarity: str = Field(default="common", description="Rarita: 'common', 'uncommon', 'rare', 'epic', 'legendary'")
+    icon: str = Field(default="Package", description="Ikona: 'Sword', 'Shield', 'Shirt', 'Wand', 'Ring', 'Potion', 'Package'")
+    sell_price: int = Field(default=5, description="Cena ve zlaťácích")
+    attack_bonus: int = Field(default=0, description="Bonus k útoku (+1, +2)")
+    defense_bonus: int = Field(default=0, description="Bonus k obraně/AC (+1, +2)")
+    healing_amount: int = Field(default=0, description="Léčení pro lektvary (např. 25)")
+    stats: str = Field(default="", description="Stručný přehled vlastností (např. 'Útok +1')")
 
 class Ukol(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
