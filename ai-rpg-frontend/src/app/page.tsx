@@ -22,6 +22,7 @@ import { SettingsModal } from '../features/ui/SettingsModal';
 import { PatchNotesModal } from '../features/ui/PatchNotesModal';
 import { PlayerHeader } from '../features/ui/PlayerHeader';
 import { PATCH_NOTES } from '../data/patchNotes';
+import { SeamlessVideo } from '../components/ui/SeamlessVideo';
 
 const getAvatarVideo = (r?: string) => {
   if (!r) return null;
@@ -843,7 +844,7 @@ export default function Home() {
       <div className="min-h-screen text-[#2d3748] flex items-center justify-center p-4 font-serif relative overflow-hidden bg-black">
         
         {/* Deep background fog */}
-        <video src="/video/bg1.mp4" autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none opacity-60" />
+        <SeamlessVideo src="/video/bg1.mp4" className="absolute inset-0 w-full h-full z-0 pointer-events-none opacity-60" />
         <div className="absolute inset-0 bg-gradient-to-b from-[#e5dfc5]/20 via-[#f9f6e6]/80 to-[#f9f6e6] z-0 pointer-events-none" />
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-rpg-magic/10 blur-[120px] rounded-full z-0 pointer-events-none" />
 
@@ -955,19 +956,18 @@ export default function Home() {
                     className="group relative w-64 h-96 shrink-0 bg-[#f9f6e6]/80 backdrop-blur-md border border-amber-900/10 rounded-2xl overflow-hidden cursor-pointer hover:border-rpg-magic transition-all hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(197,160,89,0.3)]"
                     onClick={() => loadGame(char.name)}
                   >
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#f9f6e6] via-[#f9f6e6]/90 to-transparent z-10" />
+                    <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#f9f6e6] via-[#f9f6e6]/70 to-transparent z-10 pointer-events-none" />
                     
                     {getAvatarVideo(char.race) ? (
-                      <video 
+                      <SeamlessVideo 
                         src={getAvatarVideo(char.race)!} 
-                        autoPlay loop muted playsInline 
-                        className="absolute inset-0 w-full h-full object-cover opacity-75 group-hover:opacity-95 transition-opacity duration-500" 
+                        className="absolute inset-0 w-full h-full opacity-90 group-hover:opacity-100 transition-opacity duration-500" 
                       />
                     ) : (
                       <img 
                         src={`https://image.pollinations.ai/prompt/vibrant%20fable%20style%20magical%20fantasy%20portrait%20of%20a%20${encodeURIComponent(char.race)}%20${encodeURIComponent(char.dnd_class)}%20RPG%20character?width=512&height=768&nologo=true&seed=${char.name.length * 42}`} 
                         alt={char.name} 
-                        className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-500" 
+                        className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500" 
                       />
                     )}
                     
@@ -1095,7 +1095,7 @@ export default function Home() {
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl overflow-hidden border border-rpg-magic shadow-[0_0_10px_rgba(197,160,89,0.3)] shrink-0 hidden sm:block">
                 {getAvatarVideo(race) ? (
-                  <video src={getAvatarVideo(race)!} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+                  <SeamlessVideo src={getAvatarVideo(race)!} className="w-full h-full" />
                 ) : (
                   <img src={`https://image.pollinations.ai/prompt/vibrant%20fable%20style%20magical%20fantasy%20portrait%20of%20a%20${encodeURIComponent(race)}%20${encodeURIComponent(dndClass)}%20RPG%20character?width=128&height=128&nologo=true&seed=42`} alt={name} className="w-full h-full object-cover" />
                 )}
@@ -1215,10 +1215,20 @@ export default function Home() {
             ))}
 
             {loading && (
-              <div className="flex justify-start animate-fade-in-up">
-                <div className="bg-[#f9f6e6]/80 border border-rpg-magic/30 p-5 rounded-2xl flex items-center gap-3 text-rpg-magic italic font-lora">
-                  <Sparkles className="animate-spin" size={20} />
-                  <span>Vypravěč spřádá osud...</span>
+              <div className="flex justify-start animate-fade-in-up my-2">
+                <div className="bg-[#f5eedc] border-2 border-amber-600/60 p-4 sm:p-5 rounded-2xl flex items-center gap-3.5 shadow-lg shadow-amber-900/10">
+                  <div className="relative flex items-center justify-center w-9 h-9 rounded-full bg-amber-600 text-white shadow-md shrink-0">
+                    <Sparkles className="animate-spin" size={18} />
+                    <span className="absolute inset-0 rounded-full bg-amber-400 animate-ping opacity-50" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-amber-950 font-cinzel font-bold text-sm sm:text-base tracking-wide flex items-center gap-1.5">
+                      Vypravěč přemýšlí a spřádá osud...
+                    </span>
+                    <span className="text-amber-800/80 font-lora text-xs italic">
+                      Tvá volba právě mění chod příběhu
+                    </span>
+                  </div>
                 </div>
               </div>
             )}
@@ -1329,10 +1339,17 @@ export default function Home() {
               />
               <button 
                 onClick={() => sendAction(customAction)}
-                className="bg-rpg-blood hover:bg-red-800 text-[#2d3748] px-4 sm:px-8 py-2 sm:py-3 w-full sm:w-auto rounded-xl font-cinzel font-bold text-lg tracking-widest transition-all disabled:opacity-50 flex items-center justify-center shadow-[0_0_15px_rgba(183,75,75,0.4)]"
+                className="bg-rpg-blood hover:bg-red-800 text-white px-4 sm:px-8 py-2 sm:py-3 w-full sm:w-auto rounded-xl font-cinzel font-bold text-lg tracking-widest transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(183,75,75,0.4)]"
                 disabled={loading || !customAction.trim()}
               >
-                {loading ? <Loader2 size={24} className="animate-spin" /> : "Vydat se"}
+                {loading ? (
+                  <>
+                    <Loader2 size={22} className="animate-spin text-white" />
+                    <span className="text-sm">Spřádám...</span>
+                  </>
+                ) : (
+                  "Vydat se"
+                )}
               </button>
             </div>
           </div>
