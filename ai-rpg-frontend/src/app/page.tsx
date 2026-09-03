@@ -23,6 +23,20 @@ import { PatchNotesModal } from '../features/ui/PatchNotesModal';
 import { PlayerHeader } from '../features/ui/PlayerHeader';
 import { PATCH_NOTES } from '../data/patchNotes';
 
+const getAvatarVideo = (r?: string) => {
+  if (!r) return null;
+  const lower = r.toLowerCase();
+  if (lower.includes('člověk') || lower.includes('clovek') || lower.includes('human')) return '/video/avatars/clovek.mp4';
+  if (lower.includes('elf')) return '/video/avatars/elf.mp4';
+  if (lower.includes('trpasl') || lower.includes('dwarf')) return '/video/avatars/trpaslik.mp4';
+  if (lower.includes('půlč') || lower.includes('pulc') || lower.includes('halfling')) return '/video/avatars/pulcik.mp4';
+  if (lower.includes('drak') || lower.includes('dragon')) return '/video/avatars/drakorozeny.mp4';
+  if (lower.includes('tiefling')) return '/video/avatars/tiefling.mp4';
+  if (lower.includes('ork') || lower.includes('orc')) return '/video/avatars/pulork.mp4';
+  if (lower.includes('gnóm') || lower.includes('gnom') || lower.includes('gnome')) return '/video/avatars/gnom.mp4';
+  return null;
+};
+
 const TypewriterText = ({ text, delay = 25, animate = false }: { text: string, delay?: number, animate?: boolean }) => {
   const [displayedText, setDisplayedText] = useState(animate ? "" : text);
 
@@ -75,7 +89,7 @@ const FormattedSystemLog = ({ text }: { text: string }) => {
 
 
 export default function Home() {
-  const { bgVolume, setBgVolume, currentTrack, setCurrentTrack, ttsVolume, setTtsVolume, musicPlaying, setMusicPlaying, unreadQuests, setUnreadQuests, gameState, setGameState, loading, setLoading, name, setName, dndClass, setDndClass, race, setRace, stats, setStats, keywords, setKeywords, gameMode, setGameMode, backstory, setBackstory, hp, setHp, level, setLevel, xp, setXp, gold, setGold, rations, setRations, skillPoints, setSkillPoints, inventory, setInventory, equipped, setEquipped, worldData, setWorldData, journal, setJournal, quests, setQuests, npcs, setNpcs, currentRegion, setCurrentRegion, locationType, setLocationType, currentSpellSlots, setCurrentSpellSlots, maxSpellSlots, setMaxSpellSlots, skills, setSkills, availableSkills, setAvailableSkills, inCombat, setInCombat, enemies, setEnemies , setPlayerLocation, setDay } = useGameStore();
+  const { bgVolume, setBgVolume, currentTrack, setCurrentTrack, ttsVolume, setTtsVolume, musicPlaying, setMusicPlaying, unreadQuests, setUnreadQuests, gameState, setGameState, loading, setLoading, name, setName, dndClass, setDndClass, race, setRace, stats, setStats, keywords, setKeywords, gameMode, setGameMode, backstory, setBackstory, hp, setHp, level, setLevel, xp, setXp, gold, setGold, rations, setRations, skillPoints, setSkillPoints, inventory, setInventory, equipped, setEquipped, worldData, setWorldData, journal, setJournal, quests, setQuests, npcs, setNpcs, currentRegion, setCurrentRegion, locationType, setLocationType, currentSpellSlots, setCurrentSpellSlots, maxSpellSlots, setMaxSpellSlots, skills, setSkills, availableSkills, setAvailableSkills, inCombat, setInCombat, enemies, setEnemies , playerLocation, setPlayerLocation, setDay } = useGameStore();
 
 
   const [actionsOpen, setActionsOpen] = useState(false);
@@ -329,13 +343,13 @@ export default function Home() {
           name: name,
           state: {
             hp, inventory, equipped, level, xp, skillPoints, skills, inCombat, enemies, quests,
-            locationType, currentRegion, pointsOfInterest, stats, rations, currentImage, currentImageError, currentLocationDesc, travel_mode: travelMode, travel_days_left: travelDaysLeft, travel_destination: travelDestination, zname_postavy: npcs, world_data: worldData
+            locationType, currentRegion, pointsOfInterest, stats, rations, currentImage, currentImageError, currentLocationDesc, travel_mode: travelMode, travel_days_left: travelDaysLeft, travel_destination: travelDestination, zname_postavy: npcs, world_data: worldData, playerLocation: playerLocation
           }
         }),
       }).catch(err => console.error("Autosave failed", err));
     }, 2000);
     return () => clearTimeout(timer);
-  }, [hp, inventory, equipped, level, xp, skillPoints, skills, inCombat, enemies, quests, locationType, currentRegion, pointsOfInterest, gameState, stats, gold, currentSpellSlots, maxSpellSlots, rations, currentImage, currentImageError, travelMode, travelDaysLeft, travelDestination, npcs, worldData]);
+  }, [hp, inventory, equipped, level, xp, skillPoints, skills, inCombat, enemies, quests, locationType, currentRegion, pointsOfInterest, gameState, stats, gold, currentSpellSlots, maxSpellSlots, rations, currentImage, currentImageError, travelMode, travelDaysLeft, travelDestination, npcs, worldData, playerLocation]);
 
   const playAudio = (text: string, voiceType: "narrator" | "npc_muz" | "npc_zena" = "narrator"): Promise<void> => {
     return new Promise((resolve) => {
@@ -574,6 +588,10 @@ export default function Home() {
         if (state.zname_postavy) setNpcs(state.zname_postavy);
         if (state.world_data) setWorldData(state.world_data);
         else setWorldData(null);
+
+        if (state.playerLocation || state.player_location) {
+          setPlayerLocation(state.playerLocation || state.player_location);
+        }
 
 
         if (state.currentLocationDesc) setCurrentLocationDesc(state.currentLocationDesc);
@@ -929,11 +947,19 @@ export default function Home() {
                   >
                     <div className="absolute inset-0 bg-gradient-to-t from-[#f9f6e6] via-[#f9f6e6]/90 to-transparent z-10" />
                     
-                    <img 
-                      src={`https://image.pollinations.ai/prompt/vibrant%20fable%20style%20magical%20fantasy%20portrait%20of%20a%20${encodeURIComponent(char.race)}%20${encodeURIComponent(char.dnd_class)}%20RPG%20character?width=512&height=768&nologo=true&seed=${char.name.length * 42}`} 
-                      alt={char.name} 
-                      className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-500" 
-                    />
+                    {getAvatarVideo(char.race) ? (
+                      <video 
+                        src={getAvatarVideo(char.race)!} 
+                        autoPlay loop muted playsInline 
+                        className="absolute inset-0 w-full h-full object-cover opacity-75 group-hover:opacity-95 transition-opacity duration-500" 
+                      />
+                    ) : (
+                      <img 
+                        src={`https://image.pollinations.ai/prompt/vibrant%20fable%20style%20magical%20fantasy%20portrait%20of%20a%20${encodeURIComponent(char.race)}%20${encodeURIComponent(char.dnd_class)}%20RPG%20character?width=512&height=768&nologo=true&seed=${char.name.length * 42}`} 
+                        alt={char.name} 
+                        className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-500" 
+                      />
+                    )}
                     
                     <div className="absolute inset-0 z-20 flex flex-col p-6">
                       <div className="absolute top-4 right-4 z-50">
@@ -1058,12 +1084,22 @@ export default function Home() {
             
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl overflow-hidden border border-rpg-magic shadow-[0_0_10px_rgba(197,160,89,0.3)] shrink-0 hidden sm:block">
-                <img src={`https://image.pollinations.ai/prompt/vibrant%20fable%20style%20magical%20fantasy%20portrait%20of%20a%20${encodeURIComponent(race)}%20${encodeURIComponent(dndClass)}%20RPG%20character?width=128&height=128&nologo=true&seed=42`} alt={name} className="w-full h-full object-cover" />
+                {getAvatarVideo(race) ? (
+                  <video src={getAvatarVideo(race)!} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+                ) : (
+                  <img src={`https://image.pollinations.ai/prompt/vibrant%20fable%20style%20magical%20fantasy%20portrait%20of%20a%20${encodeURIComponent(race)}%20${encodeURIComponent(dndClass)}%20RPG%20character?width=128&height=128&nologo=true&seed=42`} alt={name} className="w-full h-full object-cover" />
+                )}
               </div>
               <div className="flex flex-col">
                 <h2 className="text-lg sm:text-xl font-cinzel text-[#2d3748] font-bold drop-shadow-md leading-tight">{name} <span className="text-rpg-magic text-xs">Lv.{level}</span></h2>
-                <div className="text-slate-700 font-lora text-xs">
-                  {race} {dndClass}
+                <div className="text-slate-700 font-lora text-xs flex items-center gap-1.5 flex-wrap">
+                  <span>{race} {dndClass}</span>
+                  {currentRegion && (
+                    <>
+                      <span className="text-slate-400">•</span>
+                      <span className="text-rpg-magic font-cinzel font-bold flex items-center gap-0.5"><MapPin size={11} /> {currentRegion}</span>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -1165,6 +1201,26 @@ export default function Home() {
                 </div>
               </div>
             )}
+            {/* Embedded choices directly inside story log */}
+            {!loading && !inCombat && suggestedActions.length > 0 && (
+              <div className="flex flex-col gap-2 pt-4 mt-2 border-t border-amber-900/15">
+                <div className="text-xs font-cinzel text-slate-500 uppercase tracking-widest font-bold">
+                  Možné volby:
+                </div>
+                <div className="flex flex-col gap-2">
+                  {suggestedActions.map((act, i) => (
+                    <button
+                      key={`chat-act-${i}`}
+                      onClick={() => sendAction(act)}
+                      className="w-full text-left bg-white/75 hover:bg-[#fffdf7] border border-amber-900/15 hover:border-rpg-magic hover:shadow-[0_2px_12px_rgba(197,160,89,0.3)] px-4 py-3 rounded-xl text-slate-800 hover:text-slate-950 transition-all font-lora text-sm sm:text-base flex items-center justify-between group"
+                    >
+                      <span>{act}</span>
+                      <span className="text-rpg-magic opacity-0 group-hover:opacity-100 transition-opacity font-cinzel text-xs font-bold shrink-0 ml-2">Zvolit &rarr;</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             <div ref={chatEndRef} />
           </div>
         </div>
@@ -1196,11 +1252,14 @@ export default function Home() {
                       <MapPin size={16} /> {poi.nazev}
                     </button>
                   ))}
-                  {suggestedActions.map((act, i) => (
-                    <button key={`act-${i}`} onClick={() => sendAction(act)} className="flex-shrink-0 snap-start bg-white/50 border border-amber-900/20 text-slate-800 px-4 py-3 rounded-xl text-sm whitespace-nowrap shadow-sm max-w-[85vw] overflow-hidden text-ellipsis hover:bg-white/70 hover:text-[#2d3748] transition font-lora">
-                      {act}
-                    </button>
-                  ))}
+                  {/* On mobile only show horizontal chips, on desktop they are inside the story window */}
+                  <div className="md:hidden flex flex-nowrap gap-2">
+                    {suggestedActions.map((act, i) => (
+                      <button key={`act-${i}`} onClick={() => sendAction(act)} className="flex-shrink-0 snap-start bg-white/50 border border-amber-900/20 text-slate-800 px-4 py-3 rounded-xl text-sm whitespace-nowrap shadow-sm max-w-[85vw] overflow-hidden text-ellipsis hover:bg-white/70 hover:text-[#2d3748] transition font-lora">
+                        {act}
+                      </button>
+                    ))}
+                  </div>
                 </>
               )}
             </div>

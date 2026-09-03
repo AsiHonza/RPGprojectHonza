@@ -109,7 +109,7 @@ export default function HexMap({ worldData, onHexClick, setSelectedItem, playerL
 
   return (
     <div className="w-full h-full relative bg-[#e3dcc8] bg-[url('https://www.transparenttextures.com/patterns/aged-paper.png')] overflow-hidden border-4 border-rpg-obsidian rounded shadow-inner">
-      <TransformWrapper initialScale={1.5} minScale={0.3} maxScale={4} centerOnInit={true} wheel={{ step: 0.025 }} limitToBounds={false}>
+      <TransformWrapper initialScale={1.2} minScale={0.3} maxScale={4} centerOnInit={true} wheel={{ step: 0.025 }} limitToBounds={false}>
         {({ zoomIn, zoomOut, resetTransform, setTransform }) => (
           <>
             <div className="absolute bottom-4 right-4 flex flex-col gap-2 z-50">
@@ -132,10 +132,11 @@ export default function HexMap({ worldData, onHexClick, setSelectedItem, playerL
                 <User size={20} />
               </button>
             </div>
-        <TransformComponent wrapperClass="w-full h-full" contentClass="w-full h-full flex items-center justify-center">
+        <TransformComponent wrapperClass="w-full h-full flex items-center justify-center" contentClass="flex items-center justify-center">
       <svg 
         width={width} 
         height={height} 
+        viewBox={`0 0 ${width} ${height}`}
         className="cursor-crosshair"
       >
         <g transform={`translate(${offsetX}, ${offsetY})`}>
@@ -156,7 +157,7 @@ export default function HexMap({ worldData, onHexClick, setSelectedItem, playerL
                 {/* Kingdom Watercolor Tint */}
                 <polygon 
                   points={points}
-                  className={`${getKingdomColor(hexData.kingdom_id)} ${(playerLocation?.q === hexData.q && playerLocation?.r === hexData.r) ? "stroke-red-600 stroke-[2] drop-shadow-[0_0_8px_rgba(220,38,38,0.8)]" : "stroke-[#455a64]/30 stroke-[1]"} transition-all duration-300 group-hover:stroke-rpg-magic group-hover:stroke-2 group-hover:fill-rpg-magic/10 cursor-pointer`}
+                  className={`${getKingdomColor(hexData.kingdom_id)} ${(playerLocation?.q === hexData.q && playerLocation?.r === hexData.r) ? "stroke-amber-400 stroke-[3] drop-shadow-[0_0_10px_rgba(245,158,11,1)]" : "stroke-[#455a64]/30 stroke-[1]"} transition-all duration-300 group-hover:stroke-rpg-magic group-hover:stroke-2 group-hover:fill-rpg-magic/10 cursor-pointer`}
                 />
                 
                 {/* Terrain Ink Icon */}
@@ -167,12 +168,35 @@ export default function HexMap({ worldData, onHexClick, setSelectedItem, playerL
                   )}
 
 
-                {/* Player Pawn */}
+                {/* Distinctive Pulsing Border for Player Location (No Icon) */}
                 {playerLocation?.q === hexData.q && playerLocation?.r === hexData.r && (
-                    <g transform={`translate(${x - 12}, ${y - 12})`} className="pointer-events-none z-50 animate-bounce text-red-600 drop-shadow-[0_0_8px_rgba(220,38,38,0.9)]">
-                      <User size={24} strokeWidth={3} />
-                    </g>
-                  )}
+                  <g className="pointer-events-none">
+                    <polygon 
+                      points={points}
+                      className="fill-amber-400/25 stroke-amber-400 stroke-[3.5] animate-pulse drop-shadow-[0_0_12px_rgba(245,158,11,1)]"
+                    />
+                    <polygon 
+                      points={points}
+                      stroke="#fef08a"
+                      strokeWidth="2"
+                      strokeDasharray="6 3"
+                      fill="none"
+                      className="opacity-90 drop-shadow-[0_0_8px_rgba(254,240,138,0.9)]"
+                    />
+                    <circle 
+                      cx={x} 
+                      cy={y} 
+                      r="6" 
+                      className="fill-amber-400 animate-ping opacity-75"
+                    />
+                    <circle 
+                      cx={x} 
+                      cy={y} 
+                      r="4" 
+                      className="fill-amber-300 drop-shadow-[0_0_8px_rgba(245,158,11,1)]"
+                    />
+                  </g>
+                )}
                 {/* POI Icon */}
                 {hexData.poi && (
                     <g transform={`translate(${x - 10}, ${y - 10})`} className="pointer-events-none z-10">
@@ -183,8 +207,8 @@ export default function HexMap({ worldData, onHexClick, setSelectedItem, playerL
                 {/* Map Name Overlay (Only for Kingdoms or Capitals to avoid clutter) */}
                 {hexData.nazev && hexData.poi === 'Capital' && (
                   <text 
-                      x={x}
-                      y={y + 14}
+                    x={x}
+                    y={y + 14}
                     textAnchor="middle" 
                     className="text-[7px] font-cinzel font-bold fill-[#111827] drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)] pointer-events-none uppercase tracking-widest"
                   >

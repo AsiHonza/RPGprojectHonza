@@ -522,7 +522,22 @@ Tvým úkolem je vrátit POUZE validní JSON (žádný markdown, žádné koment
             start_kingdom_id = initial_location.get("kingdom_id") if initial_location else 1
             start_kingdom_name = kingdom_names.get(start_kingdom_id, "Neznámé království")
             
-            world_context = f"\n\n[HRAJE SE PŘÍBĚHOVÁ KAMPAŇ]: Zamotej postavu rovnou do vygenerované zápletky tohoto světa!\nZápletka: {world_data.get('main_plot')}\nMísto startu: Hráč právě začíná ve frakci/království {start_kingdom_name} (Souřadnice: {initial_location['q']}, {initial_location['r']}). Vypravěč by měl na začátku tuto lokaci představit a uvést, proč tam postava je.\nZmiň v intru letmo některé z klíčových NPC: {json.dumps(world_data.get('key_npcs'), ensure_ascii=False)}"
+            world_context = f"""
+[HRAJE SE PŘÍBĚHOVÁ KAMPAŇ]: Zamotej postavu rovnou do vygenerované zápletky tohoto světa!
+Zápletka: {world_data.get('main_plot')}
+Místo startu: Hráč právě začíná ve frakci/království {start_kingdom_name} (Souřadnice: {initial_location['q']}, {initial_location['r']}).
+Klíčová NPC: {json.dumps(world_data.get('key_npcs'), ensure_ascii=False)}
+
+KRITICKÝ POŽADAVEK NA INTRO:
+1. Nejprve ve 2-3 větách atmosféricky představ dané království a jeho aktuální náladu či napětí.
+2. IHNED potom vhoď postavu do konkrétní dramatické události přímo před jejíma očima (in media res)! Může to být:
+   - Náhlé oslovení od zoufalého měšťana, uprchlíka, strážného nebo zraněného posla.
+   - Nečekaný konflikt, rvačka, útok bestie nebo přepadení.
+   - Nález podezřelého předmětu, tajemného svitku či mrtvoly s klíčem.
+   - Zásah fanatické inkvizice nebo kultistů vyvolávající paniku v davu.
+3. Nech situaci otevřenou a napínavou, aby postava musela okamžitě reagovat!
+4. Vygeneruj přesně 3 smysluplné, konkrétní nabízené akce reagující na tuto situaci.
+"""
         
         prompt = f'''
 Jsi Pán jeskyně v textové RPG hře D&D. Hráč právě vytvořil novou postavu:
@@ -532,11 +547,11 @@ Třída: {req.dnd_class}
 Staty: {req.stats}
 {world_context}
 
-Napiš poutavý první odstavec (intro), který postavu rovnou vrhne do děje (a do kampaně, pokud je zadaná). Zohledni její rasu a třídu. Nezačínej v obyčejné hospodě, začni na zajímavém místě spjatém se zápletkou světa (pokud existuje).
 Vrať POUZE json ve formátu:
 {{
-  "intro_text": "Text vypravěče (min 3 věty)...",
-  "popis_okoli": "Stručný popis lokace"
+  "intro_text": "Text vypravěče (atmosférické představení království + okamžitá dramatická událost/konflikt/dialog)...",
+  "popis_okoli": "Stručný popis lokace",
+  "nabizene_akce": ["Konkrétní reakce 1 na událost", "Konkrétní reakce 2 (využití schopnosti či povolání)", "Konkrétní reakce 3 (alternativní přístup)"]
 }}
 '''
         response = client.models.generate_content(
@@ -553,15 +568,19 @@ Vrať POUZE json ve formátu:
             data = json.loads(clean_text)
             intro_text = data.get("intro_text", "Mlha se rozestupuje...")
             popis_okoli = data.get("popis_okoli", "Neznámé místo.")
+            nabizene_akce = data.get("nabizene_akce", ["Rozhlédnout se", "Zkontrolovat vybavení", "Vydat se vpřed"])
+            if not isinstance(nabizene_akce, list) or len(nabizene_akce) == 0:
+                nabizene_akce = ["Rozhlédnout se", "Zkontrolovat vybavení", "Vydat se vpřed"]
         except Exception:
             intro_text = response.text.strip()
             popis_okoli = "Neznámé místo."
+            nabizene_akce = ["Rozhlédnout se", "Zkontrolovat vybavení", "Vydat se vpřed"]
             
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Chyba při generování intro textu: {str(e)}")
         
     initial_history = [
-        {"role": "model", "text": json.dumps({"aktualni_region": start_kingdom_name if world_data else "Začátek cesty", "popis_okoli": popis_okoli, "vypravec": intro_text, "nabizene_akce": ["Rozhlédnout se", "Zkontrolovat vybavení", "Vydat se vpřed"]}, ensure_ascii=False)}
+        {"role": "model", "text": json.dumps({"aktualni_region": start_kingdom_name if world_data else "Začátek cesty", "popis_okoli": popis_okoli, "vypravec": intro_text, "nabizene_akce": nabizene_akce}, ensure_ascii=False)}
     ]
 
     # Nacteni tridnich dat
