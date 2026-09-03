@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
-import { Settings2, Sparkles, ChevronRight, ChevronLeft, Crown, Shield, Wand2, Axe, Ghost, Skull, Book, Flame, X } from 'lucide-react';
+import { Settings2, Sparkles, ChevronRight, ChevronLeft, Crown, Shield, Wand2, Axe, Ghost, Skull, Book, Flame, X, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const CharacterCreation = ({ startNewGame, loading, backstory, generateBackstory, onClose }: any) => {
@@ -50,6 +50,19 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
     <div className="min-h-screen bg-black text-slate-900 flex flex-col items-center justify-center p-4 overflow-y-auto overflow-x-hidden relative">
       
         <video src="/video/bg1.mp4" autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none opacity-60" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#e5dfc5]/20 via-[#f9f6e6]/50 to-transparent z-0 pointer-events-none" />
+
+        {loading && (
+          <div className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm flex items-center justify-center cursor-not-allowed">
+             <div className="flex flex-col items-center gap-4 p-8 bg-[#f9f6e6] rounded-2xl shadow-2xl border border-rpg-magic/30">
+                <Loader2 className="w-12 h-12 text-rpg-magic animate-spin" />
+                <p className="text-xl font-cinzel text-slate-800 text-center">
+                   Probouzím bohy a tvořím svět...<br/>
+                   <span className="text-sm font-lora text-slate-600">Prosím strpení, nenech se vyrušit.</span>
+                </p>
+             </div>
+          </div>
+        )}
       {/* Background Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-rpg-magic/10 blur-[120px] rounded-full pointer-events-none" />
 
