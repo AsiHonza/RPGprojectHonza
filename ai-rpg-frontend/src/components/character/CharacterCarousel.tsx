@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Flame, Sparkles, Sword } from 'lucide-react';
 import { SeamlessVideo } from '../ui/SeamlessVideo';
@@ -75,7 +75,7 @@ export const CharacterCarousel: React.FC<CharacterCarouselProps> = ({
   }
 
   return (
-    <div className="w-full flex flex-col items-center select-none">
+    <div className="w-full max-w-full flex flex-col items-center select-none overflow-hidden">
       {/* Title */}
       <div className="text-center mb-4 sm:mb-6">
         <h3 className="text-slate-800 font-cinzel font-bold text-xl sm:text-2xl tracking-wider">Tvé Legendy</h3>
@@ -83,7 +83,7 @@ export const CharacterCarousel: React.FC<CharacterCarouselProps> = ({
       </div>
 
       {/* Stage Container */}
-      <div className="relative w-full max-w-5xl h-[440px] sm:h-[490px] flex items-center justify-center overflow-visible">
+      <div className="relative w-full max-w-4xl h-[440px] sm:h-[490px] flex items-center justify-center overflow-hidden">
         
         {/* Left Arrow Button */}
         {characters.length > 1 && (

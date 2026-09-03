@@ -137,6 +137,14 @@ export default function Home() {
   
   const prevQuestsRef = useRef(quests);
   useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    if (typeof document !== 'undefined') {
+      document.body.scrollLeft = 0;
+      document.documentElement.scrollLeft = 0;
+    }
+  }, [gameState]);
+
+  useEffect(() => {
     const prev = prevQuestsRef.current;
     if (prev.length > 0 || quests.length > 0) {
       if (JSON.stringify(prev) !== JSON.stringify(quests)) {
@@ -842,7 +850,7 @@ export default function Home() {
 
   if (gameState === "menu") {
     return (
-      <div className="min-h-screen text-[#2d3748] flex items-center justify-center p-4 font-serif relative overflow-hidden bg-black">
+      <div className="min-h-screen w-full max-w-full text-[#2d3748] flex flex-col items-center justify-center p-4 font-serif relative overflow-x-hidden bg-black">
         
         {/* Deep background fog */}
         <SeamlessVideo src="/video/bg1.mp4" className="absolute inset-0 w-full h-full z-0 pointer-events-none opacity-60" />
@@ -852,7 +860,7 @@ export default function Home() {
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="max-w-4xl w-full z-10 relative flex flex-col items-center"
+          className="max-w-5xl w-full z-10 relative flex flex-col items-center mx-auto my-auto"
         >
           <div className="mb-6 sm:mb-12 text-center">
             <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold text-rpg-magic tracking-widest md:tracking-[0.2em] font-cinzel drop-shadow-[0_0_20px_rgba(197,160,89,0.5)]">
@@ -1097,6 +1105,7 @@ export default function Home() {
             <button 
               onClick={() => {
                 localStorage.removeItem("aethelgard_active_char");
+                window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
                 setGameState("menu");
                 fetchCharacters(email);
               }} 
