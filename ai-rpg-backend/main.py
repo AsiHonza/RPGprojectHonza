@@ -478,7 +478,7 @@ Tvým úkolem je vrátit POUZE validní JSON (žádný markdown, žádné koment
             
             # Merge math world and AI lore
             world_data = {
-                "hexes": math_world["hexes"],
+                "hexes": math_world.get("hex_grid", []),
                 "pois": math_world["pois"],
                 "main_plot": ai_world_data.get("main_plot"),
                 "locations": ai_world_data.get("locations"),
