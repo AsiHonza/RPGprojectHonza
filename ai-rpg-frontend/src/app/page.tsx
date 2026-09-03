@@ -762,7 +762,7 @@ export default function Home() {
       <div className="min-h-screen bg-[#e5dfc5] text-[#2d3748] flex items-center justify-center p-4 font-serif relative overflow-hidden bg-[url('https://www.transparenttextures.com/patterns/black-scales.png')]">
         
         {/* Deep background fog */}
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-900/20 via-slate-950/80 to-slate-950 z-0 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#e5dfc5]/20 via-[#f9f6e6]/80 to-[#f9f6e6] z-0 pointer-events-none" />
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-rpg-magic/10 blur-[120px] rounded-full z-0 pointer-events-none" />
 
         <motion.div 
@@ -845,7 +845,7 @@ export default function Home() {
                     className="group relative w-64 h-96 shrink-0 bg-[#f9f6e6]/80 backdrop-blur-md border border-amber-900/10 rounded-2xl overflow-hidden cursor-pointer hover:border-rpg-magic transition-all hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(197,160,89,0.3)]"
                     onClick={() => loadGame(char.name)}
                   >
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#f9f6e6] via-[#f9f6e6]/90 to-transparent z-10" />
                     
                     <img 
                       src={`https://image.pollinations.ai/prompt/vibrant%20fable%20style%20magical%20fantasy%20portrait%20of%20a%20${encodeURIComponent(char.race)}%20${encodeURIComponent(char.dnd_class)}%20RPG%20character?width=512&height=768&nologo=true&seed=${char.name.length * 42}`} 
@@ -875,7 +875,7 @@ export default function Home() {
 
               <button 
                 onClick={() => setGameState("creation")}
-                className="mt-4 px-8 py-3 bg-transparent border border-amber-900/20 text-[#2d3748] font-cinzel rounded-xl hover:bg-white/50 hover:border-amber-900/50 transition uppercase tracking-widest text-sm flex items-center gap-2"
+                className="mt-4 px-8 py-3 bg-white border-2 border-rpg-magic/50 shadow-md hover:shadow-[0_0_15px_rgba(217,119,6,0.3)] text-[#2d3748] font-cinzel rounded-xl hover:bg-white/50 hover:border-amber-900/50 transition uppercase tracking-widest text-sm flex items-center gap-2"
               >
                 <Sparkles size={16} />
                 Vytvořit Novou Legendu
