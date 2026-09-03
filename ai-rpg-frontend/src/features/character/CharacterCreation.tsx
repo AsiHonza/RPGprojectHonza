@@ -154,7 +154,7 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
                     <button 
                       onClick={generateBackstory} 
                       disabled={loading || !keywords} 
-                      className="px-6 bg-white/50 text-amber-800 font-bold bg-amber-100 border border-rpg-magic/50 rounded-xl hover:bg-rpg-magic/20 transition disabled:opacity-50 flex flex-col items-center justify-center gap-2"
+                      className="px-6 bg-transparent text-amber-800 font-bold border border-amber-900/30 rounded-xl hover:bg-amber-900/10 hover:border-amber-900/50 hover:shadow-md cursor-pointer transition disabled:opacity-50 flex flex-col items-center justify-center gap-2"
                     >
                       <Sparkles size={20} />
                       <span className="font-cinzel text-sm">Napsat<br/>Osud</span>
