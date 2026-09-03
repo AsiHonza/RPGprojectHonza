@@ -517,6 +517,7 @@ export default function Home() {
                 vyznamna_mista: dm_data.vyznamna_mista
               };
             } catch (e) {
+                console.error("JSON parse failed on:", msg.text, "\nError:", e);
               return { type: "error", text: "Chybný formát zprávy z historie." };
             }
           }

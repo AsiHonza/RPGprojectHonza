@@ -137,8 +137,8 @@ export default function HexMap({ worldData, onHexClick, setSelectedItem, playerL
                 {/* Terrain Ink Icon */}
                 {!hexData.poi && (
                     <foreignObject 
-                    x={x}
-                    y={y}
+                      x={x - 14}
+                      y={y - 16}
                     width={28}
                     height={32}
                     className="pointer-events-none overflow-visible opacity-70"
@@ -153,8 +153,8 @@ export default function HexMap({ worldData, onHexClick, setSelectedItem, playerL
                 {/* Player Pawn */}
                 {playerLocation?.q === hexData.q && playerLocation?.r === hexData.r && (
                   <foreignObject 
-                    x={x}
-                    y={y}
+                      x={x - 14}
+                      y={y - 16}
                     width={28}
                     height={32}
                     className="pointer-events-none overflow-visible z-50 animate-bounce"
@@ -167,8 +167,8 @@ export default function HexMap({ worldData, onHexClick, setSelectedItem, playerL
                 {/* POI Icon */}
                 {hexData.poi && (
                   <foreignObject 
-                    x={x}
-                    y={y}
+                      x={x - 14}
+                      y={y - 16}
                     width={28}
                     height={32}
                     className="pointer-events-none overflow-visible"
@@ -182,8 +182,8 @@ export default function HexMap({ worldData, onHexClick, setSelectedItem, playerL
                 {/* Map Name Overlay (Only for Kingdoms or Capitals to avoid clutter) */}
                 {hexData.nazev && hexData.poi === 'Capital' && (
                   <text 
-                    x={x + 13.85}
-                    y={y + 16 + 14}
+                      x={x}
+                      y={y + 14}
                     textAnchor="middle" 
                     className="text-[7px] font-cinzel font-bold fill-[#111827] drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)] pointer-events-none uppercase tracking-widest"
                   >
