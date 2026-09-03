@@ -216,13 +216,16 @@ export default function Home() {
   // Global interaction listener for Autoplay Policy
   useEffect(() => {
     const handleFirstInteraction = () => {
-      if (musicPlaying && bgAudioRef.current && bgAudioRef.current.paused) {
-          bgAudioRef.current.volume = bgVolume;
-          bgAudioRef.current.play().catch(e => console.log("Autoplay still blocked:", e));
+      if (musicPlaying && bgAudioRef.current) {
+        bgAudioRef.current.volume = bgVolume;
+        bgAudioRef.current.play().then(() => {
+          window.removeEventListener('click', handleFirstInteraction);
+          window.removeEventListener('touchstart', handleFirstInteraction);
+          window.removeEventListener('keydown', handleFirstInteraction);
+        }).catch(e => {
+          console.log("Autoplay waiting for allowed gesture:", e);
+        });
       }
-      window.removeEventListener('click', handleFirstInteraction);
-      window.removeEventListener('touchstart', handleFirstInteraction);
-      window.removeEventListener('keydown', handleFirstInteraction);
     };
 
     window.addEventListener('click', handleFirstInteraction);
@@ -234,13 +237,13 @@ export default function Home() {
       window.removeEventListener('touchstart', handleFirstInteraction);
       window.removeEventListener('keydown', handleFirstInteraction);
     };
-  }, [musicPlaying]);
+  }, [musicPlaying, bgVolume]);
 
   // Dynamic Music switching
   useEffect(() => {
     if (!musicPlaying || !bgAudioRef.current) return;
     
-    let newTrack = "/ambient.mp3";
+    let newTrack = "/music/theme.mp3";
     
     if (gameState === "menu" || gameState === "creation") {
       newTrack = "/music/theme.mp3";
@@ -249,8 +252,9 @@ export default function Home() {
         newTrack = "/music/combat1.mp3";
       } else {
         if (locationType === "mesto") newTrack = "/music/city1.mp3";
-        else if (locationType === "podzemi") newTrack = "/ambient.mp3"; // Fallback pro jeskyně, dokud nepřidáš dungeon.mp3
+        else if (locationType === "podzemi" || locationType === "dungeon") newTrack = "/music/wilds2.mp3";
         else if (locationType === "divocina") newTrack = "/music/wilds1.mp3";
+        else newTrack = "/music/city1.mp3";
       }
     }
 
@@ -287,8 +291,7 @@ export default function Home() {
         }
       }, 150);
     }
-  }, [locationType, inCombat, musicPlaying, gameState]);
-
+  }, [locationType, inCombat, musicPlaying, gameState, currentTrack, bgVolume]);
 
   // Audio control effect
   useEffect(() => {
@@ -300,7 +303,7 @@ export default function Home() {
         bgAudioRef.current.pause();
       }
     }
-  }, [musicPlaying, bgVolume]);
+  }, [musicPlaying, bgVolume, currentTrack]);
 
   const classes = ["Barbar", "Bard", "Klerik", "Druid", "Bojovník", "Mnich", "Paladin", "Hraničář", "Tulák", "Čaroděj", "Černokněžník", "Kouzelník"];
   const races = ["Člověk", "Elf", "Trpaslík", "Půlčík", "Drakorozený", "Tiefling", "Půlork", "Gnóm"];
@@ -886,9 +889,26 @@ export default function Home() {
     setLoading(false);
   };
 
-  if (gameState === "menu") {
-    return (
-      <div className="h-[100dvh] max-h-[100dvh] w-full max-w-full text-[#2d3748] flex flex-col items-center justify-center p-2 sm:p-4 font-serif relative overflow-hidden bg-[#e5dfc5]">
+  return (
+    <>
+      {gameState === "menu" && (
+        <div className="h-[100dvh] max-h-[100dvh] w-full max-w-full text-[#2d3748] flex flex-col items-center justify-center p-2 sm:p-4 font-serif relative overflow-hidden bg-[#e5dfc5]">
+          {/* Audio toggle in top right corner of menu */}
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              const nextState = !musicPlaying;
+              setMusicPlaying(nextState);
+              if (nextState && bgAudioRef.current) {
+                bgAudioRef.current.play().catch(console.error);
+              }
+            }}
+            className="absolute top-3 right-3 sm:top-4 sm:right-4 z-30 p-2 sm:px-3 sm:py-1.5 rounded-full bg-[#f9f6e6]/80 hover:bg-[#f9f6e6] border border-amber-900/20 text-slate-700 shadow-md backdrop-blur-sm transition flex items-center gap-2 text-xs font-cinzel cursor-pointer"
+            title={musicPlaying ? "Vypnout hudbu" : "Zapnout hudbu"}
+          >
+            {musicPlaying ? <Volume2 size={16} className="text-amber-800" /> : <VolumeX size={16} className="text-slate-400" />}
+            <span className="hidden sm:inline font-bold">{musicPlaying ? "Hudba hraje" : "Hudba vypnuta"}</span>
+          </button>
         
         {/* Deep background fog */}
         <SeamlessVideo src="/video/bg1.mp4" className="absolute inset-0 w-full h-full z-0 pointer-events-none opacity-60" />
@@ -1010,16 +1030,14 @@ export default function Home() {
           )}
         </motion.div>
       </div>
-    );
-  }
+    )}
 
-  if (gameState === "creation") {
-    return <CharacterCreation onClose={() => setGameState("menu")} startNewGame={startNewGame} loading={loading}  backstory={backstory} generateBackstory={generateBackstory} />;
-  }
+    {gameState === "creation" && (
+      <CharacterCreation onClose={() => setGameState("menu")} startNewGame={startNewGame} loading={loading} backstory={backstory} generateBackstory={generateBackstory} />
+    )}
 
-
-  return (
-    <div className="h-[100dvh] max-h-[100dvh] overflow-hidden bg-[#1b262c] p-1 md:p-6 gap-2 md:gap-4 font-serif flex flex-col items-center relative">
+    {gameState === "playing" && (
+      <div className="h-[100dvh] max-h-[100dvh] overflow-hidden bg-[#1b262c] p-1 md:p-6 gap-2 md:gap-4 font-serif flex flex-col items-center relative">
 
       
       {/* Patch Notes Modal */}
@@ -1446,9 +1464,20 @@ export default function Home() {
         </div>
       )}
 
-      {/* Nativní HTML5 Přehrávač (Ambient Hudba) s lokálním m4a souborem */}
-      <audio id="bg-audio" ref={bgAudioRef} src={currentTrack} loop autoPlay onError={() => { if (currentTrack !== "/ambient.mp3") setCurrentTrack("/ambient.mp3"); }} />
+        </div>
+      )}
 
-    </div>
+      {/* Persistent Global HTML5 Audio Player */}
+      <audio 
+        id="bg-audio" 
+        ref={bgAudioRef} 
+        src={currentTrack} 
+        loop 
+        autoPlay 
+        onError={() => { 
+          if (currentTrack !== "/music/theme.mp3") setCurrentTrack("/music/theme.mp3"); 
+        }} 
+      />
+    </>
   );
 }
