@@ -570,7 +570,7 @@ Vrať POUZE json ve formátu:
 }}
 '''
         response = client.models.generate_content(
-            model='gemini-3.6-flash',
+            model='gemini-2.5-flash',
             contents=prompt,
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",
@@ -601,6 +601,12 @@ Vrať POUZE json ve formátu:
     # Nacteni tridnich dat
     cls_data = CLASS_TEMPLATES.get(req.dnd_class, CLASS_TEMPLATES["Bojovník"]) # fallback
 
+    start_loc_name = start_kingdom_name
+    if initial_location and world_data and world_data.get("pois"):
+        matching_poi = next((p for p in world_data["pois"] if p.get("q") == initial_location.get("q") and p.get("r") == initial_location.get("r")), None)
+        if matching_poi and matching_poi.get("name"):
+            start_loc_name = matching_poi.get("name")
+
     state = {
         "hp": 100,
         "max_hp": 100,
@@ -615,6 +621,15 @@ Vrať POUZE json ve formátu:
         "equipped": cls_data["equipped"],
         "world_data": world_data,
         "playerLocation": initial_location,
+        "currentRegion": start_loc_name,
+        "current_region": start_loc_name,
+        "locationType": "mesto",
+        "typ_lokace": "mesto",
+        "currentLocationDesc": popis_okoli,
+        "popis_okoli": popis_okoli,
+        "pointsOfInterest": [],
+        "vyznamna_mista": [],
+        "zname_postavy": [],
         "rations": 3
     }
     
@@ -715,21 +730,66 @@ async def play_action(req: PlayerActionRequest):
 
             
         relevant_memories = ""
-        # Pidn aktuln akce s kontextem
-        context_action = f"""[Dlouhodob pam (relevantn fakta z minulosti):]
+        
+        # Určení přesné fyzické lokace hráče a oddělení přítomných vs vzdálených NPC
+        p_loc = state_dict.get("playerLocation") or {}
+        curr_q = p_loc.get("q")
+        curr_r = p_loc.get("r")
+        curr_biome = p_loc.get("biome", "Pláně")
+        curr_region = state_dict.get("currentRegion") or state_dict.get("current_region") or "Neznámá oblast"
+        curr_loc_type = state_dict.get("locationType") or state_dict.get("typ_lokace") or "divocina"
+        curr_pois = state_dict.get("pointsOfInterest") or state_dict.get("vyznamna_mista") or []
+
+        all_known_npcs = state_dict.get("zname_postavy", [])
+        local_npcs = []
+        distant_npcs = []
+        for npc in all_known_npcs:
+            if npc.get("je_spolecnik", False):
+                local_npcs.append(npc)
+                continue
+            npc_coords = npc.get("souradnice")
+            if npc_coords and curr_q is not None and curr_r is not None and npc_coords.get("q") == curr_q and npc_coords.get("r") == curr_r:
+                local_npcs.append(npc)
+            elif npc.get("lokace_nazev") and (npc.get("lokace_nazev").lower() in curr_region.lower() or curr_region.lower() in npc.get("lokace_nazev").lower()):
+                local_npcs.append(npc)
+            else:
+                distant_npcs.append(npc)
+
+        distant_names = [f"{n.get('jmeno', 'Neznámá postava')} (nachází se v: {n.get('lokace_nazev', 'předchozím městě')})" for n in distant_npcs]
+        distant_summary = ", ".join(distant_names) if distant_names else "Žádné (žádné vzdálené postavy nebyly zaznamenány)"
+        local_summary = json.dumps(local_npcs, ensure_ascii=False) if local_npcs else "Žádné dříve známé postavy. Zde jsou pouze noví místní obyvatelé, pocestní nebo tvorové z tohoto kraje."
+
+        spatial_grounding = f"""
+======================================================================
+[AKTUÁLNÍ FYZICKÁ LOKACE HRÁČE]:
+- Místo/Region: {curr_region} (Souřadnice na mapě: [{curr_q}, {curr_r}])
+- Typ prostředí: {curr_loc_type} (Terén: {curr_biome})
+- Lokální orientační body / významná místa v tomto místě: {json.dumps(curr_pois, ensure_ascii=False)}
+- KDO JE ZDE FYZICKY PŘÍTOMEN:
+  {local_summary}
+- VZDÁLENÉ POSTAVY V JINÝCH MĚSTECH A LOKACÍCH (ZDE SE FYZICKY NENACHÁZÍ!):
+  {distant_summary}
+
+[KRITICKÉ PRAVIDLO PROSTOROVÉHO REALISMU A ZÁKAZ TELEPORTACE]:
+1. Hráč se fyzicky nachází v lokaci "{curr_region}". Všechny vzdálené postavy ({distant_summary}) zůstaly v předchozích městech/lokacích a jsou daleko!
+2. PŘÍSNÝ ZÁKAZ TELEPORTACE POSTAV: V polích 'nabizene_akce', 'vypravec' ani 'npc_dialogy' se NESMÍ objevit ŽÁDNÁ ze vzdálených postav (např. hostinský z opuštěného města), pokud hráč výslovně neodcestoval zpět na jejich souřadnice!
+3. 'nabizene_akce' MUSÍ VŽDY 100% odpovídat pouze bezprostřednímu okolí a situaci v místě "{curr_region}".
+4. Pokud je hráč v novém sídle (vesnice/město), vyplň do 'vyznamna_mista' pouze body z tohoto nového sídla. Pokud je v divočině/pláních/lese, uveď v 'vyznamna_mista' pouze přírodní orientační body (např. Skalní převis, Rozcestí) nebo nech prázdné. NIKDY tam nevracej budovy z předchozího města!
+======================================================================
+"""
+
+        context_action = f"""[Dlouhodobá paměť (relevantní fakta z minulosti):]
 {relevant_memories}
-  {world_prompt_str}
+{world_prompt_str}
 
+{spatial_grounding}
 
-[Známé postavy a vztahy (PAMATUJ SI!):]
-{json.dumps(char_data.get('state', {}).get('zname_postavy', []), ensure_ascii=False)}
-
-[Aktuální stav hry - neukazovat hráči, pouze pro informaci PJ:]
+[Aktuální stav hry - pouze pro informaci PJ:]
 {json.dumps(char_data.get('state', {}), ensure_ascii=False)}
 
 {travel_prompt}
 
-[Akce hre:]
+[Akce hráče:]
 {req.action_text}
 """
         contents.append(
@@ -769,13 +829,13 @@ VNITŘNÍ MYŠLENKY A KONTROLY (OOC):
 VYPRÁVĚNÍ, MÍSTA A PUTOVÁNÍ (LOKACE):
 - **Cestování:** Rychlé přesuny na povel hráče ("Jdu do města X") jsou ZAKÁZÁNY! Každé putování mezi městy/lokacemi přepne hru do režimu "divocina". Cesta musí trvat více tahů.
 - **Náhodná setkání:** Během cesty MUSÍŠ generovat překážky: boje (vlci, bandité), logistické potíže (zlomené kolo, bouřka), příběhová setkání (potulný kupec, zraněný).
-- **Typ lokace a Region:** Do `typ_lokace` dej vždy 'mesto', 'divocina', nebo 'dungeon'. Do `aktualni_region` dej hezký název oblasti, kde hráč zrovna je (např. 'Stříbrný les', 'Hlavní město').
-- **Významná místa (Město a UI):** Pokud je hráč v `mesto`, MUSÍŠ vyplnit pole `vyznamna_mista` objekty (název, ikona, ma_ukol). Nastav `ma_ukol=True`, pokud se tam dá vzít quest (v UI se objeví vykřičník). V lese/pustině pole nech prázdné!
+- **Typ lokace a Region:** Do `typ_lokace` dej vždy 'mesto', 'vesnice', 'divocina', nebo 'dungeon'. Do `aktualni_region` dej hezký název oblasti, kde hráč zrovna je (např. 'Stříbrný les', 'Hlavní město').
+- **Významná místa (Město a UI):** Pokud je hráč v `mesto` nebo `vesnice`, MUSÍŠ vyplnit pole `vyznamna_mista` objekty (název, ikona, ma_ukol). Nastav `ma_ukol=True`, pokud se tam dá vzít quest (v UI se objeví vykřičník). V lese/pustině uveď pouze přírodní orientační body nebo nech prázdné!
 - **CESTOVÁNÍ A JÍDLO (Survival):** Když se hráč rozhodne cestovat (opustit město a jít jinam), PŘEPNI `typ_lokace` na 'divocina'. Změň `davky_jidla_zmena` na -1 (cesta stojí jídlo). Pokud hráč jídlo nemá, dej mu penalizaci (-10 HP, napiš to do system_log). Cestou VŽDY vygeneruj náhodné setkání (bandité, bouře, obchodník) a nenech ho dorazit hned do cíle!
 
 ZÁZNAMY PRO FRONTEND:
 - Do 'image_prompt' detailně popište aktuální scénu (bez textu). VŽDY NA KONEC PŘIDEJTE TENTO STYL: "style of detailed 2D painterly fantasy concept art, bright vibrant colors, majestic epic scale, cozy atmosphere, studio ghibli meets classic D&D illustrations". Do 'popis_okoli' stručně popište situaci.
-- Do 'vypravec' pište (s velkým důrazem na epické, barevné, malířské fantasy popisy majestátních scenérií, detailů architektury a útulné atmosféry) š POUZE beletristické vyprávění světa – jak se situace odvíjí, jak reagují NPC, atmosféru. NIKDY sem nepsat technické detaily (čísla hodů, XP, poškození).
+- Do 'vypravec' pište (s velkým důrazem na epické, barevné, malířské fantasy popisy majestátních scenérií, detailů architektury a útulné atmosféry) POUZE beletristické vyprávění světa – jak se situace odvíjí, jak reagují NPC, atmosféru. NIKDY sem nepsat technické detaily (čísla hodů, XP, poškození).
 - Do 'system_log' zapiš VŠECHNY technické herní mechaniky odděleně: výsledky hodů kostkou (např. "Hod na Útok: d20=14 + STR 2 = 16 vs. Obrana 12 -> Zásah!"), způsobené/přijaté poškození, získané XP, level-up oznámení. Tento text se hráči NEBUDE číst nahlas.
 - Pro NPC použij VÝHRADNĚ 'npc_dialogy' (pohlavi="muz"/"zena", image_prompt="detailed 2D painterly fantasy portrait, vibrant colors"). PŘÍSNÝ ZÁKAZ: Pokud jakákoliv postava promluví (přímá řeč), NESMÍ to být v textu 'vypravec'. Vypravěč slouží POUZE pro popis děje (např. "Garrick se na tebe podíval."). Samotná věta, kterou Garrick řekne, už MUSÍ být odděleně vložena do 'npc_dialogy'. Pokud mluví více postav, vlož do 'npc_dialogy' více objektů.
 
@@ -783,10 +843,11 @@ SPECIFIKA POSTAVY A NABIZENE AKCE:
 - TRIDA A RASA: Hracova trida a rasa hraji OBROVSKOU roli. Obchodnici by meli nabizet predmety/kouzla pro hracovu tridu, a NPC by na ni meli reagovat.
 - VZDY vygeneruj 3 az 5 "nabizenych akci" (v listu `nabizene_akce`), ktere davaji v dane situaci smysl (neomezuj se jen na 3, muze jich byt az 5).
 - Z techto nabizenych akci generuj alespon jednu tak, aby byla unikatni pro hracovu tridu (napr. Bard muze nekoho okouzlit pisni, Zlodej pacit, Barbar pouzit silu).
+- PROSTOROVÁ INTEGRITA: Všechny 'nabizene_akce', 'vypravec' i 'npc_dialogy' musí striktně respektovat aktuální fyzické místo hráče. Pokud hráč odešel z města/hostince, postavy z minulého města v této scéně NEEXISTUJÍ a nesmí být nabízeny!
 """
 
         response = client.models.generate_content(
-            model='gemini-3.6-flash',
+            model='gemini-2.5-flash',
             contents=contents,
             config=types.GenerateContentConfig(
                 system_instruction=system_prompt,
@@ -802,7 +863,7 @@ SPECIFIKA POSTAVY A NABIZENE AKCE:
         import unicodedata
         import re
         
-        region = dm_json.get("aktualni_region", "nezname_konciny")
+        region = dm_json.get("aktualni_region", curr_region)
         slug = unicodedata.normalize('NFKD', region).encode('ascii', 'ignore').decode('ascii')
         slug = re.sub(r'[^a-z0-9]+', '_', slug.lower()).strip('_')
         if not slug:
@@ -847,17 +908,43 @@ SPECIFIKA POSTAVY A NABIZENE AKCE:
         for fakt in fakta:
             await store_memory(db_key, fakt, client)
         
-        # 3. Uložení upraveného stavu do DB
+        # Aktualizujeme polohu a body zájmu ve state
+        if dm_json.get("aktualni_region"):
+            state_dict["currentRegion"] = dm_json["aktualni_region"]
+            state_dict["current_region"] = dm_json["aktualni_region"]
+        if dm_json.get("typ_lokace"):
+            state_dict["locationType"] = dm_json["typ_lokace"]
+            state_dict["typ_lokace"] = dm_json["typ_lokace"]
+        if "vyznamna_mista" in dm_json:
+            state_dict["pointsOfInterest"] = dm_json.get("vyznamna_mista", [])
+            state_dict["vyznamna_mista"] = dm_json.get("vyznamna_mista", [])
+        if dm_json.get("popis_okoli"):
+            state_dict["currentLocationDesc"] = dm_json["popis_okoli"]
+            state_dict["popis_okoli"] = dm_json["popis_okoli"]
+            
+        # Pokud se objevila nová NPC v dialozích, ukotvíme je k aktuální lokaci
+        if dm_json.get("npc_dialogy"):
+            known_npcs = state_dict.setdefault("zname_postavy", [])
+            for dialog in dm_json["npc_dialogy"]:
+                npc_name = dialog.get("jmeno")
+                if npc_name and not any(n.get("jmeno", "").lower() == npc_name.lower() for n in known_npcs):
+                    known_npcs.append({
+                        "jmeno": npc_name,
+                        "pohlavi": dialog.get("pohlavi", "muz"),
+                        "lokace_nazev": curr_region,
+                        "souradnice": {"q": curr_q, "r": curr_r},
+                        "je_spolecnik": False
+                    })
+
+        # 3. Uložení upraveného stavu a historie do DB
         updated_history = history + [
             {"role": "user", "text": req.action_text},
             {"role": "model", "text": response.text}
-
         ]
         
-        # Uložíme pouze historii, samotný state si frontend uloží zvlášť přes /save-state, 
-        # protože aplikuje level up a vybavení na své straně.
         supabase.table("characters").update({
-            "history": updated_history
+            "history": updated_history,
+            "state": state_dict
         }).eq("api_key", db_key).execute()
         
         return dm_json
@@ -997,20 +1084,38 @@ async def travel_action(req: TravelRequest):
             
         dest_name = (poi.get("name") or poi.get("nazev")) if poi else (raw_poi.get("name") if raw_poi else f"{target_hex.get('terrain', 'Divočina')}")
         
+        poi_type = (poi.get("type") or poi.get("typ") or (raw_poi.get("type") if raw_poi else "") or target_hex.get("terrain", "")).lower()
+        if any(k in poi_type for k in ["capital", "city", "mesto"]):
+            dest_type = "mesto"
+        elif any(k in poi_type for k in ["town", "village", "vesnice", "osada"]):
+            dest_type = "vesnice"
+        elif any(k in poi_type for k in ["dungeon", "ruin", "cave", "tower", "zajimavost"]):
+            dest_type = "dungeon"
+        else:
+            dest_type = "divocina"
+        
         client = genai.Client(api_key=req.api_key if getattr(req, "api_key", None) and "DUMMY" not in req.api_key else os.environ.get("GEMINI_API_KEY"))
         
-        prompt = f"""Hráč v D&D RPG (rasa: {state.get('race', 'Člověk')}, povolání: {state.get('dnd_class', 'Bojovník')}) se právě přesunul na mapě:
-Cílový terén: {target_hex.get('terrain')}
+        prompt = f"""Hráč v D&D RPG (rasa: {state.get('race', 'Člověk')}, povolání: {state.get('dnd_class', 'Bojovník')}) právě dorazil na nové místo na mapě:
+Cílová lokace: {dest_name} (Typ: {dest_type}, Terén: {target_hex.get('terrain')})
 Známý bod zájmu (POI): {json.dumps(poi or raw_poi, ensure_ascii=False) if (poi or raw_poi) else 'Běžná divočina/krajina'}
 Hlavní zápletka světa: {world_data.get('main_plot', '')}
 
-Vytvoř atmosférický popis cesty a příchodu pro Vypravěče a nabídni 3 smysluplné akce.
+KRITICKÉ PROSTOROVÉ PRAVIDLO:
+Hráč opustil předchozí město a dorazil sem. ŽÁDNÉ postavy z minulého města (hostinští, strážní, NPC z předchozího města) ZDE NEJSOU!
+Všechny nabízené akce a lokální orientační body se musí týkat VÝHRADNĚ této nové lokace ({dest_name}).
+
 Vrať POUZE validní JSON:
 {{
-  "vypravec": "Atmosférické vylíčení cesty z pohledu vypravěče (3-4 věty). Co hráč cestou viděl, jaké bylo počasí a jaké tajemství či překážka se objevila při příchodu.",
+  "vypravec": "Atmosférické vylíčení cesty a příchodu na místo z pohledu vypravěče (3-4 věty). Popiš, co hráč vidí v {dest_name}, jaké je počasí a jaká nová situace či tajemství se otevírá.",
   "popis_okoli": "Stručný popis nové oblasti (1-2 věty).",
-  "nabizene_akce": ["První logická akce (průzkum / opatrnost)", "Druhá akce (využití schopnosti / kempování)", "Třetí odvážná akce"],
-  "image_prompt": "vibrant fantasy landscape concept art of {target_hex.get('terrain')} in Aethelgard, detailed 2D painterly style, high quality"
+  "vyznamna_mista": [
+    {{"nazev": "Konkrétní budova či orientační bod 1 v {dest_name}", "ikona": "Compass"}},
+    {{"nazev": "Konkrétní budova či orientační bod 2 v {dest_name}", "ikona": "Home"}},
+    {{"nazev": "Konkrétní budova či orientační bod 3 v {dest_name}", "ikona": "Shield"}}
+  ],
+  "nabizene_akce": ["První logická akce přímo v {dest_name}", "Druhá akce přímo v {dest_name}", "Třetí odvážná akce přímo v {dest_name}"],
+  "image_prompt": "vibrant fantasy landscape concept art of {dest_name} in {target_hex.get('terrain')}, detailed 2D painterly style, high quality"
 }}"""
 
         try:
@@ -1024,15 +1129,31 @@ Vrať POUZE validní JSON:
         except Exception as ge:
             print("Gemini travel generate error:", ge)
             ai_data = {
-                "vypravec": f"Po celodenní cestě jsi dorazil do oblasti {target_hex.get('terrain', 'divočiny')}. Krajina kolem tebe je tichá, vítr šelestí v trávě a na obzoru se stahují mračna.",
+                "vypravec": f"Po celodenní cestě jsi dorazil do oblasti {dest_name}. Krajina kolem tebe je tichá, vítr šelestí v trávě a na obzoru se stahují mračna.",
                 "popis_okoli": f"Krajina: {target_hex.get('terrain', 'Pláně')}.",
-                "nabizene_akce": ["Důkladně prozkoumat nejbližší okolí", "Rozdělat tábor a odpočinout si", "Připravit si zbraň a postupovat obezřetně"],
-                "image_prompt": f"fantasy landscape {target_hex.get('terrain')}"
+                "vyznamna_mista": [],
+                "nabizene_akce": [f"Důkladně prozkoumat okolí místa {dest_name}", "Rozdělat tábor a odpočinout si", "Připravit si zbraň a postupovat obezřetně"],
+                "image_prompt": f"fantasy landscape {dest_name} in {target_hex.get('terrain')}"
             }
 
+        default_pois = []
+        if dest_type in ["mesto", "vesnice"]:
+            default_pois = [
+                {"nazev": f"Náves a tržiště v {dest_name}", "ikona": "Store"},
+                {"nazev": f"Místní hostinec a noclehárna", "ikona": "Home"},
+                {"nazev": f"Strážnice a sýpka", "ikona": "Shield"}
+            ]
+        else:
+            default_pois = [
+                {"nazev": "Vyvýšený vyhlídkový pahorek", "ikona": "Compass"},
+                {"nazev": "Chráněný skalní převis k táboření", "ikona": "Tent"},
+                {"nazev": "Staré rozcestí u milníku", "ikona": "MapPin"}
+            ]
+
         narrative_text = ai_data.get("vypravec", "")
-        popis_okoli = ai_data.get("popis_okoli", f"Oblast: {target_hex.get('terrain')}")
-        nabizene_akce = ai_data.get("nabizene_akce", ["Prozkoumat okolí", "Rozdělat tábor", "Jít dál"])
+        popis_okoli = ai_data.get("popis_okoli", f"Oblast: {dest_name} ({target_hex.get('terrain')})")
+        new_pois = ai_data.get("vyznamna_mista") or default_pois
+        nabizene_akce = ai_data.get("nabizene_akce") or [f"Prozkoumat {dest_name}", "Rozdělat tábor", "Jít dál"]
         image_prompt = ai_data.get("image_prompt", "")
         system_log_text = " | ".join(system_logs)
 
@@ -1040,6 +1161,12 @@ Vrať POUZE validní JSON:
         history.append({"role": "user", "content": f"[CESTOVÁNÍ] Cesta do: {dest_name} ({req.target_q}, {req.target_r})"})
         history.append({"role": "model", "content": narrative_text})
 
+        state["currentRegion"] = dest_name
+        state["current_region"] = dest_name
+        state["locationType"] = dest_type
+        state["typ_lokace"] = dest_type
+        state["pointsOfInterest"] = new_pois
+        state["vyznamna_mista"] = new_pois
         state["currentLocationDesc"] = popis_okoli
         state["popis_okoli"] = popis_okoli
 
@@ -1053,6 +1180,9 @@ Vrať POUZE validní JSON:
             "state": state,
             "narrative": narrative_text,
             "popis_okoli": popis_okoli,
+            "aktualni_region": dest_name,
+            "typ_lokace": dest_type,
+            "vyznamna_mista": new_pois,
             "nabizene_akce": nabizene_akce,
             "image_prompt": image_prompt,
             "system_log": system_log_text,

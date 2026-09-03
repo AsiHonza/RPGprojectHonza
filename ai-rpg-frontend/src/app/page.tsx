@@ -664,9 +664,11 @@ export default function Home() {
 
 
   const handleTravel = async (q: number, r: number, targetHex?: any) => {
-    // 1. Immediately close map and set loading on main screen
+    // 1. Immediately close map and reset all stale local choices so they don't linger!
     setMapOpen(false);
     setLoading(true);
+    setSuggestedActions([]);
+    setPointsOfInterest([]);
 
     const destLabel = targetHex?.nazev || targetHex?.terrain || "Nová oblast";
     setHistory(prev => [...prev, { type: "player", text: `🗺️ Vydávám se na cestu: ${destLabel}` }]);
@@ -690,6 +692,21 @@ export default function Home() {
           if (data.state.rations !== undefined) setRations(data.state.rations);
           if (data.state.hp !== undefined) setHp(data.state.hp);
         }
+
+        if (data.aktualni_region) setCurrentRegion(data.aktualni_region);
+        if (data.typ_lokace) setLocationType(data.typ_lokace);
+        if (data.vyznamna_mista) setPointsOfInterest(data.vyznamna_mista);
+        else setPointsOfInterest([]);
+
+        if (data.nabizene_akce && data.nabizene_akce.length > 0) {
+          setSuggestedActions(data.nabizene_akce);
+        } else {
+          setSuggestedActions([
+            `Prozkoumat oblast ${destLabel}`,
+            "Rozdělat tábor a odpočinout si",
+            "Připravit se k další cestě"
+          ]);
+        }
         
         // Push the narrative to history as DM entry with narrator text, environment description, and system log
         setHistory(prev => [...prev, { 
@@ -698,12 +715,6 @@ export default function Home() {
           popis_okoli: data.popis_okoli || `Oblast: ${data.terrain_name || 'Divočina'}`,
           system_log: data.system_log || null
         }]);
-
-        if (data.nabizene_akce && data.nabizene_akce.length > 0) {
-          setSuggestedActions(data.nabizene_akce);
-        } else {
-          setSuggestedActions(["Prozkoumat okolí", "Rozdělat tábor a odpočinout si", "Připravit se k další cestě"]);
-        }
 
         if (data.image_prompt) {
           setCurrentLocationImage(`https://image.pollinations.ai/prompt/${encodeURIComponent(data.image_prompt)}?width=800&height=600&nologo=true`);
@@ -1267,7 +1278,7 @@ export default function Home() {
                 </>
               ) : (
                 <>
-                  {locationType === 'mesto' && pointsOfInterest.length > 0 && (
+                  {pointsOfInterest.length > 0 && (
                     <div className="flex flex-wrap items-center gap-2 py-1">
                       <span className="text-xs font-cinzel font-bold text-amber-950 flex items-center gap-1 uppercase tracking-wider mr-1">
                         <MapPin size={14} className="text-amber-700" /> Lokace v okolí:
