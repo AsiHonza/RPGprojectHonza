@@ -13,11 +13,11 @@ const config: Config = {
         background: "var(--background)",
         foreground: "var(--foreground)",
         rpg: {
-          paper: '#f4ecd8',
-          obsidian: '#1b262c',
-          blood: '#b74b4b',
-          magic: '#c5a059',
-          muted: '#90a4ae'
+          paper: '#f9f6e6',
+          obsidian: '#2d3748', // Lighter for text
+          blood: '#e53e3e',    // Brighter red
+          magic: '#d97706',    // Amber 600
+          muted: '#718096'     // Slate 500
         }
       },
       fontFamily: {

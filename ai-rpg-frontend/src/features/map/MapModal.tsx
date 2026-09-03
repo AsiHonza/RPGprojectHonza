@@ -14,11 +14,11 @@ export const MapModal = ({ isOpen, onClose, setSelectedItem, onTravel }: any) =>
 
   if (!isOpen) return null;
   if (!worldData) return (
-    <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
-      <div className="bg-rpg-obsidian border border-rpg-magic p-8 rounded-2xl max-w-md text-center shadow-[0_0_30px_rgba(197,160,89,0.3)]">
-        <h2 className="text-3xl font-cinzel text-white mb-4">Mapa nenalezena</h2>
-        <p className="text-gray-400 font-lora mb-6">Tato postava byla vytvořena před aktualizací 7 Království, nebo došlo k chybě při generování světa. Pro plný zážitek z kampaně si prosím založ novou legendu!</p>
-        <button onClick={onClose} className="bg-rpg-blood text-white px-6 py-2 rounded-xl font-cinzel hover:bg-red-700 transition">Zavřít</button>
+    <div className="fixed inset-0 bg-white/95 z-50 flex items-center justify-center p-4">
+      <div className="bg-[#f9f6e6] border border-rpg-magic p-8 rounded-2xl max-w-md text-center shadow-[0_0_30px_rgba(197,160,89,0.3)]">
+        <h2 className="text-3xl font-cinzel text-slate-900 mb-4">Mapa nenalezena</h2>
+        <p className="text-slate-700 font-lora mb-6">Tato postava byla vytvořena před aktualizací 7 Království, nebo došlo k chybě při generování světa. Pro plný zážitek z kampaně si prosím založ novou legendu!</p>
+        <button onClick={onClose} className="bg-rpg-blood text-slate-900 px-6 py-2 rounded-xl font-cinzel hover:bg-red-700 transition">Zavřít</button>
       </div>
     </div>
   );
@@ -103,19 +103,19 @@ export const MapModal = ({ isOpen, onClose, setSelectedItem, onTravel }: any) =>
                 <h3 className="font-cinzel font-bold text-rpg-magic text-xl">
                   {selectedHex.nazev || "Divočina"}
                 </h3>
-                <button onClick={() => setSelectedHex(null)} className="text-gray-400 hover:text-white">
+                <button onClick={() => setSelectedHex(null)} className="text-slate-700 hover:text-slate-900">
                   <X size={16} />
                 </button>
               </div>
               
-              <div className="text-gray-300 font-lora text-sm mb-4">
+              <div className="text-slate-800 font-lora text-sm mb-4">
                 <p><strong>Terén:</strong> {selectedHex.terrain}</p>
                 <p className="mt-1">{selectedHex.popis || "Pustý kraj bez zajímavostí."}</p>
               </div>
 
               {dist > 0 && (
-                <div className="bg-black/50 p-3 rounded border border-gray-700 mb-4 text-sm font-lora">
-                  <p className="text-gray-300 mb-1">Náklady na cestu:</p>
+                <div className="bg-[#f9f6e6]/70 p-3 rounded border border-gray-700 mb-4 text-sm font-lora">
+                  <p className="text-slate-800 mb-1">Náklady na cestu:</p>
                   <ul className="text-rpg-blood">
                     <li>⏱ 1 Den</li>
                     <li>🍖 1 Zásoba (Jídlo)</li>
@@ -127,7 +127,7 @@ export const MapModal = ({ isOpen, onClose, setSelectedItem, onTravel }: any) =>
               {canTravel && (
                 <button
                   onClick={handleTravelClick}
-                  className="w-full bg-rpg-blood hover:bg-red-800 text-white font-cinzel font-bold py-2 rounded shadow transition flex items-center justify-center gap-2"
+                  className="w-full bg-rpg-blood hover:bg-red-800 text-slate-900 font-cinzel font-bold py-2 rounded shadow transition flex items-center justify-center gap-2"
                 >
                   <Footprints size={18} />
                   Vydat se na cestu

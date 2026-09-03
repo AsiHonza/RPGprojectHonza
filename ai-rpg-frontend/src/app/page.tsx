@@ -49,17 +49,17 @@ const TypewriterText = ({ text, delay = 25, animate = false }: { text: string, d
 const FormattedSystemLog = ({ text }: { text: string }) => {
     const lines = text.split('\n').map((line, idx) => {
       let html = line
-        .replace(/(Kritický úspěch!|Kritický úspěch|Kritický úspěch\.)/gi, '<span class="text-green-400 font-bold uppercase tracking-wider">$1</span>')
+        .replace(/(Kritický úspěch!|Kritický úspěch|Kritický úspěch\.)/gi, '<span class="text-green-700 font-bold uppercase tracking-wider">$1</span>')
         .replace(/(Kritické selhání!|Kritické selhání|Kritický neúspěch)/gi, '<span class="text-red-500 font-bold uppercase tracking-wider">$1</span>')
-        .replace(/(Úspěch\.|Úspěch!|Úspěch:?)/gi, '<span class="text-green-400 font-bold">$1</span>')
-        .replace(/(Selhání\.|Selhání!|Selhání:?)/gi, '<span class="text-red-400 font-bold">$1</span>')
-        .replace(/(Hráč ztrácí \d+ HP|ztrácí \d+ HP|způsobuje \d+ bodů poškození|Ztrácí \d+ HP)/gi, '<span class="text-red-400 font-bold">$1</span>')
-        .replace(/(d\d+\(\d+\))/g, '<span class="text-yellow-400 font-bold">$1</span>')
-        .replace(/(\d+ vs DC \d+)/g, '<span class="text-yellow-400 font-bold">$1</span>')
-        .replace(/(vs AC \d+)/g, '<span class="text-yellow-400 font-bold">$1</span>')
-        .replace(/(Útok vlka|Útok nepřítele|Útok skřeta|Útok orka)/gi, '<span class="text-red-400 font-bold">$1</span>')
-        .replace(/(Útok hráče.*?:)/gi, '<span class="text-green-400 font-bold">$1</span>')
-        .replace(/(Zásah!)/g, '<span class="font-bold border-b border-red-400 text-red-400">$1</span>')
+        .replace(/(Úspěch\.|Úspěch!|Úspěch:?)/gi, '<span class="text-green-700 font-bold">$1</span>')
+        .replace(/(Selhání\.|Selhání!|Selhání:?)/gi, '<span class="text-red-700 font-bold">$1</span>')
+        .replace(/(Hráč ztrácí \d+ HP|ztrácí \d+ HP|způsobuje \d+ bodů poškození|Ztrácí \d+ HP)/gi, '<span class="text-red-700 font-bold">$1</span>')
+        .replace(/(d\d+\(\d+\))/g, '<span class="text-amber-700 font-bold">$1</span>')
+        .replace(/(\d+ vs DC \d+)/g, '<span class="text-amber-700 font-bold">$1</span>')
+        .replace(/(vs AC \d+)/g, '<span class="text-amber-700 font-bold">$1</span>')
+        .replace(/(Útok vlka|Útok nepřítele|Útok skřeta|Útok orka)/gi, '<span class="text-red-700 font-bold">$1</span>')
+        .replace(/(Útok hráče.*?:)/gi, '<span class="text-green-700 font-bold">$1</span>')
+        .replace(/(Zásah!)/g, '<span class="font-bold border-b border-red-400 text-red-700">$1</span>')
         .replace(/(Hod na .*?:)/gi, '<span class="text-rpg-magic font-bold">$1</span>')
         .replace(/(Aktivní akce:)/gi, '<span class="text-blue-300 font-bold">$1</span>')
         .replace(/(Výsledek:)/gi, '<span class="text-gray-200 font-bold">$1</span>');
@@ -68,7 +68,7 @@ const FormattedSystemLog = ({ text }: { text: string }) => {
         <div key={idx} className="mb-1 last:mb-0" dangerouslySetInnerHTML={{ __html: html }} />
       );
     });
-    return <div className="font-mono text-sm text-gray-300 leading-relaxed bg-black/40 p-4 rounded-xl border border-white/10 shadow-inner mt-2">{lines}</div>;
+    return <div className="font-mono text-sm text-slate-800 leading-relaxed bg-[#f9f6e6]/60 p-4 rounded-xl border border-amber-900/10 shadow-inner mt-2">{lines}</div>;
   };
 
 
@@ -759,7 +759,7 @@ export default function Home() {
 
   if (gameState === "menu") {
     return (
-      <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-4 font-serif relative overflow-hidden bg-[url('https://www.transparenttextures.com/patterns/black-scales.png')]">
+      <div className="min-h-screen bg-[#e5dfc5] text-[#2d3748] flex items-center justify-center p-4 font-serif relative overflow-hidden bg-[url('https://www.transparenttextures.com/patterns/black-scales.png')]">
         
         {/* Deep background fog */}
         <div className="absolute inset-0 bg-gradient-to-b from-slate-900/20 via-slate-950/80 to-slate-950 z-0 pointer-events-none" />
@@ -774,18 +774,18 @@ export default function Home() {
             <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold text-rpg-magic tracking-widest md:tracking-[0.2em] font-cinzel drop-shadow-[0_0_20px_rgba(197,160,89,0.5)]">
               AELTHGARD
             </h1>
-            <p className="text-gray-400 font-lora text-xl tracking-widest mt-4 uppercase">AI Dungeons & Dragons RPG</p>
+            <p className="text-slate-700 font-lora text-xl tracking-widest mt-4 uppercase">AI Dungeons & Dragons RPG</p>
           </div>
 
           {!isLoggedIn ? (
-            <div className="w-full max-w-sm bg-black/40 backdrop-blur-md p-8 rounded-2xl border border-white/10 shadow-2xl">
+            <div className="w-full max-w-sm bg-[#f9f6e6]/60 backdrop-blur-md p-8 rounded-2xl border border-amber-900/10 shadow-2xl">
               <div className="space-y-6">
                 <div>
                   <input 
                     type="email" 
                     value={email} 
                     onChange={e => setEmail(e.target.value)} 
-                    className="w-full p-3 bg-transparent border-b-2 border-white/20 focus:border-rpg-magic outline-none text-white font-lora text-lg transition placeholder-white/30" 
+                    className="w-full p-3 bg-transparent border-b-2 border-amber-900/20 focus:border-rpg-magic outline-none text-[#2d3748] font-lora text-lg transition placeholder-white/30" 
                     placeholder="E-mail" 
                   />
                 </div>
@@ -794,7 +794,7 @@ export default function Home() {
                     type="password" 
                     value={password} 
                     onChange={e => setPassword(e.target.value)} 
-                    className="w-full p-3 bg-transparent border-b-2 border-white/20 focus:border-rpg-magic outline-none text-white font-lora text-lg transition placeholder-white/30" 
+                    className="w-full p-3 bg-transparent border-b-2 border-amber-900/20 focus:border-rpg-magic outline-none text-[#2d3748] font-lora text-lg transition placeholder-white/30" 
                     placeholder="Heslo" 
                   />
                 </div>
@@ -802,7 +802,7 @@ export default function Home() {
                 <button 
                   onClick={() => handleAuth(isRegistering)}
                   disabled={loading || !email || !password}
-                  className="w-full py-4 bg-white/5 border border-rpg-magic/50 text-rpg-magic font-cinzel font-bold text-xl rounded-xl hover:bg-rpg-magic/20 hover:shadow-[0_0_15px_rgba(197,160,89,0.4)] transition uppercase tracking-widest disabled:opacity-50 flex items-center justify-center gap-3 mt-4"
+                  className="w-full py-4 bg-white/50 border border-rpg-magic/50 text-rpg-magic font-cinzel font-bold text-xl rounded-xl hover:bg-rpg-magic/20 hover:shadow-[0_0_15px_rgba(197,160,89,0.4)] transition uppercase tracking-widest disabled:opacity-50 flex items-center justify-center gap-3 mt-4"
                 >
                   {loading && <Loader2 size={24} className="animate-spin" />}
                   {isRegistering ? "Vytvořit Účet" : "Vstoupit"}
@@ -811,7 +811,7 @@ export default function Home() {
                 <div className="text-center mt-4">
                   <button 
                     onClick={() => setIsRegistering(!isRegistering)}
-                    className="text-gray-500 hover:text-white font-lora transition"
+                    className="text-slate-600 hover:text-[#2d3748] font-lora transition"
                   >
                     {isRegistering ? "Zpět k přihlášení" : "Zaregistrovat se"}
                   </button>
@@ -819,11 +819,11 @@ export default function Home() {
               </div>
             </div>
           ) : savedCharacters.length === 0 ? (
-            <div className="text-center w-full max-w-sm bg-black/40 backdrop-blur-md p-8 rounded-2xl border border-white/10 shadow-2xl">
-              <p className="text-gray-400 font-lora mb-6">Přihlášen: {email}</p>
+            <div className="text-center w-full max-w-sm bg-[#f9f6e6]/60 backdrop-blur-md p-8 rounded-2xl border border-amber-900/10 shadow-2xl">
+              <p className="text-slate-700 font-lora mb-6">Přihlášen: {email}</p>
               <button 
                 onClick={() => setGameState("creation")}
-                className="w-full py-4 bg-rpg-blood border border-red-900/50 text-white font-cinzel font-bold text-xl rounded-xl hover:bg-red-800 hover:shadow-[0_0_20px_rgba(183,75,75,0.6)] transition uppercase tracking-widest"
+                className="w-full py-4 bg-rpg-blood border border-red-900/50 text-[#2d3748] font-cinzel font-bold text-xl rounded-xl hover:bg-red-800 hover:shadow-[0_0_20px_rgba(183,75,75,0.6)] transition uppercase tracking-widest"
               >
                 Zrození Hrdiny
               </button>
@@ -831,7 +831,7 @@ export default function Home() {
           ) : (
             <div className="w-full flex flex-col items-center gap-8">
               <div className="text-center">
-                <h3 className="text-gray-400 font-lora text-lg">Tvé Legendy</h3>
+                <h3 className="text-slate-700 font-lora text-lg">Tvé Legendy</h3>
                 <div className="h-px w-32 bg-gradient-to-r from-transparent via-rpg-magic to-transparent mx-auto mt-2" />
               </div>
 
@@ -842,13 +842,13 @@ export default function Home() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: idx * 0.1 }}
-                    className="group relative w-64 h-96 shrink-0 bg-black/60 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden cursor-pointer hover:border-rpg-magic transition-all hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(197,160,89,0.3)]"
+                    className="group relative w-64 h-96 shrink-0 bg-[#f9f6e6]/80 backdrop-blur-md border border-amber-900/10 rounded-2xl overflow-hidden cursor-pointer hover:border-rpg-magic transition-all hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(197,160,89,0.3)]"
                     onClick={() => loadGame(char.name)}
                   >
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10" />
                     
                     <img 
-                      src={`https://image.pollinations.ai/prompt/epic%20high%20fantasy%20portrait%20of%20a%20${encodeURIComponent(char.race)}%20${encodeURIComponent(char.dnd_class)}%20RPG%20character?width=512&height=768&nologo=true&seed=${char.name.length * 42}`} 
+                      src={`https://image.pollinations.ai/prompt/vibrant%20fable%20style%20magical%20fantasy%20portrait%20of%20a%20${encodeURIComponent(char.race)}%20${encodeURIComponent(char.dnd_class)}%20RPG%20character?width=512&height=768&nologo=true&seed=${char.name.length * 42}`} 
                       alt={char.name} 
                       className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-500" 
                     />
@@ -857,7 +857,7 @@ export default function Home() {
                       <div className="absolute top-4 right-4 z-50">
                         <button 
                           onClick={(e) => deleteCharacter(e, char.name)}
-                          className="p-2 text-white/30 hover:text-rpg-blood hover:bg-red-900/30 rounded-full transition"
+                          className="p-2 text-[#2d3748]/50 hover:text-rpg-blood hover:bg-red-900/30 rounded-full transition"
                           title="Smazat postavu"
                         >
                           <Flame size={20} />
@@ -865,7 +865,7 @@ export default function Home() {
                       </div>
                       
                       <div className="mt-auto">
-                        <h4 className="text-2xl font-cinzel font-bold text-white group-hover:text-rpg-magic transition drop-shadow-lg">{char.name}</h4>
+                        <h4 className="text-2xl font-cinzel font-bold text-[#2d3748] group-hover:text-rpg-magic transition drop-shadow-lg">{char.name}</h4>
                         <div className="text-rpg-magic font-lora italic mt-1 drop-shadow-md">{char.race} {char.dnd_class}</div>
                       </div>
                     </div>
@@ -875,7 +875,7 @@ export default function Home() {
 
               <button 
                 onClick={() => setGameState("creation")}
-                className="mt-4 px-8 py-3 bg-transparent border border-white/20 text-white font-cinzel rounded-xl hover:bg-white/5 hover:border-white/50 transition uppercase tracking-widest text-sm flex items-center gap-2"
+                className="mt-4 px-8 py-3 bg-transparent border border-amber-900/20 text-[#2d3748] font-cinzel rounded-xl hover:bg-white/50 hover:border-amber-900/50 transition uppercase tracking-widest text-sm flex items-center gap-2"
               >
                 <Sparkles size={16} />
                 Vytvořit Novou Legendu
@@ -901,7 +901,7 @@ export default function Home() {
 
       {/* Settings Modal */}
       {settingsOpen && (
-        <div className="absolute inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+        <div className="absolute inset-0 bg-white/80 z-50 flex items-center justify-center p-4">
           <div className="bg-[#f4f1e1] border-2 border-[#b74b4b] rounded p-6 max-w-sm w-full shadow-2xl">
             <div className="flex justify-between items-center mb-6 border-b border-[#90a4ae] pb-2">
               <h2 className="text-2xl font-bold text-[#2b4c5e] flex items-center gap-2"><Settings2 size={24} /> Nastavení</h2>
@@ -952,7 +952,7 @@ export default function Home() {
           className="absolute inset-0 bg-cover bg-center transition-all duration-1000"
           style={{ backgroundImage: `url(${currentLocationImage || 'https://www.transparenttextures.com/patterns/black-scales.png'})` }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/70 to-slate-900/40 backdrop-blur-sm" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#f9f6e6]/95 via-[#f9f6e6]/70 to-[#f9f6e6]/30 backdrop-blur-sm" />
       </div>
 
       <div className="w-full max-w-7xl flex flex-col h-full relative z-10 p-2 md:p-8 pb-0">
@@ -961,15 +961,15 @@ export default function Home() {
         {/* Top HUD */}
         <div className="flex flex-col gap-2 md:gap-4 mb-2 md:mb-4 w-full max-w-5xl mx-auto z-10">
           
-          <div className="flex items-center justify-between bg-black/40 backdrop-blur-md p-2 md:p-4 rounded-2xl border border-white/10 shadow-lg">
+          <div className="flex items-center justify-between bg-[#f9f6e6]/60 backdrop-blur-md p-2 md:p-4 rounded-2xl border border-amber-900/10 shadow-lg">
             
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl overflow-hidden border border-rpg-magic shadow-[0_0_10px_rgba(197,160,89,0.3)] shrink-0 hidden sm:block">
-                <img src={`https://image.pollinations.ai/prompt/epic%20high%20fantasy%20portrait%20of%20a%20${encodeURIComponent(race)}%20${encodeURIComponent(dndClass)}%20RPG%20character?width=128&height=128&nologo=true&seed=42`} alt={name} className="w-full h-full object-cover" />
+                <img src={`https://image.pollinations.ai/prompt/vibrant%20fable%20style%20magical%20fantasy%20portrait%20of%20a%20${encodeURIComponent(race)}%20${encodeURIComponent(dndClass)}%20RPG%20character?width=128&height=128&nologo=true&seed=42`} alt={name} className="w-full h-full object-cover" />
               </div>
               <div className="flex flex-col">
-                <h2 className="text-lg sm:text-xl font-cinzel text-white font-bold drop-shadow-md leading-tight">{name} <span className="text-rpg-magic text-xs">Lv.{level}</span></h2>
-                <div className="text-gray-400 font-lora text-xs">
+                <h2 className="text-lg sm:text-xl font-cinzel text-[#2d3748] font-bold drop-shadow-md leading-tight">{name} <span className="text-rpg-magic text-xs">Lv.{level}</span></h2>
+                <div className="text-slate-700 font-lora text-xs">
                   {race} {dndClass}
                 </div>
               </div>
@@ -978,75 +978,75 @@ export default function Home() {
             <div className="flex items-center gap-2 sm:gap-4">
               <div className="flex items-center gap-1 sm:gap-2" title="Životy">
                 <Heart size={16} className="text-rpg-blood" />
-                <div className="font-cinzel text-white text-sm sm:text-base font-bold">
-                  <span className={hp <= 20 ? 'text-rpg-blood animate-pulse' : ''}>{hp}</span><span className="text-gray-500 text-xs">/100</span>
+                <div className="font-cinzel text-[#2d3748] text-sm sm:text-base font-bold">
+                  <span className={hp <= 20 ? 'text-rpg-blood animate-pulse' : ''}>{hp}</span><span className="text-slate-600 text-xs">/100</span>
                 </div>
               </div>
               <div className="flex items-center gap-1 sm:gap-2" title="Zásoby">
                 <Drumstick size={16} className={rations < 2 ? "text-rpg-blood animate-pulse" : "text-orange-400"} />
-                <div className="font-cinzel text-white text-sm sm:text-base font-bold">{rations}</div>
+                <div className="font-cinzel text-[#2d3748] text-sm sm:text-base font-bold">{rations}</div>
               </div>
               <div className="flex items-center gap-1 sm:gap-2" title="Zlato">
                 <div className="w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center font-bold text-black text-[10px] shadow-[0_0_8px_rgba(234,179,8,0.5)]">Z</div>
-                <div className="font-cinzel text-white text-sm sm:text-base font-bold">{gold}</div>
+                <div className="font-cinzel text-[#2d3748] text-sm sm:text-base font-bold">{gold}</div>
               </div>
             </div>
 
           </div>
 
-          <div className="flex gap-1 sm:gap-4 bg-black/40 backdrop-blur-md border border-white/10 p-1 sm:p-2 md:p-3 rounded-2xl shadow-xl overflow-x-auto custom-scrollbar hide-scrollbar snap-x flex-nowrap md:justify-center">
-            <button onClick={() => setStatsOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-3 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition flex items-center gap-2 text-sm font-cinzel"><User size={18} /> <span className="hidden sm:inline">Vlastnosti</span></button>
-            <button onClick={() => setInventoryOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-3 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition flex items-center gap-2 text-sm font-cinzel"><Package size={18} /> <span className="hidden sm:inline">Batoh</span></button>
-            <button onClick={() => setJournalOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-3 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition flex items-center gap-2 text-sm font-cinzel relative">
+          <div className="flex gap-1 sm:gap-4 bg-[#f9f6e6]/60 backdrop-blur-md border border-amber-900/10 p-1 sm:p-2 md:p-3 rounded-2xl shadow-xl overflow-x-auto custom-scrollbar hide-scrollbar snap-x flex-nowrap md:justify-center">
+            <button onClick={() => setStatsOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-3 text-slate-700 hover:text-[#2d3748] hover:bg-white/70 rounded-xl transition flex items-center gap-2 text-sm font-cinzel"><User size={18} /> <span className="hidden sm:inline">Vlastnosti</span></button>
+            <button onClick={() => setInventoryOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-3 text-slate-700 hover:text-[#2d3748] hover:bg-white/70 rounded-xl transition flex items-center gap-2 text-sm font-cinzel"><Package size={18} /> <span className="hidden sm:inline">Batoh</span></button>
+            <button onClick={() => setJournalOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-3 text-slate-700 hover:text-[#2d3748] hover:bg-white/70 rounded-xl transition flex items-center gap-2 text-sm font-cinzel relative">
               <BookOpen size={18} /> <span className="hidden sm:inline">Deník</span>
               {unreadQuests && <span className="absolute top-1 right-1 w-2 h-2 bg-rpg-blood rounded-full animate-pulse" />}
             </button>
-            <button onClick={() => setNpcsOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-3 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition flex items-center gap-2 text-sm font-cinzel"><Users size={18} /> <span className="hidden sm:inline">Postavy</span></button>
+            <button onClick={() => setNpcsOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-3 text-slate-700 hover:text-[#2d3748] hover:bg-white/70 rounded-xl transition flex items-center gap-2 text-sm font-cinzel"><Users size={18} /> <span className="hidden sm:inline">Postavy</span></button>
             <button onClick={() => setMapOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-3 text-rpg-magic hover:bg-rpg-magic/20 rounded-xl transition flex items-center gap-2 text-sm font-cinzel"><Map size={18} /> <span className="hidden sm:inline">Mapa</span></button>
-            <button onClick={() => setSettingsOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-3 text-gray-500 hover:text-white hover:bg-white/10 rounded-xl transition"><Settings2 size={18} /></button>
+            <button onClick={() => setSettingsOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-3 text-slate-600 hover:text-[#2d3748] hover:bg-white/70 rounded-xl transition"><Settings2 size={18} /></button>
           </div>
           
         </div>
         {/* Story Log (Middle) */}
         <div className="flex-1 overflow-hidden relative mb-4 w-full max-w-5xl mx-auto z-10">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-lg border border-white/10 rounded-2xl shadow-2xl p-6 overflow-y-auto custom-scrollbar flex flex-col gap-6" >
+          <div className="absolute inset-0 bg-[#f9f6e6]/70 backdrop-blur-lg border border-amber-900/10 rounded-2xl shadow-2xl p-6 overflow-y-auto custom-scrollbar flex flex-col gap-6" >
             
             {history.map((msg, i) => (
               <div key={i} className={`flex ${msg.type === "player" ? "justify-end" : "justify-start"}`}>
                 <div className={`max-w-[85%] md:max-w-[75%] p-5 rounded-2xl ${
                   msg.type === "player" 
-                    ? "bg-white/5 border border-white/10 text-gray-300 font-lora" 
+                    ? "bg-white/50 border border-amber-900/10 text-slate-800 font-lora" 
                     : msg.type === "system" || msg.type === "error"
-                      ? "bg-slate-900 border border-white/5 text-gray-400 font-cinzel text-sm italic"
-                      : "bg-black/60 border border-rpg-magic/30 text-white font-lora shadow-[0_0_15px_rgba(197,160,89,0.1)]"
+                      ? "bg-[#f4ecd8] border border-amber-900/5 text-slate-700 font-cinzel text-sm italic"
+                      : "bg-[#f9f6e6]/80 border border-rpg-magic/30 text-[#2d3748] font-lora shadow-[0_0_15px_rgba(197,160,89,0.1)]"
                 }`}>
                   {msg.type === "player" && (
                     <div className="leading-relaxed text-lg">{msg.text}</div>
                   )}
                   {msg.type === "system" && <FormattedSystemLog text={msg.text} />}
-                  {msg.type === "error" && <div className="text-red-400 font-bold">Chyba: {msg.text}</div>}
+                  {msg.type === "error" && <div className="text-red-700 font-bold">Chyba: {msg.text}</div>}
                   {msg.type === "dm" && (
                     <div className="flex flex-col gap-4">
                       {msg.vypravec && (
                         <div className="leading-relaxed text-lg">
-                          <button onClick={() => playAudio(msg.vypravec, 'narrator')} className="float-right ml-4 text-gray-500 hover:text-rpg-magic transition">
+                          <button onClick={() => playAudio(msg.vypravec, 'narrator')} className="float-right ml-4 text-slate-600 hover:text-rpg-magic transition">
                             <Volume2 size={18} />
                           </button>
                           <TypewriterText text={msg.vypravec} animate={i === history.length - 1} />
                         </div>
                       )}
                       {msg.popis_okoli && (
-                        <div className="text-gray-400 italic font-lora text-sm border-l-2 border-rpg-magic/50 pl-3">
+                        <div className="text-slate-700 italic font-lora text-sm border-l-2 border-rpg-magic/50 pl-3">
                           {msg.popis_okoli}
                         </div>
                       )}
                       {msg.npc_dialogy && msg.npc_dialogy.length > 0 && (
                         <div className="flex flex-col gap-2 mt-2">
                           {msg.npc_dialogy.map((npc: any, nIdx: number) => (
-                            <div key={nIdx} className="bg-slate-900/80 p-3 rounded-lg border border-white/10">
+                            <div key={nIdx} className="bg-[#f4ecd8]/90 p-3 rounded-lg border border-amber-900/10">
                               <div className="flex justify-between items-center mb-1">
                                 <span className="font-bold text-rpg-magic font-cinzel">{npc.jmeno}</span>
-                                <button onClick={() => playAudio(npc.replika, npc.jmeno.toLowerCase().includes('žen') ? 'npc_zena' : 'npc_muz')} className="text-gray-500 hover:text-white"><Volume2 size={16} /></button>
+                                <button onClick={() => playAudio(npc.replika, npc.jmeno.toLowerCase().includes('žen') ? 'npc_zena' : 'npc_muz')} className="text-slate-600 hover:text-[#2d3748]"><Volume2 size={16} /></button>
                               </div>
                               <div className="text-gray-200">"{npc.replika}"</div>
                             </div>
@@ -1054,7 +1054,7 @@ export default function Home() {
                         </div>
                       )}
                       {msg.system_log && (
-                        <div className="text-xs font-mono mt-2 opacity-90 border-t border-white/10 pt-2">
+                        <div className="text-xs font-mono mt-2 opacity-90 border-t border-amber-900/10 pt-2">
                           <FormattedSystemLog text={msg.system_log} />
                         </div>
                       )}
@@ -1066,7 +1066,7 @@ export default function Home() {
 
             {loading && (
               <div className="flex justify-start animate-fade-in-up">
-                <div className="bg-black/60 border border-rpg-magic/30 p-5 rounded-2xl flex items-center gap-3 text-rpg-magic italic font-lora">
+                <div className="bg-[#f9f6e6]/80 border border-rpg-magic/30 p-5 rounded-2xl flex items-center gap-3 text-rpg-magic italic font-lora">
                   <Sparkles className="animate-spin" size={20} />
                   <span>Vypravěč spřádá osud...</span>
                 </div>
@@ -1086,13 +1086,13 @@ export default function Home() {
             <div className="flex flex-nowrap gap-2 flex-1 overflow-x-auto snap-x custom-scrollbar hide-scrollbar pb-2">
               {inCombat ? (
                 <>
-                  <button onClick={() => sendAction(`Útočím zbraní: ${inventory.find(i => i.id === equipped["hlavní ruka"])?.name || "Pěsti"}`)} className="bg-rpg-blood/20 border border-rpg-blood text-white px-4 py-2 rounded-xl text-sm hover:bg-rpg-blood transition shadow-[0_0_10px_rgba(183,75,75,0.2)] font-cinzel flex items-center gap-2">
+                  <button onClick={() => sendAction(`Útočím zbraní: ${inventory.find(i => i.id === equipped["hlavní ruka"])?.name || "Pěsti"}`)} className="bg-rpg-blood/20 border border-rpg-blood text-[#2d3748] px-4 py-2 rounded-xl text-sm hover:bg-rpg-blood transition shadow-[0_0_10px_rgba(183,75,75,0.2)] font-cinzel flex items-center gap-2">
                     <Sword size={16} /> Útok
                   </button>
-                  <button onClick={() => setSkillsOpen(true)} className="flex-shrink-0 snap-start whitespace-nowrap bg-white/5 border border-white/20 text-white px-4 py-3 rounded-xl text-sm hover:bg-white/10 transition font-cinzel flex items-center gap-2">
+                  <button onClick={() => setSkillsOpen(true)} className="flex-shrink-0 snap-start whitespace-nowrap bg-white/50 border border-amber-900/20 text-[#2d3748] px-4 py-3 rounded-xl text-sm hover:bg-white/70 transition font-cinzel flex items-center gap-2">
                     <Sparkles size={16} /> Dovednost
                   </button>
-                  <button onClick={() => sendAction("Pokusím se z boje utéct!")} className="flex-shrink-0 snap-start whitespace-nowrap bg-black/40 border border-gray-600 text-gray-400 px-4 py-3 rounded-xl text-sm hover:text-white transition font-cinzel italic">
+                  <button onClick={() => sendAction("Pokusím se z boje utéct!")} className="flex-shrink-0 snap-start whitespace-nowrap bg-[#f9f6e6]/60 border border-gray-600 text-slate-700 px-4 py-3 rounded-xl text-sm hover:text-[#2d3748] transition font-cinzel italic">
                     Útěk
                   </button>
                 </>
@@ -1104,7 +1104,7 @@ export default function Home() {
                     </button>
                   ))}
                   {suggestedActions.map((act, i) => (
-                    <button key={`act-${i}`} onClick={() => sendAction(act)} className="flex-shrink-0 snap-start bg-white/5 border border-white/20 text-gray-300 px-4 py-3 rounded-xl text-sm whitespace-nowrap shadow-sm max-w-[85vw] overflow-hidden text-ellipsis hover:bg-white/10 hover:text-white transition font-lora">
+                    <button key={`act-${i}`} onClick={() => sendAction(act)} className="flex-shrink-0 snap-start bg-white/50 border border-amber-900/20 text-slate-800 px-4 py-3 rounded-xl text-sm whitespace-nowrap shadow-sm max-w-[85vw] overflow-hidden text-ellipsis hover:bg-white/70 hover:text-[#2d3748] transition font-lora">
                       {act}
                     </button>
                   ))}
@@ -1118,10 +1118,10 @@ export default function Home() {
           {/* Magical Input Box */}
           <div className="relative">
             <div className="absolute -inset-1 bg-gradient-to-r from-transparent via-rpg-magic/20 to-transparent rounded-2xl blur-md" />
-            <div className="relative flex flex-wrap sm:flex-nowrap gap-2 sm:gap-3 bg-slate-900/90 backdrop-blur-xl p-2 sm:p-3 rounded-2xl border border-rpg-magic/30 shadow-[0_0_30px_rgba(0,0,0,0.8)]">
+            <div className="relative flex flex-wrap sm:flex-nowrap gap-2 sm:gap-3 bg-white/90 backdrop-blur-xl p-2 sm:p-3 rounded-2xl border border-rpg-magic/30 shadow-[0_0_30px_rgba(0,0,0,0.8)]">
               <button
                 onClick={() => setIsOOC(!isOOC)}
-                className={`p-4 transition-all rounded-xl flex items-center justify-center ${isOOC ? 'bg-indigo-900/40 text-indigo-300 border border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.2)]' : 'text-gray-500 hover:text-rpg-magic bg-white/5 border border-transparent'}`}
+                className={`p-4 transition-all rounded-xl flex items-center justify-center ${isOOC ? 'bg-indigo-900/40 text-indigo-800 border border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.2)]' : 'text-slate-600 hover:text-rpg-magic bg-white/50 border border-transparent'}`}
                 title="OOC (Myšlenka)"
               >
                 <Brain size={24} className={isOOC ? "animate-pulse" : ""} />
@@ -1132,12 +1132,12 @@ export default function Home() {
                 onChange={(e) => setCustomAction(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && sendAction(customAction)}
                 placeholder={isOOC ? "Přemýšlím nad..." : "Co uděláš dál?"} 
-                className={`flex-1 font-lora text-xl bg-transparent px-4 py-2 outline-none transition-colors ${isOOC ? 'text-indigo-200 placeholder-indigo-900' : 'text-white placeholder-gray-600'}`}
+                className={`flex-1 font-lora text-xl bg-transparent px-4 py-2 outline-none transition-colors ${isOOC ? 'text-indigo-200 placeholder-indigo-900' : 'text-[#2d3748] placeholder-gray-600'}`}
                 disabled={loading}
               />
               <button 
                 onClick={() => sendAction(customAction)}
-                className="bg-rpg-blood hover:bg-red-800 text-white px-4 sm:px-8 py-2 sm:py-3 w-full sm:w-auto rounded-xl font-cinzel font-bold text-lg tracking-widest transition-all disabled:opacity-50 flex items-center justify-center shadow-[0_0_15px_rgba(183,75,75,0.4)]"
+                className="bg-rpg-blood hover:bg-red-800 text-[#2d3748] px-4 sm:px-8 py-2 sm:py-3 w-full sm:w-auto rounded-xl font-cinzel font-bold text-lg tracking-widest transition-all disabled:opacity-50 flex items-center justify-center shadow-[0_0_15px_rgba(183,75,75,0.4)]"
                 disabled={loading || !customAction.trim()}
               >
                 {loading ? <Loader2 size={24} className="animate-spin" /> : "Vydat se"}
@@ -1150,7 +1150,7 @@ export default function Home() {
 
       {/* Stats Modal */}
       {statsOpen && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-white/90 flex items-center justify-center z-50 p-4">
           <div className="w-full max-w-lg bg-[#2b4c5e] rounded-lg border-4 border-[#90a4ae] shadow-2xl overflow-hidden flex flex-col">
             <div className="bg-[#e3dcc8] p-4 flex justify-between items-center border-b-4 border-[#90a4ae]">
               <div className="flex items-center gap-2 text-[#b74b4b] font-bold text-2xl uppercase tracking-widest">
@@ -1232,7 +1232,7 @@ export default function Home() {
       />
       {questBanner && (
         <div className="fixed inset-0 pointer-events-none z-[100] flex items-center justify-center">
-           <div className="animate-in fade-in zoom-in duration-500 flex flex-col items-center bg-black/70 px-12 py-6 border-y-4 border-[#d4af37] shadow-[0_0_50px_rgba(212,175,55,0.4)] backdrop-blur-sm">
+           <div className="animate-in fade-in zoom-in duration-500 flex flex-col items-center bg-white/80 px-12 py-6 border-y-4 border-[#d4af37] shadow-[0_0_50px_rgba(212,175,55,0.4)] backdrop-blur-sm">
              <div className="text-[#d4af37] text-xs sm:text-sm font-bold tracking-[0.4em] uppercase mb-2">{questBanner.title}</div>
              <div className="text-[#f4f1e1] text-xl sm:text-3xl font-serif drop-shadow-lg text-center max-w-md">{questBanner.subtitle}</div>
            </div>

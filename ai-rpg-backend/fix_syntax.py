@@ -1,15 +1,20 @@
 ﻿import codecs
 
-with codecs.open("main.py", "r", "utf-8") as f:
-    lines = f.readlines()
+lines = codecs.open('main.py', 'r', 'utf-8').readlines()
 
 new_lines = []
-for line in lines:
-    if line.startswith("- Do 'image_prompt'"):
-        new_lines.append('        {"role": "model", "text": """{"aktualni_region": "Pocatecni vesnice", "popis_okoli": "Stojíš na začátku své cesty.", "vypravec": "Vítej ve světě dobrodružství!", "nabizene_akce": ["Rozhlédnout se", "Jít do hospody", "Odejít z vesnice"]}"""}\n')
+skip_next = False
+for i, l in enumerate(lines):
+    if skip_next:
+        skip_next = False
+        continue
+    
+    if 'narrative_text = f"[NHODN SETKN na cest]' in l or 'narrative_text = f"[NÁHODNÉ SETKÁNÍ na cestě]' in l:
+        # replace with single line
+        new_lines.append('        narrative_text = f"[NÁHODNÉ SETKÁNÍ na cestě]\\n{resp.text.strip()}"\n')
+        skip_next = True
     else:
-        new_lines.append(line)
+        new_lines.append(l)
 
-with codecs.open("main.py", "w", "utf-8") as f:
-    f.writelines(new_lines)
-print("Syntax fixed!")
+with codecs.open('main.py', 'w', 'utf-8') as f:
+    f.write("".join(new_lines))
