@@ -61,8 +61,8 @@ const FormattedSystemLog = ({ text }: { text: string }) => {
       let html = line
         .replace(/(Kritický úspěch!|Kritický úspěch|Kritický úspěch\.)/gi, '<span class="text-green-700 font-bold uppercase tracking-wider">$1</span>')
         .replace(/(Kritické selhání!|Kritické selhání|Kritický neúspěch)/gi, '<span class="text-red-500 font-bold uppercase tracking-wider">$1</span>')
-        .replace(/(Úspěch\.|Úspěch!|Úspěch:?)/gi, '<span class="text-green-700 font-bold">$1</span>')
-        .replace(/(Selhání\.|Selhání!|Selhání:?)/gi, '<span class="text-red-700 font-bold">$1</span>')
+        .replace(/(?<!\p{L})(Úspěch\.|Úspěch!|Úspěch:?)/giu, '<span class="text-green-700 font-bold">$1</span>')
+        .replace(/(?<!\p{L})(Selhání\.|Selhání!|Selhání:?|Neúspěch\.|Neúspěch!|Neúspěch:?)/giu, '<span class="text-red-700 font-bold">$1</span>')
         .replace(/(Hráč ztrácí \d+ HP|ztrácí \d+ HP|způsobuje \d+ bodů poškození|Ztrácí \d+ HP)/gi, '<span class="text-red-700 font-bold">$1</span>')
         .replace(/(d\d+\(\d+\))/g, '<span class="text-amber-700 font-bold">$1</span>')
         .replace(/(\d+ vs DC \d+)/g, '<span class="text-amber-700 font-bold">$1</span>')
@@ -505,7 +505,11 @@ export default function Home() {
           }
           if (msg.role === "model") {
             try {
-              const dm_data = JSON.parse(msg.text);
+                let t = msg.text.trim();
+                if (t.startsWith('```json')) t = t.substring(7);
+                if (t.endsWith('```')) t = t.substring(0, t.length - 3);
+                t = t.trim();
+                const dm_data = JSON.parse(t);
               if (dm_data.nabizene_akce) lastSuggestedActions = dm_data.nabizene_akce;
               if (dm_data.image_prompt) lastImage = dm_data.image_prompt;
               if (dm_data.popis_okoli) lastDesc = dm_data.popis_okoli;
@@ -1116,9 +1120,9 @@ export default function Home() {
                             <div key={nIdx} className="bg-[#f4ecd8]/90 p-3 rounded-lg border border-amber-900/10">
                               <div className="flex justify-between items-center mb-1">
                                 <span className="font-bold text-rpg-magic font-cinzel">{npc.jmeno}</span>
-                                <button onClick={() => playAudio(npc.replika, npc.jmeno.toLowerCase().includes('žen') ? 'npc_zena' : 'npc_muz')} className="text-slate-600 hover:text-[#2d3748]"><Volume2 size={16} /></button>
+                                <button onClick={() => playAudio((npc.text || npc.replika), npc.pohlavi === 'zena' ? 'npc_zena' : 'npc_muz')} className="text-slate-600 hover:text-[#2d3748]"><Volume2 size={16} /></button>
                               </div>
-                              <div className="text-slate-900">"{npc.replika}"</div>
+                                <div className="text-slate-900">"{npc.text || npc.replika}"</div>
                             </div>
                           ))}
                         </div>
