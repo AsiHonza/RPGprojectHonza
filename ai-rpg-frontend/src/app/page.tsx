@@ -785,7 +785,7 @@ export default function Home() {
                     type="email" 
                     value={email} 
                     onChange={e => setEmail(e.target.value)} 
-                    className="w-full p-3 bg-transparent border-b-2 border-amber-900/20 focus:border-rpg-magic outline-none text-[#2d3748] font-lora text-lg transition placeholder-white/30" 
+                    className="w-full p-3 bg-transparent border-b-2 border-amber-900/20 focus:border-rpg-magic outline-none text-[#2d3748] font-lora text-lg transition placeholder-slate-400" 
                     placeholder="E-mail" 
                   />
                 </div>
@@ -794,7 +794,7 @@ export default function Home() {
                     type="password" 
                     value={password} 
                     onChange={e => setPassword(e.target.value)} 
-                    className="w-full p-3 bg-transparent border-b-2 border-amber-900/20 focus:border-rpg-magic outline-none text-[#2d3748] font-lora text-lg transition placeholder-white/30" 
+                    className="w-full p-3 bg-transparent border-b-2 border-amber-900/20 focus:border-rpg-magic outline-none text-[#2d3748] font-lora text-lg transition placeholder-slate-400" 
                     placeholder="Heslo" 
                   />
                 </div>
@@ -802,7 +802,7 @@ export default function Home() {
                 <button 
                   onClick={() => handleAuth(isRegistering)}
                   disabled={loading || !email || !password}
-                  className="w-full py-4 bg-white/50 border border-rpg-magic/50 text-rpg-magic font-cinzel font-bold text-xl rounded-xl hover:bg-rpg-magic/20 hover:shadow-[0_0_15px_rgba(197,160,89,0.4)] transition uppercase tracking-widest disabled:opacity-50 flex items-center justify-center gap-3 mt-4"
+                  className="w-full py-4 bg-white/50 border border-amber-900/50 text-slate-800 font-cinzel font-bold text-xl rounded-xl hover:bg-white/70 hover:shadow-[0_0_15px_rgba(197,160,89,0.4)] transition uppercase tracking-widest disabled:opacity-50 flex items-center justify-center gap-3 mt-4"
                 >
                   {loading && <Loader2 size={24} className="animate-spin" />}
                   {isRegistering ? "Vytvořit Účet" : "Vstoupit"}
