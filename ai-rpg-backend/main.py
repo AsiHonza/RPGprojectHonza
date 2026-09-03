@@ -155,7 +155,7 @@ async def generate_backstory(req: BackstoryRequest):
         prompt = f"Vytvoř D&D pozadí pro postavu. Jméno: {req.name}, Rasa: {req.race}, Povolání: {req.dnd_class}. Klíčová slova od hráče: {req.keywords}."
         
         response = client.models.generate_content(
-            model='gemini-2.5-flash',
+            model='gemini-4.7-flash',
             contents=prompt,
             config=types.GenerateContentConfig(
                 system_instruction="Jsi expert na D&D lore. Vygeneruj přesně 3 věci: appearance (vzhled), personality (chování) a backstory (historie).",
@@ -469,7 +469,7 @@ Tvým úkolem je vrátit POUZE validní JSON (žádný markdown, žádné koment
 }}
 """
             response = client.models.generate_content(
-                model='gemini-2.5-flash',
+                model='gemini-4.7-flash',
                 contents=world_prompt,
                 config=types.GenerateContentConfig(response_mime_type="application/json")
             )
@@ -485,8 +485,7 @@ Tvým úkolem je vrátit POUZE validní JSON (žádný markdown, žádné koment
                 "key_npcs": ai_world_data.get("key_npcs")
             }
         except Exception as e:
-            world_data = None
-            print(f"World gen failed: {e}")
+            raise HTTPException(status_code=500, detail=f"Chyba při generování světa: {str(e)}")
 
     # 2. Vygenerujeme Intro pomoci sveta
     try:
@@ -512,7 +511,7 @@ Vrať POUZE json ve formátu:
 }}
 '''
         response = client.models.generate_content(
-            model='gemini-2.5-flash',
+            model='gemini-4.7-flash',
             contents=prompt,
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",
@@ -530,8 +529,7 @@ Vrať POUZE json ve formátu:
             popis_okoli = "Neznámé místo."
             
     except Exception as e:
-        intro_text = "Vítej ve světě Aelthgard. Mlha se pomalu rozestupuje a tvé dobrodružství právě začíná..."
-        popis_okoli = "Zamlžený hvozd."
+        raise HTTPException(status_code=500, detail=f"Chyba při generování intro textu: {str(e)}")
         
     initial_history = [
         {"role": "model", "text": f'''{{"aktualni_region": "Začátek cesty", "popis_okoli": "{popis_okoli}", "vypravec": "{intro_text}", "nabizene_akce": ["Rozhlédnout se", "Zkontrolovat vybavení", "Vydat se vpřed"]}}'''}
@@ -732,7 +730,7 @@ SPECIFIKA POSTAVY A NABIZENE AKCE:
 """
 
         response = client.models.generate_content(
-            model='gemini-2.5-flash',
+            model='gemini-4.7-flash',
             contents=contents,
             config=types.GenerateContentConfig(
                 system_instruction=system_prompt,
@@ -867,6 +865,7 @@ class TravelRequest(BaseModel):
     name: str
     target_q: int
     target_r: int
+    api_key: str = "DUMMY"
 
 def hex_distance(q1, r1, q2, r2):
     return (abs(q1 - q2) + abs(q1 + r1 - q2 - r2) + abs(r1 - r2)) // 2
@@ -914,34 +913,76 @@ async def travel_action(req: TravelRequest):
     state["day"] = state.get("day", 1) + 1
     state["playerLocation"] = {"q": req.target_q, "r": req.target_r}
     
-    # Check for POI
-    poi = next((l for l in locations if l["q"] == req.target_q and l["r"] == req.target_r), None)
+    # Check for POI in already generated lore locations
+    poi = next((l for l in locations if l.get("id") == f"{req.target_q}_{req.target_r}" or (l.get("q") == req.target_q and l.get("r") == req.target_r)), None)
     
-    client = genai.Client(api_key=req.api_key if req.api_key and "DUMMY" not in req.api_key else os.environ.get("GEMINI_API_KEY"))
+    # If not in lore locations, check if it's a raw math POI
+    raw_poi = None
+    if not poi and world_data.get("pois"):
+        raw_poi = next((p for p in world_data["pois"] if p["q"] == req.target_q and p["r"] == req.target_r), None)
+    
+    client = genai.Client(api_key=req.api_key if getattr(req, "api_key", None) and "DUMMY" not in req.api_key else os.environ.get("GEMINI_API_KEY"))
     
     import random
+    import json
     encounter = random.random() < 0.25 # 25% chance of random encounter
     
     narrative_text = ""
     
     if poi:
-        prompt = f'''Hráč (rasa: {state.get("race")}, třída: {state.get("dnd_class")}) dorazil do nové lokace:
-Názav: {poi.get("nazev")}
-Popis: {poi.get("popis")}
+        prompt = f'''Hráč (rasa: {state.get("race")}, třída: {state.get("dnd_class")}) dorazil do již známé lokace:
+Název: {poi.get("name", poi.get("nazev", "Neznámé místo"))}
+Popis: {poi.get("description", poi.get("popis", ""))}
 Napiš atmosférický první odstavec (pohled vypravěče), jak hráč přichází na toto místo. Max 4 věty. Nenuť ho do akce, jen popiš příchod a atmosféru.'''
-        resp = client.models.generate_content(model='gemini-2.5-flash', contents=prompt)
+        resp = client.models.generate_content(model='gemini-4.7-flash', contents=prompt)
         narrative_text = resp.text.strip()
+        
+    elif raw_poi:
+        # Dynamically generate lore for this new POI!
+        prompt = f'''Hráč (rasa: {state.get("race")}, třída: {state.get("dnd_class")}) právě objevil na mapě nové místo, které ještě nemá historii.
+Typ místa: {raw_poi.get("type")}
+Terén: {raw_poi.get("terrain")}
+Království ID: {raw_poi.get("kingdom_id")}
+Hlavní zápletka světa: {world_data.get("main_plot", "")}
+
+Vrať POUZE validní JSON s následující strukturou (žádný markdown, žádné komentáře):
+{{
+  "location": {{
+    "id": "{req.target_q}_{req.target_r}",
+    "q": {req.target_q},
+    "r": {req.target_r},
+    "name": "Vymysli epický název",
+    "description": "Vymysli popis a co se tu děje, navázáno na zápletku nebo typ místa",
+    "ruler": "Kdo tam vládne nebo co tam žije"
+  }},
+  "intro_text": "Napiš atmosférický první odstavec (pohled vypravěče), jak hráč přichází na toto místo. Max 4 věty."
+}}'''
+        try:
+            resp = client.models.generate_content(
+                model='gemini-4.7-flash', 
+                contents=prompt,
+                config={"response_mime_type": "application/json"}
+            )
+            clean_text = resp.text.strip().removeprefix('```json').removesuffix('```').strip()
+            data = json.loads(clean_text)
+            new_loc = data.get("location")
+            if new_loc:
+                locations.append(new_loc)
+                world_data["locations"] = locations
+                state["world_data"] = world_data
+            narrative_text = data.get("intro_text", f"Dorazil jsi do {new_loc.get('name') if new_loc else 'neznámého místa'}.")
+        except Exception as e:
+            narrative_text = f"Dorazil jsi na místo: {raw_poi.get('type')}. ({str(e)})"
+            
     elif encounter:
         prompt = f'''Hráč (rasa: {state.get("race")}, třída: {state.get("dnd_class")}) cestuje divočinou. Terén: {target_hex["terrain"]}.
 Vygeneruj NÁHODNÉ SETKÁNÍ. Může to být útok (goblini, bandité, vlci) nebo neutrální/zajímavá událost (potulný kupec, prastará socha).
 Napiš to z pohledu Vypravěče a nech situaci otevřenou, ať hráč může reagovat. Max 4 věty.'''
-        resp = client.models.generate_content(model='gemini-2.5-flash', contents=prompt)
-        narrative_text = f"[NÁHODNÉ SETKÁNÍ na cestě]\n{resp.text.strip()}"
+        resp = client.models.generate_content(model='gemini-4.7-flash', contents=prompt)
     else:
         narrative_text = f"Cesta přes {target_hex['terrain']} proběhla klidně. Utábořil ses a odpočinul si."
 
-    # Add to history
-    history.append({"role": "user", "content": f"[CESTOVÁNÍ] Přesun na hex ({req.target_q}, {req.target_r})"})
+    history.append({"role": "user", "content": f"[CESTOVÁNÍ] Přesun na hex ({req.target_q}, {req.target_r})"}) 
     history.append({"role": "model", "content": narrative_text})
     
     supabase.table("characters").update({
