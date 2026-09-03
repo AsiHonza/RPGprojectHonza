@@ -159,11 +159,47 @@ export default function Home() {
     }
   }, [level, dndClass, maxSpellSlots]);
   
+
+  // Sync gameState to URL hash
+  useEffect(() => {
+    if (gameState) {
+      const currentHash = window.location.hash.replace('#', '');
+      if (currentHash !== gameState) {
+        window.history.pushState(null, '', `#${gameState}`);
+      }
+    }
+  }, [gameState]);
+
+  // Handle browser Back/Forward buttons
+  useEffect(() => {
+    const handlePopState = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (hash === 'creation' && isLoggedIn) {
+        setGameState('creation');
+      } else if (hash === 'playing' && isLoggedIn) {
+        // Can only go back to playing if we have an active character
+        const savedChar = localStorage.getItem("aethelgard_active_char");
+        if (savedChar) setGameState('playing');
+        else setGameState('menu');
+      } else {
+        setGameState('menu');
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    
+    // Initial sync on mount
+    if (isLoggedIn) {
+      handlePopState();
+    }
+    
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [isLoggedIn, setGameState]);
   // Global interaction listener for Autoplay Policy
   useEffect(() => {
     const handleFirstInteraction = () => {
       if (musicPlaying && bgAudioRef.current && bgAudioRef.current.paused) {
-        bgAudioRef.current.play().catch(e => console.log("Autoplay still blocked:", e));
+          bgAudioRef.current.volume = bgVolume;
+          bgAudioRef.current.play().catch(e => console.log("Autoplay still blocked:", e));
       }
       window.removeEventListener('click', handleFirstInteraction);
       window.removeEventListener('touchstart', handleFirstInteraction);
@@ -227,7 +263,7 @@ export default function Home() {
                   clearInterval(fadeIn);
                 }
               }, 150);
-            }).catch(e => console.error("Audio crossfade blocked", e));
+            }).catch(e => { console.error("Audio crossfade blocked", e); audio.volume = bgVolume; });
           }, 100);
         }
       }, 150);
@@ -908,7 +944,7 @@ export default function Home() {
   }
 
   if (gameState === "creation") {
-    return <CharacterCreation startNewGame={startNewGame} loading={loading}  backstory={backstory} generateBackstory={generateBackstory} />;
+    return <CharacterCreation onClose={() => setGameState("menu")} startNewGame={startNewGame} loading={loading}  backstory={backstory} generateBackstory={generateBackstory} />;
   }
 
 

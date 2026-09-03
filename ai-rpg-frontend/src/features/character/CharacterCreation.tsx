@@ -3,7 +3,7 @@ import { useGameStore } from '../../store/gameStore';
 import { Settings2, Sparkles, ChevronRight, ChevronLeft, Crown, Shield, Wand2, Axe, Ghost, Skull, Book, Flame } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export const CharacterCreation = ({ startNewGame, loading, backstory, generateBackstory }: any) => {
+export const CharacterCreation = ({ startNewGame, loading, backstory, generateBackstory, onClose }: any) => {
   const [step, setStep] = useState(1);
   const classes = ["Barbar", "Bard", "Klerik", "Druid", "Bojovník", "Mnich", "Paladin", "Hraničář", "Tulák", "Čaroděj", "Černokněžník", "Kouzelník"];
   const races = ["Člověk", "Elf", "Trpaslík", "Půlčík", "Drakorozený", "Tiefling", "Půlork", "Gnóm"];
