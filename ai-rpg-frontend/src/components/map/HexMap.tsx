@@ -109,7 +109,7 @@ export default function HexMap({ worldData, onHexClick, setSelectedItem, playerL
 
   return (
     <div className="w-full h-full relative bg-[#e3dcc8] bg-[url('https://www.transparenttextures.com/patterns/aged-paper.png')] overflow-hidden border-4 border-rpg-obsidian rounded shadow-inner">
-      <TransformWrapper initialScale={1.5} minScale={0.3} maxScale={4} centerOnInit={true} wheel={{ step: 0.1 }}>
+      <TransformWrapper initialScale={1.5} minScale={0.3} maxScale={4} centerOnInit={true} wheel={{ step: 0.025 }}>
         <TransformComponent wrapperClass="w-full h-full" contentClass="w-full h-full flex items-center justify-center">
       <svg 
         width={width} 

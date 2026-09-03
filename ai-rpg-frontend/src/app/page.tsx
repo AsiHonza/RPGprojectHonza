@@ -512,7 +512,6 @@ export default function Home() {
                 const dm_data = JSON.parse(t);
               if (dm_data.nabizene_akce) lastSuggestedActions = dm_data.nabizene_akce;
               if (dm_data.image_prompt) lastImage = dm_data.image_prompt;
-              if (dm_data.popis_okoli) lastDesc = dm_data.popis_okoli;
                 lastAudioQueue = [];
                 if (dm_data.vypravec) lastAudioQueue.push({text: dm_data.vypravec, type: "narrator"});
                 if (dm_data.npc_dialogy) dm_data.npc_dialogy.forEach((n: any) => { if (n.text) lastAudioQueue.push({text: n.text, type: n.pohlavi === "muz" ? "npc_muz" : "npc_zena"}) });
