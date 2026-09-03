@@ -91,7 +91,7 @@ const FormattedSystemLog = ({ text }: { text: string }) => {
 
 
 export default function Home() {
-  const { bgVolume, setBgVolume, currentTrack, setCurrentTrack, ttsVolume, setTtsVolume, musicPlaying, setMusicPlaying, unreadQuests, setUnreadQuests, gameState, setGameState, loading, setLoading, name, setName, dndClass, setDndClass, race, setRace, stats, setStats, keywords, setKeywords, gameMode, setGameMode, backstory, setBackstory, hp, setHp, level, setLevel, xp, setXp, gold, setGold, rations, setRations, skillPoints, setSkillPoints, inventory, setInventory, equipped, setEquipped, worldData, setWorldData, journal, setJournal, quests, setQuests, npcs, setNpcs, currentRegion, setCurrentRegion, locationType, setLocationType, currentSpellSlots, setCurrentSpellSlots, maxSpellSlots, setMaxSpellSlots, skills, setSkills, availableSkills, setAvailableSkills, inCombat, setInCombat, enemies, setEnemies , playerLocation, setPlayerLocation, setDay } = useGameStore();
+  const { bgVolume, setBgVolume, currentTrack, setCurrentTrack, ttsVolume, setTtsVolume, musicPlaying, setMusicPlaying, unreadQuests, setUnreadQuests, gameState, setGameState, loading, setLoading, name, setName, dndClass, setDndClass, race, setRace, stats, setStats, keywords, setKeywords, gameMode, setGameMode, backstory, setBackstory, hp, setHp, level, setLevel, xp, setXp, gold, setGold, rations, setRations, skillPoints, setSkillPoints, inventory, setInventory, equipped, setEquipped, worldData, setWorldData, journal, setJournal, quests, setQuests, npcs, setNpcs, currentRegion, setCurrentRegion, locationType, setLocationType, currentSpellSlots, setCurrentSpellSlots, maxSpellSlots, setMaxSpellSlots, skills, setSkills, availableSkills, setAvailableSkills, inCombat, setInCombat, enemies, setEnemies , playerLocation, setPlayerLocation, setDay, history, setHistory, suggestedActions, setSuggestedActions, pointsOfInterest, setPointsOfInterest, currentLocationImage, setCurrentLocationImage, currentLocationDesc, setCurrentLocationDesc, currentImage, setCurrentImage } = useGameStore();
 
 
   const [actionsOpen, setActionsOpen] = useState(false);
@@ -104,9 +104,7 @@ export default function Home() {
   
   // Game Play State
   const [savedCharacters, setSavedCharacters] = useState<any[]>([]);
-  const [history, setHistory] = useState<any[]>([]);
-  const [suggestedActions, setSuggestedActions] = useState<string[]>([]);
-  const [customAction, setCustomAction] = useState("");
+      const [customAction, setCustomAction] = useState("");
   const [inventoryOpen, setInventoryOpen] = useState(false);
   const [journalOpen, setJournalOpen] = useState(false);
   const [isOOC, setIsOOC] = useState(false);
@@ -120,18 +118,14 @@ export default function Home() {
   const [skillsOpen, setSkillsOpen] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
   const [questsOpen, setQuestsOpen] = useState(false);
-  const [currentLocationImage, setCurrentLocationImage] = useState<string | null>(null);
-  const [currentLocationDesc, setCurrentLocationDesc] = useState<string>("");
-  const [travelMode, setTravelMode] = useState(false);
+      const [travelMode, setTravelMode] = useState(false);
   const [travelDaysLeft, setTravelDaysLeft] = useState(0);
   const [travelDestination, setTravelDestination] = useState("");
   const [npcsOpen, setNpcsOpen] = useState(false);
   const [mapOpen, setMapOpen] = useState(false);
 
 
-  const [pointsOfInterest, setPointsOfInterest] = useState<{nazev: string, ikona: string, ma_ukol: boolean}[]>([]);
-  const [currentImage, setCurrentImage] = useState<string | null>(null);
-  const [currentImageError, setCurrentImageError] = useState<string | null>(null);
+      const [currentImageError, setCurrentImageError] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [questBanner, setQuestBanner] = useState<{title: string, subtitle: string} | null>(null);
   
@@ -887,7 +881,7 @@ export default function Home() {
         
         {/* Deep background fog */}
         <SeamlessVideo src="/video/bg1.mp4" className="absolute inset-0 w-full h-full z-0 pointer-events-none opacity-60" />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#e5dfc5]/20 via-[#f9f6e6]/80 to-[#f9f6e6] z-0 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#e5dfc5]/20 via-[#f9f6e6]/50 to-transparent z-0 pointer-events-none" />
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-rpg-magic/10 blur-[120px] rounded-full z-0 pointer-events-none" />
 
         <motion.div 

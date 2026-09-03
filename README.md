@@ -1,28 +1,34 @@
-# Aelthgard: AI Dungeons & Dragons RPG (v2.0)
+# Aelthgard: AI Dungeons & Dragons RPG (v2.1)
 
-Aelthgard je next-gen textovÃ© RPG pohÃ¡nÄ›nÃ© umÄ›lou inteligencÃ­, kterÃ© pÅ™inÃ¡Å¡Ã­ dynamickÃ½ a nekoneÄnÃ½ zÃ¡Å¾itek inspirovanÃ½ stolnÃ­mi hrami na hrdiny (D&D). PÃ¡nem jeskynÄ› (Dungeon Masterem) je zde Gemini AI, kterÃ¡ reaguje na jakoukoliv tvoji akci, posouvÃ¡ pÅ™Ã­bÄ›h a Å™Ã­dÃ­ hernÃ­ svÄ›t.
+Aelthgard je next-gen textové RPG pohánìné umìlou inteligencí, které pøináší dynamickı a nekoneènı záitek inspirovanı stolními hrami na hrdiny (D&D). Pánem jeskynì (Dungeon Masterem) je zde Gemini AI, které reaguje na jakoukoliv tvoji akci, posouvá pøíbìh a øídí herní svìt.
 
-## ğŸš€ Novinky ve verzi 2.0 (World-Gen Overhaul)
-- **KompletnÃ­ UI/UX Overhaul:** PÅ™ebudovÃ¡no do Dark Fantasy Glassmorphism stylu. VizuÃ¡l plnÃ½ tmavÃ© mlhy, zlatÃ© magie a elegantnÃ­ch karet postav.
-- **FyzickÃ¡ Honeycomb Mapa:** SvÄ›t uÅ¾ nenÃ­ jen imaginÃ¡rnÃ­ text. Je generovÃ¡n matematicky (Å¡estiÃºhelnÃ­kovÃ¡ mÅ™Ã­Å¾ka, polomÄ›r 15), obsahuje 7 KrÃ¡lovstvÃ­, stovky procedurÃ¡lnÄ› generovanÃ½ch Point of Interests a specifickÃ© biomy.
-- **Lore Bible:** PÅ™i startu hry VypravÄ›Ä vymyslÃ­ 20strÃ¡nkovÃ½ dokument historie a atmosfÃ©ry konkrÃ©tnÄ› pro tvou mapu.
-- **Hardcore CestovÃ¡nÃ­:** CestovÃ¡nÃ­ mezi hexy spotÅ™ebovÃ¡vÃ¡ jÃ­dlo a dny. Hra obsahuje systÃ©m proti vyhladovÄ›nÃ­ a nÃ¡hodnÃ¡ setkÃ¡nÃ­ Å™Ã­zenÃ¡ matematikou, na kterÃ¡ AI plynule navazuje.
+## ?? Novinky ve verzi 2.1 (Modularizace & Stabilita)
+- **Kompletní Backend Refaktoring:** Monolitickı systém byl rozdìlen do moderní FastAPI modulární architektury (outers, services, models).
+- **Pydantic Strict Schemas:** Umìlá inteligence je nyní vázána pøísnımi Pydantic schématy pomocí nejnovìjšího Google GenAI SDK. To absolutnì eliminuje chyby spojené se špatnım parsováním JSONu z modelu.
+- **Zustand State Management:** UI frontend se doèkal obrovského odlehèení pøesunem masivních stavù (historie, akce, mapa) z lokálních komponent do centrálního gameStore.ts.
+- **Prostorová konzistence (Spatial Realism):** Byla implementována striktní pravidla zamezující NPC halucinacím. Postavy jsou pevnì vázány na své lokace a nemohou "teleportovat" pøes mapu.
 
-## ğŸ² Vlastnosti hry
+## ??? Pøedchozí novinky (v2.0 World-Gen Overhaul)
+- **Kompletní UI/UX Overhaul:** Pøestavìno do Dark Fantasy Glassmorphism stylu. Vizuál plnı tmavé mlhy, zlaté magie a elegantních karet postav.
+- **Fyzická Honeycomb Mapa:** Svìt u není jen imaginární text. Je generován matematicky (šestiúhelníková møíka, polomìr 15), obsahuje 7 Království, stovky procedurálnì generovanıch Point of Interests a specifické biomy.
+- **Lore Bible:** Pøi startu hry Vypravìè vymyslí 20stránkovı dokument historie a atmosféry konkrétnì pro tvou mapu.
+- **Hardcore Cestování:** Cestování mezi hexy spotøebovává jídlo a dny. Hra obsahuje systém proti vyhladovìní a náhodná setkání øízená matematikou, na která AI plynule navazuje.
 
-- **Volnost v rozhodovÃ¡nÃ­:** Nejsi omezen jen na pÅ™edem pÅ™ipravenÃ© odpovÄ›di. MÅ¯Å¾eÅ¡ do textovÃ©ho pole napsat cokoliv a PÃ¡n jeskynÄ› na to zareaguje. OOC (Out of character) mod pro plÃ¡novÃ¡nÃ­ s DM.
-- **HlasovÃ½ VypravÄ›Ä (TTS):** HernÃ­ udÃ¡losti, promluvy NPC i popisy prostÅ™edÃ­ jsou plnÄ› namluvenÃ© pomocÃ­ realistickÃ½ch ÄeskÃ½ch hlasÅ¯.
-- **VizuÃ¡lnÃ­ dokreslenÃ­:** Hra generuje portrÃ©ty tvÃ© postavy a lokacÃ­ na mÃ­ru pomocÃ­ sluÅ¾by Pollinations.ai.
-- **HernÃ­ mechaniky:** Za hrou bÄ›Å¾Ã­ odlehÄenÃ¡ verze pravidel - tvÃ¡ postava mÃ¡ statistiky (SÃ­la, Obratnost...), zdravÃ­, zkuÅ¡enosti, inventÃ¡Å™ a zlato. UmÄ›lÃ¡ inteligence tyto mechaniky respektuje.
-- **Tvorba Hrdiny:** PlynulÃ½ magickÃ½ 3-krokovÃ½ prÅ¯vodce (Framer Motion). Vyber si rasu a povolÃ¡nÃ­. AI ti vygeneruje kompletnÃ­ pÅ™Ã­bÄ›hovÃ© pozadÃ­.
-- **PoutavÃ½ svÄ›t Aelthgard:** ProzkoumÃ¡vej temnÃ© lesy, ruÅ¡nÃ¡ mÄ›sta, zatuchlÃ© kobky a plÅˆ Ãºkoly, kterÃ© ti zadÃ¡vajÃ­ Å¾ivÃ© postavy v reÃ¡lnÃ©m Äase.
+## ?? Vlastnosti hry
 
-## ğŸ—ºï¸ Jak hrÃ¡t
+- **Volnost v rozhodování:** Nejsi omezen jen na pøedem pøipravené odpovìdi. Mùeš do textového pole napsat cokoliv a Pán jeskynì na to zareaguje. OOC (Out of character) mód pro plánování s DM.
+- **Hlasovı Vypravìè (TTS):** Herní události, promluvy NPC i popisy prostøedí jsou plnì namluvené pomocí realistickıch èeskıch hlasù.
+- **Vizuální dokreslení:** Hra generuje portréty tvé postavy a lokací na míru pomocí sluby Pollinations.ai.
+- **Herní mechaniky:** Za hrou bìí odlehèená verze pravidel - tvá postava má statistiky (Síla, Obratnost...), zdraví, zkušenosti, inventáø a zlato. Umìlá inteligence tyto mechaniky respektuje.
+- **Tvorba Hrdiny:** Plynulı magickı 3-krokovı prùvodce (Framer Motion). Vyber si rasu a povolání. AI ti vygeneruje kompletní pøíbìhové pozadí.
+- **Poutavı svìt Aelthgard:** Prozkoumávej temné lesy, rušná mìsta, zatuchlé kobky a plò úkoly, které ti zadávají ivé postavy v reálném èase.
 
-1. **Registrace:** Zadej svÅ¯j e-mail a heslo.
-2. **Tvorba postavy:** MagickÃ½m prÅ¯vodcem si vytvoÅ™ Legendu. TvÃ© statistiky se automaticky optimalizujÃ­.
-3. **PÅ™Ã­bÄ›h a Mapa:** Hra se vÅ¾dy uklÃ¡dÃ¡ automaticky. Posouvej svou peÄetÃ­ po pergamÃ©novÃ© mapÄ› svÄ›ta a prozkoumÃ¡vej hex za hexem.
-4. **Akce:** MÅ¯Å¾eÅ¡ vyuÅ¾Ã­t rychlÃ¡ tlaÄÃ­tka pro prÅ¯zkum, nebo napsat svou vlastnÃ­ kreativnÃ­ akci.
-5. **PÅ™eÅ¾itÃ­:** Nakupuj zÃ¡soby u obchodnÃ­kÅ¯ a lov v lesÃ­ch. CestovÃ¡nÃ­ nehostinnou krajinou stojÃ­ penÃ­ze i dny!
+## ?? Jak hrát
 
-VÃ­tej v Aelthgardu. TvÃ© legendÃ¡rnÃ­ dobrodruÅ¾stvÃ­ prÃ¡vÄ› zaÄÃ­nÃ¡.
+1. **Registrace:** Zadej svùj e-mail a heslo.
+2. **Tvorba postavy:** Magickım prùvodcem si vytvoø Legendu. Tvé statistiky se automaticky optimalizují.
+3. **Pøíbìh a Mapa:** Hra se vdy ukládá automaticky. Posouvej svou peèe po pergaménové mapì svìta a prozkoumávej hex za hexem.
+4. **Akce:** Mùeš vyuít rychlá tlaèítka pro prùzkum, nebo napsat svou vlastní kreativní akci.
+5. **Pøeití:** Nakupuj zásoby u obchodníkù a lov v lesích. Cestování nehostinnou krajinou stojí peníze i dny!
+
+Vítej v Aelthgardu. Tvé legendární dobrodruství právì zaèíná.

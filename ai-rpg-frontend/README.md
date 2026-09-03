@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI RPG Frontend (Next.js)
 
-## Getting Started
+Tento repozitáø obsahuje uivatelské rozhraní pro hru Aelthgard (AI Dungeons & Dragons RPG). Zajišuje vizualizaci temného fantasy svìta, renderování mapy, interakce hráèe a komunikaci s herním backendem.
 
-First, run the development server:
+## Architektura (Verze 2.1)
 
-```bash
+Frontend je postaven na moderním **Reactu** a frameworku **Next.js**. Design staví na "Glassmorphism" vizuálním stylu, vyuívá animace z **Framer Motion** a rozsáhlou sadu ikon **Lucide React**.
+
+### State Management (Zustand)
+Od verze 2.1 byl masivní React \useState\ stav extrahován z koøenovıch komponent do globálního storu pomocí knihovny **Zustand**. 
+
+- **\src/store/gameStore.ts\**: Hlavní nervové centrum aplikace. Obsahuje veškerı herní stav vèetnì:
+  - Stav hráèe (HP, zlato, statistiky, inventáø, vybavené zbranì).
+  - Svìtovı stav (historie odehraného pøíbìhu, aktuální Point of Interests, navrhované akce od umìlé inteligence).
+  - Globální UI stavy (otevøené modály, pøepínání herního módu).
+
+Díky Zustandu se extrémnì sníilo mnoství zbyteènıch pøekreslování (re-renderù) aplikace a logika je ostøe oddìlena od JSX kódu. To navíc pøipravuje cestu pro budoucí WebSockets/SSE real-time streamování pøíbìhu, kde lze globální stav aktualizovat plynule, ani by trpìl uivatelskı záitek.
+
+### Struktura sloek:
+- \src/app/page.tsx\: Hlavní stránka (øídí pøechody mezi Hlavním menu, Tvorbou postavy a Samotnou hrou).
+- \src/components/\: Znovupouitelné UI komponenty (Tlaèítka, Videa, Kolotoè postav, Zobrazování pøedmìtù).
+- \src/features/\: Funkèní moduly (Inventáø, Mapa, Úkoly, Zápisník, Tvorba postavy). Logika a UI pro jednotlivé obrazovky.
+- \src/store/\: Globální state management (Zustand).
+
+## Technologie
+- **Next.js 16+** (App Router)
+- **React 18** (Plné nasazení hookù)
+- **Tailwind CSS** (Styling a responsivita, podpora pro absolutní layout a scroll-management)
+- **Zustand** (Global state management)
+- **Framer Motion** (Plynulé pøechody a animace elementù)
+- **React Player** (Pøehrávání loopovanıch videí Vypravìèe a atmosfér)
+
+## Spuštìní vıvoje
+
+Nainstalujte balíèky a spuste vıvojovı server:
+
+\\\ash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+\\\
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Pro build do produkce (Statické / Serverové renderování):
+\\\ash
+npm run build
+npm run start
+\\\
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Napojení na Backend
+Frontend vyaduje pro plnou funkcionalitu bìící instanci \i-rpg-backend\. Veškerá komunikace s FastAPI probíhá na adrese \http://127.0.0.1:8000\ (nebo dle promìnné prostøedí \NEXT_PUBLIC_API_URL\).

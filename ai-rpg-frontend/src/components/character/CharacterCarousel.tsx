@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Flame, Sparkles, Sword } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, Sparkles, Sword } from 'lucide-react';
 import { SeamlessVideo } from '../ui/SeamlessVideo';
 
 interface Character {
@@ -230,7 +230,7 @@ export const CharacterCarousel: React.FC<CharacterCarouselProps> = ({
                       className="p-1.5 text-slate-700/60 hover:text-red-700 hover:bg-red-100/70 rounded-full transition-all shadow-sm"
                       title="Smazat postavu"
                     >
-                      <Flame size={18} />
+                      <X size={18} />
                     </button>
                   </div>
 

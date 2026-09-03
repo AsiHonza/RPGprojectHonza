@@ -1,4 +1,4 @@
-﻿import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 
 interface SeamlessVideoProps extends React.VideoHTMLAttributes<HTMLVideoElement> {
   src: string;
@@ -80,8 +80,10 @@ export const SeamlessVideo: React.FC<SeamlessVideoProps> = ({
     }
   };
 
+  const posClass = className.includes('absolute') || className.includes('fixed') ? '' : 'relative';
+
   return (
-    <div className={`relative overflow-hidden ${className}`}>
+    <div className={`${posClass} overflow-hidden ${className}`}>
       <video
         ref={v1Ref}
         src={src}

@@ -43,6 +43,20 @@ interface GameState {
   equipped: any;
   setEquipped: (eq: any) => void;
   
+  // Session Game State
+  history: any[];
+  setHistory: (h: any[] | ((prev: any[]) => any[])) => void;
+  suggestedActions: string[];
+  setSuggestedActions: (actions: string[]) => void;
+  pointsOfInterest: any[];
+  setPointsOfInterest: (pois: any[]) => void;
+  currentLocationImage: string | null;
+  setCurrentLocationImage: (img: string | null) => void;
+  currentLocationDesc: string;
+  setCurrentLocationDesc: (desc: string) => void;
+  currentImage: string | null;
+  setCurrentImage: (img: string | null) => void;
+  
   // Map and World
   day: number;
   setDay: (d: number | ((d: number) => number)) => void;
@@ -137,6 +151,19 @@ export const useGameStore = create<GameState>((set) => ({
   },
   setEquipped: (equipped) => set({ equipped }),
 
+  history: [],
+  setHistory: (history) => set((state) => ({ history: typeof history === 'function' ? history(state.history) : history })),
+  suggestedActions: [],
+  setSuggestedActions: (suggestedActions) => set({ suggestedActions }),
+  pointsOfInterest: [],
+  setPointsOfInterest: (pointsOfInterest) => set({ pointsOfInterest }),
+  currentLocationImage: null,
+  setCurrentLocationImage: (currentLocationImage) => set({ currentLocationImage }),
+  currentLocationDesc: "",
+  setCurrentLocationDesc: (currentLocationDesc) => set({ currentLocationDesc }),
+  currentImage: null,
+  setCurrentImage: (currentImage) => set({ currentImage }),
+  
   day: 1,
   setDay: (d) => set((state) => ({ day: typeof d === 'function' ? d(state.day) : d })),
   playerLocation: null,
