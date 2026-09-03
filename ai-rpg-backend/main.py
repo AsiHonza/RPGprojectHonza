@@ -261,7 +261,7 @@ CLASS_TEMPLATES = {
             {"id": "c_greataxe", "icon": "Sword", "name": "Obouruční sekera", "slot": "hlavní ruka", "type": "zbraň", "stats": "Poškození: 1d12", "sell_price": 20, "description": "Těžká obouruční sekera."},
             {"id": "c_rags", "icon": "Shirt", "name": "Kožené hadry", "slot": "hruď", "type": "zbroj", "stats": "Obrana: 0", "sell_price": 1, "description": "Barbar nepotřebuje zbroj."}
         ],
-        "equipped": {"hlava": None, "hruď": "c_rags", "hlavní ruka": "c_greataxe", "druhá ruka": None, "prsten": None, "krk": None},
+        "equipped": cls_data["equipped"],
         "available_skills": [
             {"id": "rage", "name": "Zuřivost", "desc": "Dočasně zvýší poškození a fyzickou odolnost (Aktivní)."},
             {"id": "reckless", "name": "Bezohledný útok", "desc": "Výhoda na útok, ale nepřátelé mají výhodu proti tobě (Aktivní)."},
@@ -274,7 +274,7 @@ CLASS_TEMPLATES = {
             {"id": "c_rapier", "icon": "Sword", "name": "Rapír", "slot": "hlavní ruka", "type": "zbraň", "stats": "Poškození: 1d8", "sell_price": 15, "description": "Elegantní zbraň pro šermíře."},
             {"id": "c_leather", "icon": "Shirt", "name": "Kožená zbroj", "slot": "hruď", "type": "zbroj", "stats": "Obrana: 1", "sell_price": 10, "description": "Základní ochrana."}
         ],
-        "equipped": {"hlava": None, "hruď": "c_leather", "hlavní ruka": "c_rapier", "druhá ruka": None, "prsten": None, "krk": None},
+        "equipped": cls_data["equipped"],
         "available_skills": [
             {"id": "mockery", "name": "Jízlivý posměch", "desc": "Způsobí psychické zranění a nevýhodu na útok nepřítele (Cantrip)."},
             {"id": "inspiration", "name": "Bardická inspirace", "desc": "Zlepší další hod spojence nebo tvůj vlastní (Aktivní)."},
@@ -288,7 +288,7 @@ CLASS_TEMPLATES = {
             {"id": "c_shield", "icon": "Shield", "name": "Dřevěný štít", "slot": "druhá ruka", "type": "zbroj", "stats": "Obrana: +1", "sell_price": 10, "description": "Extra obrana."},
             {"id": "c_chainshirt", "icon": "Shirt", "name": "Kroužková košile", "slot": "hruď", "type": "zbroj", "stats": "Obrana: 2", "sell_price": 20, "description": "Pevná obrana pro kněze."}
         ],
-        "equipped": {"hlava": None, "hruď": "c_chainshirt", "hlavní ruka": "c_mace", "druhá ruka": "c_shield", "prsten": None, "krk": None},
+        "equipped": cls_data["equipped"],
         "available_skills": [
             {"id": "sacredflame", "name": "Posvátný plamen", "desc": "Ožehne cíl zářivou svatou energií (Cantrip)."},
             {"id": "healingword", "name": "Léčivé slovo", "desc": "Okamžitě obnoví menší množství HP tobě nebo spojenci (Magie)."},
@@ -301,7 +301,7 @@ CLASS_TEMPLATES = {
             {"id": "c_staff", "icon": "Wand", "name": "Dřevěná hůl", "slot": "hlavní ruka", "type": "zbraň", "stats": "Poškození: 1d6", "sell_price": 5, "description": "Pevná hůl z dubového dřeva."},
             {"id": "c_leather", "icon": "Shirt", "name": "Kožená zbroj", "slot": "hruď", "type": "zbroj", "stats": "Obrana: 1", "sell_price": 10, "description": "Základní ochrana."}
         ],
-        "equipped": {"hlava": None, "hruď": "c_leather", "hlavní ruka": "c_staff", "druhá ruka": None, "prsten": None, "krk": None},
+        "equipped": cls_data["equipped"],
         "available_skills": [
             {"id": "shillelagh", "name": "Šillelagh", "desc": "Posílí tvou hůl magií přírody pro mnohem větší poškození (Cantrip)."},
             {"id": "wildshape", "name": "Zvířecí podoba", "desc": "Promění tě v šelmu (vlk, medvěd) na jeden souboj (Aktivní)."},
@@ -315,7 +315,7 @@ CLASS_TEMPLATES = {
             {"id": "c_shield", "icon": "Shield", "name": "Dřevěný štít", "slot": "druhá ruka", "type": "zbroj", "stats": "Obrana: +1", "sell_price": 10, "description": "Extra obrana."},
             {"id": "c_chainmail", "icon": "Shirt", "name": "Kroužková zbroj", "slot": "hruď", "type": "zbroj", "stats": "Obrana: 3", "sell_price": 30, "description": "Těžká zbroj."}
         ],
-        "equipped": {"hlava": None, "hruď": "c_chainmail", "hlavní ruka": "c_longsword", "druhá ruka": "c_shield", "prsten": None, "krk": None},
+        "equipped": cls_data["equipped"],
         "available_skills": [
             {"id": "secondwind", "name": "Druhý dech", "desc": "Obnoví ti v boji část zdraví (Aktivní)."},
             {"id": "actionsurge", "name": "Akční vlna", "desc": "Umožní ti zaútočit dvakrát v jednom kole (Aktivní)."},
@@ -328,7 +328,7 @@ CLASS_TEMPLATES = {
             {"id": "c_staff", "icon": "Wand", "name": "Hůl", "slot": "hlavní ruka", "type": "zbraň", "stats": "Poškození: 1d6", "sell_price": 5, "description": "Lehká hůl."},
             {"id": "c_robes", "icon": "Shirt", "name": "Mnišský oděv", "slot": "hruď", "type": "zbroj", "stats": "Obrana: 0", "sell_price": 2, "description": "Neomezuje v pohybu."}
         ],
-        "equipped": {"hlava": None, "hruď": "c_robes", "hlavní ruka": "c_staff", "druhá ruka": None, "prsten": None, "krk": None},
+        "equipped": cls_data["equipped"],
         "available_skills": [
             {"id": "flurry", "name": "Příval ran", "desc": "Série bleskových úderů pěstmi jako extra útok (Aktivní)."},
             {"id": "patient", "name": "Trpělivá obrana", "desc": "Soustředíš se výhradně na uhýbání, nepřátelé tě těžko zasáhnou (Aktivní)."},
@@ -342,7 +342,7 @@ CLASS_TEMPLATES = {
             {"id": "c_shield", "icon": "Shield", "name": "Kovový štít", "slot": "druhá ruka", "type": "zbroj", "stats": "Obrana: +1", "sell_price": 15, "description": "Extra obrana."},
             {"id": "c_chainmail", "icon": "Shirt", "name": "Kroužková zbroj", "slot": "hruď", "type": "zbroj", "stats": "Obrana: 3", "sell_price": 30, "description": "Těžká zbroj."}
         ],
-        "equipped": {"hlava": None, "hruď": "c_chainmail", "hlavní ruka": "c_warhammer", "druhá ruka": "c_shield", "prsten": None, "krk": None},
+        "equipped": cls_data["equipped"],
         "available_skills": [
             {"id": "smite", "name": "Božský úder", "desc": "Tvůj zbraňový útok získá obrovské radiantní (svaté) poškození (Magie)."},
             {"id": "layonhands", "name": "Vkládání rukou", "desc": "Léčivý dotyk obnovující větší množství zdraví (Aktivní)."},
@@ -356,7 +356,7 @@ CLASS_TEMPLATES = {
             {"id": "c_dagger", "icon": "Sword", "name": "Lovecká dýka", "slot": "druhá ruka", "type": "zbraň", "stats": "Poškození: 1d4", "sell_price": 10, "description": "Záložní zbraň."},
             {"id": "c_leather", "icon": "Shirt", "name": "Kožená zbroj", "slot": "hruď", "type": "zbroj", "stats": "Obrana: 1", "sell_price": 10, "description": "Základní ochrana."}
         ],
-        "equipped": {"hlava": None, "hruď": "c_leather", "hlavní ruka": "c_longbow", "druhá ruka": "c_dagger", "prsten": None, "krk": None},
+        "equipped": cls_data["equipped"],
         "available_skills": [
             {"id": "huntersmark", "name": "Značka lovce", "desc": "Označí cíl. Útoky proti němu působí bonusové zranění (Magie)."},
             {"id": "companion", "name": "Zvířecí společník", "desc": "Povolá na pomoc cvičené zvíře (Aktivní)."},
@@ -370,7 +370,7 @@ CLASS_TEMPLATES = {
             {"id": "c_dagger2", "icon": "Sword", "name": "Dýka do levé ruky", "slot": "druhá ruka", "type": "zbraň", "stats": "Poškození: 1d4", "sell_price": 10, "description": "Skvělá na dorážení."},
             {"id": "c_leather", "icon": "Shirt", "name": "Temná kožená zbroj", "slot": "hruď", "type": "zbroj", "stats": "Obrana: 1", "sell_price": 15, "description": "Neomezuje a splývá s nocí."}
         ],
-        "equipped": {"hlava": None, "hruď": "c_leather", "hlavní ruka": "c_dagger1", "druhá ruka": "c_dagger2", "prsten": None, "krk": None},
+        "equipped": cls_data["equipped"],
         "available_skills": [
             {"id": "sneakattack", "name": "Zákeřný útok", "desc": "Pokud nečekaně zaútočíš, způsobíš smrtící bonusové zranění (Pasivní)."},
             {"id": "cunning", "name": "Šikovná akce", "desc": "Můžeš uhýbat, schovat se nebo rychle utéct (Aktivní)."},
@@ -383,7 +383,7 @@ CLASS_TEMPLATES = {
             {"id": "c_dagger", "icon": "Sword", "name": "Dýka krystalová", "slot": "hlavní ruka", "type": "zbraň", "stats": "Poškození: 1d4", "sell_price": 15, "description": "Záložní zbraň pro případ nouze."},
             {"id": "c_robes", "icon": "Shirt", "name": "Roba ze snových vláken", "slot": "hruď", "type": "zbroj", "stats": "Obrana: 0", "sell_price": 10, "description": "Jemná magická látka."}
         ],
-        "equipped": {"hlava": None, "hruď": "c_robes", "hlavní ruka": "c_dagger", "druhá ruka": None, "prsten": None, "krk": None},
+        "equipped": cls_data["equipped"],
         "available_skills": [
             {"id": "firebolt", "name": "Ohnivá střela", "desc": "Vyšle mocný ohnivý projektil (Cantrip)."},
             {"id": "quicken", "name": "Zrychlené kouzlo", "desc": "Umožní ti zakouzlit velmi rychle (Aktivní)."},
@@ -396,7 +396,7 @@ CLASS_TEMPLATES = {
             {"id": "c_dagger", "icon": "Sword", "name": "Dýka s runou", "slot": "hlavní ruka", "type": "zbraň", "stats": "Poškození: 1d4", "sell_price": 15, "description": "Zbraň propojená s tvým patronem."},
             {"id": "c_robes", "icon": "Shirt", "name": "Temná roba", "slot": "hruď", "type": "zbroj", "stats": "Obrana: 0", "sell_price": 10, "description": "Oděv utkaný ze stínů."}
         ],
-        "equipped": {"hlava": None, "hruď": "c_robes", "hlavní ruka": "c_dagger", "druhá ruka": None, "prsten": None, "krk": None},
+        "equipped": cls_data["equipped"],
         "available_skills": [
             {"id": "eldritchblast", "name": "Mrazivý paprsek", "desc": "Ikonický útok praskající temnou energií (Cantrip)."},
             {"id": "hellish", "name": "Pekelná odplata", "desc": "Pokud jsi zraněn, útočník vzplane (Magie)."},
@@ -409,7 +409,7 @@ CLASS_TEMPLATES = {
             {"id": "c_wand", "icon": "Wand", "name": "Magická hůlka", "slot": "hlavní ruka", "type": "zbraň", "stats": "Poškození: 1d4", "sell_price": 20, "description": "Ohnisko pro tvá kouzla."},
             {"id": "c_robes", "icon": "Shirt", "name": "Učenecká roba", "slot": "hruď", "type": "zbroj", "stats": "Obrana: 0", "sell_price": 10, "description": "Pohodlný oděv na studium knížek."}
         ],
-        "equipped": {"hlava": None, "hruď": "c_robes", "hlavní ruka": "c_wand", "druhá ruka": None, "prsten": None, "krk": None},
+        "equipped": cls_data["equipped"],
         "available_skills": [
             {"id": "rayoffrost", "name": "Mrazivý dotek", "desc": "Vrhne ledový paprsek, který zpomalí cíl (Cantrip)."},
             {"id": "magicmissile", "name": "Magická střela", "desc": "Tři magické šipky, které vždy neomylně zasáhnou cíl (Magie)."},
@@ -552,16 +552,13 @@ Vrať POUZE json ve formátu:
         "max_hp": 100,
         "level": 1,
         "xp": 0,
-        "inventory": cls_data["starting_equipment"],
+        "inventory": cls_data["inventory"],
         "gold": 15,
-        "skills": cls_data["skills"],
+        "skills": cls_data["starting_skills"],
         "active_quests": [],
         "completed_quests": [],
         "stats": req.stats,
-        "equipped": {
-            "hlavní ruka": cls_data["starting_equipment"][0]["id"] if cls_data["starting_equipment"] else None,
-            "zbroj": cls_data["starting_equipment"][1]["id"] if len(cls_data["starting_equipment"]) > 1 else None
-        },
+        "equipped": cls_data["equipped"],
         "world_data": world_data,
         "player_location": initial_location,
         "rations": 3
