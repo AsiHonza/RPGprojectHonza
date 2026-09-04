@@ -21,6 +21,7 @@ import { StatsModal } from '../features/character/StatsModal';
 import { SettingsModal } from '../features/ui/SettingsModal';
 import { PatchNotesModal } from '../features/ui/PatchNotesModal';
 import { PlayerHeader } from '../features/ui/PlayerHeader';
+import { CombatArena } from '../features/combat/CombatArena';
 import { PATCH_NOTES } from '../data/patchNotes';
 import { SeamlessVideo } from '../components/ui/SeamlessVideo';
 import { CharacterCarousel } from '../components/character/CharacterCarousel';
@@ -28,14 +29,13 @@ import { CharacterCarousel } from '../components/character/CharacterCarousel';
 const getAvatarVideo = (r?: string) => {
   if (!r) return null;
   const lower = r.toLowerCase();
-  if (lower.includes('člověk') || lower.includes('clovek') || lower.includes('human')) return '/video/avatars/clovek.mp4';
-  if (lower.includes('elf')) return '/video/avatars/elf.mp4';
-  if (lower.includes('trpasl') || lower.includes('dwarf')) return '/video/avatars/trpaslik.mp4';
-  if (lower.includes('půlč') || lower.includes('pulc') || lower.includes('halfling')) return '/video/avatars/pulcik.mp4';
-  if (lower.includes('drak') || lower.includes('dragon')) return '/video/avatars/drakorozeny.mp4';
+  const normalized = lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  if (normalized.includes('clovek') || lower.includes('human')) return '/video/avatars/clovek.mp4';
+  if (normalized.includes('trpasl') || lower.includes('dwarf')) return '/video/avatars/trpaslik.mp4';
+  if (normalized.includes('drak') || lower.includes('dragon')) return '/video/avatars/drakorozeny.mp4';
   if (lower.includes('tiefling')) return '/video/avatars/tiefling.mp4';
-  if (lower.includes('ork') || lower.includes('orc')) return '/video/avatars/pulork.mp4';
-  if (lower.includes('gnóm') || lower.includes('gnom') || lower.includes('gnome')) return '/video/avatars/gnom.mp4';
+  if (normalized.includes('ork') || lower.includes('orc')) return '/video/avatars/pulork.mp4';
+  // Other races (Elf, Půlčík, Gnóm) don't have animated portraits yet - fall back to static image
   return null;
 };
 
@@ -736,6 +736,68 @@ export default function Home() {
       setLoading(false);
     }
   };
+  const handleCombatResolution = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/resolve-combat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: email,
+          name: name,
+          api_key: "DUMMY",
+          combat_log: combatLog,
+          player_hp: hp,
+          enemies: enemies,
+          level: level
+        })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setHistory(prev => [...prev, { 
+          type: "dm", 
+          vypravec: data.vypravec,
+        }]);
+        if (data.vypravec) {
+          playAudioSequentially([{text: data.vypravec, type: "narrator"}]);
+        }
+        
+        // Zmeny stavu are applied by the backend, we should refresh the character state
+        // To be safe, we can trigger fetchCharacters for this character or update locally
+        setInCombat(false);
+        setEnemies([]);
+        setCombatLog([]);
+        
+        // Refresh local state by pulling from backend
+        const charRes = await fetch(`${API_URL}/load`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: email, name: name })
+        });
+        if (charRes.ok) {
+          const charData = await charRes.json();
+          if (charData.state) {
+            setHp(charData.state.hp ?? hp);
+            setMaxHp(charData.state.maxHp ?? charData.state.max_hp ?? maxHp);
+            setXp(charData.state.xp ?? xp);
+            setGold(charData.state.gold ?? gold);
+            setLevel(charData.state.level ?? level);
+            if (charData.state.inventory) setInventory(charData.state.inventory);
+          }
+        }
+      } else {
+        setHistory(prev => [...prev, { type: "error", text: "Nepodařilo se ukončit boj na serveru." }]);
+        setInCombat(false); // Failsafe
+      }
+    } catch (e) {
+      console.error(e);
+      setHistory(prev => [...prev, { type: "error", text: "Chyba sítě při ukončení boje." }]);
+      setInCombat(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const sendAction = async (actionText: string) => {
     if (!actionText.trim() || loading) return;
     
@@ -1038,7 +1100,7 @@ export default function Home() {
     )}
 
     {gameState === "creation" && (
-      <CharacterCreation onClose={() => setGameState("menu")} startNewGame={startNewGame} loading={loading} backstory={backstory} generateBackstory={generateBackstory} />
+      <CharacterCreation onClose={() => setGameState("menu")} startNewGame={startNewGame} loading={loading} backstory={backstory} generateBackstory={generateBackstory} getAvatarVideo={getAvatarVideo} />
     )}
 
     {gameState === "playing" && (
@@ -1071,11 +1133,10 @@ export default function Home() {
           <div className="flex items-center justify-between bg-[#f9f6e6]/60 backdrop-blur-md p-2 md:p-4 rounded-2xl border border-amber-900/10 shadow-lg">
             
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl overflow-hidden border border-rpg-magic shadow-[0_0_10px_rgba(197,160,89,0.3)] shrink-0 hidden sm:block">
-                {getAvatarVideo(race) ? (
-                  <SeamlessVideo src={getAvatarVideo(race)!} className="w-full h-full" />
-                ) : (
-                  <img src={`https://image.pollinations.ai/prompt/vibrant%20fable%20style%20magical%20fantasy%20portrait%20of%20a%20${encodeURIComponent(race)}%20${encodeURIComponent(dndClass)}%20RPG%20character?width=128&height=128&nologo=true&seed=42`} alt={name} className="w-full h-full object-cover" />
+              <div className="w-12 h-12 rounded-xl overflow-hidden border border-rpg-magic shadow-[0_0_10px_rgba(197,160,89,0.3)] shrink-0 hidden sm:block relative">
+                <img src={`https://image.pollinations.ai/prompt/vibrant%20fable%20style%20magical%20fantasy%20portrait%20of%20a%20${encodeURIComponent(race)}%20${encodeURIComponent(dndClass)}%20RPG%20character?width=128&height=128&nologo=true&seed=42`} alt={name} className="w-full h-full object-cover" />
+                {getAvatarVideo(race) && (
+                  <SeamlessVideo src={getAvatarVideo(race)!} className="absolute inset-0 w-full h-full" />
                 )}
               </div>
               <div className="flex flex-col">
@@ -1190,196 +1251,188 @@ export default function Home() {
           </div>
           
         </div>
-        {/* Story Log (Middle) */}
-        <div className="flex-1 overflow-hidden relative mb-4 w-full max-w-5xl mx-auto z-10">
-          <div className="absolute inset-0 bg-[#f9f6e6]/70 backdrop-blur-lg border border-amber-900/10 rounded-2xl shadow-2xl p-6 overflow-y-auto custom-scrollbar flex flex-col gap-6" >
-            
-            {history.map((msg, i) => (
-              <div key={i} className={`flex ${msg.type === "player" ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[85%] md:max-w-[75%] p-5 rounded-2xl ${
-                  msg.type === "player" 
-                    ? "bg-white/50 border border-amber-900/10 text-slate-800 font-lora" 
-                    : msg.type === "system" || msg.type === "error"
-                      ? "bg-[#f4ecd8] border border-amber-900/5 text-slate-700 font-cinzel text-sm italic"
-                      : "bg-[#f9f6e6]/80 border border-rpg-magic/30 text-[#2d3748] font-lora shadow-[0_0_15px_rgba(197,160,89,0.1)]"
-                }`}>
-                  {msg.type === "player" && (
-                    <div className="leading-relaxed text-lg">{msg.text}</div>
-                  )}
-                  {msg.type === "system" && <FormattedSystemLog text={msg.text} />}
-                  {msg.type === "error" && <div className="text-red-700 font-bold">Chyba: {msg.text}</div>}
-                  {msg.type === "dm" && (
-                    <div className="flex flex-col gap-4">
-                      {msg.vypravec && (
-                        <div className="leading-relaxed text-lg">
-                          <button onClick={() => playAudio(msg.vypravec, 'narrator')} className="float-right ml-4 text-slate-600 hover:text-rpg-magic transition">
-                            <Volume2 size={18} />
-                          </button>
-                          <TypewriterText text={msg.vypravec} animate={i === history.length - 1} />
-                        </div>
+        {inCombat ? (
+          <div className="flex-1 overflow-hidden relative mb-4 w-full max-w-5xl mx-auto z-10">
+            <CombatArena onVictory={handleCombatResolution} />
+          </div>
+        ) : (
+          <>
+            {/* Story Log (Middle) */}
+            <div className="flex-1 overflow-hidden relative mb-4 w-full max-w-5xl mx-auto z-10">
+              <div className="absolute inset-0 bg-[#f9f6e6]/70 backdrop-blur-lg border border-amber-900/10 rounded-2xl shadow-2xl p-6 overflow-y-auto custom-scrollbar flex flex-col gap-6" >
+                
+                {history.map((msg, i) => (
+                  <div key={i} className={`flex ${msg.type === "player" ? "justify-end" : "justify-start"}`}>
+                    <div className={`max-w-[85%] md:max-w-[75%] p-5 rounded-2xl ${
+                      msg.type === "player" 
+                        ? "bg-white/50 border border-amber-900/10 text-slate-800 font-lora" 
+                        : msg.type === "system" || msg.type === "error"
+                          ? "bg-[#f4ecd8] border border-amber-900/5 text-slate-700 font-cinzel text-sm italic"
+                          : "bg-[#f9f6e6]/80 border border-rpg-magic/30 text-[#2d3748] font-lora shadow-[0_0_15px_rgba(197,160,89,0.1)]"
+                    }`}>
+                      {msg.type === "player" && (
+                        <div className="leading-relaxed text-lg">{msg.text}</div>
                       )}
-                      {msg.popis_okoli && (
-                        <div className="text-slate-700 italic font-lora text-sm border-l-2 border-rpg-magic/50 pl-3">
-                          {msg.popis_okoli}
-                        </div>
-                      )}
-                      {msg.npc_dialogy && msg.npc_dialogy.length > 0 && (
-                        <div className="flex flex-col gap-2 mt-2">
-                          {msg.npc_dialogy.map((npc: any, nIdx: number) => (
-                            <div key={nIdx} className="bg-[#f4ecd8]/90 p-3 rounded-lg border border-amber-900/10">
-                              <div className="flex justify-between items-center mb-1">
-                                <span className="font-bold text-rpg-magic font-cinzel">{npc.jmeno}</span>
-                                <button onClick={() => playAudio((npc.text || npc.replika), npc.pohlavi === 'zena' ? 'npc_zena' : 'npc_muz')} className="text-slate-600 hover:text-[#2d3748]"><Volume2 size={16} /></button>
-                              </div>
-                                <div className="text-slate-900">"{npc.text || npc.replika}"</div>
+                      {msg.type === "system" && <FormattedSystemLog text={msg.text} />}
+                      {msg.type === "error" && <div className="text-red-700 font-bold">Chyba: {msg.text}</div>}
+                      {msg.type === "dm" && (
+                        <div className="flex flex-col gap-4">
+                          {msg.vypravec && (
+                            <div className="leading-relaxed text-lg">
+                              <button onClick={() => playAudio(msg.vypravec, 'narrator')} className="float-right ml-4 text-slate-600 hover:text-rpg-magic transition">
+                                <Volume2 size={18} />
+                              </button>
+                              <TypewriterText text={msg.vypravec} animate={i === history.length - 1} />
                             </div>
-                          ))}
-                        </div>
-                      )}
-                      {msg.system_log && (
-                        <div className="text-xs font-mono mt-2 opacity-90 border-t border-amber-900/10 pt-2">
-                          <FormattedSystemLog text={msg.system_log} />
+                          )}
+                          {msg.popis_okoli && (
+                            <div className="text-slate-700 italic font-lora text-sm border-l-2 border-rpg-magic/50 pl-3">
+                              {msg.popis_okoli}
+                            </div>
+                          )}
+                          {msg.npc_dialogy && msg.npc_dialogy.length > 0 && (
+                            <div className="flex flex-col gap-2 mt-2">
+                              {msg.npc_dialogy.map((npc: any, nIdx: number) => (
+                                <div key={nIdx} className="bg-[#f4ecd8]/90 p-3 rounded-lg border border-amber-900/10">
+                                  <div className="flex justify-between items-center mb-1">
+                                    <span className="font-bold text-rpg-magic font-cinzel">{npc.jmeno}</span>
+                                    <button onClick={() => playAudio((npc.text || npc.replika), npc.pohlavi === 'zena' ? 'npc_zena' : 'npc_muz')} className="text-slate-600 hover:text-[#2d3748]"><Volume2 size={16} /></button>
+                                  </div>
+                                    <div className="text-slate-900">"{npc.text || npc.replika}"</div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          {msg.system_log && (
+                            <div className="text-xs font-mono mt-2 opacity-90 border-t border-amber-900/10 pt-2">
+                              <FormattedSystemLog text={msg.system_log} />
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
-                  )}
-                </div>
-              </div>
-            ))}
+                  </div>
+                ))}
 
-            {loading && (
-              <div className="flex justify-start animate-fade-in-up my-2">
-                <div className="bg-[#f5eedc] border-2 border-amber-600/60 p-4 sm:p-5 rounded-2xl flex items-center gap-3.5 shadow-lg shadow-amber-900/10">
-                  <div className="relative flex items-center justify-center w-9 h-9 rounded-full bg-amber-600 text-white shadow-md shrink-0">
-                    <Sparkles className="animate-spin" size={18} />
-                    <span className="absolute inset-0 rounded-full bg-amber-400 animate-ping opacity-50" />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-amber-950 font-cinzel font-bold text-sm sm:text-base tracking-wide flex items-center gap-1.5">
-                      Vypravěč přemýšlí a spřádá osud...
-                    </span>
-                    <span className="text-amber-800/80 font-lora text-xs italic">
-                      Tvá volba právě mění chod příběhu
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
-            {/* Embedded choices directly inside story log */}
-            {!loading && !inCombat && suggestedActions.length > 0 && (
-              <div className="flex flex-col gap-2 pt-4 mt-2 border-t border-amber-900/15">
-                <div className="text-xs font-cinzel text-slate-500 uppercase tracking-widest font-bold">
-                  Možné volby:
-                </div>
-                <div className="flex flex-col gap-2.5">
-                  {suggestedActions.map((act, i) => (
-                    <button
-                      key={`chat-act-${i}`}
-                      onClick={() => sendAction(act)}
-                      className="w-full text-left bg-[#fcfaf2] hover:bg-amber-100/90 border-2 border-amber-900/15 hover:border-amber-600 hover:shadow-[0_4px_16px_rgba(180,83,9,0.25)] px-4 sm:px-5 py-3.5 rounded-xl text-slate-800 hover:text-amber-950 transition-all font-lora text-sm sm:text-base flex items-center justify-between group cursor-pointer"
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="w-6 h-6 rounded-full bg-amber-900/10 group-hover:bg-amber-700 group-hover:text-white flex items-center justify-center text-xs font-cinzel font-bold text-amber-900 transition-colors shrink-0">
-                          {i + 1}
-                        </span>
-                        <span className="font-medium group-hover:font-bold transition-all">{act}</span>
+                {loading && (
+                  <div className="flex justify-start animate-fade-in-up my-2">
+                    <div className="bg-[#f5eedc] border-2 border-amber-600/60 p-4 sm:p-5 rounded-2xl flex items-center gap-3.5 shadow-lg shadow-amber-900/10">
+                      <div className="relative flex items-center justify-center w-9 h-9 rounded-full bg-amber-600 text-white shadow-md shrink-0">
+                        <Sparkles className="animate-spin" size={18} />
+                        <span className="absolute inset-0 rounded-full bg-amber-400 animate-ping opacity-50" />
                       </div>
-                      <span className="opacity-0 group-hover:opacity-100 transition-all bg-amber-700 text-white px-3 py-1 rounded-lg font-cinzel text-xs font-bold shrink-0 ml-3 shadow-sm flex items-center gap-1 group-hover:translate-x-1">
-                        Zvolit &rarr;
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-            <div ref={chatEndRef} />
-          </div>
-        </div>
-
-        {/* Bottom Actions & Input */}
-        <div className="shrink-0 flex flex-col gap-4 pb-4">
-          
-          {/* Action Buttons & Dock */}
-          <div className="flex flex-wrap justify-between items-end gap-4">
-            
-            {/* Contextual Actions */}
-            <div className="flex flex-nowrap gap-2 flex-1 overflow-x-auto snap-x custom-scrollbar hide-scrollbar pb-2">
-              {inCombat ? (
-                <>
-                  <button onClick={() => sendAction(`Útočím zbraní: ${inventory.find(i => i.id === equipped["hlavní ruka"])?.name || "Pěsti"}`)} className="bg-rpg-blood/20 border border-rpg-blood text-[#2d3748] px-4 py-2 rounded-xl text-sm hover:bg-rpg-blood transition shadow-[0_0_10px_rgba(183,75,75,0.2)] font-cinzel flex items-center gap-2">
-                    <Sword size={16} /> Útok
-                  </button>
-                  <button onClick={() => setSkillsOpen(true)} className="flex-shrink-0 snap-start whitespace-nowrap bg-white/50 border border-amber-900/20 text-[#2d3748] px-4 py-3 rounded-xl text-sm hover:bg-white/70 transition font-cinzel flex items-center gap-2">
-                    <Sparkles size={16} /> Dovednost
-                  </button>
-                  <button onClick={() => sendAction("Pokusím se z boje utéct!")} className="flex-shrink-0 snap-start whitespace-nowrap bg-[#f9f6e6]/60 border border-amber-900/20 text-slate-700 px-4 py-3 rounded-xl text-sm hover:text-[#2d3748] transition font-cinzel italic">
-                    Útěk
-                  </button>
-                </>
-              ) : (
-                <>
-                  {pointsOfInterest.length > 0 && (
-                    <div className="flex flex-wrap items-center gap-2 py-1">
-                      <span className="text-xs font-cinzel font-bold text-amber-950 flex items-center gap-1 uppercase tracking-wider mr-1">
-                        <MapPin size={14} className="text-amber-700" /> Lokace v okolí:
-                      </span>
-                      {pointsOfInterest.map((poi, i) => (
-                        <button 
-                          key={`poi-${i}`} 
-                          onClick={() => sendAction(`Jdu prozkoumat: ${poi.nazev}`)} 
-                          className="bg-[#f2ece1] hover:bg-amber-100 border border-amber-900/30 hover:border-amber-700 text-slate-900 hover:text-amber-950 px-3.5 py-2 rounded-xl text-xs font-cinzel font-bold transition-all shadow-sm flex items-center gap-1.5"
+                      <div className="flex flex-col">
+                        <span className="text-amber-950 font-cinzel font-bold text-sm sm:text-base tracking-wide flex items-center gap-1.5">
+                          Vypravěč přemýšlí a spřádá osud...
+                        </span>
+                        <span className="text-amber-800/80 font-lora text-xs italic">
+                          Tvá volba právě mění chod příběhu
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {/* Embedded choices directly inside story log */}
+                {!loading && !inCombat && suggestedActions.length > 0 && (
+                  <div className="flex flex-col gap-2 pt-4 mt-2 border-t border-amber-900/15">
+                    <div className="text-xs font-cinzel text-slate-500 uppercase tracking-widest font-bold">
+                      Možné volby:
+                    </div>
+                    <div className="flex flex-col gap-2.5">
+                      {suggestedActions.map((act, i) => (
+                        <button
+                          key={`chat-act-${i}`}
+                          onClick={() => sendAction(act)}
+                          className="w-full text-left bg-[#fcfaf2] hover:bg-amber-100/90 border-2 border-amber-900/15 hover:border-amber-600 hover:shadow-[0_4px_16px_rgba(180,83,9,0.25)] px-4 sm:px-5 py-3.5 rounded-xl text-slate-800 hover:text-amber-950 transition-all font-lora text-sm sm:text-base flex items-center justify-between group cursor-pointer"
                         >
-                          <MapPin size={14} className="text-amber-700" />
-                          <span>{poi.nazev}</span>
+                          <div className="flex items-center gap-3">
+                            <span className="w-6 h-6 rounded-full bg-amber-900/10 group-hover:bg-amber-700 group-hover:text-white flex items-center justify-center text-xs font-cinzel font-bold text-amber-900 transition-colors shrink-0">
+                              {i + 1}
+                            </span>
+                            <span className="font-medium group-hover:font-bold transition-all">{act}</span>
+                          </div>
+                          <span className="opacity-0 group-hover:opacity-100 transition-all bg-amber-700 text-white px-3 py-1 rounded-lg font-cinzel text-xs font-bold shrink-0 ml-3 shadow-sm flex items-center gap-1 group-hover:translate-x-1">
+                            Zvolit &rarr;
+                          </span>
                         </button>
                       ))}
                     </div>
-                  )}
-                </>
-              )}
-            </div>
-
-
-          </div>
-
-          {/* Magical Input Box */}
-          <div className="relative">
-            <div className="absolute -inset-1 bg-gradient-to-r from-transparent via-rpg-magic/20 to-transparent rounded-2xl blur-md pointer-events-none" />
-            <div className="relative flex flex-row items-center gap-2 sm:gap-3 bg-white/90 backdrop-blur-xl p-2 sm:p-3 rounded-2xl border border-rpg-magic/30 shadow-[0_0_30px_rgba(0,0,0,0.8)]">
-              <button
-                onClick={() => setIsOOC(!isOOC)}
-                className={`p-2.5 sm:p-3.5 transition-all rounded-xl flex items-center justify-center shrink-0 cursor-pointer ${isOOC ? 'bg-indigo-900/40 text-indigo-800 border border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.2)]' : 'text-slate-600 hover:text-rpg-magic bg-white/50 border border-transparent'}`}
-                title="OOC (Myšlenka)"
-              >
-                <Brain size={22} className={isOOC ? "animate-pulse text-indigo-600" : ""} />
-              </button>
-              <input 
-                type="text" 
-                value={customAction}
-                onChange={(e) => setCustomAction(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && sendAction(customAction)}
-                placeholder={isOOC ? "Přemýšlím nad..." : "Co uděláš dál?"} 
-                className={`flex-1 min-w-0 font-lora text-sm sm:text-lg bg-transparent px-2 sm:px-3 py-2 outline-none transition-colors ${isOOC ? 'text-indigo-900 placeholder-indigo-400' : 'text-[#2d3748] placeholder-gray-500'}`}
-                disabled={loading}
-              />
-              <button 
-                onClick={() => sendAction(customAction)}
-                className="bg-rpg-blood hover:bg-red-800 text-white px-3.5 sm:px-8 py-2.5 sm:py-3 shrink-0 rounded-xl font-cinzel font-bold text-sm sm:text-base tracking-wider sm:tracking-widest transition-all disabled:opacity-40 flex items-center justify-center gap-1.5 sm:gap-2 shadow-[0_0_15px_rgba(183,75,75,0.4)] cursor-pointer"
-                disabled={loading || !customAction.trim()}
-              >
-                {loading ? (
-                  <>
-                    <Loader2 size={18} className="animate-spin text-white" />
-                    <span className="hidden sm:inline text-xs sm:text-sm">Spřádám...</span>
-                  </>
-                ) : (
-                  "Vydat se"
+                  </div>
                 )}
-              </button>
+                <div ref={chatEndRef} />
+              </div>
             </div>
-          </div>
 
-        </div>
+            {/* Bottom Actions & Input */}
+            <div className="shrink-0 flex flex-col gap-4 pb-4 w-full max-w-5xl mx-auto px-2 sm:px-0">
+              
+              {/* Action Buttons & Dock */}
+              <div className="flex flex-wrap justify-between items-end gap-4">
+                
+                {/* Contextual Actions */}
+                <div className="flex flex-nowrap gap-2 flex-1 overflow-x-auto snap-x custom-scrollbar hide-scrollbar pb-2">
+                    <>
+                      {pointsOfInterest.length > 0 && (
+                        <div className="flex flex-wrap items-center gap-2 py-1">
+                          <span className="text-xs font-cinzel font-bold text-amber-950 flex items-center gap-1 uppercase tracking-wider mr-1">
+                            <MapPin size={14} className="text-amber-700" /> Lokace v okolí:
+                          </span>
+                          {pointsOfInterest.map((poi, i) => (
+                            <button 
+                              key={`poi-${i}`} 
+                              onClick={() => sendAction(`Jdu prozkoumat: ${poi.nazev}`)} 
+                              className="bg-[#f2ece1] hover:bg-amber-100 border border-amber-900/30 hover:border-amber-700 text-slate-900 hover:text-amber-950 px-3.5 py-2 rounded-xl text-xs font-cinzel font-bold transition-all shadow-sm flex items-center gap-1.5"
+                            >
+                              <MapPin size={14} className="text-amber-700" />
+                              <span>{poi.nazev}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                </div>
+
+              </div>
+
+              {/* Magical Input Box */}
+              <div className="relative">
+                <div className="absolute -inset-1 bg-gradient-to-r from-transparent via-rpg-magic/20 to-transparent rounded-2xl blur-md pointer-events-none" />
+                <div className="relative flex flex-row items-center gap-2 sm:gap-3 bg-white/90 backdrop-blur-xl p-2 sm:p-3 rounded-2xl border border-rpg-magic/30 shadow-[0_0_30px_rgba(0,0,0,0.8)]">
+                  <button
+                    onClick={() => setIsOOC(!isOOC)}
+                    className={`p-2.5 sm:p-3.5 transition-all rounded-xl flex items-center justify-center shrink-0 cursor-pointer ${isOOC ? 'bg-indigo-900/40 text-indigo-800 border border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.2)]' : 'text-slate-600 hover:text-rpg-magic bg-white/50 border border-transparent'}`}
+                    title="OOC (Myšlenka)"
+                  >
+                    <Brain size={22} className={isOOC ? "animate-pulse text-indigo-600" : ""} />
+                  </button>
+                  <input 
+                    type="text" 
+                    value={customAction}
+                    onChange={(e) => setCustomAction(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && sendAction(customAction)}
+                    placeholder={isOOC ? "Přemýšlím nad..." : "Co uděláš dál?"} 
+                    className={`flex-1 min-w-0 font-lora text-sm sm:text-lg bg-transparent px-2 sm:px-3 py-2 outline-none transition-colors ${isOOC ? 'text-indigo-900 placeholder-indigo-400' : 'text-[#2d3748] placeholder-gray-500'}`}
+                    disabled={loading}
+                  />
+                  <button 
+                    onClick={() => sendAction(customAction)}
+                    className="bg-rpg-blood hover:bg-red-800 text-white px-3.5 sm:px-8 py-2.5 sm:py-3 shrink-0 rounded-xl font-cinzel font-bold text-sm sm:text-base tracking-wider sm:tracking-widest transition-all disabled:opacity-40 flex items-center justify-center gap-1.5 sm:gap-2 shadow-[0_0_15px_rgba(183,75,75,0.4)] cursor-pointer"
+                    disabled={loading || !customAction.trim()}
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin text-white" />
+                        <span className="hidden sm:inline text-xs sm:text-sm">Spřádám...</span>
+                      </>
+                    ) : (
+                      "Vydat se"
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Stats Modal */}

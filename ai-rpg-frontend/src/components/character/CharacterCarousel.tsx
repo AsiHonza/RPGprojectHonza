@@ -197,23 +197,22 @@ export const CharacterCarousel: React.FC<CharacterCarouselProps> = ({
                 <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-[#f9f6e6] via-[#f9f6e6]/80 to-transparent z-10 pointer-events-none" />
 
                 {/* Portrait Content */}
-                {getAvatarVideo(char.race) ? (
+                <img
+                  src={`https://image.pollinations.ai/prompt/vibrant%20fable%20style%20magical%20fantasy%20portrait%20of%20a%20${encodeURIComponent(
+                    char.race
+                  )}%20${encodeURIComponent(char.dnd_class)}%20RPG%20character?width=512&height=768&nologo=true&seed=${
+                    char.name.length * 42
+                  }`}
+                  alt={char.name}
+                  className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
+                    isFocused ? 'opacity-90' : 'opacity-65'
+                  }`}
+                />
+                {getAvatarVideo(char.race) && (
                   <SeamlessVideo
                     src={getAvatarVideo(char.race)!}
                     className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
                       isFocused ? 'opacity-95' : 'opacity-70'
-                    }`}
-                  />
-                ) : (
-                  <img
-                    src={`https://image.pollinations.ai/prompt/vibrant%20fable%20style%20magical%20fantasy%20portrait%20of%20a%20${encodeURIComponent(
-                      char.race
-                    )}%20${encodeURIComponent(char.dnd_class)}%20RPG%20character?width=512&height=768&nologo=true&seed=${
-                      char.name.length * 42
-                    }`}
-                    alt={char.name}
-                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
-                      isFocused ? 'opacity-90' : 'opacity-65'
                     }`}
                   />
                 )}

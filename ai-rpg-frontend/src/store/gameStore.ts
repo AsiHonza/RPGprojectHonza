@@ -244,6 +244,14 @@ interface GameState {
   inCombat: boolean;
   setInCombat: (c: boolean) => void;
   enemies: any[];
+  setEnemies: (e: any[] | ((prev: any[]) => any[])) => void;
+  combatLog: string[];
+  setCombatLog: (log: string[] | ((prev: string[]) => string[])) => void;
+  combatAp: number;
+  setCombatAp: (ap: number | ((ap: number) => number)) => void;
+  combatRound: number;
+  setCombatRound: (r: number | ((r: number) => number)) => void;
+  
   // Audio
   bgVolume: number;
   setBgVolume: (v: number) => void;
@@ -354,6 +362,14 @@ export const useGameStore = create<GameState>((set) => ({
   inCombat: false,
   setInCombat: (inCombat) => set({ inCombat }),
   enemies: [],
+  setEnemies: (enemies) => set((state) => ({ enemies: typeof enemies === 'function' ? enemies(state.enemies) : enemies })),
+  combatLog: [],
+  setCombatLog: (combatLog) => set((state) => ({ combatLog: typeof combatLog === 'function' ? combatLog(state.combatLog) : combatLog })),
+  combatAp: 3,
+  setCombatAp: (combatAp) => set((state) => ({ combatAp: typeof combatAp === 'function' ? combatAp(state.combatAp) : combatAp })),
+  combatRound: 1,
+  setCombatRound: (combatRound) => set((state) => ({ combatRound: typeof combatRound === 'function' ? combatRound(state.combatRound) : combatRound })),
+
   bgVolume: 0.2,
   setBgVolume: (bgVolume) => set({ bgVolume }),
   ttsVolume: 1.0,
@@ -371,5 +387,4 @@ export const useGameStore = create<GameState>((set) => ({
   unreadQuests: false,
   setUnreadQuests: (unreadQuests) => set((state) => ({ unreadQuests: typeof unreadQuests === "function" ? unreadQuests(state.unreadQuests) : unreadQuests })),
   setMusicPlaying: (musicPlaying) => set({ musicPlaying }),
-  setEnemies: (enemies) => set({ enemies }),
 }));

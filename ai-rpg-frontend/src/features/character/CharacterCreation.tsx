@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { Settings2, Sparkles, ChevronRight, ChevronLeft, Crown, Shield, Wand2, Axe, Ghost, Skull, Book, Flame, X, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { SeamlessVideo } from '../../components/ui/SeamlessVideo';
 
 const STARTING_GEAR: Record<string, { weapon: string; armor: string; offhand?: string; potion: string }> = {
   "Barbar": { weapon: "Obouruční sekera (+2)", armor: "Kožené hadry", potion: "Léčivý lektvar" },
@@ -18,7 +19,7 @@ const STARTING_GEAR: Record<string, { weapon: string; armor: string; offhand?: s
   "Kouzelník": { weapon: "Učednická hůlka (+1)", armor: "Mágovo roucho", potion: "Léčivý lektvar" }
 };
 
-export const CharacterCreation = ({ startNewGame, loading, backstory, generateBackstory, onClose }: any) => {
+export const CharacterCreation = ({ startNewGame, loading, backstory, generateBackstory, onClose, getAvatarVideo }: any) => {
   const [step, setStep] = useState(1);
   const classes = ["Barbar", "Bard", "Klerik", "Druid", "Bojovník", "Mnich", "Paladin", "Hraničář", "Tulák", "Čaroděj", "Černokněžník", "Kouzelník"];
   const races = ["Člověk", "Elf", "Trpaslík", "Půlčík", "Drakorozený", "Tiefling", "Půlork", "Gnóm"];
@@ -165,6 +166,23 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
                       </button>
                     ))}
                   </div>
+
+                  {getAvatarVideo && getAvatarVideo(race) && (
+                    <motion.div 
+                      key={race}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="mt-3.5 flex items-center gap-3 bg-amber-100/70 p-2.5 rounded-xl border border-amber-900/20 shadow-xs"
+                    >
+                      <div className="w-12 h-12 rounded-lg overflow-hidden border border-amber-600/50 shadow-sm shrink-0">
+                        <SeamlessVideo src={getAvatarVideo(race)!} className="w-full h-full" />
+                      </div>
+                      <div className="flex flex-col text-left">
+                        <span className="font-cinzel font-bold text-xs text-amber-950">Živý portrét: {race}</span>
+                        <span className="font-lora text-[11px] text-slate-600">Animovaný vzhled tvého hrdiny v legendách</span>
+                      </div>
+                    </motion.div>
+                  )}
                 </div>
               </motion.div>
             )}

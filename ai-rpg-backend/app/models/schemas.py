@@ -47,6 +47,16 @@ class StateChanges(BaseModel):
     travel_destination_set: Optional[str] = None
     zname_postavy_zmena: List[NPCRecord] = Field(default=[])
 
+class CombatEnemy(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()), description="Unikátní ID nepřítele")
+    name: str = Field(description="Jméno nepřítele")
+    hp: int = Field(description="Aktuální zdraví")
+    max_hp: int = Field(description="Maximální zdraví")
+    ac: int = Field(description="Obranné číslo (Armor Class)")
+    intent: str = Field(default="attack", description="Záměr pro první kolo: 'attack', 'defend', 'heavy_attack', 'idle'")
+    intentDamage: int = Field(default=0, description="Předpokládané zranění, pokud je intent attack")
+    status: str = Field(default="none", description="Aktuální stav (none, bleeding, stunned, burning)")
+
 class NPCDialog(BaseModel):
     jmeno: str
     pohlavi: str
@@ -65,8 +75,8 @@ class DMResponse(BaseModel):
     system_log: str
     zmeny_stavu: StateChanges
     nabizene_akce: List[str]
-    v_boji: bool = False
-    nepratele: List[dict] = []
+    v_boji: bool = Field(default=False, description="Pokud začal boj, nastav na true")
+    nepratele: List[CombatEnemy] = Field(default=[], description="Seznam nepřátel v boji, pokud v_boji je true")
     dulezita_fakta: List[str] = Field(default=[])
     image_url: Optional[str] = None
     image_base64: Optional[str] = None
@@ -141,6 +151,15 @@ class PlayerActionRequest(BaseModel):
     level: Optional[int] = 1
     stats: Optional[Dict[str, Any]] = None
     skills: Optional[List[Any]] = None
+
+class CombatResolutionRequest(BaseModel):
+    email: str
+    name: str
+    api_key: Optional[str] = "DUMMY"
+    combat_log: List[str]
+    player_hp: int
+    enemies: List[CombatEnemy]
+    level: Optional[int] = 1
 
 class TravelRequest(BaseModel):
     email: str

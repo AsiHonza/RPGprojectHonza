@@ -1,0 +1,296 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { useGameStore } from '../../store/gameStore';
+import { Shield, Crosshair, Skull, Heart, Sword, FastForward, Sparkles, AlertTriangle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { getSkillsForWeapon, WeaponSkill } from './weaponSkills';
+import { executePlayerAttack, executeEnemyTurn, CombatEnemy } from './combatEngine';
+
+export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
+  const { 
+    enemies, setEnemies, 
+    combatLog, setCombatLog, 
+    combatAp, setCombatAp, 
+    combatRound, setCombatRound,
+    hp, setHp, maxHp, stats,
+    equipped, inventory, setInCombat
+  } = useGameStore();
+
+  const [targetId, setTargetId] = useState<string | number | null>(null);
+  const [creativeAction, setCreativeAction] = useState("");
+  const [isEnemyTurn, setIsEnemyTurn] = useState(false);
+  const logEndRef = useRef<HTMLDivElement>(null);
+
+  // Scroll log to bottom
+  useEffect(() => {
+    logEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [combatLog]);
+
+  // Determine current weapon and its skills
+  const mainHandWeaponId = equipped["hlavní ruka"];
+  const mainHandWeapon = inventory.find(i => i.id === mainHandWeaponId);
+  const weaponSkills = getSkillsForWeapon(mainHandWeapon?.name || mainHandWeapon?.type);
+
+  // Auto-target the first alive enemy if none selected
+  useEffect(() => {
+    if (!targetId || !enemies.find(e => e.id === targetId && e.hp > 0)) {
+      const firstAlive = enemies.find(e => e.hp > 0);
+      if (firstAlive) setTargetId(firstAlive.id);
+    }
+  }, [enemies, targetId]);
+
+  // Handle victory
+  useEffect(() => {
+    const aliveEnemies = enemies.filter(e => e.hp > 0);
+    if (aliveEnemies.length === 0 && enemies.length > 0 && !isEnemyTurn) {
+      setTimeout(() => {
+        handleVictory();
+      }, 1500);
+    }
+  }, [enemies, isEnemyTurn]);
+
+  const addLog = (msg: string) => {
+    setCombatLog(prev => [...prev, msg]);
+  };
+
+  const handlePlayerAction = (skill: WeaponSkill) => {
+    if (combatAp < skill.apCost || isEnemyTurn) return;
+    if (!targetId) {
+      addLog("⚠️ Musíš vybrat cíl!");
+      return;
+    }
+
+    setCombatAp(combatAp - skill.apCost);
+    
+    // Execute attack
+    const { updatedEnemies, logEntry, hit } = executePlayerAttack(skill, targetId, enemies, stats);
+    setEnemies(updatedEnemies);
+    addLog(logEntry);
+  };
+
+  const endTurn = () => {
+    if (isEnemyTurn) return;
+    setIsEnemyTurn(true);
+    addLog("⏳ Konec tvého tahu. Nepřátelé jednají...");
+
+    setTimeout(() => {
+      const aliveEnemies = enemies.filter(e => e.hp > 0);
+      if (aliveEnemies.length > 0) {
+        const { updatedPlayerHp, logEntries, updatedEnemies } = executeEnemyTurn(enemies, hp);
+        setHp(Math.max(updatedPlayerHp, 0));
+        setEnemies(updatedEnemies);
+        logEntries.forEach(l => addLog(l));
+      }
+      
+      // Start next round
+      setCombatRound(combatRound + 1);
+      setCombatAp(3); // Reset AP
+      setIsEnemyTurn(false);
+      addLog(`⚔️ --- Kolo ${combatRound + 1} ---`);
+    }, 1200);
+  };
+
+  const handleCreativeAction = () => {
+    if (!creativeAction.trim()) return;
+    if (combatAp < 1) return;
+    
+    // In the future, this calls the LLM. For now, it's a placeholder local calculation or just sends action.
+    setCombatAp(combatAp - 1);
+    addLog(`📝 *Kreativní pokus:* ${creativeAction}`);
+    addLog("🎲 *Vypravěč vyhodnocuje tvou akci...* (Bude napojeno na AI)");
+    setCreativeAction("");
+  };
+
+  const handleVictory = () => {
+    addLog("🏆 Všichni nepřátelé poraženi! Vyhrál jsi boj.");
+    if (onVictory) {
+      onVictory();
+    } else {
+      setTimeout(() => {
+        setInCombat(false);
+      }, 2000);
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-full bg-slate-900 rounded-xl border-2 border-red-900/50 shadow-2xl shadow-red-900/20 overflow-hidden font-lora relative">
+      {/* Background Effect */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-red-950/40 via-slate-900/90 to-slate-950 pointer-events-none" />
+
+      {/* Header */}
+      <div className="bg-gradient-to-r from-red-950/80 to-slate-900/80 border-b border-red-900/50 p-3 z-10 flex justify-between items-center">
+        <h2 className="font-cinzel font-bold text-red-500 text-lg flex items-center gap-2">
+          <Sword className="animate-pulse" size={20} /> TAKTICKÝ BOJ
+        </h2>
+        <div className="text-red-300/80 text-xs uppercase tracking-widest font-bold">Kolo {combatRound}</div>
+      </div>
+
+      {/* Arena: Enemies */}
+      <div className="p-4 z-10 flex-1 flex flex-col justify-end">
+        <div className="flex flex-wrap gap-4 justify-center items-end h-full mb-6">
+          <AnimatePresence>
+            {enemies.map((enemy: CombatEnemy) => {
+              const isTarget = targetId === enemy.id;
+              const isDead = enemy.hp <= 0;
+              return (
+                <motion.div 
+                  key={enemy.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0, scale: isTarget && !isDead ? 1.05 : 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  onClick={() => !isDead && setTargetId(enemy.id)}
+                  className={`relative p-3 rounded-xl border-2 transition-all cursor-pointer w-40 sm:w-48
+                    ${isDead ? 'border-slate-800 bg-slate-800/50 grayscale opacity-50' : 
+                      isTarget ? 'border-red-500 bg-red-950/40 shadow-lg shadow-red-500/20' : 'border-red-900/30 bg-slate-800/80 hover:border-red-700/50'
+                    }`}
+                >
+                  {isTarget && !isDead && (
+                    <div className="absolute -top-3 -right-3 text-red-500 animate-bounce">
+                      <Crosshair size={24} />
+                    </div>
+                  )}
+
+                  <div className="font-cinzel font-bold text-sm text-slate-200 text-center mb-2 truncate">
+                    {enemy.name}
+                  </div>
+                  
+                  {/* HP Bar */}
+                  <div className="mb-3">
+                    <div className="flex justify-between text-[10px] text-slate-400 mb-1 font-bold">
+                      <span>HP</span>
+                      <span>{Math.max(0, enemy.hp)} / {enemy.max_hp}</span>
+                    </div>
+                    <div className="w-full bg-slate-950 rounded-full h-2 border border-slate-700">
+                      <div 
+                        className={`h-full rounded-full transition-all duration-500 ${enemy.hp < enemy.max_hp * 0.3 ? 'bg-red-500' : 'bg-emerald-500'}`}
+                        style={{ width: `${Math.max(0, (enemy.hp / enemy.max_hp) * 100)}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Intent / Status */}
+                  {!isDead ? (
+                    <div className="flex justify-between items-center text-xs">
+                      <div className="flex items-center gap-1 bg-slate-900/80 px-2 py-1 rounded text-red-400 border border-red-900/30">
+                        {enemy.intent === "attack" || enemy.intent === "heavy_attack" ? (
+                          <><Sword size={12} /> {enemy.intentDamage} DMG</>
+                        ) : enemy.intent === "defend" ? (
+                          <><Shield size={12} /> OBRANA</>
+                        ) : (
+                          <span className="text-slate-500">ČEKÁ</span>
+                        )}
+                      </div>
+                      {enemy.status && enemy.status !== "none" && (
+                        <div className="text-amber-500 font-bold uppercase text-[10px]">
+                          {enemy.status}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center text-slate-500 text-xs font-bold uppercase flex justify-center items-center gap-1">
+                      <Skull size={12} /> Mrtvý
+                    </div>
+                  )}
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+        </div>
+      </div>
+
+      {/* Combat Log */}
+      <div className="h-32 sm:h-40 bg-black/60 border-t border-b border-red-900/30 overflow-y-auto p-3 z-10 text-xs sm:text-sm text-slate-300 font-lora leading-relaxed">
+        {combatLog.map((log, i) => (
+          <div key={i} className={`mb-1.5 ${log.includes('zasáhl tě') || log.includes('ztratil') ? 'text-red-400 font-semibold' : log.includes('Trefa') || log.includes('zasáhl') ? 'text-emerald-400' : 'text-slate-300'}`}>
+            <span dangerouslySetInnerHTML={{__html: log.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>')}} />
+          </div>
+        ))}
+        {isEnemyTurn && (
+          <div className="text-amber-500/70 italic animate-pulse">
+            Nepřátelé provádí své akce...
+          </div>
+        )}
+        <div ref={logEndRef} />
+      </div>
+
+      {/* Action Bar (Player UI) */}
+      <div className="bg-[#f9f6e6] p-3 sm:p-4 z-10 flex flex-col sm:flex-row gap-4 border-t-4 border-red-900/40 relative">
+        {/* Player Status */}
+        <div className="flex flex-row sm:flex-col items-center sm:items-start justify-between sm:justify-center gap-2 sm:min-w-[120px]">
+          <div>
+            <div className="text-[10px] text-amber-900 font-bold uppercase tracking-wider mb-0.5">Tvoje zdraví</div>
+            <div className="flex items-center gap-1 text-red-600 font-bold font-cinzel text-lg">
+              <Heart size={16} className={hp < maxHp * 0.3 ? 'animate-bounce' : ''} />
+              {hp} / {maxHp}
+            </div>
+          </div>
+          <div>
+            <div className="text-[10px] text-amber-900 font-bold uppercase tracking-wider mb-0.5">Akce (AP)</div>
+            <div className="flex gap-1">
+              {[1,2,3].map(i => (
+                <div key={i} className={`w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-blue-800 ${i <= combatAp ? 'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]' : 'bg-blue-900/20'}`} />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Skills */}
+        <div className="flex-1">
+          <div className="text-[10px] text-amber-900 font-bold uppercase tracking-wider mb-2">Tvé dovednosti ({mainHandWeapon?.name || "Beze zbraně"})</div>
+          <div className="flex flex-wrap gap-2">
+            {weaponSkills.map(skill => (
+              <button
+                key={skill.id}
+                disabled={combatAp < skill.apCost || isEnemyTurn}
+                onClick={() => handlePlayerAction(skill)}
+                className={`flex flex-col items-start p-2 rounded-lg border-2 transition-all min-w-[110px]
+                  ${combatAp < skill.apCost || isEnemyTurn ? 'bg-slate-200 border-slate-300 opacity-50 cursor-not-allowed' : 'bg-white border-amber-900/20 hover:border-amber-600 hover:bg-amber-50 shadow-sm'}`}
+              >
+                <div className="flex justify-between w-full items-center mb-1">
+                  <span className="text-base">{skill.icon}</span>
+                  <div className="flex gap-0.5">
+                    {Array(skill.apCost).fill(0).map((_, i) => <div key={i} className="w-1.5 h-1.5 bg-blue-500 rounded-full" />)}
+                  </div>
+                </div>
+                <span className="font-cinzel font-bold text-slate-900 text-xs text-left leading-tight">{skill.name}</span>
+                <span className="text-[9px] text-slate-500 mt-0.5">{skill.damageDice !== "0" ? `${skill.damageDice} dmg` : 'Podpora'}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* End Turn & Creative Action */}
+        <div className="flex flex-row sm:flex-col gap-2 sm:min-w-[180px] justify-between">
+          <button 
+            onClick={endTurn}
+            disabled={isEnemyTurn}
+            className="flex-1 bg-amber-900 hover:bg-amber-800 text-amber-50 font-bold font-cinzel rounded-lg flex items-center justify-center gap-2 p-2 sm:py-3 transition-colors disabled:opacity-50 text-sm shadow-md"
+          >
+            <FastForward size={16} /> Konec tahu
+          </button>
+          
+          <div className="flex-1 relative group">
+            <input 
+              type="text"
+              value={creativeAction}
+              onChange={e => setCreativeAction(e.target.value)}
+              placeholder="Napiš šílený nápad..."
+              disabled={isEnemyTurn || combatAp < 1}
+              onKeyDown={e => e.key === 'Enter' && handleCreativeAction()}
+              className="w-full bg-white/80 border-2 border-amber-900/20 rounded-lg p-2 text-xs font-lora outline-none focus:border-amber-500 pr-8 disabled:opacity-50 h-full"
+            />
+            <button 
+              onClick={handleCreativeAction}
+              disabled={isEnemyTurn || combatAp < 1 || !creativeAction.trim()}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-amber-700 hover:text-amber-500 disabled:opacity-30"
+            >
+              <Sparkles size={14} />
+            </button>
+            <div className="absolute bottom-full left-0 mb-1 w-48 bg-slate-900 text-amber-100 text-[10px] p-2 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
+              Kreativní akce (1 AP): Využije prostředí nebo nestandardní taktiku. Vypravěč určí výsledek.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

@@ -131,9 +131,13 @@ PRAVIDLA D&D 5e, OBTÍŽNOST (DC) A SELHÁNÍ:
 - **Neboj se nechat hráče selhat!** Hra musí mít napětí a selhání tvoří příběh. Hráč musí nést následky (ztráta HP, spuštění pasti, rozčílení NPC).
 - Vždy na pozadí virtuálně "hoď d20" a přičti příslušný stat. Výsledek porovnej s tvým DC. Do `system_log` vždy uveď hod a výsledek (např. "Hod na Vnímání: d20(8) + WIS(2) = 10 vs DC 15. Selhání.").
 
-TAKTICKÝ BOJ A NEPŘÁTELÉ:
-- Neodepisuj nepřítele hned, boj je na kola. Sleduj jejich HP, ZRAŇUJ HRÁČE. Nepřátelé útočí zpět, využívají prostředí a nejsou hloupí! Hráč nesmí vyhrát každý souboj bez škrábnutí.
-- Nastav `v_boji` na true, pokud probíhá boj. Pečlivě vyplňuj seznam `nepratele` (jméno, hp, max_hp, status), aby to viděl hráč na obrazovce.
+TAKTICKÝ BOJ (HYBRIDNÍ SYSTÉM):
+- Boj se nyní vyhodnocuje PLNĚ LOKÁLNĚ na straně klienta. Ty nepočítáš zásahy ani HP v průběhu boje!
+- Pokud hráč vyvolá konflikt nebo je napaden, tvým jediným úkolem je BOJ ZAHÁJIT:
+  1. Nastav `v_boji` na true.
+  2. Napiš atmosférický úvod do boje do pole `vypravec`.
+  3. Vygeneruj nepřátele do seznamu `nepratele`. Každému nastav `hp`, `max_hp` (dle úrovně, např. 15-40), `ac` (Třída zbroje 10-15) a počáteční `intent` ('attack', 'defend', 'heavy_attack', nebo 'idle').
+- Jakmile nastavíš `v_boji: true`, hráč bude bojovat lokálně v aréně bez tvé účasti.
 
 PRAVIDLA PRO LOOT, PŘEDMĚTY A ODMĚNY:
 - **Kdy generovat nový předmět do `inventar_pridat`:**
@@ -357,4 +361,127 @@ async def travel_action(req: TravelRequest):
         raise
     except Exception as e:
         print('Travel error:', e)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post('/resolve-combat')
+async def resolve_combat(req: CombatResolutionRequest):
+    try:
+        db_key = f'{req.email}#{req.name}'
+        db_res = supabase.table('characters').select('state, history').eq('api_key', db_key).execute()
+        if not db_res.data:
+            raise HTTPException(status_code=404, detail='Postava nenalezena.')
+        
+        char_data = db_res.data[0]
+        state = char_data.get('state', {})
+        history = char_data.get('history', [])
+        
+        # Determine defeated enemies
+        enemy_names = [e.name for e in req.enemies]
+        enemies_str = ", ".join(enemy_names)
+        
+        # Prepare LLM prompt
+        prompt = f"""
+        Hráč (Level {req.level}) právě vyhrál taktický souboj!
+        Poražení nepřátelé: {enemies_str}
+        
+        Záznam boje (Combat Log) od klienta zní:
+        {chr(10).join(req.combat_log[-10:])}
+        
+        Tvůj úkol:
+        1. Vrať JSON s klíčem 'vypravec', kde napíšeš brutální, epické nebo velmi atmosférické zakončení tohoto boje (tzv. Fatality / Aftermath) - max 2-3 věty, které shrnou hráčovo drtivé vítězství, jak zabil posledního protivníka a svalil se (hráč má nyní {req.player_hp} HP).
+        2. Vygeneruj adekvátní loot do 'inventar_pridat' podle pravidel (rarity podle {req.level}. úrovně, žádný broken nesmysl).
+        3. Vygeneruj odpovídající 'xp_zmena' (cca 15-30 za každého nepřítele) a 'zlato_zmena'.
+        4. Odrážej to ve strukturách 'StateChanges' ze schématu DMResponse. Nemaž žádné další stavy.
+        5. 'v_boji' vrať False.
+        """
+        
+        client = genai.Client(api_key=req.api_key if req.api_key and req.api_key != 'DUMMY' else os.environ.get('GEMINI_API_KEY'))
+        
+        # Create a simplified response schema for resolution
+        resolution_schema = {
+            "type": "OBJECT",
+            "properties": {
+                "vypravec": {"type": "STRING"},
+                "zmeny_stavu": {
+                    "type": "OBJECT",
+                    "properties": {
+                        "xp_zmena": {"type": "INTEGER"},
+                        "zlato_zmena": {"type": "INTEGER"},
+                        "inventar_pridat": {
+                            "type": "ARRAY",
+                            "items": {
+                                "type": "OBJECT",
+                                "properties": {
+                                    "name": {"type": "STRING"},
+                                    "description": {"type": "STRING"},
+                                    "type": {"type": "STRING"},
+                                    "slot": {"type": "STRING"},
+                                    "rarity": {"type": "STRING"},
+                                    "icon": {"type": "STRING"},
+                                    "sell_price": {"type": "INTEGER"},
+                                    "attack_bonus": {"type": "INTEGER"},
+                                    "defense_bonus": {"type": "INTEGER"},
+                                    "healing_amount": {"type": "INTEGER"}
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "required": ["vypravec", "zmeny_stavu"]
+        }
+        
+        resp = client.models.generate_content(
+            model='gemini-3.6-flash', 
+            contents=prompt, 
+            config=types.GenerateContentConfig(response_mime_type='application/json', response_schema=resolution_schema)
+        )
+        
+        clean_text = resp.text.strip().removeprefix('```json').removesuffix('```').strip()
+        dm_json = json.loads(clean_text)
+        
+        # Apply changes to state
+        narrative = dm_json.get('vypravec', 'Boj skončil. Nepřátelé leží v prachu a ty jsi přežil, byť možná s nějakým tím šrámem.')
+        state['hp'] = req.player_hp
+        state['inCombat'] = False
+        state['enemies'] = []
+        state['combatLog'] = []
+        state['combatAp'] = 3
+        state['combatRound'] = 1
+        
+        zmeny = dm_json.get('zmeny_stavu', {})
+        if zmeny:
+            state['xp'] = state.get('xp', 0) + zmeny.get('xp_zmena', 0)
+            state['gold'] = state.get('gold', 0) + zmeny.get('zlato_zmena', 0)
+            
+            # Simple level-up check for robust backend handling (frontend does this too, but sync is better)
+            xp_needed = state.get('level', 1) * 500
+            if state['xp'] >= xp_needed:
+                state['level'] = state.get('level', 1) + 1
+                state['max_hp'] = state.get('max_hp', 100) + 10
+                state['hp'] = state['max_hp']
+                state['xp'] -= xp_needed
+            
+            if zmeny.get('inventar_pridat'):
+                new_items = []
+                for item in zmeny['inventar_pridat']:
+                    if not item.get('id'):
+                        item['id'] = str(uuid.uuid4())
+                    new_items.append(item)
+                state['inventory'] = state.get('inventory', []) + new_items
+                
+        # Append combat resolution to history
+        history.append({'role': 'user', 'content': f'[BOJ] Poraženi nepřátelé: {enemies_str}'})
+        history.append({'role': 'model', 'content': narrative})
+        
+        supabase.table('characters').update({'state': state, 'history': history}).eq('api_key', db_key).execute()
+        
+        return {
+            "status": "success",
+            "vypravec": narrative,
+            "zmeny_stavu": zmeny
+        }
+
+    except Exception as e:
+        print('Resolve combat error:', e)
         raise HTTPException(status_code=500, detail=str(e))
