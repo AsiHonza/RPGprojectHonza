@@ -9,6 +9,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
 import { ItemIcon } from '../components/ui/ItemIcon';
 import { InventoryPanel } from '../features/character/InventoryPanel';
+import { DeathModal } from '../features/character/DeathModal';
 import ReactPlayer from 'react-player';
 import { Send, Heart, Flame, Package, Sword, Shield, FlaskConical, Gem, Shirt, ScrollText, X, Volume2, VolumeX, User, Users, Settings2, Map, Sparkles, Skull, BookOpen, MapPin, Drumstick, Mail, Loader2, Trash2 , Brain , Menu, RotateCcw } from "lucide-react";
 import { CharacterCreation } from '../features/character/CharacterCreation';
@@ -1108,6 +1109,7 @@ export default function Home() {
 
     {gameState === "playing" && (
       <div className="h-[100dvh] max-h-[100dvh] overflow-hidden bg-[#1b262c] p-1 md:p-6 gap-2 md:gap-4 font-serif flex flex-col items-center relative">
+        <DeathModal onClose={() => {}} />
 
       
       {/* Patch Notes Modal */}
