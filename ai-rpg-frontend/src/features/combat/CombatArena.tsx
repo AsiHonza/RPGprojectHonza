@@ -13,7 +13,7 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
     combatAp, setCombatAp, 
     combatRound, setCombatRound,
     hp, setHp, maxHp, stats,
-    equipped, inventory, setInCombat,
+    equipped, inventory, setInventory, setInCombat,
     race
   } = useGameStore();
 
@@ -80,6 +80,28 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
     setTimeout(() => {
       handleEnemyTurn(newEnemies);
     }, 1500);
+  };
+
+  
+  const handleUsePotion = (potion: any) => {
+    if (combatAp < 1 || isEnemyTurn) return;
+    
+    setCombatAp(prev => prev - 1);
+    const healAmount = potion.healing_amount || 25;
+    setHp(prev => Math.min(maxHp, prev + healAmount));
+    
+    // Remove from inventory
+    setInventory(prev => prev.filter(i => i.id !== potion.id));
+    
+    setCombatLog(prev => [...prev, `**TY**: Vypil jsi ${potion.name} a obnovil si ${healAmount} HP.`]);
+    
+    // Trigger enemy turn if AP is 0
+    if (combatAp - 1 <= 0) {
+      setTimeout(() => {
+        setIsEnemyTurn(true);
+        processEnemyTurn();
+      }, 1000);
+    }
   };
 
   const handlePlayerAction = (skill: WeaponSkill) => {
@@ -309,7 +331,27 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
                 <span className="text-[9px] text-slate-500 mt-0.5">{skill.damageDice !== "0" ? `${skill.damageDice} dmg` : 'Podpora'}</span>
               </button>
             ))}
-          </div>
+          
+              {/* Potions */}
+              {inventory.filter(i => i && (i.type === 'lektvar' || (i.name && i.name.toLowerCase().includes('lektvar')))).map(potion => (
+                <button
+                  key={potion.id}
+                  disabled={combatAp < 1 || isEnemyTurn}
+                  onClick={() => handleUsePotion(potion)}
+                  className={`flex flex-col items-start p-2 rounded-lg border-2 transition-all min-w-[110px]
+                    ${combatAp < 1 || isEnemyTurn ? 'bg-slate-200 border-slate-300 opacity-50 cursor-not-allowed' : 'bg-emerald-50 border-emerald-900/20 hover:border-emerald-600 hover:bg-emerald-100 shadow-sm'}`}
+                >
+                  <div className="flex justify-between w-full items-center mb-1">
+                    <span className="text-base">🧪</span>
+                    <div className="flex gap-0.5">
+                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
+                    </div>
+                  </div>
+                  <span className="font-cinzel font-bold text-emerald-900 text-xs text-left leading-tight truncate w-[85px]">{potion.name}</span>
+                  <span className="text-[9px] text-emerald-700 mt-0.5">Léčení: {potion.healing_amount || 25} HP</span>
+                </button>
+              ))}
+</div>
         </div>
 
         {/* End Turn & Creative Action */}
