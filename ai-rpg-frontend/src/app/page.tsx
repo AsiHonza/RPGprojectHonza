@@ -645,7 +645,7 @@ export default function Home() {
       const res = await fetch(`${API_URL}/create-character`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, dnd_class: dndClass, race, stats, email: email, api_key: "DUMMY", game_mode: gameMode }),
+        body: JSON.stringify({ name, dnd_class: dndClass, race, stats, email: email, api_key: "DUMMY", game_mode: gameMode, backstory: backstory || "" }),
       });
       const data = await res.json();
       

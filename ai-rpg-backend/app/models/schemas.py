@@ -141,6 +141,7 @@ class CharacterCreateRequest(BaseModel):
     email: str
     game_mode: str = "sandbox"
     api_key: str
+    backstory: Optional[str] = ""
 
 class PlayerActionRequest(BaseModel):
     email: str

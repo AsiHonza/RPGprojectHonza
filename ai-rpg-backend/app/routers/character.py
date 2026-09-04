@@ -125,50 +125,197 @@ async def create_character(req: CharacterCreateRequest):
             raise HTTPException(status_code=500, detail=f'Chyba při generování světa: {str(e)}')
     initial_location = None
     start_kingdom_name = 'Začátek cesty'
+    start_loc_type = 'mesto'
     if world_data and world_data.get('pois'):
         import random
-        capitals = [p for p in world_data['pois'] if p.get('type') == 'Capital']
-        if capitals:
-            start_poi = random.choice(capitals)
-            initial_location = {'q': start_poi['q'], 'r': start_poi['r'], 'biome': start_poi.get('terrain', 'Plains'), 'kingdom_id': start_poi.get('kingdom_id')}
+        # Dynamický a pestrý výběr startovní lokace (nejen hlavní město)
+        all_candidate_pois = [p for p in world_data['pois'] if p.get('type') in ['Capital', 'Village', 'Shrine', 'Ruin']]
+        if not all_candidate_pois:
+            all_candidate_pois = world_data['pois']
+            
+        cls_lower = (req.dnd_class or "").lower()
+        if any(c in cls_lower for c in ['druid', 'hranič', 'barbar']):
+            preferred = ['Village', 'Shrine', 'Ruin', 'Capital']
+        elif any(c in cls_lower for c in ['klerik', 'paladin']):
+            preferred = ['Shrine', 'Capital', 'Village']
+        elif any(c in cls_lower for c in ['tulák', 'bard']):
+            preferred = ['Capital', 'Village']
+        elif any(c in cls_lower for c in ['čaroděj', 'kouzelník', 'warlock', 'mág']):
+            preferred = ['Shrine', 'Ruin', 'Capital', 'Village']
         else:
-            center_hex = world_data.get('hex_grid', [{}])[0]
-            initial_location = {'q': center_hex.get('q', 0), 'r': center_hex.get('r', 0), 'biome': center_hex.get('terrain', 'Plains')}
+            preferred = ['Capital', 'Village', 'Shrine']
+            
+        matched = [p for p in all_candidate_pois if p.get('type') in preferred]
+        start_poi = random.choice(matched if matched else all_candidate_pois)
+        initial_location = {
+            'q': start_poi['q'], 
+            'r': start_poi['r'], 
+            'biome': start_poi.get('terrain', 'Plains'), 
+            'kingdom_id': start_poi.get('kingdom_id')
+        }
+        p_type = start_poi.get('type', 'Capital')
+        if p_type == 'Capital':
+            start_loc_type = 'mesto'
+        elif p_type == 'Village':
+            start_loc_type = 'vesnice'
+        elif p_type == 'Shrine':
+            start_loc_type = 'chram'
+        elif p_type == 'Ruin':
+            start_loc_type = 'ruiny'
+        else:
+            start_loc_type = 'divocina'
+    else:
+        initial_location = {'q': 0, 'r': 0, 'biome': 'Plains'}
+
     try:
         client = genai.Client(api_key=req.api_key if req.api_key and 'DUMMY' not in req.api_key else os.environ.get('GEMINI_API_KEY'))
         world_context = ''
         if world_data:
-            import json
-            kingdom_names = {1: 'Valerijské Impérium', 2: 'Svatá Říše Solariova', 3: 'Kmeny z Hlubokých hvozdů', 4: 'Svobodná města', 5: 'Karanténní Zóna', 6: 'Železný Práh', 7: 'Tajemné Útočiště'}
+            import json, random
+            kingdom_names = {
+                1: 'Valerijské Impérium', 
+                2: 'Svatá říše Solariova', 
+                3: 'Kmeny z Hlubokých hvozdů', 
+                4: 'Svobodná města', 
+                5: 'Karanténní Zóna', 
+                6: 'Železný Práh', 
+                7: 'Tajemné útočiště'
+            }
             start_kingdom_id = initial_location.get('kingdom_id') if initial_location else 1
             start_kingdom_name = kingdom_names.get(start_kingdom_id, 'Neznámé království')
-            world_context = f"\n[HRAJE SE PŘÍBĚHOVÁ KAMPAŇ]: Zamotej postavu rovnou do vygenerované zápletky tohoto světa!\nZápletka: {world_data.get('main_plot')}\nMísto startu: Hráč právě začíná ve frakci/království {start_kingdom_name} (Souřadnice: {initial_location['q']}, {initial_location['r']}).\nKlíčová NPC: {json.dumps(world_data.get('key_npcs'), ensure_ascii=False)}\n\nKRITICKÝ POŽADAVEK NA INTRO:\n1. Nejprve ve 2-3 větách atmosféricky představ dané království a jeho aktuální náladu či napětí.\n2. IHNED potom vhoď postavu do konkrétní dramatické události přímo před jejíma očima (in media res)! Může to být:\n   - Náhlé oslovení od zoufalého měšťana, uprchlíka, strážného nebo zraněného posla.\n   - Nečekaný konflikt, rvačka, útok bestie nebo přepadení.\n   - Nález podezřelého předmětu, tajemného svitku či mrtvoly s klíčem.\n   - Zásah fanatické inkvizice nebo kultistů vyvolávající paniku v davu.\n3. Nech situaci otevřenou a napínavou, aby postava musela okamžitě reagovat!\n4. Vygeneruj přesně 3 smysluplné, konkrétní nabízené akce reagující na tuto situaci.\n"
-        prompt = f'\nJsi Pán jeskyně v textové RPG hře D&D. Hráč právě vytvořil novou postavu:\nJméno: {req.name}\nRasa: {req.race}\nTřída: {req.dnd_class}\nStaty: {req.stats}\n{world_context}\n\nVrať POUZE json ve formátu:\n{{\n  "intro_text": "Text vypravěče (atmosférické představení království + okamžitá dramatická událost/konflikt/dialog)...",\n  "popis_okoli": "Stručný popis lokace",\n  "nabizene_akce": ["Konkrétní reakce 1 na událost", "Konkrétní reakce 2 (využití schopnosti či povolání)", "Konkrétní reakce 3 (alternativní přístup)"]\n}}\n'
-        response = client.models.generate_content(model='gemini-3.6-flash', contents=prompt, config=types.GenerateContentConfig(response_mime_type='application/json'))
+            
+            # 5 pestrých startovních archetypů (žádné vnucené rvačky a popravy v 1. tahu)
+            start_archetypes = [
+                {
+                    "theme": "ZÁHADA A NÁLEZ (Průzkum)",
+                    "situation": "Postava dorazila na místo nebo se probouzí a objevuje znepokojivou stopu: záhadný zapečetěný dopis/svitek určený pro ni, podivný magický symbol vyrytý na kameni, nebo zjišťuje, že zdejší studna či oltář začaly slabě zářit. Cílem je probudit zvědavost a umožnit vyšetřování."
+                },
+                {
+                    "theme": "POUTNÍK A SPOLEČNOST (Sociální interakce a zvěsti)",
+                    "situation": "Postava po dlouhé cestě sedí u krbu v hostinci, na rušném tržišti nebo u táborového ohně. Zaslechne dramatický rozhovor šeptajících cizinců o chystané zradě či pokladu, anebo k ní přistoupí místní kupec/posel s prosbou o pomoc a nabídkou odměny."
+                },
+                {
+                    "theme": "ŽIVEL A PŘEŽITÍ (Atmosférický příchod)",
+                    "situation": "Oblast právě zasáhla náhlá prudká bouře, hustá mlha nebo krupobití. Postava nachází narychlo úkryt pod střechou kaple, pod skalním převisem nebo ve staré kovárně, kde se už tísní několik dalších poutníků sdílejících oheň a své příběhy."
+                },
+                {
+                    "theme": "OSOBNÍ STOPA (Napojení na minulost a cíl)",
+                    "situation": "Úvod přímo navazuje na povolání nebo původ postavy. Sleduje stopu po svém ztraceném mistrovi, plní posvátné vnuknutí, nebo dorazila vyhledat dávného známého. Právě zahlédla stopu, známou tvář nebo symbol, který hledala."
+                },
+                {
+                    "theme": "MORÁLNÍ DILEMA A NAPĚTÍ (Konflikt beze zbraní)",
+                    "situation": "Na místě právě probíhá vyhrocený spor: místní správce či výběrčí nespravedlivě viní chudou bylinkářku nebo mladého tuláka z krádeže. Kolem stojí rozpačitý hlouček. Žádná poprava ani vytasené meče! Hráč má možnost zasáhnout slovem, autoritou, lstí, nebo se nepozorovaně prosmýknout kolem."
+                }
+            ]
+            chosen_arch = random.choice(start_archetypes)
+            backstory_info = req.backstory.strip() if getattr(req, 'backstory', None) and req.backstory.strip() else "Neuvedeno (začíná jako nový poutník bez zapsané minulosti)."
+
+            world_context = f"""
+[HRAJE SE PŘÍBĚHOVÁ KAMPAŇ]:
+Zápletka kontinentu: {world_data.get('main_plot')}
+Místo startu: Frakce {start_kingdom_name} (Souřadnice: [{initial_location['q']}, {initial_location['r']}], Typ prostředí: {start_loc_type}).
+Klíčová NPC ve světě: {json.dumps(world_data.get('key_npcs', []), ensure_ascii=False)}
+
+[POSTAVA HRÁČE]:
+- Jméno: {req.name}
+- Povolání: {req.dnd_class} | Rasa: {req.race}
+- Příběhové pozadí (Backstory): {backstory_info}
+
+[STARTOVNÍ SCÉNÁŘ - TÉMA: {chosen_arch['theme']}]:
+{chosen_arch['situation']}
+
+[PŘÍSNÁ PRAVIDLA PRO INTRO]:
+1. PŘÍSNÝ ZÁKAZ AUTOMATICKÉHO BOJE V 1. TAHU! ŽÁDNÁ inkvizice, žádné přepadení se zbraní v ruce, žádný nucený souboj! Hráč se má v klidu rozkoukat, seznámit se světem a zvolit si svůj vlastní styl.
+2. Ve 2-3 větách atmosféricky nalaď prostředí lokace (zvuky, počasí, atmosféra typu '{start_loc_type}' v říši '{start_kingdom_name}').
+3. Poté představ výše popsanou startovní situaci.
+4. 'nabizene_akce' MUSÍ nabídnout 3 ZCELA ODLIŠNÉ PŘÍSTUPY:
+   - Možnost 1: Průzkum / Pozorování / Zkoumání detailů okolí.
+   - Možnost 2: Sociální interakce / Rozhovor s přítomnou postavou.
+   - Možnost 3: Akce specifická pro povolání/rasu ({req.dnd_class}/{req.race}) nebo poklidný odchod jinam.
+   NIKDY nenabízej útočné bojové akce v 1. tahu!
+"""
+        prompt = f'''
+Jsi Pán jeskyně v textové RPG hře D&D. Hráč právě vytvořil novou postavu:
+Jméno: {req.name}
+Rasa: {req.race}
+Třída: {req.dnd_class}
+Staty: {req.stats}
+{world_context}
+
+Vrať POUZE json ve formátu:
+{{
+  "intro_text": "Text vypravěče (atmosférické představení prostředí + startovní situace/záhada/dialog)...",
+  "popis_okoli": "Stručný popis lokace",
+  "nabizene_akce": ["Konkrétní volba 1 (průzkum)", "Konkrétní volba 2 (dialog/interakce)", "Konkrétní volba 3 (třída/kouzlo/přístup)"]
+}}
+'''
+        response = client.models.generate_content(
+            model='gemini-3.6-flash',
+            contents=prompt,
+            config=types.GenerateContentConfig(response_mime_type='application/json')
+        )
         import json
         try:
             clean_text = response.text.strip().removeprefix('```json').removesuffix('```').strip()
             data = json.loads(clean_text)
-            intro_text = data.get('intro_text', 'Mlha se rozestupuje...')
+            intro_text = data.get('intro_text', 'Mlha se rozestupuje a ty se rozhlížíš po okolí...')
             popis_okoli = data.get('popis_okoli', 'Neznámé místo.')
-            nabizene_akce = data.get('nabizene_akce', ['Rozhlédnout se', 'Zkontrolovat vybavení', 'Vydat se vpřed'])
+            nabizene_akce = data.get('nabizene_akce', ['Rozhlédnout se', 'Zkontrolovat vybavení', 'Promluvit s nejbližším člověkem'])
             if not isinstance(nabizene_akce, list) or len(nabizene_akce) == 0:
-                nabizene_akce = ['Rozhlédnout se', 'Zkontrolovat vybavení', 'Vydat se vpřed']
+                nabizene_akce = ['Rozhlédnout se', 'Zkontrolovat vybavení', 'Promluvit s nejbližším člověkem']
         except Exception:
             intro_text = response.text.strip()
             popis_okoli = 'Neznámé místo.'
-            nabizene_akce = ['Rozhlédnout se', 'Zkontrolovat vybavení', 'Vydat se vpřed']
+            nabizene_akce = ['Rozhlédnout se', 'Zkontrolovat vybavení', 'Promluvit s nejbližším člověkem']
     except Exception as e:
         raise HTTPException(status_code=500, detail=f'Chyba při generování intro textu: {str(e)}')
-    initial_history = [{'role': 'model', 'text': json.dumps({'aktualni_region': start_kingdom_name if world_data else 'Začátek cesty', 'popis_okoli': popis_okoli, 'vypravec': intro_text, 'nabizene_akce': nabizene_akce}, ensure_ascii=False)}]
+        
+    initial_history = [{
+        'role': 'model', 
+        'text': json.dumps({
+            'aktualni_region': start_kingdom_name if world_data else 'Začátek cesty', 
+            'popis_okoli': popis_okoli, 
+            'vypravec': intro_text, 
+            'nabizene_akce': nabizene_akce
+        }, ensure_ascii=False)
+    }]
+    
     cls_data = CLASS_TEMPLATES.get(req.dnd_class, CLASS_TEMPLATES['Bojovník'])
     start_loc_name = start_kingdom_name
     if initial_location and world_data and world_data.get('pois'):
         matching_poi = next((p for p in world_data['pois'] if p.get('q') == initial_location.get('q') and p.get('r') == initial_location.get('r')), None)
         if matching_poi and matching_poi.get('name'):
             start_loc_name = matching_poi.get('name')
+            
     initial_equipped = auto_equip_items(cls_data['inventory'], cls_data.get('equipped'))
-    state = {'hp': 100, 'max_hp': 100, 'level': 1, 'xp': 0, 'inventory': cls_data['inventory'], 'gold': 15, 'skills': cls_data['starting_skills'], 'active_quests': [], 'completed_quests': [], 'stats': req.stats, 'equipped': initial_equipped, 'world_data': world_data, 'playerLocation': initial_location, 'currentRegion': start_loc_name, 'current_region': start_loc_name, 'locationType': 'mesto', 'typ_lokace': 'mesto', 'currentLocationDesc': popis_okoli, 'popis_okoli': popis_okoli, 'pointsOfInterest': [], 'vyznamna_mista': [], 'zname_postavy': [], 'rations': 3}
+    state = {
+        'hp': 100, 
+        'max_hp': 100, 
+        'level': 1, 
+        'xp': 0, 
+        'inventory': cls_data['inventory'], 
+        'gold': 15, 
+        'skills': cls_data['starting_skills'], 
+        'active_quests': [], 
+        'completed_quests': [], 
+        'stats': req.stats, 
+        'equipped': initial_equipped, 
+        'world_data': world_data, 
+        'playerLocation': initial_location, 
+        'currentRegion': start_loc_name, 
+        'current_region': start_loc_name, 
+        'locationType': start_loc_type, 
+        'typ_lokace': start_loc_type, 
+        'currentLocationDesc': popis_okoli, 
+        'popis_okoli': popis_okoli, 
+        'pointsOfInterest': [], 
+        'vyznamna_mista': [], 
+        'zname_postavy': [], 
+        'rations': 3,
+        'backstory': getattr(req, 'backstory', '') or ''
+    }
+    
+
     supabase.table('characters').insert({'api_key': api_key, 'name': req.name, 'dnd_class': req.dnd_class, 'race': req.race, 'state': state, 'history': initial_history}).execute()
     return {'status': 'success', 'api_key': api_key, 'message': 'Úspěšně ses probudil v novém těle.', 'intro_text': intro_text, 'popis_okoli': popis_okoli, 'state': state}
 
