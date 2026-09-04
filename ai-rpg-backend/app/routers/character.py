@@ -63,6 +63,12 @@ async def load_game(req: LoadGameRequest):
                 state['quests'] = cleaned
                 state_modified = True
 
+        if state.get('inventory') and isinstance(state['inventory'], list):
+            new_equipped = auto_equip_items(state['inventory'], state.get('equipped'))
+            if new_equipped != state.get('equipped'):
+                state['equipped'] = new_equipped
+                state_modified = True
+
         if state_modified:
             try:
                 supabase.table('characters').update({'state': state}).eq('api_key', char_data['api_key']).execute()
@@ -87,8 +93,11 @@ async def delete_character(req: DeleteCharacterRequest):
 async def save_state(req: SaveStateRequest):
     try:
         api_key = f'{req.email}#{req.name}'
-        if req.state and 'quests' in req.state and isinstance(req.state['quests'], list):
-            req.state['quests'] = sanitize_and_deduplicate_quests(req.state['quests'])
+        if req.state:
+            if 'quests' in req.state and isinstance(req.state['quests'], list):
+                req.state['quests'] = sanitize_and_deduplicate_quests(req.state['quests'])
+            if 'inventory' in req.state and isinstance(req.state['inventory'], list):
+                req.state['equipped'] = auto_equip_items(req.state['inventory'], req.state.get('equipped'))
         supabase.table('characters').update({'state': req.state}).eq('api_key', api_key).execute()
         return {'status': 'success'}
     except Exception as e:
@@ -158,7 +167,8 @@ async def create_character(req: CharacterCreateRequest):
         matching_poi = next((p for p in world_data['pois'] if p.get('q') == initial_location.get('q') and p.get('r') == initial_location.get('r')), None)
         if matching_poi and matching_poi.get('name'):
             start_loc_name = matching_poi.get('name')
-    state = {'hp': 100, 'max_hp': 100, 'level': 1, 'xp': 0, 'inventory': cls_data['inventory'], 'gold': 15, 'skills': cls_data['starting_skills'], 'active_quests': [], 'completed_quests': [], 'stats': req.stats, 'equipped': cls_data['equipped'], 'world_data': world_data, 'playerLocation': initial_location, 'currentRegion': start_loc_name, 'current_region': start_loc_name, 'locationType': 'mesto', 'typ_lokace': 'mesto', 'currentLocationDesc': popis_okoli, 'popis_okoli': popis_okoli, 'pointsOfInterest': [], 'vyznamna_mista': [], 'zname_postavy': [], 'rations': 3}
+    initial_equipped = auto_equip_items(cls_data['inventory'], cls_data.get('equipped'))
+    state = {'hp': 100, 'max_hp': 100, 'level': 1, 'xp': 0, 'inventory': cls_data['inventory'], 'gold': 15, 'skills': cls_data['starting_skills'], 'active_quests': [], 'completed_quests': [], 'stats': req.stats, 'equipped': initial_equipped, 'world_data': world_data, 'playerLocation': initial_location, 'currentRegion': start_loc_name, 'current_region': start_loc_name, 'locationType': 'mesto', 'typ_lokace': 'mesto', 'currentLocationDesc': popis_okoli, 'popis_okoli': popis_okoli, 'pointsOfInterest': [], 'vyznamna_mista': [], 'zname_postavy': [], 'rations': 3}
     supabase.table('characters').insert({'api_key': api_key, 'name': req.name, 'dnd_class': req.dnd_class, 'race': req.race, 'state': state, 'history': initial_history}).execute()
     return {'status': 'success', 'api_key': api_key, 'message': 'Úspěšně ses probudil v novém těle.', 'intro_text': intro_text, 'popis_okoli': popis_okoli, 'state': state}
 

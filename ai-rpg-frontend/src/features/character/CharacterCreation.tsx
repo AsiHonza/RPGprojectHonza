@@ -3,6 +3,21 @@ import { useGameStore } from '../../store/gameStore';
 import { Settings2, Sparkles, ChevronRight, ChevronLeft, Crown, Shield, Wand2, Axe, Ghost, Skull, Book, Flame, X, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+const STARTING_GEAR: Record<string, { weapon: string; armor: string; offhand?: string; potion: string }> = {
+  "Barbar": { weapon: "Obouruční sekera (+2)", armor: "Kožené hadry", potion: "Léčivý lektvar" },
+  "Bard": { weapon: "Rapír (+2)", armor: "Kožená zbroj (+1 AC)", potion: "Léčivý lektvar" },
+  "Klerik": { weapon: "Kovaný palcát (+1)", armor: "Kroužková košile (+1 AC)", offhand: "Okovaný štít (+1 AC)", potion: "Léčivý lektvar" },
+  "Druid": { weapon: "Druidská hůl (+1)", armor: "Zesílená kůže (+1 AC)", potion: "Léčivý lektvar" },
+  "Bojovník": { weapon: "Dlouhý meč (+2)", armor: "Kroužková zbroj (+2 AC)", offhand: "Pěchotní štít (+1 AC)", potion: "Léčivý lektvar" },
+  "Mnich": { weapon: "Bojová hůl bo (+1)", armor: "Klášterní roucho", potion: "Léčivý lektvar" },
+  "Paladin": { weapon: "Válečné kladivo (+2)", armor: "Kroužková zbroj (+2 AC)", offhand: "Posvátný štít (+1 AC)", potion: "Léčivý lektvar" },
+  "Hraničář": { weapon: "Lovecký dlouhý luk (+2)", armor: "Zesílená kůže (+1 AC)", offhand: "Lovecký tesák (+1)", potion: "Léčivý lektvar" },
+  "Tulák": { weapon: "Dýka (+1)", armor: "Kožená zbroj (+1 AC)", offhand: "Levá dýka (+1)", potion: "Léčivý lektvar" },
+  "Čaroděj": { weapon: "Rituální dýka (+1)", armor: "Magické roucho", potion: "Léčivý lektvar" },
+  "Černokněžník": { weapon: "Paktová dýka (+1)", armor: "Temné roucho", potion: "Léčivý lektvar" },
+  "Kouzelník": { weapon: "Učednická hůlka (+1)", armor: "Mágovo roucho", potion: "Léčivý lektvar" }
+};
+
 export const CharacterCreation = ({ startNewGame, loading, backstory, generateBackstory, onClose }: any) => {
   const [step, setStep] = useState(1);
   const classes = ["Barbar", "Bard", "Klerik", "Druid", "Bojovník", "Mnich", "Paladin", "Hraničář", "Tulák", "Čaroděj", "Černokněžník", "Kouzelník"];
@@ -198,6 +213,38 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
                         <div className="text-lg sm:text-xl font-cinzel font-bold text-slate-900">{val as number}</div>
                       </div>
                     ))}
+                  </div>
+                </div>
+
+                {/* Starting Gear Preview */}
+                <div className="bg-amber-100/60 p-3 sm:p-4 rounded-xl border border-amber-900/15 shadow-sm text-left">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-cinzel text-amber-950 font-bold text-xs sm:text-sm flex items-center gap-1.5">
+                      <Shield size={15} className="text-amber-700" /> Počáteční výstroj (rovnou nasazeno)
+                    </span>
+                    <span className="text-[10px] uppercase font-cinzel font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-600/30">
+                      Připraveno k boji
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-2 text-xs font-lora text-slate-800">
+                    {STARTING_GEAR[dndClass] && (
+                      <>
+                        <span className="bg-white/80 border border-amber-900/10 px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-xs">
+                          ⚔️ <strong>Zbraň:</strong> {STARTING_GEAR[dndClass].weapon}
+                        </span>
+                        <span className="bg-white/80 border border-amber-900/10 px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-xs">
+                          🛡️ <strong>Zbroj:</strong> {STARTING_GEAR[dndClass].armor}
+                        </span>
+                        {STARTING_GEAR[dndClass].offhand && (
+                          <span className="bg-white/80 border border-amber-900/10 px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-xs">
+                            🔰 <strong>Druhá ruka:</strong> {STARTING_GEAR[dndClass].offhand}
+                          </span>
+                        )}
+                        <span className="bg-white/80 border border-amber-900/10 px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-xs">
+                          🧪 <strong>V batohu:</strong> {STARTING_GEAR[dndClass].potion}
+                        </span>
+                      </>
+                    )}
                   </div>
                 </div>
               </motion.div>

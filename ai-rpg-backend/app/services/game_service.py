@@ -883,3 +883,72 @@ def sanitize_and_deduplicate_quests(quests: list) -> list:
 
     return cleaned_quests
 
+def auto_equip_items(inventory: list, current_equipped: dict = None) -> dict:
+    equipped = {
+        "hlava": None,
+        "hruď": None,
+        "hlavní ruka": None,
+        "druhá ruka": None,
+        "prsten": None,
+        "krk": None
+    }
+    if isinstance(current_equipped, dict):
+        for k, v in current_equipped.items():
+            if k in equipped and v is not None:
+                equipped[k] = v
+
+    if not isinstance(inventory, list):
+        return equipped
+
+    valid_item_ids = {i.get('id') for i in inventory if isinstance(i, dict) and i.get('id')}
+    for k in equipped:
+        if equipped[k] and equipped[k] not in valid_item_ids:
+            equipped[k] = None
+
+    equipped_vals = {v for v in equipped.values() if v is not None}
+
+    # 1. Main hand weapon: check slot == 'hlavní ruka' or type == 'zbraň'
+    if not equipped["hlavní ruka"]:
+        weapon = next((i for i in inventory if isinstance(i, dict) and i.get('id') not in equipped_vals and (i.get('slot') == "hlavní ruka" or i.get('type') == "zbraň")), None)
+        if weapon:
+            equipped["hlavní ruka"] = weapon.get('id')
+            equipped_vals.add(weapon.get('id'))
+
+    # 2. Chest armor: check slot == 'hruď' or (i.get('type') == 'zbroj' and slot != 'druhá ruka')
+    if not equipped["hruď"]:
+        armor = next((i for i in inventory if isinstance(i, dict) and i.get('id') not in equipped_vals and (i.get('slot') == "hruď" or (i.get('type') == "zbroj" and i.get('slot') != "druhá ruka"))), None)
+        if armor:
+            equipped["hruď"] = armor.get('id')
+            equipped_vals.add(armor.get('id'))
+
+    # 3. Off-hand / Shield: check slot == 'druhá ruka' or icon == 'Shield'
+    if not equipped["druhá ruka"]:
+        shield = next((i for i in inventory if isinstance(i, dict) and i.get('id') not in equipped_vals and (i.get('slot') == "druhá ruka" or (i.get('icon') == "Shield" and i.get('type') == "zbroj"))), None)
+        if shield:
+            equipped["druhá ruka"] = shield.get('id')
+            equipped_vals.add(shield.get('id'))
+
+    # 4. Helmet: check slot == 'hlava'
+    if not equipped["hlava"]:
+        helmet = next((i for i in inventory if isinstance(i, dict) and i.get('id') not in equipped_vals and i.get('slot') == "hlava"), None)
+        if helmet:
+            equipped["hlava"] = helmet.get('id')
+            equipped_vals.add(helmet.get('id'))
+
+    # 5. Ring: check slot == 'prsten' or icon == 'Ring'
+    if not equipped["prsten"]:
+        ring = next((i for i in inventory if isinstance(i, dict) and i.get('id') not in equipped_vals and (i.get('slot') == "prsten" or i.get('icon') == "Ring")), None)
+        if ring:
+            equipped["prsten"] = ring.get('id')
+            equipped_vals.add(ring.get('id'))
+
+    # 6. Necklace: check slot == 'krk' or slot == 'amulet'
+    if not equipped["krk"]:
+        necklace = next((i for i in inventory if isinstance(i, dict) and i.get('id') not in equipped_vals and (i.get('slot') in ["krk", "amulet"])), None)
+        if necklace:
+            equipped["krk"] = necklace.get('id')
+            equipped_vals.add(necklace.get('id'))
+
+    return equipped
+
+

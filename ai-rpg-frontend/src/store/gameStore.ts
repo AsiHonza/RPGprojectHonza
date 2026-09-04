@@ -54,6 +54,103 @@ export function deduplicateQuests(questList: any[]): any[] {
   return result;
 }
 
+export function autoEquipItems(inventory: any[], currentEquipped?: any): Record<string, string | null> {
+  const equipped: Record<string, string | null> = {
+    "hlava": null,
+    "hruď": null,
+    "hlavní ruka": null,
+    "druhá ruka": null,
+    "prsten": null,
+    "krk": null,
+    ...(currentEquipped || {})
+  };
+
+  if (!Array.isArray(inventory)) return equipped;
+
+  const validItemIds = new Set(inventory.filter(Boolean).map(i => i.id));
+  for (const slot of Object.keys(equipped)) {
+    if (equipped[slot] && !validItemIds.has(equipped[slot])) {
+      equipped[slot] = null;
+    }
+  }
+
+  const equippedVals = new Set(Object.values(equipped).filter(Boolean));
+
+  // 1. Main hand weapon: slot == 'hlavní ruka' or type == 'zbraň'
+  if (!equipped["hlavní ruka"]) {
+    const weapon = inventory.find(i => 
+      i && !equippedVals.has(i.id) &&
+      (i.slot === "hlavní ruka" || i.type === "zbraň")
+    );
+    if (weapon) {
+      equipped["hlavní ruka"] = weapon.id;
+      equippedVals.add(weapon.id);
+    }
+  }
+
+  // 2. Chest armor: slot == 'hruď' or (type == 'zbroj' and slot != 'druhá ruka')
+  if (!equipped["hruď"]) {
+    const armor = inventory.find(i => 
+      i && !equippedVals.has(i.id) &&
+      (i.slot === "hruď" || (i.type === "zbroj" && i.slot !== "druhá ruka"))
+    );
+    if (armor) {
+      equipped["hruď"] = armor.id;
+      equippedVals.add(armor.id);
+    }
+  }
+
+  // 3. Shield / Off-hand: slot == 'druhá ruka' or icon == 'Shield'
+  if (!equipped["druhá ruka"]) {
+    const offhand = inventory.find(i => 
+      i && !equippedVals.has(i.id) &&
+      (i.slot === "druhá ruka" || (i.icon === "Shield" && i.type === "zbroj"))
+    );
+    if (offhand) {
+      equipped["druhá ruka"] = offhand.id;
+      equippedVals.add(offhand.id);
+    }
+  }
+
+  // 4. Helmet: slot == 'hlava'
+  if (!equipped["hlava"]) {
+    const helmet = inventory.find(i => 
+      i && !equippedVals.has(i.id) &&
+      i.slot === "hlava"
+    );
+    if (helmet) {
+      equipped["hlava"] = helmet.id;
+      equippedVals.add(helmet.id);
+    }
+  }
+
+  // 5. Ring: slot == 'prsten' or icon == 'Ring'
+  if (!equipped["prsten"]) {
+    const ring = inventory.find(i => 
+      i && !equippedVals.has(i.id) &&
+      (i.slot === "prsten" || i.icon === "Ring")
+    );
+    if (ring) {
+      equipped["prsten"] = ring.id;
+      equippedVals.add(ring.id);
+    }
+  }
+
+  // 6. Necklace: slot == 'krk' or slot == 'amulet'
+  if (!equipped["krk"]) {
+    const necklace = inventory.find(i => 
+      i && !equippedVals.has(i.id) &&
+      (i.slot === "krk" || i.slot === "amulet")
+    );
+    if (necklace) {
+      equipped["krk"] = necklace.id;
+      equippedVals.add(necklace.id);
+    }
+  }
+
+  return equipped;
+}
+
 interface GameState {
   // Application UI State
   gameState: "menu" | "creation" | "playing";

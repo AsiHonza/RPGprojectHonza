@@ -3,7 +3,7 @@
 import HexMap from "../components/map/HexMap";
 import { motion } from 'framer-motion';
 import { useState, useRef, useEffect } from "react";
-import { useGameStore, isSameQuest, normalizeQuestTitle, deduplicateQuests } from '../store/gameStore';
+import { useGameStore, isSameQuest, normalizeQuestTitle, deduplicateQuests, autoEquipItems } from '../store/gameStore';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
@@ -567,15 +567,10 @@ export default function Home() {
         if (state.gold !== undefined) setGold(state.gold);
         if (state.currentSpellSlots !== undefined) setCurrentSpellSlots(state.currentSpellSlots);
         if (state.maxSpellSlots !== undefined) setMaxSpellSlots(state.maxSpellSlots);
-        setInventory(state.inventory || []);
-        setEquipped(state.equipped || {
-          "hlava": null,
-          "hruď": null,
-          "hlavní ruka": null,
-          "druhá ruka": null,
-          "prsten": null,
-          "krk": null
-        });
+        const loadedInv = state.inventory || [];
+        setInventory(loadedInv);
+        const resolvedEquipped = autoEquipItems(loadedInv, state.equipped);
+        setEquipped(resolvedEquipped);
         
         
         setLevel(state.level || 1);
