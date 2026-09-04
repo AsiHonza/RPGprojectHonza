@@ -9,6 +9,7 @@ import json
 import uuid
 import random
 from app.services.game_service import *
+from app.utils.loot_generator import generate_loot
 
 router = APIRouter(prefix="", tags=["Game"])
 
@@ -413,7 +414,7 @@ async def resolve_combat(req: CombatResolutionRequest):
         
         Tvůj úkol:
         1. Vrať JSON s klíčem 'vypravec', kde napíšeš brutální, epické nebo velmi atmosférické zakončení tohoto boje (tzv. Fatality / Aftermath) - max 2-3 věty, které shrnou hráčovo drtivé vítězství, jak zabil posledního protivníka a svalil se (hráč má nyní {req.player_hp} HP).
-        2. Vygeneruj adekvátní loot do 'inventar_pridat' podle pravidel (rarity podle {req.level}. úrovně, žádný broken nesmysl).
+        2. Vygeneruj pouze zlaté mince a zkušenosti.
         3. Vygeneruj odpovídající 'xp_zmena' (cca 15-30 za každého nepřítele) a 'zlato_zmena'.
         4. Odrážej to ve strukturách 'StateChanges' ze schématu DMResponse. Nemaž žádné další stavy.
         5. 'v_boji' vrať False.
@@ -431,24 +432,7 @@ async def resolve_combat(req: CombatResolutionRequest):
                     "properties": {
                         "xp_zmena": {"type": "INTEGER"},
                         "zlato_zmena": {"type": "INTEGER"},
-                        "inventar_pridat": {
-                            "type": "ARRAY",
-                            "items": {
-                                "type": "OBJECT",
-                                "properties": {
-                                    "name": {"type": "STRING"},
-                                    "description": {"type": "STRING"},
-                                    "type": {"type": "STRING"},
-                                    "slot": {"type": "STRING"},
-                                    "rarity": {"type": "STRING"},
-                                    "icon": {"type": "STRING"},
-                                    "sell_price": {"type": "INTEGER"},
-                                    "attack_bonus": {"type": "INTEGER"},
-                                    "defense_bonus": {"type": "INTEGER"},
-                                    "healing_amount": {"type": "INTEGER"}
-                                }
-                            }
-                        }
+                        
                     }
                 }
             },
@@ -474,6 +458,9 @@ async def resolve_combat(req: CombatResolutionRequest):
         state['combatRound'] = 1
         
         zmeny = dm_json.get('zmeny_stavu', {})
+        if zmeny:
+            zmeny['inventar_pridat'] = generate_loot(enemy_names, req.level)
+
         if zmeny:
             state['xp'] = state.get('xp', 0) + zmeny.get('xp_zmena', 0)
             state['gold'] = state.get('gold', 0) + zmeny.get('zlato_zmena', 0)
