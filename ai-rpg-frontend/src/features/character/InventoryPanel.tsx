@@ -1,19 +1,5 @@
 import React from 'react';
-import 
-            {/* Racial Trait */}
-            {RACES[race]?.trait && (
-              <div className="bg-[#fdfbf2] border border-amber-900/20 p-4 rounded-xl text-slate-800 shadow-sm">
-                <h3 className="uppercase font-cinzel font-bold text-xs tracking-widest text-amber-950 border-b border-amber-900/10 pb-2 mb-2 flex justify-between items-center">
-                  <span>Rasov� Rys: {RACES[race].trait.name}</span>
-                  <span className="bg-amber-100 text-amber-800 text-[10px] px-1.5 py-0.5 rounded font-lora">Pasivn�</span>
-                </h3>
-                <p className="text-sm font-lora italic text-slate-600">
-                  {RACES[race].trait.description}
-                </p>
-              </div>
-            )}
-
-{ ItemIcon } from '../../components/ui/ItemIcon';
+import { ItemIcon } from '../../components/ui/ItemIcon';
 import { X, Package, Shield, Swords, Sparkles, Heart, Plus, Trash2 } from 'lucide-react';
 import { useGameStore } from '../../store/gameStore';
 import { RACES } from '../../data/races';
