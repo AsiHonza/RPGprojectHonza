@@ -470,6 +470,17 @@ async def resolve_combat(req: CombatResolutionRequest):
         state['combatRound'] = 1
         
         zmeny = dm_json.get('zmeny_stavu', {})
+        
+        # OCHRANA PŘED AI HALUCINACÍ - AI občas maže zbraně, když je hráč vytáhne!
+        if zmeny and zmeny.get('inventar_odebrat_id'):
+            # Povolíme odebrat jen lektvary nebo jídlo, zbraně/zbroje nikdy z inventáře nemažeme (leda by je hráč explicitně prodal, což v boji nejde)
+            safe_removals = []
+            for item_id in zmeny['inventar_odebrat_id']:
+                item_obj = next((i for i in inv_list if i.get('id') == item_id), None)
+                if item_obj and item_obj.get('type') not in ['zbraň', 'zbroj', 'zbran', 'zbroj']:
+                    safe_removals.append(item_id)
+            zmeny['inventar_odebrat_id'] = safe_removals
+
         if zmeny:
             zmeny['inventar_pridat'] = generate_loot(enemy_names, req.level)
 

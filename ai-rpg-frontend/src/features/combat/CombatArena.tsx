@@ -144,16 +144,16 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-900 rounded-xl border-2 border-red-900/50 shadow-2xl shadow-red-900/20 overflow-hidden font-lora relative">
+    <div className="flex flex-col h-full bg-[#f9f6e6]/95 backdrop-blur-md rounded-2xl border-2 border-red-900/30 shadow-2xl overflow-hidden font-lora relative">
       {/* Background Effect */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-red-950/40 via-slate-900/90 to-slate-950 pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-red-950/20 via-[#f9f6e6]/90 to-[#e5dfc5]/95 pointer-events-none" />
 
       {/* Header */}
-      <div className="bg-gradient-to-r from-red-950/80 to-slate-900/80 border-b border-red-900/50 p-3 z-10 flex justify-between items-center">
-        <h2 className="font-cinzel font-bold text-red-500 text-lg flex items-center gap-2">
+      <div className="bg-gradient-to-r from-red-900/90 to-red-950/90 border-b border-red-900/50 p-3 z-10 flex justify-between items-center shadow-md">
+        <h2 className="font-cinzel font-bold text-red-50 text-lg flex items-center gap-2">
           <Sword className="animate-pulse" size={20} /> TAKTICKÝ BOJ
         </h2>
-        <div className="text-red-300/80 text-xs uppercase tracking-widest font-bold">Kolo {combatRound}</div>
+        <div className="text-red-200/90 text-xs uppercase tracking-widest font-bold">Kolo {combatRound}</div>
       </div>
 
       {/* Arena: Enemies */}
@@ -170,10 +170,10 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
                   animate={{ opacity: 1, y: 0, scale: isTarget && !isDead ? 1.05 : 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
                   onClick={() => !isDead && setTargetId(enemy.id)}
-                  className={`relative p-3 rounded-xl border-2 transition-all cursor-pointer w-40 sm:w-48
-                    ${isDead ? 'border-slate-800 bg-slate-800/50 grayscale opacity-50' : 
-                      isTarget ? 'border-red-500 bg-red-950/40 shadow-lg shadow-red-500/20' : 'border-red-900/30 bg-slate-800/80 hover:border-red-700/50'
-                    }`}
+                  className={`relative p-3 rounded-xl border-2 transition-all cursor-pointer w-40 sm:w-48 shadow-lg
+                      ${isDead ? 'border-amber-900/20 bg-[#e5dfc5]/50 grayscale opacity-50' : 
+                        isTarget ? 'border-red-600 bg-white/90 shadow-red-600/30 scale-105' : 'border-amber-900/30 bg-[#fdfbf2]/90 hover:border-red-700/50 hover:bg-white'
+                      }`}
                 >
                   {isTarget && !isDead && (
                     <div className="absolute -top-3 -right-3 text-red-500 animate-bounce">
@@ -181,17 +181,17 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
                     </div>
                   )}
 
-                  <div className="font-cinzel font-bold text-sm text-slate-200 text-center mb-2 truncate">
+                  <div className="font-cinzel font-bold text-sm text-slate-900 text-center mb-2 truncate">
                     {enemy.name}
                   </div>
                   
                   {/* HP Bar */}
                   <div className="mb-3">
-                    <div className="flex justify-between text-[10px] text-slate-400 mb-1 font-bold">
+                    <div className="flex justify-between text-[10px] text-slate-600 mb-1 font-bold">
                       <span>HP</span>
                       <span>{Math.max(0, enemy.hp)} / {enemy.max_hp}</span>
                     </div>
-                    <div className="w-full bg-slate-950 rounded-full h-2 border border-slate-700">
+                    <div className="w-full bg-slate-200 rounded-full h-2 border border-slate-300 shadow-inner">
                       <div 
                         className={`h-full rounded-full transition-all duration-500 ${enemy.hp < enemy.max_hp * 0.3 ? 'bg-red-500' : 'bg-emerald-500'}`}
                         style={{ width: `${Math.max(0, (enemy.hp / enemy.max_hp) * 100)}%` }}
