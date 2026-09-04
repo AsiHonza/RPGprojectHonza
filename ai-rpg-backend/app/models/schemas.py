@@ -17,7 +17,7 @@ class Item(BaseModel):
     stats: str = Field(default="", description="Stručný přehled vlastností (např. 'Útok +1')")
 
 class Ukol(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    id: Optional[str] = Field(default=None, description="Unikátní ID úkolu")
     nazev: str
     popis: str
     stav: str

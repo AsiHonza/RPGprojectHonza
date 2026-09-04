@@ -3,7 +3,7 @@
 import HexMap from "../components/map/HexMap";
 import { motion } from 'framer-motion';
 import { useState, useRef, useEffect } from "react";
-import { useGameStore } from '../store/gameStore';
+import { useGameStore, isSameQuest, normalizeQuestTitle, deduplicateQuests } from '../store/gameStore';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
@@ -142,16 +142,25 @@ export default function Home() {
     const prev = prevQuestsRef.current;
     if (prev.length > 0 || quests.length > 0) {
       if (JSON.stringify(prev) !== JSON.stringify(quests)) {
-        setUnreadQuests(true);
-        const newQuest = quests.find(q => !prev.some(pq => pq.id === q.id));
+        const newQuest = quests.find(q => !prev.some(pq => isSameQuest(pq, q)));
         if (newQuest) {
+           setUnreadQuests(true);
            setQuestBanner({title: "ÚKOL PŘIJAT", subtitle: newQuest.nazev});
         } else {
-           const completedQuest = quests.find(q => (q.stav === 'splněno' || q.stav === 'splneno') && prev.some(pq => pq.id === q.id && pq.stav !== 'splněno' && pq.stav !== 'splneno'));
+           const completedQuest = quests.find(q => (q.stav === 'splněno' || q.stav === 'splneno') && prev.some(pq => isSameQuest(pq, q) && pq.stav !== 'splněno' && pq.stav !== 'splneno'));
            if (completedQuest) {
+              setUnreadQuests(true);
               setQuestBanner({title: "ÚKOL SPLNĚN", subtitle: completedQuest.nazev});
            } else {
-              setQuestBanner({title: "DENÍK ÚKOLŮ AKTUALIZOVÁN", subtitle: ""});
+              const hadChanges = prev.length !== quests.length || 
+                quests.some(q => {
+                  const matching = prev.find(pq => isSameQuest(pq, q));
+                  return !matching || matching.stav !== q.stav || matching.popis !== q.popis;
+                });
+              if (hadChanges) {
+                setUnreadQuests(true);
+                setQuestBanner({title: "DENÍK ÚKOLŮ AKTUALIZOVÁN", subtitle: ""});
+              }
            }
         }
         setTimeout(() => setQuestBanner(null), 3500);
@@ -584,7 +593,7 @@ export default function Home() {
         setRations(state.rations ?? 3);
         setInCombat(state.inCombat || false);
         setEnemies(state.enemies || []);
-        setQuests(state.quests || []);
+        setQuests(deduplicateQuests(state.quests || []));
       setJournal(state.journal || []);
         if (data.character.stats) setStats(data.character.stats);
         if (state.locationType) setLocationType(state.locationType);
@@ -871,11 +880,11 @@ export default function Home() {
              setQuests(prev => {
                 const updated = [...prev];
                 for (const u of data.zmeny_stavu.ukoly) {
-                   const idx = updated.findIndex(existing => existing.id === u.id);
-                   if (idx !== -1) updated[idx] = u;
+                   const idx = updated.findIndex(existing => isSameQuest(existing, u));
+                   if (idx !== -1) updated[idx] = { ...updated[idx], ...u };
                    else updated.push(u);
                 }
-                return updated;
+                return deduplicateQuests(updated);
              });
           }
         }

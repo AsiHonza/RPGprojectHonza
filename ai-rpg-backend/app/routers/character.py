@@ -44,6 +44,8 @@ async def load_game(req: LoadGameRequest):
                 raise HTTPException(status_code=404, detail='Character not found.')
         char_data = db_res.data[0]
         state = char_data.get('state') or {}
+        state_modified = False
+
         if not state.get('playerLocation') and state.get('world_data'):
             w_data = state.get('world_data')
             cap = next((p for p in w_data.get('pois', []) if p.get('type') == 'Capital'), None)
@@ -52,11 +54,22 @@ async def load_game(req: LoadGameRequest):
             elif w_data.get('hex_grid'):
                 first_h = w_data['hex_grid'][0]
                 state['playerLocation'] = {'q': first_h['q'], 'r': first_h['r'], 'kingdom_id': first_h.get('kingdom_id'), 'biome': first_h.get('terrain', 'Plains')}
+            state_modified = True
+
+        if state.get('quests') and isinstance(state['quests'], list):
+            orig_len = len(state['quests'])
+            cleaned = sanitize_and_deduplicate_quests(state['quests'])
+            if len(cleaned) != orig_len or cleaned != state['quests']:
+                state['quests'] = cleaned
+                state_modified = True
+
+        if state_modified:
             try:
                 supabase.table('characters').update({'state': state}).eq('api_key', char_data['api_key']).execute()
             except Exception as se:
-                print('Could not auto-save repaired location:', se)
-            char_data['state'] = state
+                print('Could not auto-save repaired state in load_game:', se)
+        
+        char_data['state'] = state
         return {'status': 'success', 'character': char_data}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -74,6 +87,8 @@ async def delete_character(req: DeleteCharacterRequest):
 async def save_state(req: SaveStateRequest):
     try:
         api_key = f'{req.email}#{req.name}'
+        if req.state and 'quests' in req.state and isinstance(req.state['quests'], list):
+            req.state['quests'] = sanitize_and_deduplicate_quests(req.state['quests'])
         supabase.table('characters').update({'state': req.state}).eq('api_key', api_key).execute()
         return {'status': 'success'}
     except Exception as e:
@@ -147,20 +162,3 @@ async def create_character(req: CharacterCreateRequest):
     supabase.table('characters').insert({'api_key': api_key, 'name': req.name, 'dnd_class': req.dnd_class, 'race': req.race, 'state': state, 'history': initial_history}).execute()
     return {'status': 'success', 'api_key': api_key, 'message': 'Úspěšně ses probudil v novém těle.', 'intro_text': intro_text, 'popis_okoli': popis_okoli, 'state': state}
 
-@router.post('/delete-character')
-async def delete_character(req: DeleteCharacterRequest):
-    try:
-        api_key = f'{req.email}#{req.name}'
-        supabase.table('characters').delete().eq('api_key', api_key).execute()
-        return {'status': 'success'}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-@router.post('/save-state')
-async def save_state(req: SaveStateRequest):
-    try:
-        db_key = f'{req.email}#{req.name}'
-        supabase.table('characters').update({'state': req.state}).eq('api_key', db_key).execute()
-        return {'status': 'success'}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f'Chyba při ukládání: {str(e)}')

@@ -201,6 +201,10 @@ ZÁZNAMY PRO FRONTEND:
                     item['rarity'] = 'common'
                 cleaned_loot.append(item)
             dm_json['zmeny_stavu']['inventar_pridat'] = cleaned_loot
+
+        # Quest Sanitizer & Deduplication
+        if dm_json.get('zmeny_stavu') and dm_json['zmeny_stavu'].get('ukoly'):
+            dm_json['zmeny_stavu']['ukoly'] = sanitize_and_deduplicate_quests(dm_json['zmeny_stavu']['ukoly'])
         import unicodedata
         import re
         region = dm_json.get('aktualni_region', curr_region)

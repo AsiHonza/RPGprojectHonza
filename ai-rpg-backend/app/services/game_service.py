@@ -818,3 +818,68 @@ CLASS_TEMPLATES = {
 def hex_distance(q1, r1, q2, r2):
     return (abs(q1 - q2) + abs(q1 + r1 - q2 - r2) + abs(r1 - r2)) // 2
 
+import unicodedata
+import re
+import hashlib
+
+def normalize_quest_title(title: str) -> str:
+    if not title:
+        return ""
+    norm = unicodedata.normalize('NFKD', str(title)).encode('ascii', 'ignore').decode('ascii').lower()
+    return re.sub(r'[^a-z0-9]+', '', norm).strip()
+
+def sanitize_and_deduplicate_quests(quests: list) -> list:
+    if not isinstance(quests, list):
+        return []
+    cleaned_quests = []
+    seen_map = {}
+
+    for q in quests:
+        if not isinstance(q, dict):
+            continue
+        nazev = str(q.get('nazev', '')).strip()
+        if not nazev:
+            continue
+        
+        norm_key = normalize_quest_title(nazev)
+        if not norm_key:
+            continue
+
+        q_id = q.get('id')
+        hash_id = hashlib.md5(norm_key.encode('utf-8')).hexdigest()[:10]
+        deterministic_id = f"quest_{hash_id}"
+        final_id = q_id if (q_id and not q_id.startswith('quest_') and len(q_id) < 40) else deterministic_id
+
+        stav_raw = str(q.get('stav', 'aktivni')).strip().lower()
+        if 'spln' in stav_raw:
+            stav = 'splněno'
+        elif 'selh' in stav_raw:
+            stav = 'selhání'
+        else:
+            stav = 'aktivni'
+
+        popis = str(q.get('popis', '')).strip()
+
+        if norm_key in seen_map:
+            idx = seen_map[norm_key]
+            existing = cleaned_quests[idx]
+            if stav == 'splněno' or existing.get('stav') == 'splněno':
+                existing['stav'] = 'splněno'
+            elif stav == 'selhání' or existing.get('stav') == 'selhání':
+                existing['stav'] = 'selhání'
+            
+            if len(popis) > len(existing.get('popis', '')):
+                existing['popis'] = popis
+            if len(nazev) > len(existing.get('nazev', '')):
+                existing['nazev'] = nazev
+        else:
+            seen_map[norm_key] = len(cleaned_quests)
+            cleaned_quests.append({
+                'id': final_id,
+                'nazev': nazev,
+                'popis': popis,
+                'stav': stav
+            })
+
+    return cleaned_quests
+

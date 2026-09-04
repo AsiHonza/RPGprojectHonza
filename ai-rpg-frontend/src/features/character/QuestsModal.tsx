@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, ScrollText, CheckCircle2, AlertCircle, Clock, BookOpen, Sparkles } from 'lucide-react';
-import { useGameStore } from '../../store/gameStore';
+import { useGameStore, deduplicateQuests } from '../../store/gameStore';
 
 interface QuestsModalProps {
   isOpen: boolean;
@@ -9,7 +9,8 @@ interface QuestsModalProps {
 }
 
 export const QuestsModal: React.FC<QuestsModalProps> = ({ isOpen, onClose, onSwitchToJournal }) => {
-  const { quests } = useGameStore();
+  const { quests: rawQuests } = useGameStore();
+  const quests = deduplicateQuests(rawQuests);
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
 
   if (!isOpen) return null;

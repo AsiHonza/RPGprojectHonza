@@ -1,5 +1,59 @@
 import { create } from 'zustand';
 
+export function normalizeQuestTitle(title: string): string {
+  if (!title) return '';
+  return String(title)
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]/g, '')
+    .trim();
+}
+
+export function isSameQuest(a: any, b: any): boolean {
+  if (!a || !b) return false;
+  if (a.id && b.id && a.id === b.id) return true;
+  const normA = normalizeQuestTitle(a.nazev || a.title || '');
+  const normB = normalizeQuestTitle(b.nazev || b.title || '');
+  return Boolean(normA && normB && normA === normB);
+}
+
+export function deduplicateQuests(questList: any[]): any[] {
+  if (!Array.isArray(questList)) return [];
+  const result: any[] = [];
+
+  for (const q of questList) {
+    if (!q || (!q.id && !q.nazev)) continue;
+    const existingIdx = result.findIndex(item => isSameQuest(item, q));
+
+    if (existingIdx === -1) {
+      const normTitle = normalizeQuestTitle(q.nazev || '');
+      result.push({
+        ...q,
+        id: q.id || (normTitle ? `quest_${normTitle}` : `quest_${Math.random().toString(36).substring(2, 9)}`),
+        nazev: q.nazev || 'Neznámý úkol',
+        popis: q.popis || '',
+        stav: q.stav || 'aktivni',
+      });
+    } else {
+      const existing = result[existingIdx];
+      const isCompleted = q.stav === 'splněno' || q.stav === 'splneno' || existing.stav === 'splněno' || existing.stav === 'splneno';
+      const isFailed = !isCompleted && (q.stav === 'selhání' || q.stav === 'selhani' || existing.stav === 'selhání' || existing.stav === 'selhani');
+
+      result[existingIdx] = {
+        ...existing,
+        ...q,
+        id: existing.id || q.id,
+        nazev: (q.nazev && q.nazev.length >= (existing.nazev?.length || 0)) ? q.nazev : existing.nazev,
+        popis: (q.popis && q.popis.length >= (existing.popis?.length || 0)) ? q.popis : existing.popis,
+        stav: isCompleted ? 'splněno' : (isFailed ? 'selhání' : (q.stav || existing.stav || 'aktivni')),
+      };
+    }
+  }
+
+  return result;
+}
+
 interface GameState {
   // Application UI State
   gameState: "menu" | "creation" | "playing";
@@ -178,7 +232,10 @@ export const useGameStore = create<GameState>((set) => ({
   journal: [],
   setJournal: (journal) => set((state) => ({ journal: typeof journal === 'function' ? journal(state.journal) : journal })),
   quests: [],
-  setQuests: (quests) => set((state) => ({ quests: typeof quests === 'function' ? quests(state.quests) : quests })),
+  setQuests: (quests) => set((state) => {
+    const raw = typeof quests === 'function' ? quests(state.quests) : quests;
+    return { quests: deduplicateQuests(raw) };
+  }),
   npcs: [],
   setNpcs: (npcs) => set((state) => ({ npcs: typeof npcs === 'function' ? npcs(state.npcs) : npcs })),
   setWorldData: (worldData) => set({ worldData }),
