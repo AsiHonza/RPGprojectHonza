@@ -339,12 +339,22 @@ async def travel_action(req: TravelRequest):
             dest_type = 'dungeon'
         else:
             dest_type = 'divocina'
-        client = genai.Client(api_key=req.api_key if getattr(req, 'api_key', None) and 'DUMMY' not in req.api_key else os.environ.get('GEMINI_API_KEY'))
-        prompt = f"""Hráč v D&D RPG (rasa: {state.get('race', 'Člověk')}, povolání: {state.get('dnd_class', 'Bojovník')}) právě dorazil na nové místo na mapě:\nCílová lokace: {dest_name} (Typ: {dest_type}, Terén: {target_hex.get('terrain')})\nZnámý bod zájmu (POI): {(json.dumps(poi or raw_poi, ensure_ascii=False) if poi or raw_poi else 'Běžná divočina/krajina')}\nHlavní zápletka světa: {world_data.get('main_plot', '')}\n\nKRITICKÉ PROSTOROVÉ PRAVIDLO:\nHráč opustil předchozí město a dorazil sem. ŽÁDNÉ postavy z minulého města (hostinští, strážní, NPC z předchozího města) ZDE NEJSOU!\nVšechny nabízené akce a lokální orientační body se musí týkat VÝHRADNĚ této nové lokace ({dest_name}).\n\nVrať POUZE validní JSON:\n{{\n  "vypravec": "Atmosférické vylíčení cesty a příchodu na místo z pohledu vypravěče (3-4 věty). Popiš, co hráč vidí v {dest_name}, jaké je počasí a jaká nová situace či tajemství se otevírá.",\n  "popis_okoli": "Stručný popis nové oblasti (1-2 věty).",\n  "vyznamna_mista": [\n    {{"nazev": "Konkrétní budova či orientační bod 1 v {dest_name}", "ikona": "Compass"}},\n    {{"nazev": "Konkrétní budova či orientační bod 2 v {dest_name}", "ikona": "Home"}},\n    {{"nazev": "Konkrétní budova či orientační bod 3 v {dest_name}", "ikona": "Shield"}}\n  ],\n  "nabizene_akce": ["První logická akce přímo v {dest_name}", "Druhá akce přímo v {dest_name}", "Třetí odvážná akce přímo v {dest_name}"],\n  "image_prompt": "vibrant fantasy landscape concept art of {dest_name} in {target_hex.get('terrain')}, detailed 2D painterly style, high quality"\n}}"""
-        try:
-            resp = client.models.generate_content(model='gemini-3.6-flash', contents=prompt, config=types.GenerateContentConfig(response_mime_type='application/json'))
-            clean_text = resp.text.strip().removeprefix('```json').removesuffix('```').strip()
-            ai_data = json.loads(clean_text)
+        loc_key = f"{req.target_q}_{req.target_r}"
+        visited_locations = state.get('visited_locations', {})
+        
+        if loc_key in visited_locations:
+            print(f"CACHE HIT: Lokace {loc_key} nactena z DB")
+            ai_data = visited_locations[loc_key]
+        else:
+            print(f"CACHE MISS: Lokace {loc_key} se musi vygenerovat")
+            client = genai.Client(api_key=req.api_key if getattr(req, 'api_key', None) and 'DUMMY' not in req.api_key else os.environ.get('GEMINI_API_KEY'))
+            prompt = f"""Hráč v D&D RPG (rasa: {state.get('race', 'Člověk')}, povolání: {state.get('dnd_class', 'Bojovník')}) právě dorazil na nové místo na mapě:\nCílová lokace: {dest_name} (Typ: {dest_type}, Terén: {target_hex.get('terrain')})\nZnámý bod zájmu (POI): {(json.dumps(poi or raw_poi, ensure_ascii=False) if poi or raw_poi else 'Běžná divočina/krajina')}\nHlavní zápletka světa: {world_data.get('main_plot', '')}\n\nKRITICKÉ PROSTOROVÉ PRAVIDLO:\nHráč opustil předchozí místo a dorazil sem. ŽÁDNÉ postavy z minulého místa (hostinští, strážní, NPC z předchozího místa) ZDE NEJSOU!\nVšechny nabízené akce a lokální orientační body se musí týkat VÝHRADNĚ této nové lokace ({dest_name}).\n\nVrať POUZE validní JSON:\n{{\n  "vypravec": "Atmosférické vylíčení cesty a příchodu na místo z pohledu vypravěče (3-4 věty). Popiš, co hráč vidí v {dest_name}, jaké je počasí a jaká nová situace či tajemství se otevírá.",\n  "popis_okoli": "Stručný popis nové oblasti (1-2 věty).",\n  "vyznamna_mista": [\n    {{"nazev": "Konkrétní budova či orientační bod 1 v {dest_name}", "ikona": "Compass"}},\n    {{"nazev": "Konkrétní budova či orientační bod 2 v {dest_name}", "ikona": "Home"}},\n    {{"nazev": "Konkrétní budova či orientační bod 3 v {dest_name}", "ikona": "Shield"}}\n  ],\n  "nabizene_akce": ["První logická akce přímo v {dest_name}", "Druhá akce přímo v {dest_name}", "Třetí odvážná akce přímo v {dest_name}"],\n  "image_prompt": "vibrant fantasy landscape concept art of {dest_name} in {target_hex.get('terrain')}, detailed 2D painterly style, high quality"\n}}"""
+            try:
+                resp = client.models.generate_content(model='gemini-3.6-flash', contents=prompt, config=types.GenerateContentConfig(response_mime_type='application/json'))
+                clean_text = resp.text.strip().removeprefix('```json').removesuffix('```').strip()
+                ai_data = json.loads(clean_text)
+                visited_locations[loc_key] = ai_data
+                state['visited_locations'] = visited_locations
         except Exception as ge:
             print('Gemini travel generate error:', ge)
             ai_data = {'vypravec': f'Po celodenní cestě jsi dorazil do oblasti {dest_name}. Krajina kolem tebe je tichá, vítr šelestí v trávě a na obzoru se stahují mračna.', 'popis_okoli': f"Krajina: {target_hex.get('terrain', 'Pláně')}.", 'vyznamna_mista': [], 'nabizene_akce': [f'Důkladně prozkoumat okolí místa {dest_name}', 'Rozdělat tábor a odpočinout si', 'Připravit si zbraň a postupovat obezřetně'], 'image_prompt': f"fantasy landscape {dest_name} in {target_hex.get('terrain')}"}
