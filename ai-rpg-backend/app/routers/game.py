@@ -10,6 +10,7 @@ import uuid
 import random
 from app.services.game_service import *
 from app.utils.loot_generator import generate_loot
+from app.utils.intent_router import get_action_intent
 
 router = APIRouter(prefix="", tags=["Game"])
 
@@ -115,6 +116,17 @@ async def play_action(req: PlayerActionRequest):
 
         req_level = req.level or 1
         action_str = req.action_text or req.action or ""
+        
+        # AI INTENT ROUTER - Fáze 2
+        intent = get_action_intent(action_str, req.api_key if req.api_key and req.api_key != 'DUMMY' else os.environ.get('GEMINI_API_KEY'))
+        if intent == 'UI_AKCE':
+            print("Router: Detekována UI akce, vracím prázdný stav.")
+            return {
+                "status": "success",
+                "vypravec": f"Podíval jsi se na {action_str.lower()}.",
+                "zmeny_stavu": {}
+            }
+        print("Router: Detekována běžná příběhová akce.")
 
         atk_bonus = sum(int(i.get('attack_bonus', 0)) for i in equipped_items)
         def_bonus = sum(int(i.get('defense_bonus', 0)) for i in equipped_items)
