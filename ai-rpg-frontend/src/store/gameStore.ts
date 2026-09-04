@@ -98,6 +98,8 @@ interface GameState {
   setBgVolume: (v: number) => void;
   ttsVolume: number;
   setTtsVolume: (v: number) => void;
+  ttsProvider: "elevenlabs" | "edge";
+  setTtsProvider: (p: "elevenlabs" | "edge") => void;
   currentTrack: string;
   setCurrentTrack: (t: string) => void;
   musicPlaying: boolean;
@@ -202,6 +204,13 @@ export const useGameStore = create<GameState>((set) => ({
   setBgVolume: (bgVolume) => set({ bgVolume }),
   ttsVolume: 1.0,
   setTtsVolume: (ttsVolume) => set({ ttsVolume }),
+  ttsProvider: (typeof window !== "undefined" && (localStorage.getItem("aethelgard_tts_provider") as any)) || "elevenlabs",
+  setTtsProvider: (ttsProvider) => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("aethelgard_tts_provider", ttsProvider);
+    }
+    set({ ttsProvider });
+  },
   currentTrack: '/music/theme.mp3',
   setCurrentTrack: (currentTrack) => set({ currentTrack }),
   musicPlaying: true,

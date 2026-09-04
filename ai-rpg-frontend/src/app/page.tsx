@@ -91,7 +91,7 @@ const FormattedSystemLog = ({ text }: { text: string }) => {
 
 
 export default function Home() {
-  const { bgVolume, setBgVolume, currentTrack, setCurrentTrack, ttsVolume, setTtsVolume, musicPlaying, setMusicPlaying, unreadQuests, setUnreadQuests, gameState, setGameState, loading, setLoading, name, setName, dndClass, setDndClass, race, setRace, stats, setStats, keywords, setKeywords, gameMode, setGameMode, backstory, setBackstory, hp, setHp, maxHp, setMaxHp, level, setLevel, xp, setXp, gold, setGold, rations, setRations, skillPoints, setSkillPoints, inventory, setInventory, equipped, setEquipped, worldData, setWorldData, journal, setJournal, quests, setQuests, npcs, setNpcs, currentRegion, setCurrentRegion, locationType, setLocationType, currentSpellSlots, setCurrentSpellSlots, maxSpellSlots, setMaxSpellSlots, skills, setSkills, availableSkills, setAvailableSkills, inCombat, setInCombat, enemies, setEnemies , playerLocation, setPlayerLocation, setDay, history, setHistory, suggestedActions, setSuggestedActions, pointsOfInterest, setPointsOfInterest, currentLocationImage, setCurrentLocationImage, currentLocationDesc, setCurrentLocationDesc, currentImage, setCurrentImage } = useGameStore();
+  const { bgVolume, setBgVolume, currentTrack, setCurrentTrack, ttsVolume, setTtsVolume, ttsProvider, setTtsProvider, musicPlaying, setMusicPlaying, unreadQuests, setUnreadQuests, gameState, setGameState, loading, setLoading, name, setName, dndClass, setDndClass, race, setRace, stats, setStats, keywords, setKeywords, gameMode, setGameMode, backstory, setBackstory, hp, setHp, maxHp, setMaxHp, level, setLevel, xp, setXp, gold, setGold, rations, setRations, skillPoints, setSkillPoints, inventory, setInventory, equipped, setEquipped, worldData, setWorldData, journal, setJournal, quests, setQuests, npcs, setNpcs, currentRegion, setCurrentRegion, locationType, setLocationType, currentSpellSlots, setCurrentSpellSlots, maxSpellSlots, setMaxSpellSlots, skills, setSkills, availableSkills, setAvailableSkills, inCombat, setInCombat, enemies, setEnemies , playerLocation, setPlayerLocation, setDay, history, setHistory, suggestedActions, setSuggestedActions, pointsOfInterest, setPointsOfInterest, currentLocationImage, setCurrentLocationImage, currentLocationDesc, setCurrentLocationDesc, currentImage, setCurrentImage } = useGameStore();
 
 
   const [actionsOpen, setActionsOpen] = useState(false);
@@ -364,7 +364,7 @@ export default function Home() {
       if (voiceType === "npc_zena") voice = "cs-CZ-VlastaNeural";
       if (voiceType === "npc_muz") voice = "cs-CZ-AntoninNeural";
 
-              const url = `${API_URL}/tts?text=${encodeURIComponent(text)}&voice=${voice}`;
+      const url = `${API_URL}/tts?text=${encodeURIComponent(text)}&voice_type=${voiceType}&provider=${ttsProvider}&voice=${voice}`;
         fetch(url)
           .then(res => res.blob())
           .then(blob => {
@@ -1077,13 +1077,55 @@ export default function Home() {
                   onChange={(e) => setTtsVolume(parseFloat(e.target.value))}
                   className="w-full accent-[#b74b4b]"
                 />
-              
-              <div className="pt-4 mt-6 border-t border-[#90a4ae]">
-                <a href="mailto:janmlcak6@gmail.com?subject=Zpětná vazba - Aethelgard" className="w-full py-2 bg-[#2b4c5e] text-[#f4f1e1] rounded font-bold hover:bg-[#1e3746] transition flex justify-center items-center gap-2">
-                  <Mail size={18} /> Odeslat zpětnou vazbu
+              </div>
+
+              <div>
+                <label className="text-[#2b4c5e] font-bold mb-2 block text-sm">
+                  Kvalita / Hlas vypravěče
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => setTtsProvider("elevenlabs")}
+                    className={`py-2 px-2.5 rounded-lg text-xs font-cinzel font-bold border transition cursor-pointer flex flex-col items-center justify-center gap-0.5 ${
+                      ttsProvider === "elevenlabs"
+                        ? "bg-amber-200/80 border-amber-700 text-amber-950 shadow-sm"
+                        : "bg-white/60 border-amber-900/20 text-slate-600 hover:bg-white/90"
+                    }`}
+                  >
+                    <span>🎙️ ElevenLabs</span>
+                    <span className="text-[10px] font-normal text-amber-800">Filmový / Emoce</span>
+                  </button>
+                  <button
+                    onClick={() => setTtsProvider("edge")}
+                    className={`py-2 px-2.5 rounded-lg text-xs font-cinzel font-bold border transition cursor-pointer flex flex-col items-center justify-center gap-0.5 ${
+                      ttsProvider === "edge"
+                        ? "bg-amber-200/80 border-amber-700 text-amber-950 shadow-sm"
+                        : "bg-white/60 border-amber-900/20 text-slate-600 hover:bg-white/90"
+                    }`}
+                  >
+                    <span>🔊 Edge-TTS</span>
+                    <span className="text-[10px] font-normal text-slate-600">Atmosférický (Zdarma)</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-[#90a4ae]/60">
+                <button 
+                  onClick={() => {
+                    localStorage.removeItem("aethelgard_active_char");
+                    window.location.reload();
+                  }} 
+                  className="w-full py-2 border-2 border-amber-900/40 text-slate-800 rounded-lg font-bold hover:bg-amber-900/10 transition flex justify-center items-center gap-2 text-sm cursor-pointer"
+                >
+                  Zpět do menu (Odejít ze hry)
+                </button>
+              </div>
+
+              <div className="pt-2 border-t border-[#90a4ae]/60">
+                <a href="mailto:janmlcak6@gmail.com?subject=Zpětná vazba - Aethelgard" className="w-full py-2 bg-[#2b4c5e] text-[#f4f1e1] rounded-lg font-bold hover:bg-[#1e3746] transition flex justify-center items-center gap-2 text-sm">
+                  <Mail size={16} /> Odeslat zpětnou vazbu
                 </a>
               </div>
-</div>
             </div>
           </div>
         </div>

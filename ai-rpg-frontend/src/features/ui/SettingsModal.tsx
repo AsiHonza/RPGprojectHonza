@@ -3,7 +3,7 @@ import { X, Settings2, Mail } from 'lucide-react';
 import { useGameStore } from '../../store/gameStore';
 
 export const SettingsModal = ({ isOpen, onClose }: any) => {
-  const { bgVolume, setBgVolume, ttsVolume, setTtsVolume } = useGameStore();
+  const { bgVolume, setBgVolume, ttsVolume, setTtsVolume, ttsProvider, setTtsProvider } = useGameStore();
 
   if (!isOpen) return null;
 
@@ -39,7 +39,37 @@ export const SettingsModal = ({ isOpen, onClose }: any) => {
                   onChange={(e) => setTtsVolume(parseFloat(e.target.value))}
                   className="w-full accent-[#b74b4b]"
                 />
-              
+              </div>
+
+              <div>
+                <label className="text-[#2b4c5e] font-bold mb-2 block text-sm">
+                  Kvalita / Hlas vypravěče
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => setTtsProvider("elevenlabs")}
+                    className={`py-2 px-2.5 rounded-lg text-xs font-cinzel font-bold border transition cursor-pointer flex flex-col items-center justify-center gap-0.5 ${
+                      ttsProvider === "elevenlabs"
+                        ? "bg-amber-200/80 border-amber-700 text-amber-950 shadow-sm"
+                        : "bg-white/60 border-amber-900/20 text-slate-600 hover:bg-white/90"
+                    }`}
+                  >
+                    <span>🎙️ ElevenLabs</span>
+                    <span className="text-[10px] font-normal text-amber-800">Filmový / Emoce</span>
+                  </button>
+                  <button
+                    onClick={() => setTtsProvider("edge")}
+                    className={`py-2 px-2.5 rounded-lg text-xs font-cinzel font-bold border transition cursor-pointer flex flex-col items-center justify-center gap-0.5 ${
+                      ttsProvider === "edge"
+                        ? "bg-amber-200/80 border-amber-700 text-amber-950 shadow-sm"
+                        : "bg-white/60 border-amber-900/20 text-slate-600 hover:bg-white/90"
+                    }`}
+                  >
+                    <span>🔊 Edge-TTS</span>
+                    <span className="text-[10px] font-normal text-slate-600">Atmosférický (Zdarma)</span>
+                  </button>
+                </div>
+              </div>
 
               <div className="pt-4 mt-2 border-t border-[#90a4ae]">
                 <button onClick={() => {
