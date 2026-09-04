@@ -368,9 +368,9 @@ async def travel_action(req: TravelRequest):
                 ai_data = json.loads(clean_text)
                 visited_locations[loc_key] = ai_data
                 state['visited_locations'] = visited_locations
-        except Exception as ge:
-            print('Gemini travel generate error:', ge)
-            ai_data = {'vypravec': f'Po celodenní cestě jsi dorazil do oblasti {dest_name}. Krajina kolem tebe je tichá, vítr šelestí v trávě a na obzoru se stahují mračna.', 'popis_okoli': f"Krajina: {target_hex.get('terrain', 'Pláně')}.", 'vyznamna_mista': [], 'nabizene_akce': [f'Důkladně prozkoumat okolí místa {dest_name}', 'Rozdělat tábor a odpočinout si', 'Připravit si zbraň a postupovat obezřetně'], 'image_prompt': f"fantasy landscape {dest_name} in {target_hex.get('terrain')}"}
+            except Exception as ge:
+                print('Gemini travel generate error:', ge)
+                ai_data = {'vypravec': f'Po celodenní cestě jsi dorazil do oblasti {dest_name}. Krajina kolem tebe je tichá, vítr šelestí v trávě a na obzoru se stahují mračna.', 'popis_okoli': f"Krajina: {target_hex.get('terrain', 'Pláně')}.", 'vyznamna_mista': [], 'nabizene_akce': [f'Důkladně prozkoumat okolí místa {dest_name}', 'Rozdělat tábor a odpočinout si', 'Připravit si zbraň a postupovat obezřetně'], 'image_prompt': f"fantasy landscape {dest_name} in {target_hex.get('terrain')}"}
         default_pois = []
         if dest_type in ['mesto', 'vesnice']:
             default_pois = [{'nazev': f'Náves a tržiště v {dest_name}', 'ikona': 'Store'}, {'nazev': f'Místní hostinec a noclehárna', 'ikona': 'Home'}, {'nazev': f'Strážnice a sýpka', 'ikona': 'Shield'}]
