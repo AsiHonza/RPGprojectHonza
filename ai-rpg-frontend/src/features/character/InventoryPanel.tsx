@@ -91,7 +91,7 @@ export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem 
             <span className="text-[9px] font-cinzel font-bold text-amber-950 truncate max-w-[56px] text-center px-0.5">{item.name}</span>
           </>
         ) : (
-          <span className="text-slate-400 text-[10px] uppercase font-cinzel font-bold tracking-tighter">{slotName}</span>
+          <span className="text-slate-600 text-[10px] uppercase font-cinzel font-bold tracking-tighter">{slotName}</span>
         )}
       </div>
     );
