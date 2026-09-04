@@ -737,7 +737,10 @@ export default function Home() {
       setLoading(false);
     }
   };
+  const isResolvingCombatRef = useRef(false);
   const handleCombatResolution = async () => {
+    if (isResolvingCombatRef.current) return;
+    isResolvingCombatRef.current = true;
     setLoading(true);
     try {
       const res = await fetch(`${API_URL}/resolve-combat`, {
@@ -1052,7 +1055,7 @@ export default function Home() {
                   <p className="text-xs text-slate-500 font-lora mb-6">Zatím nemáš vytvořenou žádnou postavu pro tento e-mail.</p>
                   <button 
                     onClick={() => setGameState("creation")}
-                    className="w-full py-4 bg-rpg-blood border border-red-900/50 text-[#2d3748] font-cinzel font-bold text-xl rounded-xl hover:bg-red-800 hover:shadow-[0_0_20px_rgba(183,75,75,0.6)] transition uppercase tracking-widest"
+                    className="w-full py-4 bg-red-800 hover:bg-red-700 active:bg-red-900 border border-red-900/50 text-white font-cinzel font-bold text-xl rounded-xl shadow-[0_0_20px_rgba(183,75,75,0.4)] hover:shadow-[0_0_25px_rgba(183,75,75,0.7)] transition uppercase tracking-widest cursor-pointer"
                   >
                     Zrození Hrdiny
                   </button>
@@ -1421,7 +1424,7 @@ export default function Home() {
                   />
                   <button 
                     onClick={() => sendAction(customAction)}
-                    className="bg-rpg-blood hover:bg-red-800 text-white px-3.5 sm:px-8 py-2.5 sm:py-3 shrink-0 rounded-xl font-cinzel font-bold text-sm sm:text-base tracking-wider sm:tracking-widest transition-all disabled:opacity-40 flex items-center justify-center gap-1.5 sm:gap-2 shadow-[0_0_15px_rgba(183,75,75,0.4)] cursor-pointer"
+                    className="bg-red-800 hover:bg-red-700 active:bg-red-900 text-white px-3.5 sm:px-8 py-2.5 sm:py-3 shrink-0 rounded-xl font-cinzel font-bold text-sm sm:text-base tracking-wider sm:tracking-widest transition-all disabled:opacity-50 disabled:bg-red-900/40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 sm:gap-2 shadow-[0_0_15px_rgba(183,75,75,0.4)] cursor-pointer"
                     disabled={loading || !customAction.trim()}
                   >
                     {loading ? (

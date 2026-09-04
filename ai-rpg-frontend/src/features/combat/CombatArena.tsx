@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useGameStore } from '../../store/gameStore';
-import { Shield, Crosshair, Skull, Heart, Sword, FastForward, Sparkles, AlertTriangle } from 'lucide-react';
+import { Shield, Crosshair, Skull, Heart, Sword, FastForward, Sparkles, AlertTriangle, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getSkillsForWeapon, WeaponSkill } from './weaponSkills';
 import { executePlayerAttack, executeEnemyTurn, CombatEnemy } from './combatEngine';
@@ -25,6 +25,12 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
   const logEndRef = useRef<HTMLDivElement>(null);
   const [usedRelentless, setUsedRelentless] = useState(false);
   const [dragonCooldown, setDragonCooldown] = useState(0);
+  const [isCombatFinished, setIsCombatFinished] = useState(false);
+  const victoryHandledRef = useRef(false);
+
+  const allEnemiesDead = enemies.length > 0 && enemies.every(e => e.hp <= 0);
+  const playerDead = hp <= 0;
+  const isActionLocked = isEnemyTurn || isCombatFinished || allEnemiesDead || playerDead;
 
   // Scroll log to bottom
   useEffect(() => {
@@ -47,19 +53,23 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
   // Handle victory
   useEffect(() => {
     const aliveEnemies = enemies.filter(e => e.hp > 0);
-    if (aliveEnemies.length === 0 && enemies.length > 0 && !isEnemyTurn) {
-      setTimeout(() => {
-        handleVictory();
-      }, 1500);
+    if (aliveEnemies.length === 0 && enemies.length > 0) {
+      if (!victoryHandledRef.current) {
+        victoryHandledRef.current = true;
+        setIsCombatFinished(true);
+        setTimeout(() => {
+          handleVictory();
+        }, 1200);
+      }
     }
-  }, [enemies, isEnemyTurn]);
+  }, [enemies]);
 
   const addLog = (msg: string) => {
     setCombatLog(prev => [...prev, msg]);
   };
 
   const handleDragonBreath = () => {
-    if (combatAp < 2 || isEnemyTurn || dragonCooldown > 0) return;
+    if (isActionLocked || combatAp < 2 || dragonCooldown > 0) return;
     setCombatAp(combatAp - 2);
     setDragonCooldown(3);
     
@@ -84,7 +94,7 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
 
   
   const handleUsePotion = (potion: any) => {
-    if (combatAp < 1 || isEnemyTurn) return;
+    if (isActionLocked || combatAp < 1) return;
     
     setCombatAp(prev => prev - 1);
     const healAmount = potion.healing_amount || 25;
@@ -105,7 +115,7 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
   };
 
   const handlePlayerAction = (skill: WeaponSkill) => {
-    if (combatAp < skill.apCost || isEnemyTurn) return;
+    if (isActionLocked || combatAp < skill.apCost) return;
     if (!targetId) {
       addLog("⚠️ Musíš vybrat cíl!");
       return;
@@ -120,7 +130,7 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
   };
 
   const endTurn = () => {
-    if (isEnemyTurn) return;
+    if (isActionLocked) return;
     setIsEnemyTurn(true);
     addLog("⏳ Konec tvého tahu. Nepřátelé jednají...");
 
@@ -294,10 +304,10 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
             {/* Dragon Breath */}
             {RACES[race]?.trait.id === 'dragon_breath' && (
               <button
-                disabled={combatAp < 2 || isEnemyTurn || dragonCooldown > 0}
+                disabled={isActionLocked || combatAp < 2 || dragonCooldown > 0}
                 onClick={handleDragonBreath}
                 className={`flex flex-col items-start p-2 rounded-lg border-2 transition-all min-w-[110px]
-                  ${combatAp < 2 || isEnemyTurn || dragonCooldown > 0 ? 'bg-slate-200 border-slate-300 opacity-50 cursor-not-allowed' : 'bg-red-50 border-red-900/20 hover:border-red-600 shadow-sm'}`}
+                  ${isActionLocked || combatAp < 2 || dragonCooldown > 0 ? 'bg-slate-200 border-slate-300 opacity-50 cursor-not-allowed' : 'bg-red-50 border-red-900/20 hover:border-red-600 shadow-sm'}`}
               >
                 <div className="flex justify-between w-full items-center mb-1">
                   <span className="text-base">🔥</span>
@@ -316,10 +326,10 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
             {weaponSkills.map(skill => (
               <button
                 key={skill.id}
-                disabled={combatAp < skill.apCost || isEnemyTurn}
+                disabled={isActionLocked || combatAp < skill.apCost}
                 onClick={() => handlePlayerAction(skill)}
                 className={`flex flex-col items-start p-2 rounded-lg border-2 transition-all min-w-[110px]
-                  ${combatAp < skill.apCost || isEnemyTurn ? 'bg-slate-200 border-slate-300 opacity-50 cursor-not-allowed' : 'bg-white border-amber-900/20 hover:border-amber-600 hover:bg-amber-50 shadow-sm'}`}
+                  ${isActionLocked || combatAp < skill.apCost ? 'bg-slate-200 border-slate-300 opacity-50 cursor-not-allowed' : 'bg-white border-amber-900/20 hover:border-amber-600 hover:bg-amber-50 shadow-sm'}`}
               >
                 <div className="flex justify-between w-full items-center mb-1">
                   <span className="text-base">{skill.icon}</span>
@@ -336,10 +346,10 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
               {inventory.filter(i => i && (i.type === 'lektvar' || (i.name && i.name.toLowerCase().includes('lektvar')))).map(potion => (
                 <button
                   key={potion.id}
-                  disabled={combatAp < 1 || isEnemyTurn}
+                  disabled={isActionLocked || combatAp < 1}
                   onClick={() => handleUsePotion(potion)}
                   className={`flex flex-col items-start p-2 rounded-lg border-2 transition-all min-w-[110px]
-                    ${combatAp < 1 || isEnemyTurn ? 'bg-slate-200 border-slate-300 opacity-50 cursor-not-allowed' : 'bg-emerald-50 border-emerald-900/20 hover:border-emerald-600 hover:bg-emerald-100 shadow-sm'}`}
+                    ${isActionLocked || combatAp < 1 ? 'bg-slate-200 border-slate-300 opacity-50 cursor-not-allowed' : 'bg-emerald-50 border-emerald-900/20 hover:border-emerald-600 hover:bg-emerald-100 shadow-sm'}`}
                 >
                   <div className="flex justify-between w-full items-center mb-1">
                     <span className="text-base">🧪</span>
@@ -358,10 +368,22 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
         <div className="flex flex-row sm:flex-col gap-2 sm:min-w-[180px] justify-between">
           <button 
             onClick={endTurn}
-            disabled={isEnemyTurn}
-            className="flex-1 bg-amber-900 hover:bg-amber-800 text-amber-50 font-bold font-cinzel rounded-lg flex items-center justify-center gap-2 p-2 sm:py-3 transition-colors disabled:opacity-50 text-sm shadow-md"
+            disabled={isActionLocked}
+            className={`flex-1 font-bold font-cinzel rounded-xl flex items-center justify-center gap-2 p-2 sm:py-3 transition-colors text-sm shadow-md ${allEnemiesDead ? 'bg-emerald-800 text-white cursor-not-allowed opacity-90' : 'bg-red-800 hover:bg-red-700 text-white disabled:opacity-50 disabled:bg-red-950/40 disabled:cursor-not-allowed'}`}
           >
-            <FastForward size={16} /> Konec tahu
+            {allEnemiesDead ? (
+              <>
+                <Sparkles size={16} className="animate-spin" /> Vítězství! Vyhodnocuji...
+              </>
+            ) : isEnemyTurn ? (
+              <>
+                <Loader2 size={16} className="animate-spin" /> Tah nepřátel...
+              </>
+            ) : (
+              <>
+                <FastForward size={16} /> Konec tahu
+              </>
+            )}
           </button>
           
           <div className="flex-1 relative group">
@@ -370,13 +392,13 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
               value={creativeAction}
               onChange={e => setCreativeAction(e.target.value)}
               placeholder="Napiš šílený nápad..."
-              disabled={isEnemyTurn || combatAp < 1}
+              disabled={isActionLocked || combatAp < 1}
               onKeyDown={e => e.key === 'Enter' && handleCreativeAction()}
               className="w-full bg-white/80 border-2 border-amber-900/20 rounded-lg p-2 text-xs font-lora outline-none focus:border-amber-500 pr-8 disabled:opacity-50 h-full"
             />
             <button 
               onClick={handleCreativeAction}
-              disabled={isEnemyTurn || combatAp < 1 || !creativeAction.trim()}
+              disabled={isActionLocked || combatAp < 1 || !creativeAction.trim()}
               className="absolute right-2 top-1/2 -translate-y-1/2 text-amber-700 hover:text-amber-500 disabled:opacity-30"
             >
               <Sparkles size={14} />

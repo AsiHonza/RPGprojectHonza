@@ -10,6 +10,11 @@
   --color-foreground: var(--foreground);
   --font-medieval: var(--font-medieval);
   --font-garamond: var(--font-garamond);
+  --color-rpg-paper: #f9f6e6;
+  --color-rpg-obsidian: #2d3748;
+  --color-rpg-blood: #b91c1c;
+  --color-rpg-magic: #d97706;
+  --color-rpg-muted: #718096;
 }
 
 @media (prefers-color-scheme: dark) {
