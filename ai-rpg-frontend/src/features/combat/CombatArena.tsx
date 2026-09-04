@@ -4,6 +4,7 @@ import { Shield, Crosshair, Skull, Heart, Sword, FastForward, Sparkles, AlertTri
 import { motion, AnimatePresence } from 'framer-motion';
 import { getSkillsForWeapon, WeaponSkill } from './weaponSkills';
 import { executePlayerAttack, executeEnemyTurn, CombatEnemy } from './combatEngine';
+import { RACES } from '../../data/races';
 
 export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
   const { 
@@ -12,13 +13,18 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
     combatAp, setCombatAp, 
     combatRound, setCombatRound,
     hp, setHp, maxHp, stats,
-    equipped, inventory, setInCombat
+    equipped, inventory, setInCombat,
+    race
   } = useGameStore();
+
+  const maxAP = RACES[race]?.trait.id === 'human_versatility' ? 4 : 3;
 
   const [targetId, setTargetId] = useState<string | number | null>(null);
   const [creativeAction, setCreativeAction] = useState("");
   const [isEnemyTurn, setIsEnemyTurn] = useState(false);
   const logEndRef = useRef<HTMLDivElement>(null);
+  const [usedRelentless, setUsedRelentless] = useState(false);
+  const [dragonCooldown, setDragonCooldown] = useState(0);
 
   // Scroll log to bottom
   useEffect(() => {
@@ -52,6 +58,30 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
     setCombatLog(prev => [...prev, msg]);
   };
 
+  const handleDragonBreath = () => {
+    if (combatAp < 2 || isEnemyTurn || dragonCooldown > 0) return;
+    setCombatAp(combatAp - 2);
+    setDragonCooldown(3);
+    
+    let newEnemies = [...enemies];
+    let logStr = "🔥 **Dračí dech!** Vydechl jsi vlnu plamenů na všechny nepřátele! ";
+    
+    newEnemies.forEach(e => {
+      if (e.hp > 0) {
+        const dmg = Math.floor(Math.random() * 6) + 1 + (stats.cha ? Math.floor((stats.cha - 10) / 2) : 0);
+        e.hp -= Math.max(1, dmg);
+        logStr += ` [${e.name}: ${dmg} dmg]`;
+      }
+    });
+    
+    setEnemies(newEnemies);
+    addLog(logStr);
+    
+    setTimeout(() => {
+      handleEnemyTurn(newEnemies);
+    }, 1500);
+  };
+
   const handlePlayerAction = (skill: WeaponSkill) => {
     if (combatAp < skill.apCost || isEnemyTurn) return;
     if (!targetId) {
@@ -62,7 +92,7 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
     setCombatAp(combatAp - skill.apCost);
     
     // Execute attack
-    const { updatedEnemies, logEntry, hit } = executePlayerAttack(skill, targetId, enemies, stats);
+    const { updatedEnemies, logEntry, hit } = executePlayerAttack(skill, targetId, enemies, stats, race);
     setEnemies(updatedEnemies);
     addLog(logEntry);
   };
@@ -75,15 +105,17 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
     setTimeout(() => {
       const aliveEnemies = enemies.filter(e => e.hp > 0);
       if (aliveEnemies.length > 0) {
-        const { updatedPlayerHp, logEntries, updatedEnemies } = executeEnemyTurn(enemies, hp);
+        const { updatedPlayerHp, logEntries, updatedEnemies, usedRelentlessEndurance } = executeEnemyTurn(enemies, hp, race, usedRelentless);
         setHp(Math.max(updatedPlayerHp, 0));
         setEnemies(updatedEnemies);
+        setUsedRelentless(usedRelentlessEndurance);
         logEntries.forEach(l => addLog(l));
       }
       
       // Start next round
       setCombatRound(combatRound + 1);
-      setCombatAp(3); // Reset AP
+      setDragonCooldown(prev => Math.max(0, prev - 1));
+      setCombatAp(maxAP); // Reset AP
       setIsEnemyTurn(false);
       addLog(`⚔️ --- Kolo ${combatRound + 1} ---`);
     }, 1200);
@@ -226,7 +258,7 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
           <div>
             <div className="text-[10px] text-amber-900 font-bold uppercase tracking-wider mb-0.5">Akce (AP)</div>
             <div className="flex gap-1">
-              {[1,2,3].map(i => (
+              {Array.from({length: maxAP}, (_, i) => i + 1).map(i => (
                 <div key={i} className={`w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-blue-800 ${i <= combatAp ? 'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]' : 'bg-blue-900/20'}`} />
               ))}
             </div>
@@ -237,6 +269,28 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
         <div className="flex-1">
           <div className="text-[10px] text-amber-900 font-bold uppercase tracking-wider mb-2">Tvé dovednosti ({mainHandWeapon?.name || "Beze zbraně"})</div>
           <div className="flex flex-wrap gap-2">
+            {/* Dragon Breath */}
+            {RACES[race]?.trait.id === 'dragon_breath' && (
+              <button
+                disabled={combatAp < 2 || isEnemyTurn || dragonCooldown > 0}
+                onClick={handleDragonBreath}
+                className={`flex flex-col items-start p-2 rounded-lg border-2 transition-all min-w-[110px]
+                  ${combatAp < 2 || isEnemyTurn || dragonCooldown > 0 ? 'bg-slate-200 border-slate-300 opacity-50 cursor-not-allowed' : 'bg-red-50 border-red-900/20 hover:border-red-600 shadow-sm'}`}
+              >
+                <div className="flex justify-between w-full items-center mb-1">
+                  <span className="text-base">🔥</span>
+                  <div className="flex">
+                    <div className={`w-2 h-2 rounded-full border border-blue-800 ${combatAp >= 1 ? 'bg-blue-500' : 'bg-blue-900/20'}`} />
+                    <div className={`w-2 h-2 rounded-full border border-blue-800 ${combatAp >= 2 ? 'bg-blue-500' : 'bg-blue-900/20'}`} />
+                  </div>
+                </div>
+                <div className="text-left w-full">
+                  <div className="text-xs font-bold text-red-900 font-cinzel leading-tight">Dračí Dech</div>
+                  <div className="text-[9px] text-red-700 leading-tight mt-0.5">AoE Oheň</div>
+                </div>
+                {dragonCooldown > 0 && <div className="text-[10px] text-red-600 font-bold mt-1">🔄 CD: {dragonCooldown}</div>}
+              </button>
+            )}
             {weaponSkills.map(skill => (
               <button
                 key={skill.id}

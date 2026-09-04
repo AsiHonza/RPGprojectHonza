@@ -1,4 +1,5 @@
 import { useGameStore } from "../../store/gameStore";
+import { RACES } from "../../data/races";
 
 export interface CombatEnemy {
   id: string | number;
@@ -64,7 +65,8 @@ export function executePlayerAttack(
   skill: any, 
   targetId: string | number, 
   enemies: CombatEnemy[],
-  playerStats: any
+  playerStats: any,
+  playerRace: string
 ): { updatedEnemies: CombatEnemy[], logEntry: string, hit: boolean } {
   
   let targetIndex = enemies.findIndex(e => e.id === targetId);
@@ -74,7 +76,12 @@ export function executePlayerAttack(
   let logEntry = "";
   let hit = false;
   
-  const d20 = rollDie(20);
+  let d20 = rollDie(20);
+  if (d20 === 1 && RACES[playerRace]?.trait.id === "halfling_luck") {
+    d20 = rollDie(20);
+    logEntry += "🍀 Půlčíkovo štěstí tě zachránilo před kritickým neúspěchem! ";
+  }
+  
   // Rough modifier calculation
   const modifier = Math.floor(((playerStats.str || 10) - 10) / 2);
   const attackRoll = d20 + modifier;
@@ -126,8 +133,10 @@ export function executePlayerAttack(
 // Execute Enemy Turn
 export function executeEnemyTurn(
   enemies: CombatEnemy[],
-  playerHp: number
-): { updatedPlayerHp: number, logEntries: string[], updatedEnemies: CombatEnemy[] } {
+  playerHp: number,
+  playerRace: string,
+  usedRelentlessEndurance: boolean
+): { updatedPlayerHp: number, logEntries: string[], updatedEnemies: CombatEnemy[], usedRelentlessEndurance: boolean } {
   let currentHp = playerHp;
   let logEntries: string[] = [];
   let updatedEnemies = enemies.map(e => ({...e}));
@@ -153,9 +162,27 @@ export function executeEnemyTurn(
 
     // Execute Intent
     if (enemy.intent === "attack" || enemy.intent === "heavy_attack") {
-      const dmg = enemy.intentDamage || rollDie(6);
+      let dmg = enemy.intentDamage || rollDie(6);
+      
+      // Gnome Cunning
+      if (RACES[playerRace]?.trait.id === "gnome_cunning" && dmg > 5 && rollDie(100) <= 25) {
+        dmg = 0;
+        logEntries.push(`✨ Technomagický štít tě ochránil před mocným útokem od **${enemy.name}**!`);
+      }
+      
+      // Dwarven Toughness (Damage reduction)
+      if (RACES[playerRace]?.trait.id === "dwarven_toughness") {
+        dmg = Math.max(0, dmg - 1);
+      }
+      
       currentHp -= dmg;
-      logEntries.push(`💥 **${enemy.name}** zaútočil a udělil ti **${dmg} poškození**!`);
+      logEntries.push(`⚔️ **${enemy.name}** zaútočil a udělil ti **${dmg} poškození**!`);
+      
+      // Tiefling Hellish Rebuke (Thorns)
+      if (RACES[playerRace]?.trait.id === "hellish_rebuke" && dmg > 0) {
+        enemy.hp -= 2;
+        logEntries.push(`🔥 Pekelná odplata! **${enemy.name}** utržil 2 poškození z tvé krve.`);
+      }
     } else if (enemy.intent === "defend") {
       logEntries.push(`🛡️ **${enemy.name}** se drží v obraně.`);
     }
@@ -164,5 +191,12 @@ export function executeEnemyTurn(
     Object.assign(enemy, generateEnemyIntent(enemy));
   });
 
-  return { updatedPlayerHp: currentHp, logEntries, updatedEnemies };
+  // Half-Orc Relentless Endurance
+  if (currentHp <= 0 && RACES[playerRace]?.trait.id === "relentless_endurance" && !usedRelentlessEndurance) {
+    currentHp = 1;
+    usedRelentlessEndurance = true;
+    logEntries.push("🛡️ Nezdolná vytrvalost! Odmítl jsi padnout a zůstáváš na 1 HP.");
+  }
+
+  return { updatedPlayerHp: currentHp, logEntries, updatedEnemies, usedRelentlessEndurance };
 }

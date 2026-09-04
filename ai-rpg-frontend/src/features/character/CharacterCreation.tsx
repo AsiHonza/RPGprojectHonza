@@ -3,6 +3,8 @@ import { useGameStore } from '../../store/gameStore';
 import { Settings2, Sparkles, ChevronRight, ChevronLeft, Crown, Shield, Wand2, Axe, Ghost, Skull, Book, Flame, X, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SeamlessVideo } from '../../components/ui/SeamlessVideo';
+import { calculateBaseStats } from '../../utils/statsCalculator';
+import { RACES } from '../../data/races';
 
 const STARTING_GEAR: Record<string, { weapon: string; armor: string; offhand?: string; potion: string }> = {
   "Barbar": { weapon: "Obouruční sekera (+2)", armor: "Kožené hadry", potion: "Léčivý lektvar" },
@@ -32,6 +34,11 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
     keywords, setKeywords, 
     gameMode, setGameMode 
   } = useGameStore();
+
+  React.useEffect(() => {
+    setStats(calculateBaseStats(dndClass, race));
+  }, [dndClass, race, setStats]);
+
 
   const handleNext = () => setStep(prev => Math.min(prev + 1, 3));
   const handlePrev = () => setStep(prev => Math.max(prev - 1, 1));
@@ -225,12 +232,18 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
                     </span>
                   </div>
                   <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 text-center">
-                    {Object.entries(stats).map(([stat, val]) => (
-                      <div key={stat} className="bg-[#f9f6e6] p-2 rounded-lg border border-amber-900/15 shadow-sm">
+                    {Object.entries(stats).map(([stat, val]) => {
+                      const bonus = RACES[race]?.bonuses?.[stat as keyof typeof RACES[string]['bonuses']];
+                      return (
+                      <div key={stat} className="bg-[#f9f6e6] p-2 rounded-lg border border-amber-900/15 shadow-sm relative">
                         <div className="text-[10px] uppercase text-amber-900 font-bold tracking-wider mb-0.5">{stat}</div>
-                        <div className="text-lg sm:text-xl font-cinzel font-bold text-slate-900">{val as number}</div>
+                        <div className="text-lg sm:text-xl font-cinzel font-bold text-slate-900">
+                          {val as number}
+                          {bonus ? <span className="text-green-600 text-sm ml-1">(+{bonus})</span> : null}
+                        </div>
                       </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 </div>
 

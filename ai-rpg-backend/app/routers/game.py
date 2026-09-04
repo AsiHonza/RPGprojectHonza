@@ -99,6 +99,19 @@ async def play_action(req: PlayerActionRequest):
         armor_item = next((i for i in equipped_items if i.get('slot') == 'hruď' or i.get('type') == 'zbroj'), None)
         shield_item = next((i for i in equipped_items if i.get('slot') == 'druhá ruka' and i.get('type') == 'zbroj'), None)
         
+        races_info = {
+            "Člověk": "Zdolnost (+1 Akční bod na začátku boje)",
+            "Elf": "Bystré smysly (+1 k Obraně (AC))",
+            "Trpaslík": "Trpasličí houževnatost (Sníží každé fyzické zranění o 1. +5 k max HP)",
+            "Půlčík": "Štístko (Při hodu 1 na útok automaticky hází znovu)",
+            "Drakorozený": "Dračí dech (Plošné zranění ohněm všem nepřátelům)",
+            "Tiefling": "Pekelná odplata (Když utrží zranění nablízko, vrátí útočníkovi 2 body poškození)",
+            "Půlork": "Nezdolná vytrvalost (Jednou za boj ho fatální rána nezabije, ale zanechá ho na 1 HP)",
+            "Gnóm": "Technomagický štít (25% šance zcela ignorovat zranění vyšší než 5)"
+        }
+        player_race = state_dict.get('race', 'Člověk')
+        race_trait = races_info.get(player_race, '')
+
         req_level = req.level or 1
         action_str = req.action_text or req.action or ""
 
@@ -113,6 +126,7 @@ async def play_action(req: PlayerActionRequest):
 
         combat_stats_summary = f"""
 [AKTUÁLNÍ BOJOVÉ VYBAVENÍ A EFEKTIVNÍ STATY HRÁČE]:
+- Rasa a trait: {player_race} ({race_trait}. Respektuj tuto vlastnost v narativu a reakcích NPC!)
 - Úroveň: {req_level} | Životy: {state_dict.get('hp', 100)} / {state_dict.get('max_hp', 100)}
 - Vybavená zbraň: {weapon_item.get('name') if weapon_item else 'Holé ruce'} (Bonus k útoku ze zbraně: +{atk_bonus})
 - Vybavená zbroj a štít: {', '.join([i.get('name') for i in [armor_item, shield_item] if i]) or 'Běžný oděv'} (Bonus k obraně ze zbroje: +{def_bonus})
