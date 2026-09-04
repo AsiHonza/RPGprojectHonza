@@ -1045,91 +1045,7 @@ export default function Home() {
       <PatchNotesModal isOpen={patchNotesOpen} onClose={() => setPatchNotesOpen(false)} />
 
       {/* Settings Modal */}
-      {settingsOpen && (
-        <div className="absolute inset-0 bg-white/80 z-50 flex items-center justify-center p-4">
-          <div className="bg-[#f4f1e1] border-2 border-[#b74b4b] rounded p-6 max-w-sm w-full shadow-2xl">
-            <div className="flex justify-between items-center mb-6 border-b border-[#90a4ae] pb-2">
-              <h2 className="text-2xl font-bold text-[#2b4c5e] flex items-center gap-2"><Settings2 size={24} /> Nastavení</h2>
-              <button onClick={() => setSettingsOpen(false)} className="text-[#b74b4b] hover:text-[#8a3333]"><X size={24} /></button>
-            </div>
-            
-            <div className="space-y-6">
-              <div>
-                <label className="flex justify-between text-[#2b4c5e] font-bold mb-2">
-                  <span>Hudba pozadí</span>
-                  <span>{Math.round(bgVolume * 100)}%</span>
-                </label>
-                <input 
-                  type="range" min="0" max="1" step="0.05" 
-                  value={bgVolume} 
-                  onChange={(e) => setBgVolume(parseFloat(e.target.value))}
-                  className="w-full accent-[#b74b4b]"
-                />
-              </div>
-              <div>
-                <label className="flex justify-between text-[#2b4c5e] font-bold mb-2">
-                  <span>Hlas vypravěče</span>
-                  <span>{Math.round(ttsVolume * 100)}%</span>
-                </label>
-                <input 
-                  type="range" min="0" max="1" step="0.05" 
-                  value={ttsVolume} 
-                  onChange={(e) => setTtsVolume(parseFloat(e.target.value))}
-                  className="w-full accent-[#b74b4b]"
-                />
-              </div>
-
-              <div>
-                <label className="text-[#2b4c5e] font-bold mb-2 block text-sm">
-                  Kvalita / Hlas vypravěče
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => setTtsProvider("elevenlabs")}
-                    className={`py-2 px-2.5 rounded-lg text-xs font-cinzel font-bold border transition cursor-pointer flex flex-col items-center justify-center gap-0.5 ${
-                      ttsProvider === "elevenlabs"
-                        ? "bg-amber-200/80 border-amber-700 text-amber-950 shadow-sm"
-                        : "bg-white/60 border-amber-900/20 text-slate-600 hover:bg-white/90"
-                    }`}
-                  >
-                    <span>🎙️ ElevenLabs</span>
-                    <span className="text-[10px] font-normal text-amber-800">Filmový / Emoce</span>
-                  </button>
-                  <button
-                    onClick={() => setTtsProvider("edge")}
-                    className={`py-2 px-2.5 rounded-lg text-xs font-cinzel font-bold border transition cursor-pointer flex flex-col items-center justify-center gap-0.5 ${
-                      ttsProvider === "edge"
-                        ? "bg-amber-200/80 border-amber-700 text-amber-950 shadow-sm"
-                        : "bg-white/60 border-amber-900/20 text-slate-600 hover:bg-white/90"
-                    }`}
-                  >
-                    <span>🔊 Edge-TTS</span>
-                    <span className="text-[10px] font-normal text-slate-600">Atmosférický (Zdarma)</span>
-                  </button>
-                </div>
-              </div>
-
-              <div className="pt-3 border-t border-[#90a4ae]/60">
-                <button 
-                  onClick={() => {
-                    localStorage.removeItem("aethelgard_active_char");
-                    window.location.reload();
-                  }} 
-                  className="w-full py-2 border-2 border-amber-900/40 text-slate-800 rounded-lg font-bold hover:bg-amber-900/10 transition flex justify-center items-center gap-2 text-sm cursor-pointer"
-                >
-                  Zpět do menu (Odejít ze hry)
-                </button>
-              </div>
-
-              <div className="pt-2 border-t border-[#90a4ae]/60">
-                <a href="mailto:janmlcak6@gmail.com?subject=Zpětná vazba - Aethelgard" className="w-full py-2 bg-[#2b4c5e] text-[#f4f1e1] rounded-lg font-bold hover:bg-[#1e3746] transition flex justify-center items-center gap-2 text-sm">
-                  <Mail size={16} /> Odeslat zpětnou vazbu
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
 
       {/* --- AELTHGARD IMMERSIVE GAMEPLAY UI --- */}
       
@@ -1191,16 +1107,70 @@ export default function Home() {
 
           </div>
 
-          <div className="flex gap-1 sm:gap-4 bg-[#f9f6e6]/60 backdrop-blur-md border border-amber-900/10 p-1 sm:p-2 md:p-3 rounded-2xl shadow-xl overflow-x-auto custom-scrollbar hide-scrollbar snap-x flex-nowrap md:justify-center">
-            <button onClick={() => setStatsOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-3 text-slate-700 hover:text-[#2d3748] hover:bg-white/70 rounded-xl transition flex items-center gap-2 text-sm font-cinzel"><User size={18} /> <span className="hidden sm:inline">Vlastnosti</span></button>
-            <button onClick={() => setInventoryOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-3 text-slate-700 hover:text-[#2d3748] hover:bg-white/70 rounded-xl transition flex items-center gap-2 text-sm font-cinzel"><Package size={18} /> <span className="hidden sm:inline">Batoh</span></button>
-            <button onClick={() => setJournalOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-3 text-slate-700 hover:text-[#2d3748] hover:bg-white/70 rounded-xl transition flex items-center gap-2 text-sm font-cinzel relative">
-              <BookOpen size={18} /> <span className="hidden sm:inline">Deník</span>
-              {unreadQuests && <span className="absolute top-1 right-1 w-2 h-2 bg-rpg-blood rounded-full animate-pulse" />}
+          <div className="flex gap-1 sm:gap-2.5 bg-[#f9f6e6]/70 backdrop-blur-md border border-amber-900/15 p-1 sm:p-2 rounded-2xl shadow-xl overflow-x-auto custom-scrollbar hide-scrollbar snap-x flex-nowrap md:justify-center items-center">
+            <button onClick={() => setStatsOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-2.5 text-slate-700 hover:text-amber-950 hover:bg-white/80 rounded-xl transition flex items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold">
+              <User size={17} className="text-amber-900" /> <span className="hidden sm:inline">Vlastnosti</span>
             </button>
-            <button onClick={() => setNpcsOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-3 text-slate-700 hover:text-[#2d3748] hover:bg-white/70 rounded-xl transition flex items-center gap-2 text-sm font-cinzel"><Users size={18} /> <span className="hidden sm:inline">Postavy</span></button>
-            <button onClick={() => setMapOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-3 text-rpg-magic hover:bg-rpg-magic/20 rounded-xl transition flex items-center gap-2 text-sm font-cinzel"><Map size={18} /> <span className="hidden sm:inline">Mapa</span></button>
-            <button onClick={() => setSettingsOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-3 text-slate-600 hover:text-[#2d3748] hover:bg-white/70 rounded-xl transition" title="Nastavení"><Settings2 size={18} /></button>
+            <button onClick={() => setInventoryOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-2.5 text-slate-700 hover:text-amber-950 hover:bg-white/80 rounded-xl transition flex items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold">
+              <Package size={17} className="text-amber-900" /> <span className="hidden sm:inline">Batoh</span>
+            </button>
+            
+            {/* Dedicated Quests Button */}
+            <button 
+              onClick={() => { setQuestsOpen(true); setUnreadQuests(false); }} 
+              className={`flex-shrink-0 snap-start p-2 sm:p-2.5 rounded-xl transition flex items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold relative ${
+                unreadQuests 
+                  ? 'bg-amber-200/90 text-amber-950 border border-amber-600/50 shadow-[0_0_12px_rgba(212,175,55,0.4)]' 
+                  : 'text-slate-700 hover:text-amber-950 hover:bg-white/80'
+              }`}
+              title="Kniha úkolů"
+            >
+              <ScrollText size={17} className="text-amber-900" /> 
+              <span>Úkoly</span>
+              {quests.filter(q => q.stav === 'aktivni' || (!q.stav?.includes('spln') && !q.stav?.includes('selh'))).length > 0 && (
+                <span className="px-1.5 py-0.2 bg-amber-800 text-white text-[10px] rounded-full font-bold shadow-xs">
+                  {quests.filter(q => q.stav === 'aktivni' || (!q.stav?.includes('spln') && !q.stav?.includes('selh'))).length}
+                </span>
+              )}
+              {unreadQuests && (
+                <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-600 rounded-full animate-ping" />
+              )}
+            </button>
+
+            {/* Journal Button */}
+            <button 
+              onClick={() => setJournalOpen(true)} 
+              className="flex-shrink-0 snap-start p-2 sm:p-2.5 text-slate-700 hover:text-amber-950 hover:bg-white/80 rounded-xl transition flex items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold"
+              title="Kronika příběhu"
+            >
+              <BookOpen size={17} className="text-amber-900" /> <span className="hidden sm:inline">Deník</span>
+            </button>
+
+            {/* Skills Button */}
+            <button 
+              onClick={() => setSkillsOpen(true)} 
+              className="flex-shrink-0 snap-start p-2 sm:p-2.5 text-slate-700 hover:text-amber-950 hover:bg-white/80 rounded-xl transition flex items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold" 
+              title="Dovednosti a kouzla"
+            >
+              <Sparkles size={17} className="text-amber-900" /> <span className="hidden sm:inline">Schopnosti</span>
+            </button>
+
+            {/* NPCs Button */}
+            <button onClick={() => setNpcsOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-2.5 text-slate-700 hover:text-amber-950 hover:bg-white/80 rounded-xl transition flex items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold">
+              <Users size={17} className="text-amber-900" /> <span className="hidden sm:inline">Postavy</span>
+            </button>
+
+            {/* Map Button */}
+            <button onClick={() => setMapOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-2.5 text-amber-900 hover:bg-amber-100/60 rounded-xl transition flex items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold">
+              <Map size={17} /> <span className="hidden sm:inline">Mapa</span>
+            </button>
+
+            {/* Settings Button */}
+            <button onClick={() => setSettingsOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-2.5 text-slate-600 hover:text-amber-950 hover:bg-white/80 rounded-xl transition" title="Nastavení">
+              <Settings2 size={17} />
+            </button>
+
+            {/* Back to Hero Selection */}
             <button 
               onClick={() => {
                 localStorage.removeItem("aethelgard_active_char");
@@ -1208,10 +1178,10 @@ export default function Home() {
                 setGameState("menu");
                 fetchCharacters(email);
               }} 
-              className="flex-shrink-0 snap-start p-2 sm:p-3 text-red-700 hover:text-red-900 hover:bg-red-50/80 rounded-xl transition flex items-center gap-1.5 text-sm font-cinzel font-bold border border-red-900/20" 
+              className="flex-shrink-0 snap-start p-2 sm:p-2.5 text-red-700 hover:text-red-900 hover:bg-red-50/80 rounded-xl transition flex items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold border border-red-900/20" 
               title="Zpět do výběru hrdinů"
             >
-              <Users size={18} /> <span className="hidden sm:inline">Výběr hrdiny</span>
+              <Users size={16} /> <span className="hidden md:inline">Výběr hrdiny</span>
             </button>
           </div>
           
@@ -1409,93 +1379,65 @@ export default function Home() {
       </div>
 
       {/* Stats Modal */}
-      {statsOpen && (
-        <div className="fixed inset-0 bg-white/90 flex items-center justify-center z-50 p-4">
-          <div className="w-full max-w-lg bg-[#2b4c5e] rounded-lg border-4 border-[#90a4ae] shadow-2xl overflow-hidden flex flex-col">
-            <div className="bg-[#e3dcc8] p-4 flex justify-between items-center border-b-4 border-[#90a4ae]">
-              <div className="flex items-center gap-2 text-[#b74b4b] font-bold text-2xl uppercase tracking-widest">
-                <User size={28} /> Vlastnosti
-              </div>
-              <button onClick={() => setStatsOpen(false)} className="text-[#2b4c5e] hover:text-[#b74b4b] transition">
-                <X size={28} />
-              </button>
-            </div>
-            
-            <div className="p-6 bg-[#1e3746] flex flex-col gap-6">
-              <div className="flex justify-between items-center bg-[#1b262c] border-2 border-[#455a64] p-4 rounded text-[#90a4ae]">
-                <div>
-                  <h3 className="font-bold text-lg text-[#f4f1e1]">Základní atributy</h3>
-                  <p className="text-sm">Vylepšete si statistiky pro hody kostkou.</p>
-                </div>
-                <div className="text-right">
-                  <div className="text-sm">Nevyužité body</div>
-                  <div className="text-2xl font-bold text-[#d4af37]">{skillPoints}</div>
-                </div>
-              </div>
+      <StatsModal isOpen={statsOpen} onClose={() => setStatsOpen(false)} />
 
-              <div className="flex flex-col gap-3">
-                {[
-                  { key: 'str', label: 'Síla (STR)' },
-                  { key: 'dex', label: 'Obratnost (DEX)' },
-                  { key: 'con', label: 'Odolnost (CON)' },
-                  { key: 'intel', label: 'Inteligence (INT)' },
-                  { key: 'wis', label: 'Moudrost (WIS)' },
-                  { key: 'cha', label: 'Charisma (CHA)' },
-                ].map((stat) => (
-                  <div key={stat.key} className="flex justify-between items-center bg-[#2b4c5e] p-3 rounded border border-[#455a64]">
-                    <span className="font-bold text-[#f4f1e1] uppercase w-1/2">{stat.label}</span>
-                    <span className="font-bold text-[#90a4ae] text-xl w-1/4 text-center">{stats[stat.key as keyof typeof stats]}</span>
-                    <button 
-                      onClick={() => {
-                        if (skillPoints > 0) {
-                          setStats({ ...stats, [stat.key]: stats[stat.key as keyof typeof stats] + 1 });
-                          setSkillPoints(p => p - 1);
-                        }
-                      }}
-                      disabled={skillPoints <= 0}
-                      className="bg-[#d4af37] text-[#1b262c] font-bold w-8 h-8 rounded flex items-center justify-center hover:bg-[#f4f1e1] disabled:opacity-30 disabled:cursor-not-allowed"
-                    >
-                      +
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-      
-      
       {/* Journal Modal */}
-        <JournalModal isOpen={journalOpen} onClose={() => setJournalOpen(false)} />
+      <JournalModal 
+        isOpen={journalOpen} 
+        onClose={() => setJournalOpen(false)} 
+        onSwitchToQuests={() => {
+          setQuestsOpen(true);
+          setUnreadQuests(false);
+        }}
+      />
 
       {/* Skills Modal */}
-      <SkillsModal isOpen={skillsOpen} onClose={() => setSkillsOpen(false)}  setCustomAction={setCustomAction} />
+      <SkillsModal isOpen={skillsOpen} onClose={() => setSkillsOpen(false)} setCustomAction={setCustomAction} />
 
       {/* Quests Modal */}
-        <QuestsModal isOpen={questsOpen} onClose={() => setQuestsOpen(false)} />
+      <QuestsModal 
+        isOpen={questsOpen} 
+        onClose={() => setQuestsOpen(false)} 
+        onSwitchToJournal={() => setJournalOpen(true)}
+      />
 
-      
-        
-        {/* Map Modal */}
-        <MapModal isOpen={mapOpen} onClose={() => setMapOpen(false)} setSelectedItem={setSelectedItem} onTravel={handleTravel} />
+      {/* Map Modal */}
+      <MapModal isOpen={mapOpen} onClose={() => setMapOpen(false)} setSelectedItem={setSelectedItem} onTravel={handleTravel} />
 
-        {/* NPCs Modal */}
-        <NpcsModal isOpen={npcsOpen} onClose={() => setNpcsOpen(false)} setMapOpen={setMapOpen} />
+      {/* NPCs Modal */}
+      <NpcsModal isOpen={npcsOpen} onClose={() => setNpcsOpen(false)} setMapOpen={setMapOpen} />
 
-        {/* Inventory Modal */}
+      {/* Inventory Modal */}
       <InventoryPanel 
         isOpen={inventoryOpen} 
         onClose={() => setInventoryOpen(false)} 
         selectedItem={selectedItem} 
         setSelectedItem={setSelectedItem} 
       />
+
+      {/* Atmospheric Quest Notification Banner */}
       {questBanner && (
-        <div className="fixed inset-0 pointer-events-none z-[100] flex items-center justify-center">
-           <div className="animate-in fade-in zoom-in duration-500 flex flex-col items-center bg-white/80 px-12 py-6 border-y-4 border-[#d4af37] shadow-[0_0_50px_rgba(212,175,55,0.4)] backdrop-blur-sm">
-             <div className="text-[#d4af37] text-xs sm:text-sm font-bold tracking-[0.4em] uppercase mb-2">{questBanner.title}</div>
-             <div className="text-[#f4f1e1] text-xl sm:text-3xl font-serif drop-shadow-lg text-center max-w-md">{questBanner.subtitle}</div>
-           </div>
+        <div 
+          onClick={() => {
+            setQuestsOpen(true);
+            setUnreadQuests(false);
+            setQuestBanner(null);
+          }}
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs cursor-pointer animate-in fade-in duration-300"
+        >
+          <div className="flex flex-col items-center bg-[#f9f6e6]/95 border-2 border-amber-600/50 px-8 sm:px-12 py-6 rounded-2xl shadow-[0_0_50px_rgba(212,175,55,0.4)] backdrop-blur-xl max-w-lg text-center hover:scale-105 transition transform">
+            <div className="text-amber-800 text-xs sm:text-sm font-cinzel font-bold tracking-[0.3em] uppercase mb-1.5 flex items-center gap-2">
+              <Sparkles size={16} /> {questBanner.title} <Sparkles size={16} />
+            </div>
+            {questBanner.subtitle && (
+              <div className="text-amber-950 text-xl sm:text-2xl font-cinzel font-bold mb-2">
+                {questBanner.subtitle}
+              </div>
+            )}
+            <span className="text-[11px] font-lora text-amber-900 font-bold bg-amber-100 px-3 py-1 rounded-full border border-amber-900/15">
+              Klikni pro zobrazení v Knize úkolů
+            </span>
+          </div>
         </div>
       )}
 
