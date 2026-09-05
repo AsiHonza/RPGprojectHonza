@@ -39,7 +39,7 @@ Pravidla:
     
     try:
         resp = client.models.generate_content(
-            model='gemini-1.5-flash-8b', 
+            model='gemini-3.6-flash', 
             contents=prompt, 
             config=types.GenerateContentConfig(
                 response_mime_type='application/json', 

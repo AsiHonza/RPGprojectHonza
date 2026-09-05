@@ -64,7 +64,7 @@ Vrať pouze čisté shrnutí bez uvozovek a úvodních řečí."""
 
     try:
         resp = client.models.generate_content(
-            model='gemini-2.5-flash',
+            model='gemini-3.6-flash',
             contents=prompt,
             config=types.GenerateContentConfig(temperature=0.3, max_output_tokens=150)
         )

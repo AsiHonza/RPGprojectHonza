@@ -1,4 +1,4 @@
-﻿import codecs
+import codecs
 
 with codecs.open("main.py", "r", "utf-8") as f:
     content = f.read()
@@ -44,7 +44,7 @@ create_logic = """
             client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
             world_prompt = f"Vytvoř temný a epický fantasy svět pro kampaň. Postava se jmenuje {req.name}, je to {req.race} {req.dnd_class}. Vymysli originální hlavní zápletku, unikátní mapu (seznam lokací s X a Y souřadnicemi 0-100) a klíčová NPC."
             response = client.models.generate_content(
-                model='gemini-2.5-flash',
+                model='gemini-3.6-flash',
                 contents=world_prompt,
                 config=types.GenerateContentConfig(
                     response_mime_type="application/json",
