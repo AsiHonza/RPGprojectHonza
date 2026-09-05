@@ -6,6 +6,7 @@ import { getSkillsForWeapon, WeaponSkill } from './weaponSkills';
 import { executePlayerAttack, executeEnemyTurn, executePlayerClassSkill, tickPlayerStatuses, CombatEnemy, ActiveStatusEffect } from './combatEngine';
 import { RACES } from '../../data/races';
 import { CLASS_SKILL_TREES, ClassSkill } from '../../data/classSkillTrees';
+import { getBuffDamageBonus } from '../../services/economy/buffEngine';
 
 export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
   const { 
@@ -15,7 +16,8 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
     combatRound, setCombatRound,
     hp, setHp, maxHp, stats,
     equipped, inventory, setInventory, setInCombat,
-    race, dndClass, skills, preparedSkills
+    race, dndClass, skills, preparedSkills,
+    activeBuffs, tickCombatBuffs
   } = useGameStore();
 
   const maxAP = RACES[race]?.trait.id === 'human_versatility' ? 4 : 3;
@@ -143,7 +145,21 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
     
     // Execute attack with weapon status affliction support
     const weaponAffliction = (mainHandWeapon as any)?.statusAffliction;
-    const { updatedEnemies, logEntry, hit } = executePlayerAttack(skill, targetId, enemies, stats, race, weaponAffliction);
+    let { updatedEnemies, logEntry, hit } = executePlayerAttack(skill, targetId, enemies, stats, race, weaponAffliction);
+    
+    // Apply active blacksmith/damage buffs
+    const buffDmg = getBuffDamageBonus(activeBuffs);
+    if (hit && buffDmg > 0) {
+      updatedEnemies = updatedEnemies.map(e => {
+        if (e.id === targetId) {
+          const newHp = Math.max(0, e.hp - buffDmg);
+          return { ...e, hp: newHp };
+        }
+        return e;
+      });
+      logEntry += ` ✨ [Broušená zbraň: +${buffDmg} dmg]`;
+    }
+
     setEnemies(updatedEnemies);
     addLog(logEntry);
 
@@ -256,6 +272,7 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
   };
 
   const handleVictory = () => {
+    tickCombatBuffs();
     addLog("🏆 Všichni nepřátelé poraženi! Vyhrál jsi boj.");
     if (onVictory) {
       onVictory();
@@ -273,9 +290,17 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
 
       {/* Header */}
       <div className="bg-gradient-to-r from-red-900/90 to-red-950/90 border-b border-red-900/50 p-3 z-10 flex justify-between items-center shadow-md">
-        <h2 className="font-cinzel font-bold text-red-50 text-lg flex items-center gap-2">
-          <Sword className="animate-pulse" size={20} /> TAKTICKÝ BOJ
-        </h2>
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <h2 className="font-cinzel font-bold text-red-50 text-lg flex items-center gap-2">
+            <Sword className="animate-pulse" size={20} /> TAKTICKÝ BOJ
+          </h2>
+          {activeBuffs.map(b => (
+            <span key={b.id} className="bg-amber-500/20 text-amber-200 border border-amber-500/40 px-2 py-0.5 rounded-md text-[10px] font-bold flex items-center gap-1" title={b.description}>
+              <span>{b.icon}</span>
+              <span>{b.name}</span>
+            </span>
+          ))}
+        </div>
         <div className="text-red-200/90 text-xs uppercase tracking-widest font-bold">Kolo {combatRound}</div>
       </div>
 

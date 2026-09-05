@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { ActiveBuff } from '../services/economy/buffEngine';
+import { MountDef } from '../services/economy/economyEngine';
 
 export function normalizeQuestTitle(title: string): string {
   if (!title) return '';
@@ -283,6 +285,15 @@ interface GameState {
   unreadQuests: boolean;
   setUnreadQuests: (u: boolean | ((u: boolean) => boolean)) => void;
   setMusicPlaying: (p: boolean) => void;
+  
+  // Buffs & Mounts (Economy & Power)
+  activeBuffs: ActiveBuff[];
+  addBuff: (buff: ActiveBuff) => void;
+  removeBuff: (buffId: string) => void;
+  tickCombatBuffs: () => void;
+  tickDailyBuffs: () => void;
+  activeMount: MountDef | null;
+  setActiveMount: (mount: MountDef | null) => void;
 }
 
 export const useGameStore = create<GameState>((set) => ({
@@ -467,4 +478,34 @@ export const useGameStore = create<GameState>((set) => ({
   unreadQuests: false,
   setUnreadQuests: (unreadQuests) => set((state) => ({ unreadQuests: typeof unreadQuests === "function" ? unreadQuests(state.unreadQuests) : unreadQuests })),
   setMusicPlaying: (musicPlaying) => set({ musicPlaying }),
+
+  // Buffs & Mounts
+  activeBuffs: [],
+  addBuff: (buff) => set((state) => {
+    const filtered = state.activeBuffs.filter(b => b.id !== buff.id);
+    return { activeBuffs: [...filtered, buff] };
+  }),
+  removeBuff: (buffId) => set((state) => ({
+    activeBuffs: state.activeBuffs.filter(b => b.id !== buffId)
+  })),
+  tickCombatBuffs: () => set((state) => {
+    const updated = state.activeBuffs.map(b => {
+      if (b.durationBattles !== undefined) {
+        return { ...b, durationBattles: b.durationBattles - 1 };
+      }
+      return b;
+    }).filter(b => b.durationBattles === undefined || b.durationBattles > 0);
+    return { activeBuffs: updated };
+  }),
+  tickDailyBuffs: () => set((state) => {
+    const updated = state.activeBuffs.map(b => {
+      if (b.durationDays !== undefined) {
+        return { ...b, durationDays: b.durationDays - 1 };
+      }
+      return b;
+    }).filter(b => b.durationDays === undefined || b.durationDays > 0);
+    return { activeBuffs: updated };
+  }),
+  activeMount: null,
+  setActiveMount: (activeMount) => set({ activeMount }),
 }));

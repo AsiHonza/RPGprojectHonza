@@ -11,7 +11,7 @@ import { ItemIcon } from '../components/ui/ItemIcon';
 import { InventoryPanel } from '../features/character/InventoryPanel';
 import { DeathModal } from '../features/character/DeathModal';
 import ReactPlayer from 'react-player';
-import { Send, Heart, Flame, Package, Sword, Shield, FlaskConical, Gem, Shirt, ScrollText, X, Volume2, VolumeX, User, Users, Settings2, Map, Sparkles, Skull, BookOpen, MapPin, Drumstick, Mail, Loader2, Trash2 , Brain , Menu, RotateCcw } from "lucide-react";
+import { Send, Heart, Flame, Package, Sword, Shield, FlaskConical, Gem, Shirt, ScrollText, X, Volume2, VolumeX, User, Users, Settings2, Map, Sparkles, Skull, BookOpen, MapPin, Drumstick, Mail, Loader2, Trash2 , Brain , Menu, RotateCcw, ShoppingBag } from "lucide-react";
 import { CharacterCreation } from '../features/character/CharacterCreation';
 import { MapModal } from '../features/map/MapModal';
 import { QuestsModal } from '../features/character/QuestsModal';
@@ -22,6 +22,7 @@ import { StatsModal } from '../features/character/StatsModal';
 import { SettingsModal } from '../features/ui/SettingsModal';
 import { PatchNotesModal } from '../features/ui/PatchNotesModal';
 import { CampModal } from '../features/character/CampModal';
+import { TownServicesModal } from '../features/town/TownServicesModal';
 import { PlayerHeader } from '../features/ui/PlayerHeader';
 import { CombatArena } from '../features/combat/CombatArena';
 import { PATCH_NOTES } from '../data/patchNotes';
@@ -110,7 +111,7 @@ export default function Home() {
   const [savedCharacters, setSavedCharacters] = useState<any[]>([]);
       const [customAction, setCustomAction] = useState("");
   // Central Modal Manager State
-  type ActiveModalType = 'inventory' | 'map' | 'journal' | 'quests' | 'npcs' | 'skills' | 'stats' | 'settings' | 'patchNotes' | 'camp' | null;
+  type ActiveModalType = 'inventory' | 'map' | 'journal' | 'quests' | 'npcs' | 'skills' | 'stats' | 'settings' | 'patchNotes' | 'camp' | 'town_services' | null;
   const [activeModal, setActiveModal] = useState<ActiveModalType>(null);
 
   const inventoryOpen = activeModal === 'inventory';
@@ -142,6 +143,9 @@ export default function Home() {
 
   const campOpen = activeModal === 'camp';
   const setCampOpen = (open: boolean) => setActiveModal(open ? 'camp' : null);
+
+  const townServicesOpen = activeModal === 'town_services';
+  const setTownServicesOpen = (open: boolean) => setActiveModal(open ? 'town_services' : null);
 
   const [isOOC, setIsOOC] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
@@ -1381,6 +1385,15 @@ export default function Home() {
               <Flame size={17} className="text-amber-600" /> <span className="hidden sm:inline">Tábor</span>
             </button>
 
+            {/* 4c. Tržnice & Služby */}
+            <button 
+              onClick={() => { setTownServicesOpen(true); setHeroDropdownOpen(false); setMenuDropdownOpen(false); }} 
+              className="flex-shrink-0 p-2 sm:p-2.5 text-amber-900 hover:bg-amber-100/60 rounded-xl transition flex items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold"
+              title="Městské služby, kovář a tržnice"
+            >
+              <ShoppingBag size={17} className="text-amber-700" /> <span className="hidden sm:inline">Tržnice</span>
+            </button>
+
             {/* 5. Menu Dropdown (Deník, Postavy, Nastavení, Návrat) */}
             <div className="relative z-50">
               <button 
@@ -1398,6 +1411,13 @@ export default function Home() {
 
               {menuDropdownOpen && (
                 <div className="absolute top-full right-0 mt-2 w-56 max-w-[calc(100vw-32px)] bg-[#fdfbf7] border border-amber-900/30 rounded-2xl shadow-[0_10px_35px_rgba(0,0,0,0.35)] p-2 z-[60] flex flex-col gap-1 backdrop-blur-xl">
+                  <button 
+                    onClick={() => { setTownServicesOpen(true); setMenuDropdownOpen(false); }}
+                    className="w-full text-left px-3 py-2 text-slate-800 hover:bg-amber-100/70 rounded-xl transition flex items-center gap-2.5 text-xs sm:text-sm font-cinzel font-bold"
+                  >
+                    <ShoppingBag size={16} className="text-amber-700" />
+                    <span>Tržnice a městské služby</span>
+                  </button>
                   <button 
                     onClick={() => { setCampOpen(true); setMenuDropdownOpen(false); }}
                     className="w-full text-left px-3 py-2 text-slate-800 hover:bg-amber-100/70 rounded-xl transition flex items-center gap-2.5 text-xs sm:text-sm font-cinzel font-bold"
@@ -1661,6 +1681,9 @@ export default function Home() {
 
       {/* Camp Modal */}
       <CampModal isOpen={campOpen} onClose={() => setCampOpen(false)} />
+
+      {/* Town Services Modal */}
+      <TownServicesModal isOpen={townServicesOpen} onClose={() => setTownServicesOpen(false)} />
 
       {/* Inventory Modal */}
       <InventoryPanel 
