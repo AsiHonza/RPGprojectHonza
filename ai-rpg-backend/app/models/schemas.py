@@ -63,12 +63,17 @@ class NPCDialog(BaseModel):
     image_prompt: str
     text: str
 
+class HexMutation(BaseModel):
+    stav: Optional[str] = Field(default=None, description="Nový stav lokace: např. 'vycisteno', 'spojenci', 'zniceno', 'obchodni_cesta'")
+    popis: Optional[str] = Field(default=None, description="Stručný popis změny na lokaci")
+
 class DMResponse(BaseModel):
-    typ_lokace: str
-    aktualni_region: str
-    vyznamna_mista: List[PointOfInterest] = Field(default=[])
-    popis_okoli: str
-    image_prompt: str
+    nova_scena: bool = Field(default=False, description="Nastav na true POUZE pokud se radikálně změnilo prostředí nebo hráč vstoupil do nové budovy/lokace")
+    typ_lokace: Optional[str] = Field(default=None, description="Vyplň pouze při změně lokace (mesto, vesnice, divocina, dungeon)")
+    aktualni_region: Optional[str] = Field(default=None, description="Vyplň pouze při změně regionu")
+    vyznamna_mista: Optional[List[PointOfInterest]] = Field(default=[], description="Vyplň POUZE při nova_scena: true, jinak nech prázdné")
+    popis_okoli: Optional[str] = Field(default=None, description="Vyplň POUZE při nova_scena: true, jinak nech prázdné nebo null")
+    image_prompt: Optional[str] = Field(default=None, description="Vyplň POUZE pokud je potřeba vygenerovat nový obrázek scény (při změně scény)")
     novy_zapis_do_deniku: Optional[str] = Field(default=None)
     vypravec: str
     npc_dialogy: List[NPCDialog] = []
@@ -77,7 +82,9 @@ class DMResponse(BaseModel):
     nabizene_akce: List[str]
     v_boji: bool = Field(default=False, description="Pokud začal boj, nastav na true")
     nepratele: List[CombatEnemy] = Field(default=[], description="Seznam nepřátel v boji, pokud v_boji je true")
-    dulezita_fakta: List[str] = Field(default=[])
+    dulezita_fakta: List[str] = Field(default=[], description="Trvalá fakta, sliby NPC, nová zjištění pro dlouhodobou paměť světa")
+    reputace_zmena: Optional[Dict[str, int]] = Field(default=None, description="Změny reputace u frakcí, např. {'valerium': -5, 'solarian': 10}")
+    hex_mutace: Optional[HexMutation] = Field(default=None, description="Pokud tato akce trvale změnila tento hex na mapě (např. vyčištěn dungeon)")
     image_url: Optional[str] = None
     image_base64: Optional[str] = None
     image_error: Optional[str] = None

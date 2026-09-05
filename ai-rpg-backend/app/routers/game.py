@@ -65,7 +65,7 @@ async def play_action(req: PlayerActionRequest):
             travel_prompt = f"\n[SYSTÉMOVÝ HOD NA SETKÁNÍ PRO TENTO TAH: {roll}]\nPŘÍSNÝ PŘÍKAZ: Tvoje vyprávění V TOMTO TAHU se musí točit výhradně kolem tohoto scénáře: {enc}\nPOUŽIJ POLE 'travel_days_left_set' a nastav tam (aktuální hodnota mínus jedna). Pokud klesne na 0, nastav 'travel_mode_set' na false a 'travel_destination_set' na prázdný řetězec. ODEČTI 1 z 'rations'.\n\nPokud text akce začíná na [OOC/MYŠLENKA], ignoruj hod a nic neodečítej!"
         else:
             travel_prompt = "\n[SYSTÉM: CESTOVÁNÍ]: Pokud hráč vyslovil přání odejít daleko do jiné lokace, ZAHÁJÍŠ CESTOVÁNÍ. Vyplň pole 'travel_mode_set' jako true, 'travel_destination_set' jako 'Název cíle' a 'travel_days_left_set' jako (číslo 2 až 5 podle dálky). V tomto tahu pouze popiš, že vyráží. (Pokud používá OOC, ignoruj to)."
-        relevant_memories = ''
+        relevant_memories = format_prompt_memory(state_dict)
         p_loc = state_dict.get('playerLocation') or {}
         curr_q = p_loc.get('q')
         curr_r = p_loc.get('r')
@@ -224,8 +224,12 @@ VYPRÁVĚNÍ, MÍSTA A PUTOVÁNÍ (LOKACE):
 - **Typ lokace a Region:** Do `typ_lokace` dej vždy 'mesto', 'vesnice', 'divocina', nebo 'dungeon'. Do `aktualni_region` dej hezký název oblasti.
 - **CESTOVÁNÍ A JÍDLO:** Když hráč cestuje, přepni do 'divocina' a odečti 1 jídlo (`davky_jidla_zmena`: -1).
 
-ZÁZNAMY PRO FRONTEND:
-- Do 'image_prompt' detailně popište aktuální scénu (bez textu). VŽDY NA KONEC PŘIDEJTE: "style of detailed 2D painterly fantasy concept art, bright vibrant colors, majestic epic scale, cozy atmosphere, studio ghibli meets classic D&D illustrations".
+ZÁZNAMY PRO FRONTEND A EFEKTIVITA TOKENŮ:
+- **DELTA REŽIM:** Pokud hráč pokračuje v dialogu nebo běžné činnosti na stejném místě, nastav `nova_scena: false`. Pole `vyznamna_mista`, `popis_okoli` a `image_prompt` vyplňuj VÝHRADNĚ tehdy, pokud je `nova_scena: true` (nová lokace/budova). Při `nova_scena: false` je nechej prázdné nebo null!
+- **TRVALÁ FAKTA A PAMĚŤ:** Do `dulezita_fakta` zapiš stručná klíčová zjištění, sliby NPC nebo milníky, které si má svět pamatovat navždy (např. "Hráč zachránil syna kováře Borise").
+- **REPUTACE FRAKCÍ:** Pokud čin hráče ovlivnil některé ze 7 království nebo 3 bohy, uveď změnu v `reputace_zmena` (např. {"valerium": -5, "solarian": 10}).
+- **MUTACE LOKACÍ NA MAPĚ:** Pokud hráč trvale změnil stav této lokace (vyčištěn dungeon, zničen tábor banditů, posvěcena svatyně), vyplň `hex_mutace` (např. {"stav": "vycisteno", "popis": "Doupě goblinů bylo vyčištěno a je bezpečné"}).
+- Do 'image_prompt' detailně popište aktuální scénu (bez textu, pouze pokud je nova_scena: true). VŽDY NA KONEC PŘIDEJTE: "style of detailed 2D painterly fantasy concept art, bright vibrant colors, majestic epic scale, cozy atmosphere, studio ghibli meets classic D&D illustrations".
 - Do 'vypravec' pište POUZE beletristické vyprávění světa. NIKDY sem nepsat technické detaily (čísla hodů, XP, poškození).
 - Do 'system_log' zapiš VŠECHNY technické herní mechaniky odděleně: výsledky hodů d20, způsobené/přijaté poškození, získané XP, nalezený loot.
 - Pro NPC použij VÝHRADNĚ 'npc_dialogy' (pohlavi="muz"/"zena"). Přímá řeč NESMÍ být ve vypravěči!
@@ -286,18 +290,40 @@ ZÁZNAMY PRO FRONTEND:
                         dm_json['image_error'] = 'Vyčerpán denní limit pro obrázky. Zobrazuji černé pozadí.'
                     else:
                         dm_json['image_error'] = f'Chyba: {str(img_e)}'
+        # 1. Update factual memory (L3)
         fakta = dm_json.get('dulezita_fakta', [])
-        for fakt in fakta:
-            await store_memory(db_key, fakt, client)
+        if fakta:
+            store_factual_memory(state_dict, fakta)
+
+        # 2. Update faction and god reputation
+        rep_changes = dm_json.get('reputace_zmena')
+        if rep_changes and isinstance(rep_changes, dict):
+            rep_map = state_dict.setdefault('reputace', {})
+            for faction, change in rep_changes.items():
+                if isinstance(change, (int, float)):
+                    rep_map[faction] = rep_map.get(faction, 0) + int(change)
+
+        # 3. Update persistent hex mutation
+        hex_mut = dm_json.get('hex_mutace')
+        if hex_mut and isinstance(hex_mut, dict) and curr_q is not None and curr_r is not None:
+            loc_key = f"{curr_q}_{curr_r}"
+            visited = state_dict.setdefault('visited_locations', {})
+            loc_entry = visited.setdefault(loc_key, {})
+            if hex_mut.get('stav'):
+                loc_entry['stav'] = hex_mut['stav']
+            if hex_mut.get('popis'):
+                loc_entry['poznamka'] = hex_mut['popis']
+
+        # 4. Delta scene / location updates
         if dm_json.get('aktualni_region'):
             state_dict['currentRegion'] = dm_json['aktualni_region']
             state_dict['current_region'] = dm_json['aktualni_region']
         if dm_json.get('typ_lokace'):
             state_dict['locationType'] = dm_json['typ_lokace']
             state_dict['typ_lokace'] = dm_json['typ_lokace']
-        if 'vyznamna_mista' in dm_json:
-            state_dict['pointsOfInterest'] = dm_json.get('vyznamna_mista', [])
-            state_dict['vyznamna_mista'] = dm_json.get('vyznamna_mista', [])
+        if dm_json.get('vyznamna_mista'):
+            state_dict['pointsOfInterest'] = dm_json['vyznamna_mista']
+            state_dict['vyznamna_mista'] = dm_json['vyznamna_mista']
         if dm_json.get('popis_okoli'):
             state_dict['currentLocationDesc'] = dm_json['popis_okoli']
             state_dict['popis_okoli'] = dm_json['popis_okoli']
@@ -307,7 +333,34 @@ ZÁZNAMY PRO FRONTEND:
                 npc_name = dialog.get('jmeno')
                 if npc_name and (not any((n.get('jmeno', '').lower() == npc_name.lower() for n in known_npcs))):
                     known_npcs.append({'jmeno': npc_name, 'pohlavi': dialog.get('pohlavi', 'muz'), 'lokace_nazev': curr_region, 'souradnice': {'q': curr_q, 'r': curr_r}, 'je_spolecnik': False})
-        updated_history = history + [{'role': 'user', 'text': action_str}, {'role': 'model', 'text': response.text}]
+
+        # 5. Clean narrative history storage (eliminates DB bloat)
+        story_text = dm_json.get('vypravec', '')
+        for npc in dm_json.get('npc_dialogy', []):
+            story_text += f"\n{npc.get('jmeno')}: {npc.get('text')}"
+        updated_history = history + [{'role': 'user', 'text': action_str}, {'role': 'model', 'text': story_text}]
+
+        # 6. Periodic rolling chronicle compression (L2 memory)
+        turns_count = state_dict.get('turns_since_compression', 0) + 1
+        state_dict['turns_since_compression'] = turns_count
+        if turns_count >= 5 and len(updated_history) >= 6:
+            try:
+                recent_slice = updated_history[-6:]
+                summary = await compress_history_to_chronicle(recent_slice, client)
+                if summary:
+                    kronika = state_dict.setdefault('kronika', [])
+                    kronika.append(summary)
+                    if len(kronika) > 15:
+                        state_dict['kronika'] = kronika[-15:]
+                    state_dict['turns_since_compression'] = 0
+            except Exception as ce:
+                print("Chronicle compression non-fatal error:", ce)
+
+        # Attach active reputation & chronicle to dm_json response for frontend UI
+        dm_json['aktivni_reputace'] = state_dict.get('reputace', {})
+        dm_json['kronika'] = state_dict.get('kronika', [])
+        dm_json['svetova_fakta'] = state_dict.get('svetova_fakta', [])
+
         supabase.table('characters').update({'history': updated_history, 'state': state_dict}).eq('api_key', db_key).execute()
         return dm_json
     except Exception as e:
@@ -411,9 +464,24 @@ async def travel_action(req: TravelRequest):
         state['pointsOfInterest'] = new_pois
         state['vyznamna_mista'] = new_pois
         state['currentLocationDesc'] = popis_okoli
-        state['popis_okoli'] = popis_okoli
         supabase.table('characters').update({'state': state, 'history': history}).eq('api_key', db_key).execute()
-        return {'status': 'success', 'state': state, 'narrative': narrative_text, 'popis_okoli': popis_okoli, 'aktualni_region': dest_name, 'typ_lokace': dest_type, 'vyznamna_mista': new_pois, 'nabizene_akce': nabizene_akce, 'image_prompt': image_prompt, 'system_log': system_log_text, 'destination_name': dest_name, 'terrain_name': target_hex.get('terrain')}
+        return {
+            'status': 'success',
+            'state': state,
+            'narrative': narrative_text,
+            'popis_okoli': popis_okoli,
+            'aktualni_region': dest_name,
+            'typ_lokace': dest_type,
+            'vyznamna_mista': new_pois,
+            'nabizene_akce': nabizene_akce,
+            'image_prompt': image_prompt,
+            'system_log': system_log_text,
+            'destination_name': dest_name,
+            'terrain_name': target_hex.get('terrain'),
+            'kronika': state.get('kronika', []),
+            'aktivni_reputace': state.get('reputace', {}),
+            'svetova_fakta': state.get('svetova_fakta', [])
+        }
     except HTTPException:
         raise
     except Exception as e:

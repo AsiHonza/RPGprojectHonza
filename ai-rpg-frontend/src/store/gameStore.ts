@@ -233,6 +233,17 @@ interface GameState {
   locationType: string;
   setLocationType: (l: string) => void;
   
+  // Living World, Memory & Faction Standing
+  reputation: Record<string, number>;
+  setReputation: (rep: Record<string, number> | ((prev: Record<string, number>) => Record<string, number>)) => void;
+  updateReputation: (changes: Record<string, number>) => void;
+  chronicle: string[];
+  setChronicle: (chronicle: string[] | ((prev: string[]) => string[])) => void;
+  worldFlags: string[];
+  setWorldFlags: (flags: string[] | ((prev: string[]) => string[])) => void;
+  consequenceToast: { text: string; faction?: string; delta?: number } | null;
+  setConsequenceToast: (toast: { text: string; faction?: string; delta?: number } | null) => void;
+  
   // Magic
   currentSpellSlots: number;
   setCurrentSpellSlots: (s: number | ((s: number) => number)) => void;
@@ -385,6 +396,37 @@ export const useGameStore = create<GameState>((set) => ({
   setCurrentRegion: (currentRegion) => set({ currentRegion }),
   locationType: "divocina",
   setLocationType: (locationType) => set({ locationType }),
+
+  reputation: {
+    valerium: 0,
+    solarian: 0,
+    vyldia: 0,
+    svobodna_mesta: 0,
+    karantena: 0,
+    zelezny_prah: 0,
+    utociste: 0,
+    kull: 0
+  },
+  setReputation: (reputation) => set((state) => ({ 
+    reputation: typeof reputation === 'function' ? reputation(state.reputation) : reputation 
+  })),
+  updateReputation: (changes) => set((state) => {
+    const next = { ...state.reputation };
+    for (const [k, v] of Object.entries(changes)) {
+      next[k] = (next[k] || 0) + v;
+    }
+    return { reputation: next };
+  }),
+  chronicle: [],
+  setChronicle: (chronicle) => set((state) => ({ 
+    chronicle: typeof chronicle === 'function' ? chronicle(state.chronicle) : chronicle 
+  })),
+  worldFlags: [],
+  setWorldFlags: (worldFlags) => set((state) => ({ 
+    worldFlags: typeof worldFlags === 'function' ? worldFlags(state.worldFlags) : worldFlags 
+  })),
+  consequenceToast: null,
+  setConsequenceToast: (consequenceToast) => set({ consequenceToast }),
 
   currentSpellSlots: 0,
   setCurrentSpellSlots: (currentSpellSlots) => set((state) => ({ currentSpellSlots: typeof currentSpellSlots === "function" ? currentSpellSlots(state.currentSpellSlots) : currentSpellSlots })),

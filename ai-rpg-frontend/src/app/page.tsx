@@ -94,7 +94,7 @@ const FormattedSystemLog = ({ text }: { text: string }) => {
 
 
 export default function Home() {
-  const { bgVolume, setBgVolume, currentTrack, setCurrentTrack, ttsVolume, setTtsVolume, ttsProvider, setTtsProvider, musicPlaying, setMusicPlaying, unreadQuests, setUnreadQuests, gameState, setGameState, loading, setLoading, name, setName, dndClass, setDndClass, race, setRace, stats, setStats, keywords, setKeywords, gameMode, setGameMode, backstory, setBackstory, hp, setHp, maxHp, setMaxHp, level, setLevel, xp, setXp, gold, setGold, rations, setRations, skillPoints, setSkillPoints, inventory, setInventory, equipped, setEquipped, worldData, setWorldData, journal, setJournal, quests, setQuests, npcs, setNpcs, currentRegion, setCurrentRegion, locationType, setLocationType, currentSpellSlots, setCurrentSpellSlots, maxSpellSlots, setMaxSpellSlots, skills, setSkills, availableSkills, setAvailableSkills, inCombat, setInCombat, enemies, setEnemies , playerLocation, setPlayerLocation, setDay, history, setHistory, suggestedActions, setSuggestedActions, pointsOfInterest, setPointsOfInterest, currentLocationImage, setCurrentLocationImage, currentLocationDesc, setCurrentLocationDesc, currentImage, setCurrentImage, combatLog, setCombatLog } = useGameStore();
+  const { bgVolume, setBgVolume, currentTrack, setCurrentTrack, ttsVolume, setTtsVolume, ttsProvider, setTtsProvider, musicPlaying, setMusicPlaying, unreadQuests, setUnreadQuests, gameState, setGameState, loading, setLoading, name, setName, dndClass, setDndClass, race, setRace, stats, setStats, keywords, setKeywords, gameMode, setGameMode, backstory, setBackstory, hp, setHp, maxHp, setMaxHp, level, setLevel, xp, setXp, gold, setGold, rations, setRations, skillPoints, setSkillPoints, inventory, setInventory, equipped, setEquipped, worldData, setWorldData, journal, setJournal, quests, setQuests, npcs, setNpcs, currentRegion, setCurrentRegion, locationType, setLocationType, currentSpellSlots, setCurrentSpellSlots, maxSpellSlots, setMaxSpellSlots, skills, setSkills, availableSkills, setAvailableSkills, inCombat, setInCombat, enemies, setEnemies , playerLocation, setPlayerLocation, setDay, history, setHistory, suggestedActions, setSuggestedActions, pointsOfInterest, setPointsOfInterest, currentLocationImage, setCurrentLocationImage, currentLocationDesc, setCurrentLocationDesc, currentImage, setCurrentImage, combatLog, setCombatLog, setReputation, updateReputation, setChronicle, setWorldFlags, consequenceToast, setConsequenceToast } = useGameStore();
 
 
   const [actionsOpen, setActionsOpen] = useState(false);
@@ -741,6 +741,9 @@ export default function Home() {
           if (data.state.hp !== undefined) setHp(data.state.hp);
         }
 
+        if (data.aktivni_reputace) setReputation(data.aktivni_reputace);
+        if (data.kronika) setChronicle(data.kronika);
+        if (data.svetova_fakta) setWorldFlags(data.svetova_fakta);
         if (data.aktualni_region) setCurrentRegion(data.aktualni_region);
         if (data.typ_lokace) setLocationType(data.typ_lokace);
         if (data.vyznamna_mista) setPointsOfInterest(data.vyznamna_mista);
@@ -930,6 +933,29 @@ export default function Home() {
           }
 
         }
+
+        // Update Living World & Memory state
+        if (data.aktivni_reputace) setReputation(data.aktivni_reputace);
+        else if (data.reputace_zmena) updateReputation(data.reputace_zmena);
+
+        if (data.reputace_zmena && Object.keys(data.reputace_zmena).length > 0) {
+          const [factionKey, val] = Object.entries(data.reputace_zmena)[0];
+          const sign = (val > 0) ? '+' + val : val;
+          setConsequenceToast({
+            text: 'Reputace u frakce byla upravena: ' + sign,
+            faction: factionKey,
+            delta: val
+          });
+          setTimeout(() => setConsequenceToast(null), 5000);
+        } else if (data.hex_mutace) {
+          setConsequenceToast({
+            text: 'Oblast byla trvale ovlivněna tvým činem! (' + (data.hex_mutace.popis || data.hex_mutace.stav || 'Změněno') + ')',
+          });
+          setTimeout(() => setConsequenceToast(null), 5000);
+        }
+
+        if (data.kronika) setChronicle(data.kronika);
+        if (data.svetova_fakta) setWorldFlags(data.svetova_fakta);
 
         if (data.nepratele) setEnemies(data.nepratele);
         if (data.typ_lokace) setLocationType(data.typ_lokace);
@@ -1603,6 +1629,25 @@ export default function Home() {
       />
 
       {/* Atmospheric Quest Notification Banner */}
+      {/* Atmospheric Consequence & World Mutation Toast */}
+      {consequenceToast && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[90] pointer-events-none animate-in fade-in slide-in-from-top-4 duration-300">
+          <div className="bg-[#1b262c]/95 border-2 border-amber-500 text-amber-100 px-5 py-3 rounded-2xl shadow-[0_0_30px_rgba(245,158,11,0.5)] backdrop-blur-md flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-amber-500/20 border border-amber-400 flex items-center justify-center text-amber-300 font-bold shrink-0">
+              ⚖️
+            </div>
+            <div>
+              <div className="font-cinzel font-bold text-xs uppercase tracking-wider text-amber-300">
+                Svět reaguje na tvé činy
+              </div>
+              <div className="font-lora text-xs sm:text-sm text-slate-100 font-medium">
+                {consequenceToast.text}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {questBanner && (
         <div 
           onClick={() => {
