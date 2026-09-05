@@ -73,6 +73,7 @@ async def list_characters(req: ListCharactersRequest):
         raise HTTPException(status_code=400, detail=str(e))
 
 @router.post('/load-game')
+@router.post('/load')
 async def load_game(req: LoadGameRequest):
     try:
         clean_email = req.email.strip()
@@ -161,7 +162,7 @@ async def load_game(req: LoadGameRequest):
                 print('Could not auto-save repaired state in load_game:', se)
         
         char_data['state'] = state
-        return {'status': 'success', 'character': char_data}
+        return {'status': 'success', 'character': char_data, 'state': state}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 

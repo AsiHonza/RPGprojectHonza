@@ -895,20 +895,21 @@ export default function Home() {
         setCombatLog([]);
         
         // Refresh local state by pulling from backend
-        const charRes = await fetch(`${API_URL}/load`, {
+        const charRes = await fetch(`${API_URL}/load-game`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: email, name: name })
         });
         if (charRes.ok) {
           const charData = await charRes.json();
-          if (charData.state) {
-            setHp(charData.state.hp ?? hp);
-            setMaxHp(charData.state.maxHp ?? charData.state.max_hp ?? maxHp);
-            setXp(charData.state.xp ?? xp);
-            setGold(charData.state.gold ?? gold);
-            setLevel(charData.state.level ?? level);
-            if (charData.state.inventory) setInventory(charData.state.inventory);
+          const charState = charData.character?.state || charData.state;
+          if (charState) {
+            setHp(charState.hp ?? hp);
+            setMaxHp(charState.maxHp ?? charState.max_hp ?? maxHp);
+            setXp(charState.xp ?? xp);
+            setGold(charState.gold ?? gold);
+            setLevel(charState.level ?? level);
+            if (charState.inventory) setInventory(charState.inventory);
           }
         }
       } else {

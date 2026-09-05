@@ -285,11 +285,12 @@ ZÁZNAMY PRO FRONTEND A EFEKTIVITA TOKENŮ:
             dm_json['zmeny_stavu']['ukoly'] = sanitize_and_deduplicate_quests(dm_json['zmeny_stavu']['ukoly'])
         import unicodedata
         import re
-        region = dm_json.get('aktualni_region', curr_region)
-        slug = unicodedata.normalize('NFKD', region).encode('ascii', 'ignore').decode('ascii')
+        region = dm_json.get('aktualni_region') or curr_region or 'Neznámá oblast'
+        slug = unicodedata.normalize('NFKD', str(region)).encode('ascii', 'ignore').decode('ascii')
         slug = re.sub('[^a-z0-9]+', '_', slug.lower()).strip('_')
         if not slug:
             slug = 'lokace_bez_jmena'
+        os.makedirs('images', exist_ok=True)
         filename = f'{slug}.jpg'
         filepath = os.path.join('images', filename)
         if os.path.exists(filepath):
