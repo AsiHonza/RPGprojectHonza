@@ -1023,11 +1023,12 @@ export default function Home() {
           animate={{ opacity: 1, scale: 1 }}
           className="max-w-5xl w-full z-10 relative flex flex-col items-center mx-auto my-auto shrink-0"
         >
-          <div className="mb-2 sm:mb-3 text-center shrink-0">
-            <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-rpg-magic tracking-widest md:tracking-[0.2em] font-cinzel drop-shadow-[0_0_20px_rgba(197,160,89,0.5)]">
-              AELTHGARD
-            </h1>
-            <p className="text-slate-700 font-lora text-xs sm:text-sm tracking-widest mt-1 uppercase">AI Dungeons & Dragons RPG</p>
+          <div className="mb-2 sm:mb-4 text-center shrink-0 flex flex-col items-center">
+            <img 
+              src="/images/logo.png" 
+              alt="Aelthgard - AI Dungeons & Dragons RPG" 
+              className="w-full max-w-[340px] sm:max-w-[460px] md:max-w-[540px] h-auto object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.3)] select-none pointer-events-none transition-transform duration-300 hover:scale-102" 
+            />
           </div>
 
           {!isLoggedIn ? (
