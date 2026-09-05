@@ -148,9 +148,29 @@ async def play_action(req: PlayerActionRequest):
 ZÁVAZNÉ PRAVIDLO: V každém souboji striktně použij tyto hodnoty v `system_log` a popiš zásah či odražení rány s ohledem na toto vybavení!
 """
 
+        skills_summary_list = []
+        if req.skills and isinstance(req.skills, list):
+            for s in req.skills:
+                if isinstance(s, dict):
+                    s_name = s.get('name', s.get('id', 'Neznámá schopnost'))
+                    s_rank = s.get('rank', 1)
+                    s_type = 'Aktivní kouzlo' if s.get('type') == 'active' else 'Pasivní schopnost'
+                    skills_summary_list.append(f"- {s_name} (Rank {s_rank}) [{s_type}]")
+                elif isinstance(s, str):
+                    skills_summary_list.append(f"- {s}")
+        skills_summary = "\n".join(skills_summary_list) if skills_summary_list else "Zatím žádné odemknuté schopnosti (hráč spoléhá na základní výbavu a instinkty)."
+
         context_action = f"[Dlouhodobá paměť (relevantní fakta z minulosti):]\n{relevant_memories}\n{world_prompt_str}\n\n{spatial_grounding}\n\n{combat_stats_summary}\n\n{travel_prompt}\n\n[Akce hráče:]\n{action_str}\n"
         contents.append(types.Content(role='user', parts=[types.Part.from_text(text=context_action)]))
         system_prompt = f"""Jsi Pán jeskyně ve fantasy světě Aethelgard. Hráč je momentálně na {req_level}. úrovni.
+
+
+ODEMKNUTÉ SCHOPNOSTI, KOUZLA A DOVEDNOSTI HRÁČE:
+{skills_summary}
+
+POKYNY PRO NABÍZENÉ AKCE A DIALOGY SE SCHOPNOSTMI:
+- Mezi 3 až 5 'nabizene_akce' VŽDY zahrň 1 až 2 akce označené štítkem schopnosti, např. "[Schopnost: {{název schopnosti}}] Popis specifického taktického nebo příběhového použití", které využívají hráčovy reálně odemknuté dovednosti.
+- Respektuj Rank schopnosti při popisu účinku (Rank III představuje legendární mistrovství).
 
 PRAVIDLA D&D 5e, OBTÍŽNOST (DC) A SELHÁNÍ:
 - **Nešetři hráče!** Pokud dělá riskantní akci (průzkum, přesvědčování, skok), VŽDY urči adekvátní Obtížnost (DC). 
@@ -482,7 +502,8 @@ async def resolve_combat(req: CombatResolutionRequest):
             zmeny['inventar_odebrat_id'] = safe_removals
 
         if zmeny:
-            zmeny['inventar_pridat'] = generate_loot(enemy_names, req.level)
+            dnd_class = getattr(req, 'dnd_class', None) or state.get('dndClass') or state.get('dnd_class') or 'Bojovník'
+            zmeny['inventar_pridat'] = generate_loot(enemy_names, req.level, dnd_class)
 
         if zmeny:
             state['xp'] = state.get('xp', 0) + zmeny.get('xp_zmena', 0)
@@ -491,10 +512,13 @@ async def resolve_combat(req: CombatResolutionRequest):
             # Simple level-up check for robust backend handling (frontend does this too, but sync is better)
             xp_needed = state.get('level', 1) * 500
             if state['xp'] >= xp_needed:
-                state['level'] = state.get('level', 1) + 1
+                next_lvl = state.get('level', 1) + 1
+                state['level'] = next_lvl
                 state['max_hp'] = state.get('max_hp', 100) + 10
                 state['hp'] = state['max_hp']
                 state['xp'] -= xp_needed
+                points_earned = 2 if next_lvl % 2 == 0 else 1
+                state['skillPoints'] = state.get('skillPoints', 0) + points_earned
             
             if zmeny.get('inventar_pridat'):
                 new_items = []

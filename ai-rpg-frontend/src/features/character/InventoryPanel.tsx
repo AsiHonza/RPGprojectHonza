@@ -1,6 +1,6 @@
 import React from 'react';
 import { ItemIcon } from '../../components/ui/ItemIcon';
-import { X, Package, Shield, Swords, Sparkles, Heart, Plus, Trash2 } from 'lucide-react';
+import { X, Package, Shield, Swords, Sparkles, Heart, Plus, Trash2, Coins, AlertTriangle } from 'lucide-react';
 import { useGameStore } from '../../store/gameStore';
 import { RACES } from '../../data/races';
 
@@ -19,10 +19,12 @@ export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem 
     equipped, 
     setEquipped, 
     gold, 
+    setGold,
     hp, 
     setHp, 
     maxHp,
     race, 
+    dndClass,
     stats, 
     setStats, 
     skillPoints, 
@@ -32,9 +34,9 @@ export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem 
   if (!isOpen) return null;
 
   // Calculate Equipped Items & Combat Stats
-  const equippedItems = inventory.filter(i => Object.values(equipped).includes(i.id));
-  const weaponBonus = equippedItems.reduce((acc, i) => acc + (Number(i.attack_bonus) || 0), 0);
-  const armorBonus = equippedItems.reduce((acc, i) => acc + (Number(i.defense_bonus) || 0), 0);
+  const equippedItems = inventory.filter((i: any) => Object.values(equipped).includes(i.id));
+  const weaponBonus = equippedItems.reduce((acc: number, i: any) => acc + (Number(i.attack_bonus) || 0), 0);
+  const armorBonus = equippedItems.reduce((acc: number, i: any) => acc + (Number(i.defense_bonus) || 0), 0);
   
   const strMod = Math.floor(((stats?.str ?? 10) - 10) / 2);
   const dexMod = Math.floor(((stats?.dex ?? 10) - 10) / 2);
@@ -50,7 +52,7 @@ export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem 
   const usePotion = (item: any) => {
     const healVal = item.healing_amount || 25;
     setHp((h: number) => Math.min(maxHp, h + healVal));
-    setInventory((inv: any[]) => inv.filter(i => i.id !== item.id));
+    setInventory((inv: any[]) => inv.filter((i: any) => i.id !== item.id));
     setSelectedItem(null);
   };
 
@@ -62,7 +64,21 @@ export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem 
       });
       return newEq;
     });
-    setInventory((inv: any[]) => inv.filter(i => i.id !== item.id));
+    setInventory((inv: any[]) => inv.filter((i: any) => i.id !== item.id));
+    setSelectedItem(null);
+  };
+
+  const sellItem = (item: any) => {
+    const price = item.sell_price || 10;
+    setGold((g: number) => g + price);
+    setEquipped((eq: any) => {
+      const newEq = { ...eq };
+      Object.keys(newEq).forEach(k => {
+        if (newEq[k] === item.id) newEq[k] = null;
+      });
+      return newEq;
+    });
+    setInventory((inv: any[]) => inv.filter((i: any) => i.id !== item.id));
     setSelectedItem(null);
   };
 
@@ -73,7 +89,7 @@ export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem 
 
   const renderSlot = (slotKey: string, slotName: string, defaultIcon: string) => {
     const itemId = equipped[slotKey];
-    const item = inventory.find(i => i.id === itemId);
+    const item = inventory.find((i: any) => i.id === itemId);
     const rConfig = item ? getRarityConfig(item.rarity) : null;
 
     return (
@@ -112,7 +128,7 @@ export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem 
                 Inventář a Výstroj
               </h2>
               <p className="text-xs font-lora text-slate-600">
-                Správa předmětů, zbraní a bojových atributů
+                Správa předmětů, zbraní, šperků a bojových atributů ({dndClass})
               </p>
             </div>
           </div>
@@ -240,6 +256,7 @@ export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem 
                 const rConfig = getRarityConfig(selectedItem.rarity);
                 const isEquipped = Object.values(equipped).includes(selectedItem.id);
                 const isPotion = selectedItem.type === 'lektvar';
+                const isClassLocked = selectedItem.allowedClasses && selectedItem.allowedClasses.length > 0 && !selectedItem.allowedClasses.includes(dndClass);
 
                 return (
                   <>
@@ -251,18 +268,31 @@ export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem 
                     </div>
                     
                     <h2 className={`text-xl font-cinzel font-bold mb-0.5 text-amber-950`}>{selectedItem.name}</h2>
-                    <p className="text-slate-500 text-xs font-cinzel uppercase tracking-wider mb-3">
+                    <p className="text-slate-500 text-xs font-cinzel uppercase tracking-wider mb-2">
                       {selectedItem.type} • {selectedItem.slot || 'bez slotu'}
                     </p>
+
+                    {/* Class Restriction Warning */}
+                    {isClassLocked && (
+                      <div className="w-full mb-3 p-2 bg-red-100/90 text-red-900 border border-red-300 rounded-lg text-xs font-cinzel font-bold flex items-center justify-center gap-1.5 shadow-2xs">
+                        <AlertTriangle size={14} />
+                        <span>Vyžaduje třídu: {selectedItem.allowedClasses.join(", ")}</span>
+                      </div>
+                    )}
                     
                     <div className="bg-[#fcfbf7] w-full p-4 rounded-xl text-sm mb-4 text-left border border-amber-900/15">
-                      <p className="mb-2 italic text-xs leading-relaxed font-lora text-slate-700">{selectedItem.description || 'Obyčejný předmět nalezený na cestách po Aethelgardu.'}</p>
+                      <p className="mb-2 italic text-xs leading-relaxed font-lora text-slate-700">{selectedItem.description || selectedItem.desc || 'Obyčejný předmět nalezený na cestách po Aethelgardu.'}</p>
                       
-                      {/* Numerical Modifiers */}
+                      {/* Numerical Modifiers & Status Effects */}
                       <div className="flex flex-wrap gap-2 pt-2 border-t border-amber-900/10 text-xs">
                         {Number(selectedItem.attack_bonus) > 0 && (
                           <span className="font-cinzel font-bold text-amber-900 bg-amber-100 px-2 py-0.5 rounded border border-amber-700/30">
                             Útok: +{selectedItem.attack_bonus}
+                          </span>
+                        )}
+                        {selectedItem.damageDice && (
+                          <span className="font-cinzel font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded border border-slate-300">
+                            Poškození: {selectedItem.damageDice}
                           </span>
                         )}
                         {Number(selectedItem.defense_bonus) > 0 && (
@@ -270,15 +300,42 @@ export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem 
                             Obrana: +{selectedItem.defense_bonus} AC
                           </span>
                         )}
+                        {Number(selectedItem.flatDamageReduction) > 0 && (
+                          <span className="font-cinzel font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded border border-slate-300">
+                            Redukce: -{selectedItem.flatDamageReduction} dmg
+                          </span>
+                        )}
+                        {selectedItem.statusAffliction && (
+                          <span className="font-cinzel font-bold text-amber-900 bg-amber-100 px-2 py-0.5 rounded border border-amber-600/40">
+                            Status: {selectedItem.statusAffliction.type} ({Math.round(selectedItem.statusAffliction.chance * 100)}%)
+                          </span>
+                        )}
                         {Number(selectedItem.healing_amount) > 0 && (
                           <span className="font-cinzel font-bold text-emerald-900 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-700/30">
                             Léčení: +{selectedItem.healing_amount} HP
                           </span>
                         )}
-                        {selectedItem.stats && !selectedItem.attack_bonus && !selectedItem.defense_bonus && (
-                          <span className="font-cinzel font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">{selectedItem.stats}</span>
-                        )}
                       </div>
+
+                      {/* Resistances */}
+                      {selectedItem.resistances && (
+                        <div className="mt-2 text-[11px] font-cinzel text-slate-600 flex flex-wrap gap-2">
+                          <span className="font-bold text-slate-700">Odolnosti:</span>
+                          {Object.entries(selectedItem.resistances).map(([k, v]) => (
+                            <span key={k} className="px-1.5 py-0.2 bg-amber-100/60 rounded border border-amber-900/15">
+                              {k}: {Math.round((v as number) * 100)}%
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Special Effect */}
+                      {selectedItem.specialEffect && (
+                        <div className="mt-2 p-2 bg-amber-100/90 border border-amber-600/40 rounded-lg text-xs text-amber-950 font-medium leading-relaxed shadow-2xs">
+                          <span className="font-cinzel font-bold text-amber-900">Unikátní efekt: </span>
+                          {selectedItem.specialEffect}
+                        </div>
+                      )}
                     </div>
 
                     <div className="font-cinzel font-bold mb-4 text-sm flex items-center justify-between w-full px-2">
@@ -313,6 +370,7 @@ export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem 
                           </button>
                         ) : (
                           <button 
+                            disabled={isClassLocked}
                             onClick={() => {
                               const normSlot = selectedItem.slot?.toLowerCase().trim();
                               let finalSlot = normSlot;
@@ -325,17 +383,26 @@ export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem 
                               
                               setEquipped({ ...equipped, [finalSlot]: selectedItem.id });
                             }}
-                            className="w-full py-2.5 bg-amber-800 hover:bg-amber-700 text-white font-cinzel font-bold uppercase text-xs tracking-wider transition shadow-lg rounded-xl"
+                            className="w-full py-2.5 bg-amber-800 hover:bg-amber-700 text-white font-cinzel font-bold uppercase text-xs tracking-wider transition shadow-lg rounded-xl disabled:opacity-40 disabled:cursor-not-allowed"
                           >
-                            Vybavit do výstroje
+                            {isClassLocked ? "Tuto výstroj nelze nasadit" : "Vybavit do výstroje"}
                           </button>
                         )
                       )}
 
+                      {/* Sell Item Action */}
+                      <button
+                        onClick={() => sellItem(selectedItem)}
+                        className="w-full py-2 bg-white border border-amber-900/20 hover:bg-amber-100/60 text-amber-900 font-cinzel font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition shadow-2xs"
+                      >
+                        <Coins size={14} className="text-yellow-600" />
+                        <span>Prodat obchodníkovi (+{selectedItem.sell_price || 5} Zl.)</span>
+                      </button>
+
                       {/* Drop Item Action */}
                       <button
                         onClick={() => dropItem(selectedItem)}
-                        className="w-full py-1.5 text-xs text-red-700 hover:text-red-800 hover:bg-red-50 rounded-lg flex items-center justify-center gap-1.5 transition font-cinzel"
+                        className="w-full py-1 text-xs text-red-700 hover:text-red-800 hover:bg-red-50 rounded-lg flex items-center justify-center gap-1.5 transition font-cinzel"
                       >
                         <Trash2 size={13} /> Zahodit předmět
                       </button>
@@ -408,5 +475,3 @@ export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem 
     </div>
   );
 };
-
-

@@ -36,7 +36,9 @@ const getAvatarVideo = (r?: string) => {
   if (normalized.includes('drak') || lower.includes('dragon')) return '/video/avatars/drakorozeny.mp4';
   if (lower.includes('tiefling')) return '/video/avatars/tiefling.mp4';
   if (normalized.includes('ork') || lower.includes('orc')) return '/video/avatars/pulork.mp4';
-  // Other races (Elf, Půlčík, Gnóm) don't have animated portraits yet - fall back to static image
+  if (normalized.includes('pulcik') || lower.includes('halfling')) return '/video/avatars/pulcik.mp4';
+  if (normalized.includes('gnom') || lower.includes('gnome')) return '/video/avatars/gnom.mp4';
+  // Other races (Elf) don't have animated portraits yet - fall back to static image
   return null;
 };
 
@@ -117,6 +119,8 @@ export default function Home() {
   
   // Quests
   const [skillsOpen, setSkillsOpen] = useState(false);
+  const [heroDropdownOpen, setHeroDropdownOpen] = useState(false);
+  const [menuDropdownOpen, setMenuDropdownOpen] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
   const [questsOpen, setQuestsOpen] = useState(false);
       const [travelMode, setTravelMode] = useState(false);
@@ -932,10 +936,11 @@ export default function Home() {
                  setLevel(nextLevel);
                  setMaxHp(nextMaxHp);
                  setHp(nextMaxHp); // Full heal on level-up
-                 setSkillPoints(sp => sp + 1);
+                 const earnedPoints = nextLevel % 2 === 0 ? 2 : 1;
+                  setSkillPoints(sp => sp + earnedPoints);
                  setQuestBanner({
                    title: `POSTOUPIL JSI NA ÚROVEŇ ${nextLevel}!`,
-                   subtitle: `+10 Max HP (vyléčen na ${nextMaxHp} HP) a získal jsi 1 dovednostní bod!`
+                   subtitle: `+10 Max HP (vyléčen na ${nextMaxHp} HP) a získal jsi ${earnedPoints} ${earnedPoints === 1 ? "dovednostní bod" : "dovednostní body"}!`
                  });
                  setTimeout(() => setQuestBanner(null), 7000);
                  return newXp - xpNeeded;
@@ -1204,18 +1209,75 @@ export default function Home() {
 
           </div>
 
-          <div className="flex gap-1 sm:gap-2.5 bg-[#f9f6e6]/70 backdrop-blur-md border border-amber-900/15 p-1 sm:p-2 rounded-2xl shadow-xl overflow-x-auto custom-scrollbar hide-scrollbar snap-x flex-nowrap md:justify-center items-center">
-            <button onClick={() => setStatsOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-2.5 text-slate-700 hover:text-amber-950 hover:bg-white/80 rounded-xl transition flex items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold">
-              <User size={17} className="text-amber-900" /> <span className="hidden sm:inline">Vlastnosti</span>
-            </button>
-            <button onClick={() => setInventoryOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-2.5 text-slate-700 hover:text-amber-950 hover:bg-white/80 rounded-xl transition flex items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold">
-              <Package size={17} className="text-amber-900" /> <span className="hidden sm:inline">Batoh</span>
+          <div className="relative flex gap-1.5 sm:gap-3 bg-[#f9f6e6]/80 backdrop-blur-md border border-amber-900/15 p-1.5 sm:p-2 rounded-2xl shadow-xl items-center justify-center">
+            {/* Click outside overlay for dropdowns */}
+            {(heroDropdownOpen || menuDropdownOpen) && (
+              <div 
+                className="fixed inset-0 z-20" 
+                onClick={() => { setHeroDropdownOpen(false); setMenuDropdownOpen(false); }} 
+              />
+            )}
+
+            {/* 1. Hrdina Dropdown (Vlastnosti & Schopnosti) */}
+            <div className="relative z-30">
+              <button 
+                onClick={() => { setHeroDropdownOpen(prev => !prev); setMenuDropdownOpen(false); }}
+                className={`flex-shrink-0 p-2 sm:p-2.5 rounded-xl transition flex items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold relative ${
+                  heroDropdownOpen 
+                    ? 'bg-amber-200/90 text-amber-950 border border-amber-600/40 shadow-sm' 
+                    : 'text-slate-700 hover:text-amber-950 hover:bg-white/80'
+                }`}
+                title="Hrdina - Vlastnosti a schopnosti"
+              >
+                <Shield size={17} className="text-amber-900" />
+                <span>Hrdina</span>
+                {skillPoints > 0 && (
+                  <span className="px-1.5 py-0.2 bg-amber-600 text-white text-[10px] rounded-full font-bold shadow-xs animate-pulse" title={`${skillPoints} volných dovednostních bodů`}>
+                    {skillPoints}
+                  </span>
+                )}
+              </button>
+
+              {heroDropdownOpen && (
+                <div className="absolute top-full left-0 mt-2 w-52 bg-[#fdfbf7] border border-amber-900/20 rounded-2xl shadow-2xl p-2 z-40 flex flex-col gap-1 backdrop-blur-md">
+                  <button 
+                    onClick={() => { setStatsOpen(true); setHeroDropdownOpen(false); }}
+                    className="w-full text-left px-3 py-2 text-slate-800 hover:bg-amber-100/70 rounded-xl transition flex items-center gap-2.5 text-xs sm:text-sm font-cinzel font-bold"
+                  >
+                    <User size={16} className="text-amber-900" />
+                    <span>Vlastnosti postavy</span>
+                  </button>
+                  <button 
+                    onClick={() => { setSkillsOpen(true); setHeroDropdownOpen(false); }}
+                    className="w-full text-left px-3 py-2 text-slate-800 hover:bg-amber-100/70 rounded-xl transition flex items-center justify-between gap-2 text-xs sm:text-sm font-cinzel font-bold"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Sparkles size={16} className="text-amber-900" />
+                      <span>Kniha schopností</span>
+                    </div>
+                    {skillPoints > 0 && (
+                      <span className="px-1.5 py-0.2 bg-amber-600 text-white text-[10px] rounded-full font-bold shadow-xs animate-pulse">
+                        +{skillPoints}
+                      </span>
+                    )}
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* 2. Batoh (Inventář) */}
+            <button 
+              onClick={() => { setInventoryOpen(true); setHeroDropdownOpen(false); setMenuDropdownOpen(false); }} 
+              className="flex-shrink-0 p-2 sm:p-2.5 text-slate-700 hover:text-amber-950 hover:bg-white/80 rounded-xl transition flex items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold"
+              title="Inventář a výbava"
+            >
+              <Package size={17} className="text-amber-900" /> <span>Batoh</span>
             </button>
             
-            {/* Dedicated Quests Button */}
+            {/* 3. Úkoly */}
             <button 
-              onClick={() => { setQuestsOpen(true); setUnreadQuests(false); }} 
-              className={`flex-shrink-0 snap-start p-2 sm:p-2.5 rounded-xl transition flex items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold relative ${
+              onClick={() => { setQuestsOpen(true); setUnreadQuests(false); setHeroDropdownOpen(false); setMenuDropdownOpen(false); }} 
+              className={`flex-shrink-0 p-2 sm:p-2.5 rounded-xl transition flex items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold relative ${
                 unreadQuests 
                   ? 'bg-amber-200/90 text-amber-950 border border-amber-600/50 shadow-[0_0_12px_rgba(212,175,55,0.4)]' 
                   : 'text-slate-700 hover:text-amber-950 hover:bg-white/80'
@@ -1234,52 +1296,70 @@ export default function Home() {
               )}
             </button>
 
-            {/* Journal Button */}
+            {/* 4. Mapa */}
             <button 
-              onClick={() => setJournalOpen(true)} 
-              className="flex-shrink-0 snap-start p-2 sm:p-2.5 text-slate-700 hover:text-amber-950 hover:bg-white/80 rounded-xl transition flex items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold"
-              title="Kronika příběhu"
+              onClick={() => { setMapOpen(true); setHeroDropdownOpen(false); setMenuDropdownOpen(false); }} 
+              className="flex-shrink-0 p-2 sm:p-2.5 text-amber-900 hover:bg-amber-100/60 rounded-xl transition flex items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold"
+              title="Mapa světa"
             >
-              <BookOpen size={17} className="text-amber-900" /> <span className="hidden sm:inline">Deník</span>
+              <Map size={17} /> <span>Mapa</span>
             </button>
 
-            {/* Skills Button */}
-            <button 
-              onClick={() => setSkillsOpen(true)} 
-              className="flex-shrink-0 snap-start p-2 sm:p-2.5 text-slate-700 hover:text-amber-950 hover:bg-white/80 rounded-xl transition flex items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold" 
-              title="Dovednosti a kouzla"
-            >
-              <Sparkles size={17} className="text-amber-900" /> <span className="hidden sm:inline">Schopnosti</span>
-            </button>
+            {/* 5. Menu Dropdown (Deník, Postavy, Nastavení, Návrat) */}
+            <div className="relative z-30">
+              <button 
+                onClick={() => { setMenuDropdownOpen(prev => !prev); setHeroDropdownOpen(false); }}
+                className={`flex-shrink-0 p-2 sm:p-2.5 rounded-xl transition flex items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold ${
+                  menuDropdownOpen 
+                    ? 'bg-amber-200/90 text-amber-950 border border-amber-600/40 shadow-sm' 
+                    : 'text-slate-700 hover:text-amber-950 hover:bg-white/80'
+                }`}
+                title="Další volby a systémové menu"
+              >
+                <Menu size={17} className="text-amber-900" />
+                <span className="hidden sm:inline">Menu</span>
+              </button>
 
-            {/* NPCs Button */}
-            <button onClick={() => setNpcsOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-2.5 text-slate-700 hover:text-amber-950 hover:bg-white/80 rounded-xl transition flex items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold">
-              <Users size={17} className="text-amber-900" /> <span className="hidden sm:inline">Postavy</span>
-            </button>
-
-            {/* Map Button */}
-            <button onClick={() => setMapOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-2.5 text-amber-900 hover:bg-amber-100/60 rounded-xl transition flex items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold">
-              <Map size={17} /> <span className="hidden sm:inline">Mapa</span>
-            </button>
-
-            {/* Settings Button */}
-            <button onClick={() => setSettingsOpen(true)} className="flex-shrink-0 snap-start p-2 sm:p-2.5 text-slate-600 hover:text-amber-950 hover:bg-white/80 rounded-xl transition" title="Nastavení">
-              <Settings2 size={17} />
-            </button>
-
-            {/* Back to Hero Selection */}
-            <button 
-              onClick={() => {
-                localStorage.removeItem("aethelgard_active_char");
-                window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-                setGameState("menu");
-                fetchCharacters(email);
-              }} 
-              className="flex-shrink-0 snap-start p-2 sm:p-2.5 text-red-700 hover:text-red-900 hover:bg-red-50/80 rounded-xl transition flex items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold border border-red-900/20" 
-              title="Zpět do výběru hrdinů"
-            >
-              <Users size={16} /> <span className="hidden md:inline">Výběr hrdiny</span>
-            </button>
+              {menuDropdownOpen && (
+                <div className="absolute top-full right-0 mt-2 w-56 bg-[#fdfbf7] border border-amber-900/20 rounded-2xl shadow-2xl p-2 z-40 flex flex-col gap-1 backdrop-blur-md">
+                  <button 
+                    onClick={() => { setJournalOpen(true); setMenuDropdownOpen(false); }}
+                    className="w-full text-left px-3 py-2 text-slate-800 hover:bg-amber-100/70 rounded-xl transition flex items-center gap-2.5 text-xs sm:text-sm font-cinzel font-bold"
+                  >
+                    <BookOpen size={16} className="text-amber-900" />
+                    <span>Deník a kronika</span>
+                  </button>
+                  <button 
+                    onClick={() => { setNpcsOpen(true); setMenuDropdownOpen(false); }}
+                    className="w-full text-left px-3 py-2 text-slate-800 hover:bg-amber-100/70 rounded-xl transition flex items-center gap-2.5 text-xs sm:text-sm font-cinzel font-bold"
+                  >
+                    <Users size={16} className="text-amber-900" />
+                    <span>Známé postavy</span>
+                  </button>
+                  <button 
+                    onClick={() => { setSettingsOpen(true); setMenuDropdownOpen(false); }}
+                    className="w-full text-left px-3 py-2 text-slate-800 hover:bg-amber-100/70 rounded-xl transition flex items-center gap-2.5 text-xs sm:text-sm font-cinzel font-bold"
+                  >
+                    <Settings2 size={16} className="text-amber-900" />
+                    <span>Nastavení</span>
+                  </button>
+                  <div className="h-[1px] bg-amber-900/10 my-1" />
+                  <button 
+                    onClick={() => {
+                      localStorage.removeItem("aethelgard_active_char");
+                      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+                      setMenuDropdownOpen(false);
+                      setGameState("menu");
+                      fetchCharacters(email);
+                    }}
+                    className="w-full text-left px-3 py-2 text-red-700 hover:bg-red-50 rounded-xl transition flex items-center gap-2.5 text-xs sm:text-sm font-cinzel font-bold"
+                  >
+                    <Users size={16} className="text-red-700" />
+                    <span>Výběr hrdiny</span>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
           
         </div>

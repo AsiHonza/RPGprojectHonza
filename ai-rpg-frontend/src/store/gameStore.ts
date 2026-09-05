@@ -236,6 +236,8 @@ interface GameState {
 
   // Skills
   skills: any[];
+  preparedSkills: string[];
+  setPreparedSkills: (s: string[] | ((prev: string[]) => string[])) => void;
   setSkills: (s: any[]) => void;
   availableSkills: any[];
   setAvailableSkills: (s: any[]) => void;
@@ -358,6 +360,8 @@ export const useGameStore = create<GameState>((set) => ({
   setSkills: (skills) => set({ skills }),
   availableSkills: [],
   setAvailableSkills: (availableSkills) => set({ availableSkills }),
+  preparedSkills: [],
+  setPreparedSkills: (preparedSkills) => set((state) => ({ preparedSkills: typeof preparedSkills === "function" ? preparedSkills(state.preparedSkills) : preparedSkills })),
 
   inCombat: false,
   setInCombat: (inCombat) => set({ inCombat }),

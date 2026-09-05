@@ -161,6 +161,7 @@ class CombatResolutionRequest(BaseModel):
     player_hp: int
     enemies: List[CombatEnemy]
     level: Optional[int] = 1
+    dnd_class: Optional[str] = "Bojovník"
 
 class TravelRequest(BaseModel):
     email: str
