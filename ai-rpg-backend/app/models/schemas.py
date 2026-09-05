@@ -105,7 +105,7 @@ class LoadGameRequest(BaseModel):
     name: str
 
 class DeleteCharacterRequest(BaseModel):
-    email: str
+    email: Optional[str] = ""
     name: str
 
 class SaveStateRequest(BaseModel):
@@ -137,10 +137,10 @@ class CharacterCreateRequest(BaseModel):
     name: str
     dnd_class: str
     race: str
-    stats: dict
-    email: str
-    game_mode: str = "sandbox"
-    api_key: str
+    stats: Optional[dict] = None
+    email: Optional[str] = "hrac@aelthgard.com"
+    game_mode: Optional[str] = "campaign"
+    api_key: Optional[str] = "DUMMY"
     backstory: Optional[str] = ""
 
 class PlayerActionRequest(BaseModel):

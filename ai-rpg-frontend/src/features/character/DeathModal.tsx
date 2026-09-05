@@ -5,7 +5,7 @@ import { useGameStore } from '../../store/gameStore';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
 export const DeathModal = ({ onClose }: { onClose: () => void }) => {
-  const { name, email, setGameState, hp, maxHp } = useGameStore();
+  const { name, setGameState, hp, maxHp } = useGameStore();
   const [loading, setLoading] = useState(false);
 
   // If the player isn't actually dead, don't show the modal
@@ -17,7 +17,7 @@ export const DeathModal = ({ onClose }: { onClose: () => void }) => {
       await fetch(`${API_URL}/delete-character`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, name })
+        body: JSON.stringify({ email: (typeof window !== 'undefined' ? localStorage.getItem('aethelgard_session_email') : '') || '', name })
       });
     } catch (e) {
       console.error("Failed to delete character", e);

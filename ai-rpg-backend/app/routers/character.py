@@ -83,8 +83,13 @@ async def load_game(req: LoadGameRequest):
 @router.post('/delete-character')
 async def delete_character(req: DeleteCharacterRequest):
     try:
-        api_key = f'{req.email}#{req.name}'
-        supabase.table('characters').delete().eq('api_key', api_key).execute()
+        clean_name = req.name.strip()
+        clean_email = (req.email or '').strip()
+        if clean_email:
+            api_key = f'{clean_email}#{clean_name}'
+            supabase.table('characters').delete().eq('api_key', api_key).execute()
+        else:
+            supabase.table('characters').delete().ilike('api_key', f'%#{clean_name}').execute()
         return {'status': 'success'}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -105,10 +110,12 @@ async def save_state(req: SaveStateRequest):
 
 @router.post('/create-character')
 async def create_character(req: CharacterCreateRequest):
-    api_key = f'{req.email}#{req.name}'
+    clean_name = req.name.strip()
+    clean_email = (req.email or '').strip() or 'hrac@aelthgard.com'
+    api_key = f'{clean_email}#{clean_name}'
     res = supabase.table('characters').select('api_key').eq('api_key', api_key).execute()
     if res.data:
-        raise HTTPException(status_code=400, detail='Character already exists.')
+        raise HTTPException(status_code=400, detail=f"Postava se jménem '{clean_name}' již existuje. Zvol prosím jiné jméno nebo původní postavu smaž.")
     world_data = None
     if req.game_mode == 'campaign':
         try:

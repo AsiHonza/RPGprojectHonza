@@ -501,6 +501,19 @@ export default function Home() {
     }
   };
 
+  const formatError = (detail: any, fallback = "Došlo k neočekávané chybě.") => {
+    if (!detail) return fallback;
+    if (typeof detail === "string") return detail;
+    if (Array.isArray(detail)) {
+      return detail.map((d: any) => d.msg || (typeof d === "object" ? JSON.stringify(d) : String(d))).join("\n");
+    }
+    if (typeof detail === "object") {
+      if (detail.message) return detail.message;
+      return JSON.stringify(detail);
+    }
+    return String(detail);
+  };
+
   const loadGame = async (characterName: string, overrideEmail: string = email) => {
     if (!overrideEmail || !characterName) return alert("Přihlaste se a vyberte postavu!");
     setLoading(true);
@@ -629,7 +642,7 @@ export default function Home() {
             playAudioSequentially(lastAudioQueue);
         }
       } else {
-        alert(data.detail || "Chyba při načítání pozice.");
+        alert(formatError(data.detail, "Chyba při načítání pozice."));
       }
     } catch (err) {
       console.error(err); alert("Chyba připojení k serveru.");
@@ -641,23 +654,34 @@ export default function Home() {
     if (!name) return alert("Zadejte jméno!");
     setLoading(true);
 
+    const userEmail = email || (typeof window !== 'undefined' ? localStorage.getItem("aethelgard_session_email") : "") || "hrac@aelthgard.com";
+
     try {
       const res = await fetch(`${API_URL}/create-character`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, dnd_class: dndClass, race, stats, email: email, api_key: "DUMMY", game_mode: gameMode, backstory: backstory || "" }),
+        body: JSON.stringify({ 
+          name, 
+          dnd_class: dndClass, 
+          race, 
+          stats, 
+          email: userEmail, 
+          api_key: "DUMMY", 
+          game_mode: gameMode, 
+          backstory: backstory || "" 
+        }),
       });
       const data = await res.json();
       
       if (res.ok) {
         // Load the character to fetch full state including generated world_data
-        await loadGame(name);
+        await loadGame(name, userEmail);
         
         // Ensure UI updates properly to playing state
         setGameState("playing");
         localStorage.setItem("aethelgard_active_char", name);
       } else {
-        alert(data.detail || "Chyba při tvorbě.");
+        alert(formatError(data.detail, "Chyba při tvorbě postavy."));
       }
     } catch (e) {
       alert("Nelze se připojit k serveru.");
