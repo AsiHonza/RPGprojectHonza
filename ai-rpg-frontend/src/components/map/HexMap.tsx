@@ -1,11 +1,11 @@
-import React, { useMemo, useState, useRef } from 'react';
+import React, { useMemo, useState, useRef, useCallback, useEffect } from 'react';
 import { Grid, defineHex, Orientation } from 'honeycomb-grid';
 import { 
   Castle, Skull, 
   Home, Star, Eye, Navigation, Plus, Minus, Crosshair
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
+import { TransformWrapper, TransformComponent, ReactZoomPanPinchRef } from "react-zoom-pan-pinch";
 import { WORLD_LORE } from '../../data/worldLore';
 import { useGameStore } from '../../store/gameStore';
 
@@ -218,6 +218,32 @@ export default function HexMap({
     };
   }, [hexes]);
 
+  // Transform ref & Auto-centering on Hero
+  const transformRef = useRef<ReactZoomPanPinchRef | null>(null);
+
+  const centerOnHero = useCallback((animated = true) => {
+    if (!transformRef.current || !activeLocation) return;
+    const targetHex = grid.toArray().find(h => Number(h.q) === Number(activeLocation.q) && Number(h.r) === Number(activeLocation.r));
+    if (!targetHex) return;
+    const px = targetHex.x + offsetX;
+    const py = targetHex.y + offsetY;
+    const scale = 1.9;
+    const wrapper = document.querySelector(".react-transform-wrapper");
+    const cx = wrapper?.clientWidth ? wrapper.clientWidth / 2 : window.innerWidth / 2;
+    const cy = wrapper?.clientHeight ? wrapper.clientHeight / 2 : window.innerHeight / 2;
+    transformRef.current.setTransform(-px * scale + cx, -py * scale + cy, scale, animated ? 300 : 0);
+  }, [activeLocation, grid, offsetX, offsetY]);
+
+  // Auto-focus on hero when opened or location changes
+  useEffect(() => {
+    const timer1 = setTimeout(() => centerOnHero(false), 80);
+    const timer2 = setTimeout(() => centerOnHero(true), 320);
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+    };
+  }, [centerOnHero]);
+
   // Touch vs Drag guard
   const handlePointerDown = (e: React.PointerEvent) => {
     pointerDownPos.current = { x: e.clientX, y: e.clientY, time: Date.now() };
@@ -259,7 +285,8 @@ export default function HexMap({
       <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_90px_rgba(40,25,10,0.45)] z-20" />
 
       <TransformWrapper 
-        initialScale={1.6} 
+        ref={transformRef}
+        initialScale={1.8} 
         minScale={0.4} 
         maxScale={4.5} 
         centerOnInit={false} 
@@ -267,22 +294,22 @@ export default function HexMap({
         limitToBounds={false}
         onInit={(ref) => {
           if (activeLocation) {
-            const targetHex = grid.toArray().find(h => h.q === activeLocation.q && h.r === activeLocation.r);
+            const targetHex = grid.toArray().find(h => Number(h.q) === Number(activeLocation.q) && Number(h.r) === Number(activeLocation.r));
             if (targetHex) {
               const px = targetHex.x + offsetX;
               const py = targetHex.y + offsetY;
-              const scale = 1.6;
+              const scale = 1.9;
               const wrapper = document.querySelector(".react-transform-wrapper");
-              const cx = wrapper ? wrapper.clientWidth / 2 : 400;
-              const cy = wrapper ? wrapper.clientHeight / 2 : 400;
+              const cx = wrapper ? wrapper.clientWidth / 2 : window.innerWidth / 2;
+              const cy = wrapper ? wrapper.clientHeight / 2 : window.innerHeight / 2;
               ref.setTransform(-px * scale + cx, -py * scale + cy, scale, 0);
               return;
             }
           }
-          ref.centerView(1.6, 0);
+          ref.centerView(1.8, 0);
         }}
       >
-        {({ zoomIn, zoomOut, setTransform }) => (
+        {({ zoomIn, zoomOut }) => (
           <>
             {/* Zoom and Hero Center Controls */}
             <div className="absolute bottom-6 right-4 sm:bottom-8 sm:right-6 flex flex-col gap-2 z-40">
@@ -301,20 +328,7 @@ export default function HexMap({
                 <Minus size={20} className="stroke-[2.5]" />
               </button>
               <button 
-                onClick={() => {
-                  if (activeLocation) {
-                    const targetHex = grid.toArray().find(h => h.q === activeLocation.q && h.r === activeLocation.r);
-                    if (targetHex) {
-                      const px = targetHex.x + offsetX;
-                      const py = targetHex.y + offsetY;
-                      const scale = 2.0;
-                      const wrapper = document.querySelector(".react-transform-wrapper");
-                      const cx = wrapper ? wrapper.clientWidth / 2 : 400;
-                      const cy = wrapper ? wrapper.clientHeight / 2 : 400;
-                      setTransform(-px * scale + cx, -py * scale + cy, scale, 400);
-                    }
-                  }
-                }} 
+                onClick={() => centerOnHero(true)} 
                 className="w-10 h-10 bg-amber-900 border-2 border-amber-700 rounded-xl flex items-center justify-center text-amber-100 hover:bg-amber-950 shadow-xl transition active:scale-95 cursor-pointer" 
                 title="Centrovat na hrdinu"
               >
@@ -462,7 +476,7 @@ export default function HexMap({
                                       <Castle size={14} className="text-amber-300" />
                                     </g>
                                     {/* Capital Banner - only show if player is NOT standing on this hex to prevent overlap */}
-                                    {(!activeLocation || activeLocation.q !== hexData.q || activeLocation.r !== hexData.r) && (
+                                    {(!activeLocation || Number(activeLocation.q) !== Number(hexData.q) || Number(activeLocation.r) !== Number(hexData.r)) && (
                                       <g transform="translate(0, 15)">
                                         <rect x="-30" y="-7" width="60" height="13" rx="3" fill="#fef3c7" stroke="#b45309" strokeWidth="1" className="shadow" />
                                         <text x="0" y="0" textAnchor="middle" dominantBaseline="middle" className="text-[7px] font-cinzel font-black fill-[#78350f] uppercase tracking-wider">
@@ -518,13 +532,14 @@ export default function HexMap({
 
                   {/* 2. Kingdom Watermark Names (Antique Cartographic Text) */}
                   {kingdomCenters.map(kc => {
-                    const playerHex = activeLocation ? grid.toArray().find(h => h.q === activeLocation.q && h.r === activeLocation.r) : null;
-                    const isPlayerNear = playerHex && Math.hypot(kc.x - playerHex.x, kc.y - playerHex.y) < 48;
+                    const playerHex = activeLocation ? grid.toArray().find(h => Number(h.q) === Number(activeLocation.q) && Number(h.r) === Number(activeLocation.r)) : null;
+                    const isPlayerNear = playerHex && Math.hypot(kc.x - playerHex.x, kc.y - playerHex.y) < 55;
+                    if (isPlayerNear) return null; // Avoid overlapping hero medallion & banner
                     return (
                       <g 
                         key={`kingdom-label-${kc.kingdomId}`} 
-                        transform={`translate(${kc.x}, ${isPlayerNear ? kc.y - 34 : kc.y - 20})`}
-                        className={`pointer-events-none select-none transition-opacity duration-300 ${isPlayerNear ? 'opacity-20' : 'opacity-50'}`}
+                        transform={`translate(${kc.x}, ${kc.y - 20})`}
+                        className="pointer-events-none select-none opacity-45"
                       >
                         <text 
                           x="0" 
@@ -590,12 +605,12 @@ export default function HexMap({
 
                   {/* 5. Hero Miniature & Pulsing Beacon */}
                   {activeLocation && (() => {
-                    const playerHex = grid.toArray().find(h => h.q === activeLocation.q && h.r === activeLocation.r);
+                    const playerHex = grid.toArray().find(h => Number(h.q) === Number(activeLocation.q) && Number(h.r) === Number(activeLocation.r));
                     if (!playerHex) return null;
-                    const playerHexData = hexes.find(h => h.q === activeLocation.q && h.r === activeLocation.r);
-                    const locLabel = playerHexData?.nazev || (playerHexData?.poi === 'Capital' ? 'Hlavní Město' : null);
+                    const playerHexData = enrichedGrid.find(h => Number(h.q) === Number(activeLocation.q) && Number(h.r) === Number(activeLocation.r));
+                    const locLabel = playerHexData?.nazev || (playerHexData?.poi === 'Capital' ? 'Hlavní Město' : playerHexData?.poi);
                     const bannerText = locLabel ? `HRDINA • ${locLabel}` : 'HRDINA';
-                    const bannerWidth = Math.max(50, Math.min(140, bannerText.length * 6.2 + 16));
+                    const bannerWidth = Math.max(50, Math.min(150, bannerText.length * 6.2 + 16));
 
                     return (
                       <g transform={`translate(${playerHex.x}, ${playerHex.y})`} className="pointer-events-none z-40">

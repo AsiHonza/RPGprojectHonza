@@ -41,11 +41,11 @@ async def play_action(req: PlayerActionRequest):
         state_dict = char_data.get('state', {})
         travel_days_left = state_dict.get('travel_days_left', 0)
         is_traveling = state_dict.get('travel_mode', False) or travel_days_left > 0
-        world_data = state_dict.get('world_data')
+        world_data = state_dict.get('world_data') or {}
         world_prompt_str = ''
         if world_data:
             current_region = state_dict.get('currentRegion') or state_dict.get('aktualni_region')
-            local_locations = [loc for loc in world_data.get('locations', []) if loc.get('nazev') == current_region]
+            local_locations = [loc for loc in (world_data.get('locations') or []) if isinstance(loc, dict) and loc.get('nazev') == current_region]
             world_prompt_str = f"\n[TOTO JE ŘÍZENÝ SANDBOX! Svět je pevně dán:]\nZápletka: {world_data.get('main_plot', '')}\nAktuální lokace info: {json.dumps(local_locations, ensure_ascii=False)}\n\n[KRITICKÉ PRAVIDLO PRO TAJEMSTVÍ]: Všechna 'tajemstvi_nebo_problem' a 'skryty_motiv' jsou před hráčem PŘÍSNĚ SKRYTÁ. Nesmíš je hráči vyžvanit v úvodním popisu lokace! Hráč na ně musí přijít sám pomocí průzkumu, dedukce nebo dialogů s NPC.\n"
         travel_prompt = ''
         if is_traveling:
@@ -431,32 +431,63 @@ async def travel_action(req: TravelRequest):
         if not db_res.data:
             raise HTTPException(status_code=404, detail='Postava nenalezena.')
         char_data = db_res.data[0]
-        state = char_data.get('state', {})
-        history = char_data.get('history', [])
-        world_data = state.get('world_data', {})
-        locations = world_data.get('locations', [])
-        hex_grid = world_data.get('hex_grid', [])
+        state = char_data.get('state') or {}
+        history = char_data.get('history') or []
+        world_data = state.get('world_data') or {}
+        
+        # Self-healing: if world_data or hex_grid is missing, generate mathematical world on the fly
+        if not world_data or not world_data.get('hex_grid'):
+            import world_generator
+            math_world = world_generator.generate_world_data()
+            world_data = {
+                'hex_grid': math_world.get('hex_grid', []),
+                'pois': math_world.get('pois', []),
+                'main_plot': 'Cesta po zemích a královstvích Aelthgardu.',
+                'locations': [],
+                'key_npcs': []
+            }
+            state['world_data'] = world_data
+
+        locations = world_data.get('locations') or []
+        hex_grid = world_data.get('hex_grid') or []
+        pois = world_data.get('pois') or []
         current_loc = state.get('playerLocation')
-        if not current_loc and world_data:
-            cap = next((p for p in world_data.get('pois', []) if p.get('type') == 'Capital'), None)
+
+        # Fallback for current player location
+        if not current_loc or not isinstance(current_loc, dict) or 'q' not in current_loc or 'r' not in current_loc:
+            cap = next((p for p in pois if isinstance(p, dict) and p.get('type') == 'Capital' and p.get('kingdom_id') != 5), None)
+            if not cap:
+                cap = next((p for p in pois if isinstance(p, dict) and p.get('type') == 'Capital'), None)
             if cap:
                 current_loc = {'q': cap['q'], 'r': cap['r'], 'kingdom_id': cap.get('kingdom_id'), 'biome': cap.get('terrain', 'Plains')}
             elif hex_grid:
-                first_h = hex_grid[0]
+                first_h = next((h for h in hex_grid if isinstance(h, dict) and h.get('kingdom_id') != 5), hex_grid[0])
                 current_loc = {'q': first_h['q'], 'r': first_h['r'], 'kingdom_id': first_h.get('kingdom_id'), 'biome': first_h.get('terrain', 'Plains')}
+            else:
+                current_loc = {'q': int(req.target_q), 'r': int(req.target_r), 'kingdom_id': 1, 'biome': 'Plains'}
             state['playerLocation'] = current_loc
-        if not current_loc:
-            raise HTTPException(status_code=400, detail='Neznámá pozice hráče na mapě.')
-        dist = hex_distance(current_loc['q'], current_loc['r'], req.target_q, req.target_r)
+
+        try:
+            cur_q = int(current_loc['q'])
+            cur_r = int(current_loc['r'])
+            tgt_q = int(req.target_q)
+            tgt_r = int(req.target_r)
+        except Exception:
+            raise HTTPException(status_code=400, detail='Neplatný formát souřadnic pro cestování.')
+
+        dist = hex_distance(cur_q, cur_r, tgt_q, tgt_r)
         if dist > 1:
             raise HTTPException(status_code=400, detail='Můžeš cestovat jen o 1 hex!')
-        target_hex = next((h for h in hex_grid if h['q'] == req.target_q and h['r'] == req.target_r), None)
+
+        target_hex = next((h for h in hex_grid if isinstance(h, dict) and int(h.get('q', 999)) == tgt_q and int(h.get('r', 999)) == tgt_r), None)
         if not target_hex:
-            raise HTTPException(status_code=400, detail='Cíl leží mimo známou mapu.')
+            target_hex = {'q': tgt_q, 'r': tgt_r, 'terrain': 'Plains', 'kingdom_id': current_loc.get('kingdom_id', 1)}
+
         if target_hex.get('terrain') in ['Ocean']:
             raise HTTPException(status_code=400, detail='Oceán je neprostupný.')
         if target_hex.get('terrain') in ['Swamp', 'Wasteland', 'Desert', 'Mountains'] and state.get('rations', 0) < 2:
             raise HTTPException(status_code=400, detail='Do nehostinného terénu potřebuješ alespoň 2 dávky zásob jídla.')
+
         system_logs = []
         if state.get('rations', 0) < 1:
             penalty = 10
@@ -465,55 +496,135 @@ async def travel_action(req: TravelRequest):
         else:
             state['rations'] = max(0, state.get('rations', 1) - 1)
             system_logs.append('Spotřebována 1 dávka jídla na den cesty.')
+
         state['day'] = state.get('day', 1) + 1
         system_logs.append(f"Uplynul 1 den cesty (Den {state['day']}).")
-        state['playerLocation'] = {'q': req.target_q, 'r': req.target_r, 'kingdom_id': target_hex.get('kingdom_id'), 'biome': target_hex.get('terrain', 'Plains')}
-        poi = next((l for l in locations if l.get('id') == f'{req.target_q}_{req.target_r}' or (l.get('q') == req.target_q and l.get('r') == req.target_r)), None)
-        raw_poi = None
-        if not poi and world_data.get('pois'):
-            raw_poi = next((p for p in world_data['pois'] if p['q'] == req.target_q and p['r'] == req.target_r), None)
-        dest_name = poi.get('name') or poi.get('nazev') if poi else raw_poi.get('name') if raw_poi else f"{target_hex.get('terrain', 'Divočina')}"
-        poi_type = (poi.get('type') or poi.get('typ') or (raw_poi.get('type') if raw_poi else '') or target_hex.get('terrain', '')).lower()
-        if any((k in poi_type for k in ['capital', 'city', 'mesto'])):
+        state['playerLocation'] = {'q': tgt_q, 'r': tgt_r, 'kingdom_id': target_hex.get('kingdom_id'), 'biome': target_hex.get('terrain', 'Plains')}
+
+        poi = next((l for l in locations if isinstance(l, dict) and (l.get('id') == f'{tgt_q}_{tgt_r}' or (int(l.get('q', 999)) == tgt_q and int(l.get('r', 999)) == tgt_r))), None)
+        raw_poi = next((p for p in pois if isinstance(p, dict) and int(p.get('q', 999)) == tgt_q and int(p.get('r', 999)) == tgt_r), None)
+
+        kingdom_names = {
+            1: 'Valerijské Impérium',
+            2: 'Svatá říše Solariova',
+            3: 'Kmeny z Hlubokých hvozdů',
+            4: 'Svobodná města',
+            5: 'Karanténní Zóna',
+            6: 'Železný Práh',
+            7: 'Tajemné Útočiště'
+        }
+        poi_names_map = {
+            'Capital': 'Hlavní město',
+            'Village': 'Vesnice',
+            'Dungeon': 'Podzemní kobka',
+            'Shrine': 'Posvátná svatyně',
+            'Ruin': 'Prastaré ruiny'
+        }
+
+        dest_name = None
+        if poi and isinstance(poi, dict):
+            dest_name = poi.get('name') or poi.get('nazev')
+        if not dest_name and raw_poi and isinstance(raw_poi, dict):
+            p_type = raw_poi.get('type')
+            p_kid = raw_poi.get('kingdom_id')
+            k_name = kingdom_names.get(p_kid, 'Aelthgard')
+            if p_type == 'Capital':
+                dest_name = f"Hlavní město ({k_name})"
+            elif p_type:
+                dest_name = f"{poi_names_map.get(p_type, p_type)} ({k_name})"
+        if not dest_name:
+            terrain_cz = {
+                'Ocean': 'Oceánské pobřeží',
+                'Mountains': 'Horské štíty',
+                'Forest': 'Hluboký hvozd',
+                'Swamp': 'Mlžné bažiny',
+                'Wasteland': 'Pustina',
+                'Plains': 'Travnaté pláně'
+            }
+            terr = target_hex.get('terrain', 'Plains')
+            dest_name = f"{terrain_cz.get(terr, terr)} ({tgt_q}, {tgt_r})"
+
+        poi_type = ''
+        if poi and isinstance(poi, dict):
+            poi_type = (poi.get('type') or poi.get('typ') or '').lower()
+        if not poi_type and raw_poi and isinstance(raw_poi, dict):
+            poi_type = str(raw_poi.get('type', '')).lower()
+        if not poi_type:
+            poi_type = str(target_hex.get('terrain', '')).lower()
+
+        if any(k in poi_type for k in ['capital', 'city', 'mesto']):
             dest_type = 'mesto'
-        elif any((k in poi_type for k in ['town', 'village', 'vesnice', 'osada'])):
+        elif any(k in poi_type for k in ['town', 'village', 'vesnice', 'osada']):
             dest_type = 'vesnice'
-        elif any((k in poi_type for k in ['dungeon', 'ruin', 'cave', 'tower', 'zajimavost'])):
+        elif any(k in poi_type for k in ['dungeon', 'ruin', 'cave', 'tower', 'zajimavost', 'shrine']):
             dest_type = 'dungeon'
         else:
             dest_type = 'divocina'
-        loc_key = f"{req.target_q}_{req.target_r}"
-        visited_locations = state.get('visited_locations', {})
-        
-        if loc_key in visited_locations:
+
+        loc_key = f"{tgt_q}_{tgt_r}"
+        visited_locations = state.get('visited_locations')
+        if not isinstance(visited_locations, dict):
+            visited_locations = {}
+
+        if loc_key in visited_locations and isinstance(visited_locations[loc_key], dict):
             print(f"CACHE HIT: Lokace {loc_key} nactena z DB")
             ai_data = visited_locations[loc_key]
         else:
             print(f"CACHE MISS: Lokace {loc_key} se musi vygenerovat")
             client = genai.Client(api_key=req.api_key if getattr(req, 'api_key', None) and 'DUMMY' not in req.api_key else os.environ.get('GEMINI_API_KEY'))
-            prompt = f"""Hráč v D&D RPG (rasa: {state.get('race', 'Člověk')}, povolání: {state.get('dnd_class', 'Bojovník')}) právě dorazil na nové místo na mapě:\nCílová lokace: {dest_name} (Typ: {dest_type}, Terén: {target_hex.get('terrain')})\nZnámý bod zájmu (POI): {(json.dumps(poi or raw_poi, ensure_ascii=False) if poi or raw_poi else 'Běžná divočina/krajina')}\nHlavní zápletka světa: {world_data.get('main_plot', '')}\n\nKRITICKÉ PROSTOROVÉ PRAVIDLO:\nHráč opustil předchozí místo a dorazil sem. ŽÁDNÉ postavy z minulého místa (hostinští, strážní, NPC z předchozího místa) ZDE NEJSOU!\nVšechny nabízené akce a lokální orientační body se musí týkat VÝHRADNĚ této nové lokace ({dest_name}).\n\nVrať POUZE validní JSON:\n{{\n  "vypravec": "Atmosférické vylíčení cesty a příchodu na místo z pohledu vypravěče (3-4 věty). Popiš, co hráč vidí v {dest_name}, jaké je počasí a jaká nová situace či tajemství se otevírá.",\n  "popis_okoli": "Stručný popis nové oblasti (1-2 věty).",\n  "vyznamna_mista": [\n    {{"nazev": "Konkrétní budova či orientační bod 1 v {dest_name}", "ikona": "Compass"}},\n    {{"nazev": "Konkrétní budova či orientační bod 2 v {dest_name}", "ikona": "Home"}},\n    {{"nazev": "Konkrétní budova či orientační bod 3 v {dest_name}", "ikona": "Shield"}}\n  ],\n  "nabizene_akce": ["První logická akce přímo v {dest_name}", "Druhá akce přímo v {dest_name}", "Třetí odvážná akce přímo v {dest_name}"],\n  "image_prompt": "vibrant fantasy landscape concept art of {dest_name} in {target_hex.get('terrain')}, detailed 2D painterly style, high quality"\n}}"""
+            prompt = f"""Hráč v D&D RPG (rasa: {state.get('race', 'Člověk')}, povolání: {state.get('dnd_class', 'Bojovník')}) právě dorazil na nové místo na mapě:
+Cílová lokace: {dest_name} (Typ: {dest_type}, Terén: {target_hex.get('terrain')})
+Známý bod zájmu (POI): {(json.dumps(poi or raw_poi, ensure_ascii=False) if poi or raw_poi else 'Běžná divočina/krajina')}
+Hlavní zápletka světa: {world_data.get('main_plot', '')}
+
+KRITICKÉ PROSTOROVÉ PRAVIDLO:
+Hráč opustil předchozí místo a dorazil sem. ŽÁDNÉ postavy z minulého místa (hostinští, strážní, NPC z předchozího místa) ZDE NEJSOU!
+Všechny nabízené akce a lokální orientační body se musí týkat VÝHRADNĚ této nové lokace ({dest_name}).
+
+Vrať POUZE validní JSON:
+{{
+  "vypravec": "Atmosférické vylíčení cesty a příchodu na místo z pohledu vypravěče (3-4 věty). Popiš, co hráč vidí v {dest_name}, jaké je počasí a jaká nová situace či tajemství se otevírá.",
+  "popis_okoli": "Stručný popis nové oblasti (1-2 věty).",
+  "vyznamna_mista": [
+    {{"nazev": "Konkrétní budova či orientační bod 1 v {dest_name}", "ikona": "Compass"}},
+    {{"nazev": "Konkrétní budova či orientační bod 2 v {dest_name}", "ikona": "Home"}},
+    {{"nazev": "Konkrétní budova či orientační bod 3 v {dest_name}", "ikona": "Shield"}}
+  ],
+  "nabizene_akce": ["První logická akce přímo v {dest_name}", "Druhá akce přímo v {dest_name}", "Třetí odvážná akce přímo v {dest_name}"],
+  "image_prompt": "vibrant fantasy landscape concept art of {dest_name} in {target_hex.get('terrain')}, detailed 2D painterly style, high quality"
+}}"""
             try:
                 resp = client.models.generate_content(model='gemini-3.6-flash', contents=prompt, config=types.GenerateContentConfig(response_mime_type='application/json'))
                 clean_text = resp.text.strip().removeprefix('```json').removesuffix('```').strip()
                 ai_data = json.loads(clean_text)
-                visited_locations[loc_key] = ai_data
-                state['visited_locations'] = visited_locations
+                if isinstance(ai_data, dict):
+                    visited_locations[loc_key] = ai_data
+                    state['visited_locations'] = visited_locations
+                else:
+                    ai_data = {}
             except Exception as ge:
                 print('Gemini travel generate error:', ge)
-                ai_data = {'vypravec': f'Po celodenní cestě jsi dorazil do oblasti {dest_name}. Krajina kolem tebe je tichá, vítr šelestí v trávě a na obzoru se stahují mračna.', 'popis_okoli': f"Krajina: {target_hex.get('terrain', 'Pláně')}.", 'vyznamna_mista': [], 'nabizene_akce': [f'Důkladně prozkoumat okolí místa {dest_name}', 'Rozdělat tábor a odpočinout si', 'Připravit si zbraň a postupovat obezřetně'], 'image_prompt': f"fantasy landscape {dest_name} in {target_hex.get('terrain')}"}
+                ai_data = {}
+
+        if not isinstance(ai_data, dict):
+            ai_data = {}
+
         default_pois = []
         if dest_type in ['mesto', 'vesnice']:
             default_pois = [{'nazev': f'Náves a tržiště v {dest_name}', 'ikona': 'Store'}, {'nazev': f'Místní hostinec a noclehárna', 'ikona': 'Home'}, {'nazev': f'Strážnice a sýpka', 'ikona': 'Shield'}]
         else:
             default_pois = [{'nazev': 'Vyvýšený vyhlídkový pahorek', 'ikona': 'Compass'}, {'nazev': 'Chráněný skalní převis k táboření', 'ikona': 'Tent'}, {'nazev': 'Staré rozcestí u milníku', 'ikona': 'MapPin'}]
-        narrative_text = ai_data.get('vypravec', '')
-        popis_okoli = ai_data.get('popis_okoli', f"Oblast: {dest_name} ({target_hex.get('terrain')})")
+
+        narrative_text = ai_data.get('vypravec') or f'Po celodenní cestě jsi dorazil do oblasti {dest_name}. Krajina kolem tebe je tichá, vítr šelestí v trávě a na obzoru se otevírá nový obzor.'
+        popis_okoli = ai_data.get('popis_okoli') or f"Krajina: {dest_name} ({target_hex.get('terrain', 'Pláně')})."
         new_pois = ai_data.get('vyznamna_mista') or default_pois
-        nabizene_akce = ai_data.get('nabizene_akce') or [f'Prozkoumat {dest_name}', 'Rozdělat tábor', 'Jít dál']
-        image_prompt = ai_data.get('image_prompt', '')
+        nabizene_akce = ai_data.get('nabizene_akce') or [f'Důkladně prozkoumat okolí místa {dest_name}', 'Rozdělat tábor a odpočinout si', 'Připravit se k další cestě']
+        image_prompt = ai_data.get('image_prompt', '') or f"fantasy landscape {dest_name}"
         system_log_text = ' | '.join(system_logs)
-        history.append({'role': 'user', 'content': f'[CESTOVÁNÍ] Cesta do: {dest_name} ({req.target_q}, {req.target_r})'})
+
+        history.append({'role': 'user', 'content': f'[CESTOVÁNÍ] Cesta do: {dest_name} ({tgt_q}, {tgt_r})'})
         history.append({'role': 'model', 'content': narrative_text})
+
         state['currentRegion'] = dest_name
         state['current_region'] = dest_name
         state['locationType'] = dest_type
@@ -521,6 +632,7 @@ async def travel_action(req: TravelRequest):
         state['pointsOfInterest'] = new_pois
         state['vyznamna_mista'] = new_pois
         state['currentLocationDesc'] = popis_okoli
+
         supabase.table('characters').update({'state': state, 'history': history}).eq('api_key', db_key).execute()
         return {
             'status': 'success',

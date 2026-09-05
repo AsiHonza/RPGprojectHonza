@@ -65,6 +65,7 @@ export const MapModal = ({ isOpen, onClose, setSelectedItem, onTravel }: any) =>
   };
 
   const handleHexClick = (hex: any) => {
+    setShowLegend(false);
     setSelectedHex(hex);
     if (hex.nazev && setSelectedItem) {
       setSelectedItem({
@@ -74,6 +75,13 @@ export const MapModal = ({ isOpen, onClose, setSelectedItem, onTravel }: any) =>
         type: hex.poi || hex.terrain
       });
     }
+  };
+
+  const toggleLegend = () => {
+    setShowLegend(prev => {
+      if (!prev) setSelectedHex(null);
+      return !prev;
+    });
   };
 
   // Travel calculation
@@ -216,7 +224,7 @@ export const MapModal = ({ isOpen, onClose, setSelectedItem, onTravel }: any) =>
 
           {/* Map Legend Button */}
           <button
-            onClick={() => setShowLegend(prev => !prev)}
+            onClick={toggleLegend}
             className={`px-2.5 sm:px-3 py-2 rounded-xl border-2 font-cinzel text-xs font-bold transition flex items-center gap-1.5 shadow-md cursor-pointer ${
               showLegend
                 ? 'bg-amber-900 text-amber-100 border-amber-700'
@@ -253,7 +261,7 @@ export const MapModal = ({ isOpen, onClose, setSelectedItem, onTravel }: any) =>
 
         {/* Responsive Tactile Bottom Sheet / Travel Confirmation */}
         <AnimatePresence>
-          {selectedHex && (
+          {selectedHex && !showLegend && (
             <motion.div
               initial={{ y: 150, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
