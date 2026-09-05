@@ -215,6 +215,11 @@ interface GameState {
   setDay: (d: number | ((d: number) => number)) => void;
   playerLocation: {q: number, r: number} | null;
   setPlayerLocation: (loc: {q: number, r: number} | null) => void;
+  exploredHexes: string[];
+  setExploredHexes: (hexes: string[] | ((prev: string[]) => string[])) => void;
+  fogOfWarEnabled: boolean;
+  setFogOfWarEnabled: (enabled: boolean | ((prev: boolean) => boolean)) => void;
+  revealHexes: (centerQ: number, centerR: number, radius?: number) => void;
   worldData: any;
   journal: string[];
   setJournal: (journal: string[] | ((prev: string[]) => string[])) => void;
@@ -334,7 +339,37 @@ export const useGameStore = create<GameState>((set) => ({
   day: 1,
   setDay: (d) => set((state) => ({ day: typeof d === 'function' ? d(state.day) : d })),
   playerLocation: null,
-  setPlayerLocation: (loc) => set({ playerLocation: loc }),
+  setPlayerLocation: (loc) => set((state) => {
+    if (!loc) return { playerLocation: null };
+    const newExplored = new Set(state.exploredHexes);
+    for (let dq = -2; dq <= 2; dq++) {
+      const rMin = Math.max(-2, -dq - 2);
+      const rMax = Math.min(2, -dq + 2);
+      for (let dr = rMin; dr <= rMax; dr++) {
+        newExplored.add(`${loc.q + dq}_${loc.r + dr}`);
+      }
+    }
+    return { playerLocation: loc, exploredHexes: Array.from(newExplored) };
+  }),
+  exploredHexes: [],
+  setExploredHexes: (exploredHexes) => set((state) => ({ 
+    exploredHexes: typeof exploredHexes === 'function' ? exploredHexes(state.exploredHexes) : exploredHexes 
+  })),
+  fogOfWarEnabled: true,
+  setFogOfWarEnabled: (fogOfWarEnabled) => set((state) => ({ 
+    fogOfWarEnabled: typeof fogOfWarEnabled === 'function' ? fogOfWarEnabled(state.fogOfWarEnabled) : fogOfWarEnabled 
+  })),
+  revealHexes: (centerQ: number, centerR: number, radius: number = 2) => set((state) => {
+    const newExplored = new Set(state.exploredHexes);
+    for (let dq = -radius; dq <= radius; dq++) {
+      const rMin = Math.max(-radius, -dq - radius);
+      const rMax = Math.min(radius, -dq + radius);
+      for (let dr = rMin; dr <= rMax; dr++) {
+        newExplored.add(`${centerQ + dq}_${centerR + dr}`);
+      }
+    }
+    return { exploredHexes: Array.from(newExplored) };
+  }),
   worldData: null,
   journal: [],
   setJournal: (journal) => set((state) => ({ journal: typeof journal === 'function' ? journal(state.journal) : journal })),
