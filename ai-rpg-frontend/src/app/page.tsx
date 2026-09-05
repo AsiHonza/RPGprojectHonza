@@ -38,7 +38,7 @@ const getAvatarVideo = (r?: string) => {
   if (normalized.includes('ork') || lower.includes('orc')) return '/video/avatars/pulork.mp4';
   if (normalized.includes('pulcik') || lower.includes('halfling')) return '/video/avatars/pulcik.mp4';
   if (normalized.includes('gnom') || lower.includes('gnome')) return '/video/avatars/gnom.mp4';
-  // Other races (Elf) don't have animated portraits yet - fall back to static image
+  if (normalized.includes('elf')) return '/video/avatars/elf.mp4';
   return null;
 };
 
@@ -509,7 +509,11 @@ export default function Home() {
     if (!detail) return fallback;
     if (typeof detail === "string") return detail;
     if (Array.isArray(detail)) {
-      return detail.map((d: any) => d.msg || (typeof d === "object" ? JSON.stringify(d) : String(d))).join("\n");
+      return detail.map((d: any) => {
+        const field = d.loc ? d.loc.filter((x: any) => x !== "body").join(".") : "";
+        const msg = d.msg || (typeof d === "object" ? JSON.stringify(d) : String(d));
+        return field ? `${field}: ${msg}` : msg;
+      }).join("\n");
     }
     if (typeof detail === "object") {
       if (detail.message) return detail.message;
@@ -655,24 +659,37 @@ export default function Home() {
   };
 
   const startNewGame = async () => {
-    if (!name) return alert("Zadejte jméno!");
+    if (!name || !name.trim()) return alert("Zadejte jméno!");
     setLoading(true);
 
     const userEmail = email || (typeof window !== 'undefined' ? localStorage.getItem("aethelgard_session_email") : "") || "hrac@aelthgard.com";
+
+    let formattedBackstory = "";
+    if (backstory) {
+      if (typeof backstory === "string") {
+        formattedBackstory = backstory;
+      } else if (typeof backstory === "object") {
+        formattedBackstory = [
+          backstory.appearance ? `Vzhled: ${backstory.appearance}` : "",
+          backstory.personality ? `Osobnost: ${backstory.personality}` : "",
+          backstory.backstory ? `Příběh: ${backstory.backstory}` : ""
+        ].filter(Boolean).join("\n\n");
+      }
+    }
 
     try {
       const res = await fetch(`${API_URL}/create-character`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
-          name, 
-          dnd_class: dndClass, 
-          race, 
+          name: name.trim(), 
+          dnd_class: dndClass || "Bojovník", 
+          race: race || "Člověk", 
           stats, 
           email: userEmail, 
           api_key: "DUMMY", 
-          game_mode: gameMode, 
-          backstory: backstory || "" 
+          game_mode: gameMode || "campaign", 
+          backstory: formattedBackstory 
         }),
       });
       const data = await res.json();

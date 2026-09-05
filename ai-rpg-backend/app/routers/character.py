@@ -215,7 +215,17 @@ async def create_character(req: CharacterCreateRequest):
                 }
             ]
             chosen_arch = random.choice(start_archetypes)
-            backstory_info = req.backstory.strip() if getattr(req, 'backstory', None) and req.backstory.strip() else "Neuvedeno (začíná jako nový poutník bez zapsané minulosti)."
+            raw_backstory = getattr(req, 'backstory', '') or ''
+        if isinstance(raw_backstory, dict):
+            parts = []
+            if raw_backstory.get('appearance'): parts.append(f"Vzhled: {raw_backstory['appearance']}")
+            if raw_backstory.get('personality'): parts.append(f"Osobnost: {raw_backstory['personality']}")
+            if raw_backstory.get('backstory'): parts.append(f"Příběh: {raw_backstory['backstory']}")
+            backstory_info = "\n".join(parts) if parts else "Neuvedeno (začíná jako nový poutník bez zapsané minulosti)."
+        elif isinstance(raw_backstory, str) and raw_backstory.strip():
+            backstory_info = raw_backstory.strip()
+        else:
+            backstory_info = "Neuvedeno (začíná jako nový poutník bez zapsané minulosti)."
 
             world_context = f"""
 [HRAJE SE PŘÍBĚHOVÁ KAMPAŇ]:

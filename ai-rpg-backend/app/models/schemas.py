@@ -141,7 +141,7 @@ class CharacterCreateRequest(BaseModel):
     email: Optional[str] = "hrac@aelthgard.com"
     game_mode: Optional[str] = "campaign"
     api_key: Optional[str] = "DUMMY"
-    backstory: Optional[str] = ""
+    backstory: Optional[Any] = ""
 
 class PlayerActionRequest(BaseModel):
     email: str
