@@ -48,11 +48,13 @@ async def load_game(req: LoadGameRequest):
 
         if not state.get('playerLocation') and state.get('world_data'):
             w_data = state.get('world_data')
-            cap = next((p for p in w_data.get('pois', []) if p.get('type') == 'Capital'), None)
+            cap = next((p for p in w_data.get('pois', []) if p.get('type') == 'Capital' and p.get('kingdom_id') != 5), None)
+            if not cap:
+                cap = next((p for p in w_data.get('pois', []) if p.get('type') == 'Capital'), None)
             if cap:
                 state['playerLocation'] = {'q': cap['q'], 'r': cap['r'], 'kingdom_id': cap.get('kingdom_id'), 'biome': cap.get('terrain', 'Plains')}
             elif w_data.get('hex_grid'):
-                first_h = w_data['hex_grid'][0]
+                first_h = next((h for h in w_data['hex_grid'] if h.get('kingdom_id') != 5), w_data['hex_grid'][0])
                 state['playerLocation'] = {'q': first_h['q'], 'r': first_h['r'], 'kingdom_id': first_h.get('kingdom_id'), 'biome': first_h.get('terrain', 'Plains')}
             state_modified = True
 
@@ -155,7 +157,14 @@ async def create_character(req: CharacterCreateRequest):
     if world_data and world_data.get('pois'):
         import random
         # Dynamický a pestrý výběr startovní lokace (nejen hlavní město)
-        all_candidate_pois = [p for p in world_data['pois'] if p.get('type') in ['Capital', 'Village', 'Shrine', 'Ruin']]
+        # Striktně vylučujeme Království 5 (Karanténní Zóna) - zamořená pustina pro vysoké úrovně
+        all_candidate_pois = [
+            p for p in world_data['pois'] 
+            if p.get('type') in ['Capital', 'Village', 'Shrine', 'Ruin'] 
+            and p.get('kingdom_id') != 5
+        ]
+        if not all_candidate_pois:
+            all_candidate_pois = [p for p in world_data['pois'] if p.get('kingdom_id') != 5]
         if not all_candidate_pois:
             all_candidate_pois = world_data['pois']
             
@@ -208,7 +217,11 @@ async def create_character(req: CharacterCreateRequest):
                 7: 'Tajemné útočiště'
             }
             start_kingdom_id = initial_location.get('kingdom_id') if initial_location else 1
-            start_kingdom_name = kingdom_names.get(start_kingdom_id, 'Neznámé království')
+            if start_kingdom_id == 5 or not start_kingdom_id:
+                start_kingdom_id = 1
+                if initial_location:
+                    initial_location['kingdom_id'] = 1
+            start_kingdom_name = kingdom_names.get(start_kingdom_id, 'Valerijské Impérium')
             
             # 5 pestrých startovních archetypů (žádné vnucené rvačky a popravy v 1. tahu)
             start_archetypes = [
@@ -262,9 +275,10 @@ Klíčová NPC ve světě: {json.dumps(world_data.get('key_npcs', []), ensure_as
 
 [PŘÍSNÁ PRAVIDLA PRO INTRO]:
 1. PŘÍSNÝ ZÁKAZ AUTOMATICKÉHO BOJE V 1. TAHU! ŽÁDNÁ inkvizice, žádné přepadení se zbraní v ruce, žádný nucený souboj! Hráč se má v klidu rozkoukat, seznámit se světem a zvolit si svůj vlastní styl.
-2. Ve 2-3 větách atmosféricky nalaď prostředí lokace (zvuky, počasí, atmosféra typu '{start_loc_type}' v říši '{start_kingdom_name}').
-3. Poté představ výše popsanou startovní situaci.
-4. 'nabizene_akce' MUSÍ nabídnout 3 ZCELA ODLIŠNÉ PŘÍSTUPY:
+2. PŘÍSNÝ ZÁKAZ STARTOVAT V KARANTÉNNÍ ZÓNĚ (Království 5)! Hráč 1. úrovně začíná v obyvatelné, civilizované nebo pohraniční říši '{start_kingdom_name}'.
+3. Ve 2-3 větách atmosféricky nalaď prostředí lokace (zvuky, počasí, atmosféra typu '{start_loc_type}' v říši '{start_kingdom_name}').
+4. Poté představ výše popsanou startovní situaci.
+5. 'nabizene_akce' MUSÍ nabídnout 3 ZCELA ODLIŠNÉ PŘÍSTUPY:
    - Možnost 1: Průzkum / Pozorování / Zkoumání detailů okolí.
    - Možnost 2: Sociální interakce / Rozhovor s přítomnou postavou.
    - Možnost 3: Akce specifická pro povolání/rasu ({req.dnd_class}/{req.race}) nebo poklidný odchod jinam.

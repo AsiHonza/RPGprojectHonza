@@ -1172,7 +1172,7 @@ export default function Home() {
               </div>
             </div>
           ) : savedCharacters.length === 0 ? (
-            <div className="text-center w-full max-w-sm bg-[#f9f6e6]/60 backdrop-blur-md p-8 rounded-2xl border border-amber-900/10 shadow-2xl">
+            <div className="text-center w-full max-w-lg bg-[#f9f6e6]/90 backdrop-blur-xl p-8 sm:p-10 rounded-3xl border-2 border-amber-900/20 shadow-2xl">
               <p className="text-slate-700 font-lora mb-2 text-sm">Přihlášen: <span className="font-bold text-slate-900">{email}</span></p>
               {loading ? (
                 <div className="py-8 flex flex-col items-center gap-3 text-rpg-magic font-cinzel">
@@ -1181,10 +1181,13 @@ export default function Home() {
                 </div>
               ) : (
                 <>
-                  <p className="text-xs text-slate-500 font-lora mb-6">Zatím nemáš vytvořenou žádnou postavu pro tento e-mail.</p>
+                  <div className="mb-6 space-y-1.5">
+                    <h4 className="text-xl font-cinzel font-bold text-amber-950">Vítej v Aelthgardu</h4>
+                    <p className="text-xs sm:text-sm text-slate-600 font-lora">Dosud nemáš vytvořenou žádnou postavu pro tento účet. Je čas probudit hrdinu a zapsat své jméno do kronik sedmi království.</p>
+                  </div>
                   <button 
                     onClick={() => setGameState("creation")}
-                    className="w-full py-4 bg-red-800 hover:bg-red-700 active:bg-red-900 border border-red-900/50 text-white font-cinzel font-bold text-xl rounded-xl shadow-[0_0_20px_rgba(183,75,75,0.4)] hover:shadow-[0_0_25px_rgba(183,75,75,0.7)] transition uppercase tracking-widest cursor-pointer"
+                    className="w-full py-4 bg-red-800 hover:bg-red-700 active:bg-red-900 border-2 border-red-900/50 text-white font-cinzel font-bold text-xl rounded-2xl shadow-[0_0_25px_rgba(183,75,75,0.5)] hover:shadow-[0_0_30px_rgba(183,75,75,0.8)] transition uppercase tracking-widest cursor-pointer flex items-center justify-center gap-2.5"
                   >
                     Zrození Hrdiny
                   </button>
@@ -1584,7 +1587,7 @@ export default function Home() {
                           {msg.npc_dialogy && msg.npc_dialogy.length > 0 && (
                             <div className="flex flex-col gap-2 mt-2">
                               {msg.npc_dialogy.map((npc: any, nIdx: number) => (
-                                <div key={nIdx} className="bg-[#f4ecd8]/90 p-3 rounded-lg border border-amber-900/10">
+                                <div key={nIdx} className="bg-[#f4ecd8]/90 p-3.5 rounded-2xl border border-amber-900/15 shadow-2xs">
                                   <div className="flex justify-between items-center mb-1">
                                     <span className="font-bold text-rpg-magic font-cinzel">{npc.jmeno}</span>
                                     <button onClick={() => playAudio((npc.text || npc.replika), npc.pohlavi === 'zena' ? 'npc_zena' : 'npc_muz')} className="text-slate-600 hover:text-[#2d3748]"><Volume2 size={16} /></button>
@@ -1642,7 +1645,7 @@ export default function Home() {
                             </span>
                             <span className="font-medium group-hover:font-bold transition-all">{act}</span>
                           </div>
-                          <span className="opacity-0 group-hover:opacity-100 transition-all bg-amber-700 text-white px-3 py-1 rounded-lg font-cinzel text-xs font-bold shrink-0 ml-3 shadow-sm flex items-center gap-1 group-hover:translate-x-1">
+                          <span className="opacity-0 group-hover:opacity-100 transition-all bg-amber-700 text-white px-3 py-1 rounded-xl font-cinzel text-xs font-bold shrink-0 ml-3 shadow-sm flex items-center gap-1 group-hover:translate-x-1">
                             Zvolit &rarr;
                           </span>
                         </button>

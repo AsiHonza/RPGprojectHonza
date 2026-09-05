@@ -185,7 +185,7 @@ export const DesktopSidePanel: React.FC<DesktopSidePanelProps> = ({
           </div>
           <div className="flex flex-wrap gap-1.5">
             {activeMount && (
-              <span className="bg-amber-200/80 border border-amber-700/30 text-amber-950 text-xs px-2.5 py-1 rounded-lg font-medium flex items-center gap-1.5 shadow-2xs">
+              <span className="bg-amber-200/80 border border-amber-700/30 text-amber-950 text-xs px-2.5 py-1 rounded-xl font-medium flex items-center gap-1.5 shadow-2xs">
                 <span>{activeMount.icon}</span>
                 <span>{activeMount.name}</span>
                 <span className="bg-amber-800/20 px-1 rounded text-[10px] font-bold">+{activeMount.inventoryBonus} sl.</span>
@@ -194,7 +194,7 @@ export const DesktopSidePanel: React.FC<DesktopSidePanelProps> = ({
             {activeBuffs.map(b => (
               <span 
                 key={b.id} 
-                className="bg-amber-200/80 border border-amber-700/30 text-amber-950 text-xs px-2.5 py-1 rounded-lg font-medium flex items-center gap-1.5 shadow-2xs"
+                className="bg-amber-200/80 border border-amber-700/30 text-amber-950 text-xs px-2.5 py-1 rounded-xl font-medium flex items-center gap-1.5 shadow-2xs"
                 title={b.description}
               >
                 <span>{b.icon}</span>

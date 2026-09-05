@@ -17,7 +17,7 @@ export const PatchNotesModal = ({ isOpen, onClose }: any) => {
             initial={{ scale: 0.95, y: 20 }}
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0.95, y: 20 }}
-            className="bg-rpg-obsidian border-2 border-rpg-magic rounded-xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-[0_0_40px_rgba(197,160,89,0.3)] overflow-hidden"
+            className="bg-rpg-obsidian border-2 border-rpg-magic rounded-3xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-[0_0_40px_rgba(197,160,89,0.3)] overflow-hidden"
           >
             <div className="flex justify-between items-center p-5 border-b border-[#2b4c5e] bg-[#f4ecd8]">
               <div className="flex items-center gap-3 text-rpg-magic font-bold text-2xl uppercase tracking-widest font-cinzel">
@@ -30,7 +30,7 @@ export const PatchNotesModal = ({ isOpen, onClose }: any) => {
             
             <div className="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-8 bg-gradient-to-b from-[#111827] to-rpg-obsidian text-rpg-paper">
               {PATCH_NOTES.map((patch: any, idx: number) => (
-                <div key={idx} className="bg-[#f4ecd8] border border-[#2b4c5e] rounded-lg p-5 shadow-lg">
+                <div key={idx} className="bg-[#f4ecd8] border border-[#2b4c5e] rounded-2xl p-5 shadow-lg">
                   <div className="flex justify-between items-end border-b border-[#2b4c5e] pb-3 mb-5">
                     <h2 className="text-rpg-magic font-bold text-2xl font-cinzel tracking-wide drop-shadow-sm">{patch.version}</h2>
                     <span className="text-rpg-muted text-sm font-bold uppercase">{patch.date}</span>

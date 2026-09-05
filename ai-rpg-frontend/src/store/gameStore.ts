@@ -312,7 +312,7 @@ export const useGameStore = create<GameState>((set) => ({
   setStats: (stats) => set({ stats }),
   keywords: "",
   setKeywords: (keywords) => set({ keywords }),
-  gameMode: "sandbox",
+  gameMode: "campaign",
   setGameMode: (gameMode) => set({ gameMode }),
   backstory: null,
   setBackstory: (backstory) => set({ backstory }),

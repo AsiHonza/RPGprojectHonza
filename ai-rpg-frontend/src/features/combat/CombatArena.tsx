@@ -295,7 +295,7 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
             <Sword className="animate-pulse" size={20} /> TAKTICKÝ BOJ
           </h2>
           {activeBuffs.map(b => (
-            <span key={b.id} className="bg-amber-500/20 text-amber-200 border border-amber-500/40 px-2 py-0.5 rounded-md text-[10px] font-bold flex items-center gap-1" title={b.description}>
+            <span key={b.id} className="bg-amber-500/20 text-amber-200 border border-amber-500/40 px-2 py-0.5 rounded-full text-[10px] font-bold flex items-center gap-1" title={b.description}>
               <span>{b.icon}</span>
               <span>{b.name}</span>
             </span>
@@ -324,7 +324,7 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
                   transition={{ duration: 0.3 }}
                   exit={{ opacity: 0, scale: 0.8 }}
                   onClick={() => !isDead && setTargetId(enemy.id)}
-                  className={`relative p-3 rounded-xl border-2 transition-all cursor-pointer w-40 sm:w-48 shadow-lg
+                  className={`relative p-3.5 rounded-2xl border-2 transition-all cursor-pointer w-40 sm:w-48 shadow-lg
                       ${isDead ? 'border-amber-900/20 bg-[#e5dfc5]/50 grayscale opacity-50' : 
                         isTarget ? 'border-red-600 bg-white/90 shadow-red-600/30 scale-105' : 'border-amber-900/30 bg-[#fdfbf2]/90 hover:border-red-700/50 hover:bg-white'
                       }`}
@@ -345,7 +345,7 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
                       {enemy.activeStatuses.map((st, i) => (
                         <span 
                           key={i} 
-                          className="text-[10px] px-1.5 py-0.2 rounded-md font-bold flex items-center gap-0.5 bg-amber-100/90 border border-amber-900/30 text-amber-950 shadow-2xs"
+                          className="text-[10px] px-1.5 py-0.2 rounded-lg font-bold flex items-center gap-0.5 bg-amber-100/90 border border-amber-900/30 text-amber-950 shadow-2xs"
                           title={`${st.name}: ${st.damagePerRound ? `${st.damagePerRound} dmg/kolo` : 'Aktivní'} (zbývá ${st.duration} kol)`}
                         >
                           {st.icon} {st.duration}k
@@ -452,7 +452,7 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
               <button
                 disabled={isActionLocked || combatAp < 2 || dragonCooldown > 0}
                 onClick={handleDragonBreath}
-                className={`flex flex-col items-start p-2 rounded-lg border-2 transition-all min-w-[105px]
+                className={`flex flex-col items-start p-2.5 rounded-xl border-2 transition-all min-w-[105px]
                   ${isActionLocked || combatAp < 2 || dragonCooldown > 0 ? 'bg-slate-200 border-slate-300 opacity-50 cursor-not-allowed' : 'bg-red-50 border-red-900/20 hover:border-red-600 shadow-xs'}`}
               >
                 <div className="flex justify-between w-full items-center mb-1">
@@ -480,7 +480,7 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
                   key={skill.id}
                   disabled={isDisabled}
                   onClick={() => handleCastClassSkill(skill, rankData)}
-                  className={`flex flex-col items-start p-2 rounded-lg border-2 transition-all min-w-[110px] relative
+                  className={`flex flex-col items-start p-2.5 rounded-xl border-2 transition-all min-w-[110px] relative
                     ${isDisabled ? 'bg-slate-200 border-slate-300 opacity-50 cursor-not-allowed' : 'bg-amber-50 border-amber-900/30 hover:border-amber-700 hover:bg-amber-100/80 shadow-xs'}`}
                 >
                   <div className="flex justify-between w-full items-center mb-1">
@@ -510,7 +510,7 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
                 key={skill.id}
                 disabled={isActionLocked || combatAp < skill.apCost}
                 onClick={() => handlePlayerAction(skill)}
-                className={`flex flex-col items-start p-2 rounded-lg border-2 transition-all min-w-[105px]
+                className={`flex flex-col items-start p-2.5 rounded-xl border-2 transition-all min-w-[105px]
                   ${isActionLocked || combatAp < skill.apCost ? 'bg-slate-200 border-slate-300 opacity-50 cursor-not-allowed' : 'bg-white border-amber-900/20 hover:border-amber-600 hover:bg-amber-50 shadow-xs'}`}
               >
                 <div className="flex justify-between w-full items-center mb-1">
@@ -532,7 +532,7 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
                 key={potion.id}
                 disabled={isActionLocked || combatAp < 1}
                 onClick={() => handleUsePotion(potion)}
-                className={`flex flex-col items-start p-2 rounded-lg border-2 transition-all min-w-[105px]
+                className={`flex flex-col items-start p-2.5 rounded-xl border-2 transition-all min-w-[105px]
                   ${isActionLocked || combatAp < 1 ? 'bg-slate-200 border-slate-300 opacity-50 cursor-not-allowed' : 'bg-emerald-50 border-emerald-900/20 hover:border-emerald-600 hover:bg-emerald-100 shadow-xs'}`}
               >
                 <div className="flex justify-between w-full items-center mb-1">
