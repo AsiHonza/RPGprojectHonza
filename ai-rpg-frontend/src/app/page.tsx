@@ -1183,7 +1183,7 @@ export default function Home() {
         
 
         {/* Top HUD */}
-        <div className="flex flex-col gap-2 md:gap-4 mb-2 md:mb-4 w-full max-w-5xl mx-auto z-10">
+        <div className="flex flex-col gap-2 md:gap-4 mb-2 md:mb-4 w-full max-w-5xl mx-auto relative z-50">
           
           <div className="flex items-center justify-between bg-[#f9f6e6]/60 backdrop-blur-md p-2 md:p-4 rounded-2xl border border-amber-900/10 shadow-lg">
             
@@ -1227,7 +1227,7 @@ export default function Home() {
 
           </div>
 
-          <div className="relative z-30 flex gap-1.5 sm:gap-3 bg-[#f9f6e6]/80 backdrop-blur-md border border-amber-900/15 p-1.5 sm:p-2 rounded-2xl shadow-xl items-center justify-center">
+          <div className="relative z-50 flex gap-1.5 sm:gap-3 bg-[#f9f6e6]/80 backdrop-blur-md border border-amber-900/15 p-1.5 sm:p-2 rounded-2xl shadow-xl items-center justify-center">
             {/* Click outside overlay for dropdowns */}
             {(heroDropdownOpen || menuDropdownOpen) && (
               <div 
@@ -1237,7 +1237,7 @@ export default function Home() {
             )}
 
             {/* 1. Hrdina Dropdown (Vlastnosti & Schopnosti) */}
-            <div className="relative z-30">
+            <div className="relative z-50">
               <button 
                 onClick={() => { setHeroDropdownOpen(prev => !prev); setMenuDropdownOpen(false); }}
                 className={`flex-shrink-0 p-2 sm:p-2.5 rounded-xl transition flex items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold relative ${
@@ -1257,7 +1257,7 @@ export default function Home() {
               </button>
 
               {heroDropdownOpen && (
-                <div className="absolute top-full left-0 mt-2 w-56 bg-[#fdfbf7] border border-amber-900/30 rounded-2xl shadow-2xl p-2 z-50 flex flex-col gap-1 backdrop-blur-xl">
+                <div className="absolute top-full left-0 mt-2 w-56 max-w-[calc(100vw-32px)] bg-[#fdfbf7] border border-amber-900/30 rounded-2xl shadow-[0_10px_35px_rgba(0,0,0,0.35)] p-2 z-[60] flex flex-col gap-1 backdrop-blur-xl">
                   <button 
                     onClick={() => { setStatsOpen(true); setHeroDropdownOpen(false); }}
                     className="w-full text-left px-3 py-2 text-slate-800 hover:bg-amber-100/70 rounded-xl transition flex items-center gap-2.5 text-xs sm:text-sm font-cinzel font-bold"
@@ -1324,7 +1324,7 @@ export default function Home() {
             </button>
 
             {/* 5. Menu Dropdown (Deník, Postavy, Nastavení, Návrat) */}
-            <div className="relative z-30">
+            <div className="relative z-50">
               <button 
                 onClick={() => { setMenuDropdownOpen(prev => !prev); setHeroDropdownOpen(false); }}
                 className={`flex-shrink-0 p-2 sm:p-2.5 rounded-xl transition flex items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold ${
@@ -1339,7 +1339,7 @@ export default function Home() {
               </button>
 
               {menuDropdownOpen && (
-                <div className="absolute top-full right-0 mt-2 w-56 bg-[#fdfbf7] border border-amber-900/30 rounded-2xl shadow-2xl p-2 z-50 flex flex-col gap-1 backdrop-blur-xl">
+                <div className="absolute top-full right-0 mt-2 w-56 max-w-[calc(100vw-32px)] bg-[#fdfbf7] border border-amber-900/30 rounded-2xl shadow-[0_10px_35px_rgba(0,0,0,0.35)] p-2 z-[60] flex flex-col gap-1 backdrop-blur-xl">
                   <button 
                     onClick={() => { setJournalOpen(true); setMenuDropdownOpen(false); }}
                     className="w-full text-left px-3 py-2 text-slate-800 hover:bg-amber-100/70 rounded-xl transition flex items-center gap-2.5 text-xs sm:text-sm font-cinzel font-bold"
