@@ -23,6 +23,7 @@ import { SettingsModal } from '../features/ui/SettingsModal';
 import { PatchNotesModal } from '../features/ui/PatchNotesModal';
 import { CampModal } from '../features/character/CampModal';
 import { TownServicesModal } from '../features/town/TownServicesModal';
+import { DesktopSidePanel } from '../features/ui/DesktopSidePanel';
 import { PlayerHeader } from '../features/ui/PlayerHeader';
 import { CombatArena } from '../features/combat/CombatArena';
 import { PATCH_NOTES } from '../data/patchNotes';
@@ -1232,11 +1233,11 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-t from-[#f9f6e6]/95 via-[#f9f6e6]/70 to-[#f9f6e6]/30 backdrop-blur-sm" />
       </div>
 
-      <div className="w-full max-w-7xl flex flex-col h-full relative z-10 p-2 md:p-8 pb-0">
+      <div className="w-full max-w-[1720px] flex flex-col h-full relative z-10 p-1.5 sm:p-3 md:p-4 lg:p-6 pb-0">
         
 
         {/* Top HUD */}
-        <div className="flex flex-col gap-2 md:gap-4 mb-2 md:mb-4 w-full max-w-5xl mx-auto relative z-50">
+        <div className="flex flex-col gap-2 md:gap-3 mb-2 md:mb-3 w-full mx-auto relative z-50">
           
           <div className="flex items-center justify-between bg-[#f9f6e6]/60 backdrop-blur-md p-2 md:p-4 rounded-2xl border border-amber-900/10 shadow-lg">
             
@@ -1289,8 +1290,8 @@ export default function Home() {
               />
             )}
 
-            {/* 1. Hrdina Dropdown (Vlastnosti & Schopnosti) */}
-            <div className="relative z-50">
+            {/* 1. Hrdina Dropdown (Vlastnosti & Schopnosti) - visible on md+ */}
+            <div className="relative z-50 hidden md:block">
               <button 
                 onClick={() => { setHeroDropdownOpen(prev => !prev); setMenuDropdownOpen(false); }}
                 className={`flex-shrink-0 p-2 sm:p-2.5 rounded-xl transition flex items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold relative ${
@@ -1339,7 +1340,7 @@ export default function Home() {
             {/* 2. Batoh (Inventář) */}
             <button 
               onClick={() => { setInventoryOpen(true); setHeroDropdownOpen(false); setMenuDropdownOpen(false); }} 
-              className="flex-shrink-0 p-2 sm:p-2.5 text-slate-700 hover:text-amber-950 hover:bg-white/80 rounded-xl transition flex items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold"
+              className="flex-1 md:flex-none p-2 sm:p-2.5 text-slate-700 hover:text-amber-950 hover:bg-white/80 rounded-xl transition flex items-center justify-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold"
               title="Inventář a výbava"
             >
               <Package size={17} className="text-amber-900" /> <span>Batoh</span>
@@ -1348,7 +1349,7 @@ export default function Home() {
             {/* 3. Úkoly */}
             <button 
               onClick={() => { setQuestsOpen(true); setUnreadQuests(false); setHeroDropdownOpen(false); setMenuDropdownOpen(false); }} 
-              className={`flex-shrink-0 p-2 sm:p-2.5 rounded-xl transition flex items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold relative ${
+              className={`flex-1 md:flex-none p-2 sm:p-2.5 rounded-xl transition flex items-center justify-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold relative ${
                 unreadQuests 
                   ? 'bg-amber-200/90 text-amber-950 border border-amber-600/50 shadow-[0_0_12px_rgba(212,175,55,0.4)]' 
                   : 'text-slate-700 hover:text-amber-950 hover:bg-white/80'
@@ -1370,28 +1371,28 @@ export default function Home() {
             {/* 4. Mapa */}
             <button 
               onClick={() => { setMapOpen(true); setHeroDropdownOpen(false); setMenuDropdownOpen(false); }} 
-              className="flex-shrink-0 p-2 sm:p-2.5 text-amber-900 hover:bg-amber-100/60 rounded-xl transition flex items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold"
+              className="flex-1 md:flex-none p-2 sm:p-2.5 text-amber-900 hover:bg-amber-100/60 rounded-xl transition flex items-center justify-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold"
               title="Mapa světa"
             >
               <Map size={17} /> <span>Mapa</span>
             </button>
 
-            {/* 4b. Tábor */}
+            {/* 4b. Tábor - visible on md+ */}
             <button 
               onClick={() => { setCampOpen(true); setHeroDropdownOpen(false); setMenuDropdownOpen(false); }} 
-              className="flex-shrink-0 p-2 sm:p-2.5 text-amber-900 hover:bg-amber-100/60 rounded-xl transition flex items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold"
+              className="hidden md:flex flex-shrink-0 p-2 sm:p-2.5 text-amber-900 hover:bg-amber-100/60 rounded-xl transition items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold"
               title="Táboření a odpočinek"
             >
-              <Flame size={17} className="text-amber-600" /> <span className="hidden sm:inline">Tábor</span>
+              <Flame size={17} className="text-amber-600" /> <span>Tábor</span>
             </button>
 
-            {/* 4c. Tržnice & Služby */}
+            {/* 4c. Tržnice & Služby - visible on md+ */}
             <button 
               onClick={() => { setTownServicesOpen(true); setHeroDropdownOpen(false); setMenuDropdownOpen(false); }} 
-              className="flex-shrink-0 p-2 sm:p-2.5 text-amber-900 hover:bg-amber-100/60 rounded-xl transition flex items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold"
+              className="hidden md:flex flex-shrink-0 p-2 sm:p-2.5 text-amber-950 bg-amber-200/90 hover:bg-amber-300/90 border border-amber-600/40 rounded-xl transition items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold shadow-2xs"
               title="Městské služby, kovář a tržnice"
             >
-              <ShoppingBag size={17} className="text-amber-700" /> <span className="hidden sm:inline">Tržnice</span>
+              <ShoppingBag size={17} className="text-amber-800" /> <span>Tržnice</span>
             </button>
 
             {/* 5. Menu Dropdown (Deník, Postavy, Nastavení, Návrat) */}
@@ -1410,13 +1411,38 @@ export default function Home() {
               </button>
 
               {menuDropdownOpen && (
-                <div className="absolute top-full right-0 mt-2 w-56 max-w-[calc(100vw-32px)] bg-[#fdfbf7] border border-amber-900/30 rounded-2xl shadow-[0_10px_35px_rgba(0,0,0,0.35)] p-2 z-[60] flex flex-col gap-1 backdrop-blur-xl">
+                <div className="absolute top-full right-0 mt-2 w-64 max-w-[calc(100vw-32px)] bg-[#fdfbf7] border border-amber-900/30 rounded-2xl shadow-[0_10px_35px_rgba(0,0,0,0.35)] p-2.5 z-[60] flex flex-col gap-1 backdrop-blur-xl animate-in fade-in slide-in-from-top-2 duration-150">
+                  {/* Mobile Hero Actions */}
+                  <div className="md:hidden flex flex-col gap-1 border-b border-amber-900/10 pb-1.5 mb-1">
+                    <button 
+                      onClick={() => { setStatsOpen(true); setMenuDropdownOpen(false); }}
+                      className="w-full text-left px-3 py-2 text-slate-800 hover:bg-amber-100/70 rounded-xl transition flex items-center gap-2.5 text-xs sm:text-sm font-cinzel font-bold"
+                    >
+                      <User size={16} className="text-amber-900" />
+                      <span>Vlastnosti hrdiny</span>
+                    </button>
+                    <button 
+                      onClick={() => { setSkillsOpen(true); setMenuDropdownOpen(false); }}
+                      className="w-full text-left px-3 py-2 text-slate-800 hover:bg-amber-100/70 rounded-xl transition flex items-center justify-between gap-2.5 text-xs sm:text-sm font-cinzel font-bold"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <Sparkles size={16} className="text-amber-900" />
+                        <span>Kniha schopností</span>
+                      </div>
+                      {skillPoints > 0 && (
+                        <span className="px-1.5 py-0.2 bg-amber-600 text-white text-[10px] rounded-full font-bold shadow-xs">
+                          +{skillPoints}
+                        </span>
+                      )}
+                    </button>
+                  </div>
+
                   <button 
                     onClick={() => { setTownServicesOpen(true); setMenuDropdownOpen(false); }}
-                    className="w-full text-left px-3 py-2 text-slate-800 hover:bg-amber-100/70 rounded-xl transition flex items-center gap-2.5 text-xs sm:text-sm font-cinzel font-bold"
+                    className="w-full text-left px-3 py-2 text-amber-950 bg-amber-100/80 hover:bg-amber-200/80 rounded-xl transition flex items-center gap-2.5 text-xs sm:text-sm font-cinzel font-bold border border-amber-900/15"
                   >
-                    <ShoppingBag size={16} className="text-amber-700" />
-                    <span>Tržnice a městské služby</span>
+                    <ShoppingBag size={16} className="text-amber-800" />
+                    <span>Tržnice & Služby</span>
                   </button>
                   <button 
                     onClick={() => { setCampOpen(true); setMenuDropdownOpen(false); }}
@@ -1467,14 +1493,18 @@ export default function Home() {
           
         </div>
         {inCombat ? (
-          <div className="flex-1 overflow-hidden relative mb-4 w-full max-w-5xl mx-auto z-10">
+          <div className="flex-1 min-h-0 overflow-hidden relative mb-3 w-full max-w-5xl mx-auto z-10">
             <CombatArena onVictory={handleCombatResolution} />
           </div>
         ) : (
-          <>
-            {/* Story Log (Middle) */}
-            <div className="flex-1 overflow-hidden relative mb-4 w-full max-w-5xl mx-auto z-10">
-              <div className="absolute inset-0 bg-[#f9f6e6]/70 backdrop-blur-lg border border-amber-900/10 rounded-2xl shadow-2xl p-6 overflow-y-auto custom-scrollbar flex flex-col gap-6" >
+          <div className="flex-1 min-h-0 w-full flex gap-4 lg:gap-6 overflow-hidden mb-2">
+            
+            {/* Left Column: Primary Narrative & Action Stream */}
+            <div className="flex-1 min-w-0 flex flex-col h-full min-h-0 overflow-hidden">
+              
+              {/* Story Log (Middle) */}
+              <div className="flex-1 min-h-0 overflow-hidden relative mb-3">
+                <div className="absolute inset-0 bg-[#f9f6e6]/70 backdrop-blur-lg border border-amber-900/10 rounded-2xl shadow-2xl p-4 sm:p-6 overflow-y-auto custom-scrollbar flex flex-col gap-5 sm:gap-6" >
                 
                 {history.map((msg, i) => (
                   <div key={i} className={`flex ${msg.type === "player" ? "justify-end" : "justify-start"}`}>
@@ -1579,7 +1609,7 @@ export default function Home() {
             </div>
 
             {/* Bottom Actions & Input */}
-            <div className="shrink-0 flex flex-col gap-4 pb-4 w-full max-w-5xl mx-auto px-2 sm:px-0">
+            <div className="shrink-0 flex flex-col gap-2.5 pb-2 w-full px-1 sm:px-0">
               
               {/* Action Buttons & Dock */}
               <div className="flex flex-wrap justify-between items-end gap-4">
@@ -1646,7 +1676,20 @@ export default function Home() {
                 </div>
               </div>
             </div>
-          </>
+            </div>
+
+            {/* Right Column: Desktop Companion Panel (lg and xl screens) */}
+            <DesktopSidePanel 
+              onOpenInventory={() => setInventoryOpen(true)}
+              onOpenMap={() => setMapOpen(true)}
+              onOpenQuests={() => { setQuestsOpen(true); setUnreadQuests(false); }}
+              onOpenTownServices={() => setTownServicesOpen(true)}
+              onOpenCamp={() => setCampOpen(true)}
+              onOpenStats={() => setStatsOpen(true)}
+              onOpenSkills={() => setSkillsOpen(true)}
+            />
+
+          </div>
         )}
       </div>
 

@@ -17,6 +17,19 @@ import {
   DiceGameResult 
 } from '../../services/economy/economyEngine';
 import { ActiveBuff } from '../../services/economy/buffEngine';
+import { ItemIcon } from '../../components/ui/ItemIcon';
+
+export function translateItemType(type?: string): string {
+  if (!type) return 'Předmět';
+  const t = type.toLowerCase();
+  if (t === 'weapon' || t === 'zbraň') return 'Zbraň';
+  if (t === 'armor' || t === 'zbroj') return 'Zbroj';
+  if (t === 'shield' || t === 'štít') return 'Štít';
+  if (t === 'potion' || t === 'lektvar') return 'Lektvar';
+  if (t === 'accessory' || t === 'doplněk') return 'Doplněk';
+  if (t === 'valuable' || t === 'cennost') return 'Cennost';
+  return type;
+}
 
 interface TownServicesModalProps {
   isOpen: boolean;
@@ -58,7 +71,7 @@ export const TownServicesModal: React.FC<TownServicesModalProps> = ({ isOpen, on
   const [feedback, setFeedback] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
   
   // Gambling state
-  const [diceBet, setDiceBet] = useState<number>(10);
+  const [diceBet, setDiceBet] = useState<number>(15);
   const [diceResult, setDiceResult] = useState<DiceGameResult | null>(null);
   const [isRollingDice, setIsRollingDice] = useState<boolean>(false);
 
@@ -389,13 +402,13 @@ export const TownServicesModal: React.FC<TownServicesModalProps> = ({ isOpen, on
         )}
 
         {/* Navigation Tabs */}
-        <div className="flex border-b border-amber-900/20 bg-[#efe7d3] px-3 sm:px-6 pt-2 gap-1 sm:gap-2 overflow-x-auto shrink-0">
+        <div className="flex border-b border-amber-900/20 bg-[#efe7d3] px-2 sm:px-6 pt-2 gap-1 sm:gap-2 overflow-x-auto shrink-0 scrollbar-none">
           {[
-            { id: 'market', label: 'Tržiště & Lektvary', icon: ShoppingBag },
-            { id: 'blacksmith', label: 'Kovářská dílna', icon: Hammer },
-            { id: 'tavern', label: 'Hostinec & Hazard', icon: Beer },
-            { id: 'stables', label: 'Stáje & Oře', icon: Compass },
-            { id: 'temple', label: 'Svatyně & Požehnání', icon: Sun },
+            { id: 'market', shortLabel: 'Tržiště', label: 'Tržiště & Lektvary', icon: ShoppingBag },
+            { id: 'blacksmith', shortLabel: 'Kovář', label: 'Kovářská dílna', icon: Hammer },
+            { id: 'tavern', shortLabel: 'Krčma', label: 'Hostinec & Hazard', icon: Beer },
+            { id: 'stables', shortLabel: 'Stáje', label: 'Stáje & Oře', icon: Compass },
+            { id: 'temple', shortLabel: 'Svatyně', label: 'Svatyně & Požehnání', icon: Sun },
           ].map(t => {
             const Icon = t.icon;
             const isActive = activeTab === t.id;
@@ -403,14 +416,15 @@ export const TownServicesModal: React.FC<TownServicesModalProps> = ({ isOpen, on
               <button
                 key={t.id}
                 onClick={() => setActiveTab(t.id as TabType)}
-                className={`flex items-center gap-2 px-3 sm:px-4 py-2.5 text-xs sm:text-sm font-cinzel font-bold border-t-2 border-x-2 rounded-t-xl transition whitespace-nowrap ${
+                className={`flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-cinzel font-bold border-t-2 border-x-2 rounded-t-xl transition shrink-0 ${
                   isActive 
                     ? 'bg-[#f9f6ea] border-amber-900/40 text-amber-950 shadow-xs' 
                     : 'border-transparent text-amber-900/70 hover:text-amber-950 hover:bg-amber-200/50'
                 }`}
               >
-                <Icon size={16} />
-                <span>{t.label}</span>
+                <Icon size={15} />
+                <span className="hidden sm:inline">{t.label}</span>
+                <span className="sm:hidden">{t.shortLabel}</span>
               </button>
             );
           })}
@@ -525,11 +539,13 @@ export const TownServicesModal: React.FC<TownServicesModalProps> = ({ isOpen, on
                         return (
                           <div key={`${item.id}_${idx}`} className="bg-white/70 border border-amber-900/20 rounded-xl p-3 flex items-center justify-between shadow-xs">
                             <div className="flex items-center gap-2.5 min-w-0">
-                              <span className="text-2xl shrink-0">{item.icon || '📦'}</span>
+                              <div className="w-10 h-10 shrink-0 flex items-center justify-center rounded-lg bg-amber-900/10 border border-amber-900/20 overflow-hidden">
+                                <ItemIcon iconName={item.icon || item.type || 'item'} itemId={item.id} size={32} />
+                              </div>
                               <div className="min-w-0">
                                 <h4 className="font-cinzel font-bold text-xs sm:text-sm text-amber-950 truncate">{item.name}</h4>
-                                <span className="text-[10px] text-amber-800/70 block">
-                                  {isEquipped ? '⚔️ Právě nasazeno' : item.type || 'Předmět'}
+                                <span className="text-[10px] text-amber-800/70 block font-lora">
+                                  {isEquipped ? '⚔️ Právě nasazeno' : translateItemType(item.type)}
                                 </span>
                               </div>
                             </div>
@@ -634,12 +650,12 @@ export const TownServicesModal: React.FC<TownServicesModalProps> = ({ isOpen, on
               </div>
 
               {/* Tavern Gambling: Dragon's Eye */}
-              <div className="bg-gradient-to-br from-amber-950 to-[#2b1810] text-amber-100 p-5 rounded-2xl border-2 border-amber-600/50 shadow-lg">
-                <div className="flex items-center justify-between mb-4 border-b border-amber-700/40 pb-3">
+              <div className="bg-gradient-to-br from-amber-950 to-[#2b1810] text-amber-100 p-4 sm:p-5 rounded-2xl border-2 border-amber-600/50 shadow-lg">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 border-b border-amber-700/40 pb-3">
                   <div className="flex items-center gap-3">
-                    <Dices size={28} className="text-amber-400 animate-bounce" />
+                    <Dices size={28} className="text-amber-400 animate-bounce shrink-0" />
                     <div>
-                      <h4 className="font-cinzel font-bold text-lg text-amber-200">Krčemní kostky: Dračí oko</h4>
+                      <h4 className="font-cinzel font-bold text-base sm:text-lg text-amber-200">Krčemní kostky: Dračí oko</h4>
                       <p className="text-xs text-amber-300/70 font-lora">
                         3d6 ty vs 3d6 hostinský. Vyšší součet bere bank. Trojice stejných čísel = trojnásobná výhra!
                       </p>
@@ -647,7 +663,7 @@ export const TownServicesModal: React.FC<TownServicesModalProps> = ({ isOpen, on
                   </div>
 
                   {/* Bet Selection */}
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
                     <span className="text-xs font-cinzel text-amber-300/80">Sázka:</span>
                     {[5, 15, 30].map(bet => (
                       <button
