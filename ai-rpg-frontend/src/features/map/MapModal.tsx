@@ -132,13 +132,14 @@ export const MapModal = ({ isOpen, onClose, setSelectedItem, onTravel }: any) =>
   };
 
   const handleStepTravel = () => {
-    if (travelStats.nextStep && onTravel) {
+    const step = travelStats.nextStep;
+    if (step && onTravel) {
       const nextHexData = worldData?.hex_grid?.find(
-        (h: any) => h.q === travelStats.nextStep.q && h.r === travelStats.nextStep.r
-      ) || travelStats.nextStep;
+        (h: any) => h.q === step.q && h.r === step.r
+      ) || step;
       setSelectedHex(null);
       onClose();
-      onTravel(travelStats.nextStep.q, travelStats.nextStep.r, nextHexData);
+      onTravel(step.q, step.r, nextHexData);
     }
   };
 
@@ -395,134 +396,150 @@ export const MapModal = ({ isOpen, onClose, setSelectedItem, onTravel }: any) =>
         {/* Collapsible Illustrated Map Legend */}
         <AnimatePresence>
           {showLegend && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="fixed inset-4 sm:inset-auto sm:top-16 sm:left-4 sm:w-[460px] sm:max-h-[82vh] z-[95] bg-[#faf6ea] bg-[url('https://www.transparenttextures.com/patterns/aged-paper.png')] border-4 border-amber-950/80 rounded-2xl shadow-2xl p-4 sm:p-5 flex flex-col overflow-hidden"
-            >
-              {/* Legend Header */}
-              <div className="flex justify-between items-center pb-3 border-b-2 border-amber-900/25 shrink-0">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-amber-900/15 flex items-center justify-center text-amber-900">
-                    <Compass size={18} />
-                  </div>
-                  <h3 className="font-cinzel font-bold text-amber-950 text-lg sm:text-xl">
-                    Legenda Mapy
-                  </h3>
-                </div>
-                <button 
-                  onClick={() => setShowLegend(false)}
-                  className="text-amber-900/70 hover:text-amber-950 p-1 rounded-lg hover:bg-amber-900/10 transition cursor-pointer"
-                >
-                  <X size={20} />
-                </button>
-              </div>
+            <>
+              {/* Dark backdrop scrim to isolate legend and prevent bleed-through */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setShowLegend(false)}
+                className="fixed inset-0 bg-black/65 backdrop-blur-xs z-[90] cursor-pointer"
+              />
 
-              {/* Legend Content Scrollable */}
-              <div className="overflow-y-auto flex-1 py-3 flex flex-col gap-4 text-xs font-lora">
-                {/* 1. Kingdoms */}
-                <div>
-                  <h4 className="font-cinzel font-bold text-amber-900 text-sm mb-2 uppercase tracking-wider flex items-center gap-1.5">
-                    <Shield size={15} /> 7 Království Aelthgardu
-                  </h4>
-                  <div className="grid grid-cols-1 gap-1.5">
-                    {WORLD_LORE.kingdoms.map(k => (
-                      <div key={k.id} className="p-2 rounded-lg bg-amber-900/5 border border-amber-900/15 flex items-start gap-2">
-                        <span className="text-base">{k.badge}</span>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="fixed inset-4 sm:inset-auto sm:top-16 sm:left-4 sm:w-[460px] sm:max-h-[82vh] z-[95] bg-[#faf6ea] bg-[url('https://www.transparenttextures.com/patterns/aged-paper.png')] border-4 border-amber-950/80 rounded-2xl shadow-2xl p-4 sm:p-5 flex flex-col overflow-hidden text-slate-900"
+              >
+                {/* Legend Header */}
+                <div className="flex justify-between items-center pb-3 border-b-2 border-amber-900/25 shrink-0">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-amber-900/15 flex items-center justify-center text-amber-900">
+                      <Compass size={18} />
+                    </div>
+                    <h3 className="font-cinzel font-bold text-amber-950 text-lg sm:text-xl">
+                      Legenda Mapy
+                    </h3>
+                  </div>
+                  <button 
+                    onClick={() => setShowLegend(false)}
+                    className="text-amber-900/70 hover:text-amber-950 p-1.5 rounded-lg hover:bg-amber-900/10 transition cursor-pointer"
+                    title="Zavřít legendu"
+                  >
+                    <X size={22} />
+                  </button>
+                </div>
+
+                {/* Legend Content Scrollable */}
+                <div className="overflow-y-auto flex-1 py-3 flex flex-col gap-4 text-xs font-lora">
+                  {/* 1. Kingdoms */}
+                  <div>
+                    <h4 className="font-cinzel font-bold text-amber-900 text-sm mb-2 uppercase tracking-wider flex items-center gap-1.5">
+                      <Shield size={15} /> 7 Království Aelthgardu
+                    </h4>
+                    <div className="grid grid-cols-1 gap-1.5">
+                      {WORLD_LORE.kingdoms.map(k => (
+                        <div key={k.id} className="p-2 rounded-lg bg-amber-900/5 border border-amber-900/15 flex items-start gap-2">
+                          <span className="text-base">{k.badge}</span>
+                          <div>
+                            <strong className="font-cinzel text-amber-950 block">{k.name}</strong>
+                            <span className="text-[11px] text-slate-700">{k.archetype}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 2. POIs */}
+                  <div>
+                    <h4 className="font-cinzel font-bold text-amber-900 text-sm mb-2 uppercase tracking-wider flex items-center gap-1.5">
+                      <Star size={15} /> Významná Místa (POIs)
+                    </h4>
+                    <div className="grid grid-cols-1 gap-2">
+                      <div className="flex items-center gap-2.5 p-1.5 rounded-lg bg-amber-950 text-amber-100 border border-amber-600">
+                        <Castle size={16} className="text-amber-300 shrink-0" />
                         <div>
-                          <strong className="font-cinzel text-amber-950 block">{k.name}</strong>
-                          <span className="text-[11px] text-slate-700">{k.archetype}</span>
+                          <strong className="font-cinzel block text-[11px]">Hlavní Město</strong>
+                          <span className="text-[10px] text-amber-200">Sídlo panovníka, obchody a gildy</span>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* 2. POIs */}
-                <div>
-                  <h4 className="font-cinzel font-bold text-amber-900 text-sm mb-2 uppercase tracking-wider flex items-center gap-1.5">
-                    <Star size={15} /> Významná Místa (POIs)
-                  </h4>
-                  <div className="grid grid-cols-1 gap-2">
-                    <div className="flex items-center gap-2.5 p-1.5 rounded-lg bg-amber-950 text-amber-100 border border-amber-600">
-                      <Castle size={16} className="text-amber-300 shrink-0" />
-                      <div>
-                        <strong className="font-cinzel block text-[11px]">Hlavní Město</strong>
-                        <span className="text-[10px] text-amber-200">Sídlo panovníka, obchody a gildy</span>
+                      <div className="flex items-center gap-2.5 p-1.5 rounded-lg bg-[#451a03] text-amber-100 border border-amber-700">
+                        <Home size={16} className="text-amber-200 shrink-0" />
+                        <div>
+                          <strong className="font-cinzel block text-[11px]">Vesnice</strong>
+                          <span className="text-[10px] text-amber-200">Hostinec, odpočinek a doplňování zásob</span>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2.5 p-1.5 rounded-lg bg-[#451a03] text-amber-100 border border-amber-700">
-                      <Home size={16} className="text-amber-200 shrink-0" />
-                      <div>
-                        <strong className="font-cinzel block text-[11px]">Vesnice</strong>
-                        <span className="text-[10px] text-amber-200">Hostinec, odpočinek a doplňování zásob</span>
+                      <div className="flex items-center gap-2.5 p-1.5 rounded-lg bg-zinc-900 text-red-200 border border-red-800">
+                        <Skull size={16} className="text-red-400 shrink-0" />
+                        <div>
+                          <strong className="font-cinzel block text-[11px]">Temnice (Dungeon)</strong>
+                          <span className="text-[10px] text-red-300">Nebezpečná monstra, starobylá kořist</span>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2.5 p-1.5 rounded-lg bg-zinc-900 text-red-200 border border-red-800">
-                      <Skull size={16} className="text-red-400 shrink-0" />
-                      <div>
-                        <strong className="font-cinzel block text-[11px]">Temnice (Dungeon)</strong>
-                        <span className="text-[10px] text-red-300">Nebezpečná monstra, starobylá kořist</span>
+                      <div className="flex items-center gap-2.5 p-1.5 rounded-lg bg-indigo-950 text-indigo-100 border border-indigo-700">
+                        <Star size={16} className="text-indigo-300 shrink-0" />
+                        <div>
+                          <strong className="font-cinzel block text-[11px]">Posvátná Svatyně</strong>
+                          <span className="text-[10px] text-indigo-200">Božská požehnání a léčení</span>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2.5 p-1.5 rounded-lg bg-indigo-950 text-indigo-100 border border-indigo-700">
-                      <Star size={16} className="text-indigo-300 shrink-0" />
-                      <div>
-                        <strong className="font-cinzel block text-[11px]">Posvátná Svatyně</strong>
-                        <span className="text-[10px] text-indigo-200">Božská požehnání a léčení</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2.5 p-1.5 rounded-lg bg-slate-900 text-teal-100 border border-teal-700">
-                      <Eye size={16} className="text-teal-300 shrink-0" />
-                      <div>
-                        <strong className="font-cinzel block text-[11px]">Prastará Ruina</strong>
-                        <span className="text-[10px] text-teal-200">Tajemná magie a zapomenutá historie</span>
+                      <div className="flex items-center gap-2.5 p-1.5 rounded-lg bg-slate-900 text-teal-100 border border-teal-700">
+                        <Eye size={16} className="text-teal-300 shrink-0" />
+                        <div>
+                          <strong className="font-cinzel block text-[11px]">Prastará Ruina</strong>
+                          <span className="text-[10px] text-teal-200">Tajemná magie a zapomenutá historie</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                {/* 3. Terrains */}
-                <div>
-                  <h4 className="font-cinzel font-bold text-amber-900 text-sm mb-2 uppercase tracking-wider flex items-center gap-1.5">
-                    <Info size={15} /> Terény & Zásoby
-                  </h4>
-                  <div className="grid grid-cols-2 gap-2 text-[11px]">
-                    <div className="p-2 rounded bg-amber-900/5 border border-amber-900/10">
-                      <strong className="block text-amber-950">🌾 Pláně</strong>
-                      <span className="text-slate-600">Náklad: 1 den, 1 jídlo</span>
-                    </div>
-                    <div className="p-2 rounded bg-amber-900/5 border border-amber-900/10">
-                      <strong className="block text-amber-950">🌲 Lesy</strong>
-                      <span className="text-slate-600">Náklad: 1 den, 1 jídlo</span>
-                    </div>
-                    <div className="p-2 rounded bg-amber-900/5 border border-amber-900/10">
-                      <strong className="block text-amber-950">⛰️ Hory</strong>
-                      <span className="text-slate-600">Náklad: 1 den, 2 jídla</span>
-                    </div>
-                    <div className="p-2 rounded bg-amber-900/5 border border-amber-900/10">
-                      <strong className="block text-amber-950">🌫️ Bažiny</strong>
-                      <span className="text-slate-600">Náklad: 1 den, 2 jídla</span>
-                    </div>
-                    <div className="p-2 rounded bg-amber-900/5 border border-amber-900/10">
-                      <strong className="block text-amber-950">🔥 Pustina</strong>
-                      <span className="text-slate-600">Náklad: 1 den, 2 jídla</span>
-                    </div>
-                    <div className="p-2 rounded bg-amber-900/5 border border-amber-900/10">
-                      <strong className="block text-amber-950">🌊 Oceán</strong>
-                      <span className="text-slate-600">Neprostupný bez lodi</span>
+                  {/* 3. Terrains */}
+                  <div>
+                    <h4 className="font-cinzel font-bold text-amber-900 text-sm mb-2 uppercase tracking-wider flex items-center gap-1.5">
+                      <Info size={15} /> Terény & Zásoby
+                    </h4>
+                    <div className="grid grid-cols-2 gap-2 text-[11px]">
+                      <div className="p-2 rounded bg-amber-900/5 border border-amber-900/10">
+                        <strong className="block text-amber-950">🌾 Pláně</strong>
+                        <span className="text-slate-700">Náklad: 1 den, 1 jídlo</span>
+                      </div>
+                      <div className="p-2 rounded bg-amber-900/5 border border-amber-900/10">
+                        <strong className="block text-amber-950">🌲 Lesy</strong>
+                        <span className="text-slate-700">Náklad: 1 den, 1 jídlo</span>
+                      </div>
+                      <div className="p-2 rounded bg-amber-900/5 border border-amber-900/10">
+                        <strong className="block text-amber-950">⛰️ Hory</strong>
+                        <span className="text-slate-700">Náklad: 1 den, 2 jídla</span>
+                      </div>
+                      <div className="p-2 rounded bg-amber-900/5 border border-amber-900/10">
+                        <strong className="block text-amber-950">🌫️ Bažiny</strong>
+                        <span className="text-slate-700">Náklad: 1 den, 2 jídla</span>
+                      </div>
+                      <div className="p-2 rounded bg-amber-900/5 border border-amber-900/10">
+                        <strong className="block text-amber-950">🔥 Pustina</strong>
+                        <span className="text-slate-700">Náklad: 1 den, 2 jídla</span>
+                      </div>
+                      <div className="p-2 rounded bg-amber-900/5 border border-amber-900/10">
+                        <strong className="block text-amber-950">🌊 Oceán</strong>
+                        <span className="text-slate-700">Neprostupný bez lodi</span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* 4. Fog of War */}
-                <div className="p-2.5 rounded-xl bg-amber-900/10 border border-amber-900/20 text-[11px] leading-relaxed">
-                  <strong className="font-cinzel text-amber-950 block mb-0.5">🌫️ Mlha Neznáma (Fog of War)</strong>
-                  Šrafované oblasti představují neprozkoumané země. Jakmile vstoupíš do sousedství nebo navštívíš daný hex, mlha se rozplyne a odhalí skrytá města, dungeony i krajinu. Mlhu lze kdykoli přepnout tlačítkem v záhlaví.
+                  {/* 4. Fog of War */}
+                  <div className="p-3 rounded-xl bg-amber-900/10 border border-amber-900/25 text-[11px] leading-relaxed">
+                    <strong className="font-cinzel text-amber-950 font-bold block mb-1 text-xs flex items-center gap-1.5">
+                      <span>🌫️</span> Mlha Neznáma (Fog of War)
+                    </strong>
+                    <p className="text-amber-950 font-medium font-lora">
+                      Šrafované oblasti představují neprozkoumané země. Jakmile vstoupíš do sousedství nebo navštívíš daný hex, mlha se rozplyne a odhalí skrytá města, dungeony i krajinu. Mlhu lze kdykoli přepnout tlačítkem v záhlaví.
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
+              </motion.div>
+            </>
           )}
         </AnimatePresence>
 

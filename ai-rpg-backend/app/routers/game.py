@@ -224,6 +224,21 @@ VYPRÁVĚNÍ, MÍSTA A PUTOVÁNÍ (LOKACE):
 - **Typ lokace a Region:** Do `typ_lokace` dej vždy 'mesto', 'vesnice', 'divocina', nebo 'dungeon'. Do `aktualni_region` dej hezký název oblasti.
 - **CESTOVÁNÍ A JÍDLO:** Když hráč cestuje, přepni do 'divocina' a odečti 1 jídlo (`davky_jidla_zmena`: -1).
 
+PSYCHOLOGIE A ŽIVOT NPC POSTAV (SOUL & SUBTEXT ENGINE):
+- ŽÁDNÁ PLOCHÁ ENCYKLOPEDIE: Každá významnější postava má svůj vlastní život, strachy, manýry a skrytou vnitřní motivaci (proč jedná tak, jak jedná).
+- PŘÍSNÝ ZÁKAZ PROVALENÍ TAJEMSTVÍ: NPC NIKDY nevysloví své tajemství ani svou vnitřní motivaci hned v prvním uvítacím dialogu!
+- SUBTEXT (PODTEXT) A ŘEČ TĚLA: Skrytá motivace a strach se projevují nepřímo – v tom, jak postava formuluje nabídky, čemu se vyhýbá, jak těká pohledem, jak si mne ruce, nebo jaké podmínky si klade výměnou za pomoc.
+- VHLED A DŮVĚRA (INSIGHT & TRUST): Pokud hráč použije empatii, vhled (Insight) nebo si získá důvěru postavy (pomocí, laskavostí, charismatem), popiš vnitřní napětí a v `zmeny_stavu.zname_postavy_zmena` aktualizuj:
+  - `jmeno`: jméno postavy
+  - `lokace`: název aktuálního místa
+  - `popis`: stručný popis role a vzhledu
+  - `povaha`: stručné vystupování a manýry (např. "Opatrný kovář, mluví úsečně, neustále čistí meč a vyhýbá se zmínkám o válce")
+  - `motivace`: vnitřní cíl postavy (např. "Potřebuje splatit dluh 40 zlaťáků městské gardě, než mu zabaví dílnu")
+  - `odhalene_tajemstvi`: vyplň POUZE tehdy, pokud ho hráč v tomto tahu skutečně odhalil (jinak nechej null/prázdné!)
+  - `duvera`: číslo -10 až +10 (výchozí 0, roste při pomoci a klesá při vyhrožování či urážkách)
+  - `vztah`: 'Neutrální', 'Přátelský', 'Spojenec', 'Obezřetný', nebo 'Nepřátelský'
+- Mezi 'nabizene_akce' při setkání s NPC zahrň alespoň jednu možnost sociální interakce: např. "[Vhled] Odhadnout jeho skutečné úmysly z řeči těla" nebo "[Přesvědčování] Zkusit si získat jeho důvěru".
+
 ZÁZNAMY PRO FRONTEND A EFEKTIVITA TOKENŮ:
 - **DELTA REŽIM:** Pokud hráč pokračuje v dialogu nebo běžné činnosti na stejném místě, nastav `nova_scena: false`. Pole `vyznamna_mista`, `popis_okoli` a `image_prompt` vyplňuj VÝHRADNĚ tehdy, pokud je `nova_scena: true` (nová lokace/budova). Při `nova_scena: false` je nechej prázdné nebo null!
 - **TRVALÁ FAKTA A PAMĚŤ:** Do `dulezita_fakta` zapiš stručná klíčová zjištění, sliby NPC nebo milníky, které si má svět pamatovat navždy (např. "Hráč zachránil syna kováře Borise").
@@ -327,12 +342,53 @@ ZÁZNAMY PRO FRONTEND A EFEKTIVITA TOKENŮ:
         if dm_json.get('popis_okoli'):
             state_dict['currentLocationDesc'] = dm_json['popis_okoli']
             state_dict['popis_okoli'] = dm_json['popis_okoli']
+        known_npcs = state_dict.setdefault('zname_postavy', [])
+        # Process NPC updates from state changes (Soul & Subtext Engine)
+        npc_changes = (dm_json.get('zmeny_stavu') or {}).get('zname_postavy_zmena') or []
+        for npc_rec in npc_changes:
+            if not isinstance(npc_rec, dict):
+                continue
+            rec_name = npc_rec.get('jmeno')
+            if not rec_name:
+                continue
+            existing = next((n for n in known_npcs if n.get('jmeno', '').lower() == rec_name.lower()), None)
+            if existing:
+                if npc_rec.get('vztah'): existing['vztah'] = npc_rec['vztah']
+                if npc_rec.get('povaha'): existing['povaha'] = npc_rec['povaha']
+                if npc_rec.get('motivace'): existing['motivace'] = npc_rec['motivace']
+                if npc_rec.get('odhalene_tajemstvi'): existing['odhalene_tajemstvi'] = npc_rec['odhalene_tajemstvi']
+                if 'duvera' in npc_rec and npc_rec['duvera'] is not None: existing['duvera'] = npc_rec['duvera']
+                if npc_rec.get('popis'): existing['popis'] = npc_rec['popis']
+            else:
+                known_npcs.append({
+                    'jmeno': rec_name,
+                    'lokace': npc_rec.get('lokace') or curr_region,
+                    'lokace_nazev': curr_region,
+                    'souradnice': {'q': curr_q, 'r': curr_r},
+                    'popis': npc_rec.get('popis', ''),
+                    'vztah': npc_rec.get('vztah', 'Neutrální'),
+                    'povaha': npc_rec.get('povaha'),
+                    'motivace': npc_rec.get('motivace'),
+                    'odhalene_tajemstvi': npc_rec.get('odhalene_tajemstvi'),
+                    'duvera': npc_rec.get('duvera', 0),
+                    'je_spolecnik': False
+                })
+
         if dm_json.get('npc_dialogy'):
-            known_npcs = state_dict.setdefault('zname_postavy', [])
             for dialog in dm_json['npc_dialogy']:
                 npc_name = dialog.get('jmeno')
                 if npc_name and (not any((n.get('jmeno', '').lower() == npc_name.lower() for n in known_npcs))):
-                    known_npcs.append({'jmeno': npc_name, 'pohlavi': dialog.get('pohlavi', 'muz'), 'lokace_nazev': curr_region, 'souradnice': {'q': curr_q, 'r': curr_r}, 'je_spolecnik': False})
+                    known_npcs.append({
+                        'jmeno': npc_name,
+                        'pohlavi': dialog.get('pohlavi', 'muz'),
+                        'lokace': curr_region,
+                        'lokace_nazev': curr_region,
+                        'souradnice': {'q': curr_q, 'r': curr_r},
+                        'popis': f"Obyvatel kraje {curr_region}.",
+                        'vztah': 'Neutrální',
+                        'duvera': 0,
+                        'je_spolecnik': False
+                    })
 
         # 5. Clean narrative history storage (eliminates DB bloat)
         story_text = dm_json.get('vypravec', '')
@@ -360,6 +416,7 @@ ZÁZNAMY PRO FRONTEND A EFEKTIVITA TOKENŮ:
         dm_json['aktivni_reputace'] = state_dict.get('reputace', {})
         dm_json['kronika'] = state_dict.get('kronika', [])
         dm_json['svetova_fakta'] = state_dict.get('svetova_fakta', [])
+        dm_json['zname_postavy'] = known_npcs
 
         supabase.table('characters').update({'history': updated_history, 'state': state_dict}).eq('api_key', db_key).execute()
         return dm_json
@@ -480,7 +537,8 @@ async def travel_action(req: TravelRequest):
             'terrain_name': target_hex.get('terrain'),
             'kronika': state.get('kronika', []),
             'aktivni_reputace': state.get('reputace', {}),
-            'svetova_fakta': state.get('svetova_fakta', [])
+            'svetova_fakta': state.get('svetova_fakta', []),
+            'zname_postavy': state.get('zname_postavy', [])
         }
     except HTTPException:
         raise

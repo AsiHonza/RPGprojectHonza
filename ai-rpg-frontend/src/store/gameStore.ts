@@ -184,7 +184,7 @@ interface GameState {
   xp: number;
   setXp: (x: number | ((x: number) => number)) => void;
   gold: number;
-  setGold: (gold: number) => void;
+  setGold: (gold: number | ((g: number) => number)) => void;
   rations: number;
   setRations: (r: number | ((r: number) => number)) => void;
   skillPoints: number;
@@ -283,7 +283,6 @@ interface GameState {
   unreadQuests: boolean;
   setUnreadQuests: (u: boolean | ((u: boolean) => boolean)) => void;
   setMusicPlaying: (p: boolean) => void;
-  setEnemies: (e: any[]) => void;
 }
 
 export const useGameStore = create<GameState>((set) => ({
@@ -316,7 +315,7 @@ export const useGameStore = create<GameState>((set) => ({
   xp: 0,
   setXp: (xp) => set((state) => ({ xp: typeof xp === "function" ? xp(state.xp) : xp })),
   gold: 15,
-  setGold: (gold) => set({ gold }),
+  setGold: (gold) => set((state) => ({ gold: typeof gold === "function" ? gold(state.gold) : gold })),
   rations: 3,
   setRations: (rations) => set((state) => ({ rations: typeof rations === "function" ? rations(state.rations) : rations })),
   skillPoints: 0,

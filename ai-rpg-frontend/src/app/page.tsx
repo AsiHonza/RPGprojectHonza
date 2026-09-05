@@ -21,6 +21,7 @@ import { SkillsModal } from '../features/character/SkillsModal';
 import { StatsModal } from '../features/character/StatsModal';
 import { SettingsModal } from '../features/ui/SettingsModal';
 import { PatchNotesModal } from '../features/ui/PatchNotesModal';
+import { CampModal } from '../features/character/CampModal';
 import { PlayerHeader } from '../features/ui/PlayerHeader';
 import { CombatArena } from '../features/combat/CombatArena';
 import { PATCH_NOTES } from '../data/patchNotes';
@@ -108,26 +109,47 @@ export default function Home() {
   // Game Play State
   const [savedCharacters, setSavedCharacters] = useState<any[]>([]);
       const [customAction, setCustomAction] = useState("");
-  const [inventoryOpen, setInventoryOpen] = useState(false);
-  const [journalOpen, setJournalOpen] = useState(false);
+  // Central Modal Manager State
+  type ActiveModalType = 'inventory' | 'map' | 'journal' | 'quests' | 'npcs' | 'skills' | 'stats' | 'settings' | 'patchNotes' | 'camp' | null;
+  const [activeModal, setActiveModal] = useState<ActiveModalType>(null);
+
+  const inventoryOpen = activeModal === 'inventory';
+  const setInventoryOpen = (open: boolean) => setActiveModal(open ? 'inventory' : null);
+
+  const journalOpen = activeModal === 'journal';
+  const setJournalOpen = (open: boolean) => setActiveModal(open ? 'journal' : null);
+
+  const settingsOpen = activeModal === 'settings';
+  const setSettingsOpen = (open: boolean) => setActiveModal(open ? 'settings' : null);
+
+  const patchNotesOpen = activeModal === 'patchNotes';
+  const setPatchNotesOpen = (open: boolean) => setActiveModal(open ? 'patchNotes' : null);
+
+  const skillsOpen = activeModal === 'skills';
+  const setSkillsOpen = (open: boolean) => setActiveModal(open ? 'skills' : null);
+
+  const statsOpen = activeModal === 'stats';
+  const setStatsOpen = (open: boolean) => setActiveModal(open ? 'stats' : null);
+
+  const questsOpen = activeModal === 'quests';
+  const setQuestsOpen = (open: boolean) => setActiveModal(open ? 'quests' : null);
+
+  const npcsOpen = activeModal === 'npcs';
+  const setNpcsOpen = (open: boolean) => setActiveModal(open ? 'npcs' : null);
+
+  const mapOpen = activeModal === 'map';
+  const setMapOpen = (open: boolean) => setActiveModal(open ? 'map' : null);
+
+  const campOpen = activeModal === 'camp';
+  const setCampOpen = (open: boolean) => setActiveModal(open ? 'camp' : null);
+
   const [isOOC, setIsOOC] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [patchNotesOpen, setPatchNotesOpen] = useState(false);
-  
-  // Nové stavy pro boj a RPG systém
-  
-  // Quests
-  const [skillsOpen, setSkillsOpen] = useState(false);
   const [heroDropdownOpen, setHeroDropdownOpen] = useState(false);
   const [menuDropdownOpen, setMenuDropdownOpen] = useState(false);
-  const [statsOpen, setStatsOpen] = useState(false);
-  const [questsOpen, setQuestsOpen] = useState(false);
-      const [travelMode, setTravelMode] = useState(false);
+  const [travelMode, setTravelMode] = useState(false);
   const [travelDaysLeft, setTravelDaysLeft] = useState(0);
   const [travelDestination, setTravelDestination] = useState("");
-  const [npcsOpen, setNpcsOpen] = useState(false);
-  const [mapOpen, setMapOpen] = useState(false);
 
 
       const [currentImageError, setCurrentImageError] = useState<string | null>(null);
@@ -939,8 +961,9 @@ export default function Home() {
         else if (data.reputace_zmena) updateReputation(data.reputace_zmena);
 
         if (data.reputace_zmena && Object.keys(data.reputace_zmena).length > 0) {
-          const [factionKey, val] = Object.entries(data.reputace_zmena)[0];
-          const sign = (val > 0) ? '+' + val : val;
+          const [factionKey, rawVal] = Object.entries(data.reputace_zmena)[0];
+          const val = Number(rawVal);
+          const sign = (val > 0) ? '+' + val : String(val);
           setConsequenceToast({
             text: 'Reputace u frakce byla upravena: ' + sign,
             faction: factionKey,
@@ -1349,6 +1372,15 @@ export default function Home() {
               <Map size={17} /> <span>Mapa</span>
             </button>
 
+            {/* 4b. Tábor */}
+            <button 
+              onClick={() => { setCampOpen(true); setHeroDropdownOpen(false); setMenuDropdownOpen(false); }} 
+              className="flex-shrink-0 p-2 sm:p-2.5 text-amber-900 hover:bg-amber-100/60 rounded-xl transition flex items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold"
+              title="Táboření a odpočinek"
+            >
+              <Flame size={17} className="text-amber-600" /> <span className="hidden sm:inline">Tábor</span>
+            </button>
+
             {/* 5. Menu Dropdown (Deník, Postavy, Nastavení, Návrat) */}
             <div className="relative z-50">
               <button 
@@ -1366,6 +1398,13 @@ export default function Home() {
 
               {menuDropdownOpen && (
                 <div className="absolute top-full right-0 mt-2 w-56 max-w-[calc(100vw-32px)] bg-[#fdfbf7] border border-amber-900/30 rounded-2xl shadow-[0_10px_35px_rgba(0,0,0,0.35)] p-2 z-[60] flex flex-col gap-1 backdrop-blur-xl">
+                  <button 
+                    onClick={() => { setCampOpen(true); setMenuDropdownOpen(false); }}
+                    className="w-full text-left px-3 py-2 text-slate-800 hover:bg-amber-100/70 rounded-xl transition flex items-center gap-2.5 text-xs sm:text-sm font-cinzel font-bold"
+                  >
+                    <Flame size={16} className="text-amber-600" />
+                    <span>Táboření a odpočinek</span>
+                  </button>
                   <button 
                     onClick={() => { setJournalOpen(true); setMenuDropdownOpen(false); }}
                     className="w-full text-left px-3 py-2 text-slate-800 hover:bg-amber-100/70 rounded-xl transition flex items-center gap-2.5 text-xs sm:text-sm font-cinzel font-bold"
@@ -1619,6 +1658,9 @@ export default function Home() {
 
       {/* NPCs Modal */}
       <NpcsModal isOpen={npcsOpen} onClose={() => setNpcsOpen(false)} setMapOpen={setMapOpen} />
+
+      {/* Camp Modal */}
+      <CampModal isOpen={campOpen} onClose={() => setCampOpen(false)} />
 
       {/* Inventory Modal */}
       <InventoryPanel 

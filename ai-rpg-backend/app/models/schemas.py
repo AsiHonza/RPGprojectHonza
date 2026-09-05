@@ -31,7 +31,11 @@ class NPCRecord(BaseModel):
     jmeno: str
     lokace: str
     popis: str
-    vztah: str = Field(description="Vztah k hraci")
+    vztah: str = Field(default="Neutrální", description="Vztah k hráči (Neutrální, Přátelský, Spojenec, Obezřetný, Nepřátelský)")
+    povaha: Optional[str] = Field(default=None, description="Osobnost, tón řeči a manýry postavy (např. 'Podezíravý kupec, mluví šeptem a neustále si mne ruce')")
+    motivace: Optional[str] = Field(default=None, description="Skrytá vnitřní potřeba či cíl postavy (např. 'Získat 30 zlaťáků na vyplacení bratra z vězení')")
+    odhalene_tajemstvi: Optional[str] = Field(default=None, description="Tajemství nebo zranitelnost odhalená hráčem. Pokud dosud nebylo odhaleno, nechat null/prázdné")
+    duvera: int = Field(default=0, description="Stupeň důvěry k hráči (-10 až +10)")
 
 class StateChanges(BaseModel):
     zivoty_zmena: int = 0

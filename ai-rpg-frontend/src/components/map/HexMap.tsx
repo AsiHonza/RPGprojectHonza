@@ -112,7 +112,7 @@ export default function HexMap({
       const locationLore = worldData.locations?.find((l: any) => l.q === hex.q && l.r === hex.r);
       const kInfo = hex.kingdom_id ? WORLD_LORE.kingdoms.find(k => k.id === hex.kingdom_id) : null;
       
-      let defaultName = null;
+      let defaultName: string | null = null;
       if (hex.poi === 'Capital' && kInfo) {
         defaultName = kInfo.name;
       }
@@ -461,13 +461,15 @@ export default function HexMap({
                                     <g transform="translate(-7, -7)">
                                       <Castle size={14} className="text-amber-300" />
                                     </g>
-                                    {/* Capital Banner */}
-                                    <g transform="translate(0, 15)">
-                                      <rect x="-30" y="-7" width="60" height="13" rx="3" fill="#fef3c7" stroke="#b45309" strokeWidth="1" className="shadow" />
-                                      <text x="0" y="0" textAnchor="middle" dominantBaseline="middle" className="text-[7px] font-cinzel font-black fill-[#78350f] uppercase tracking-wider">
-                                        {hexData.nazev || 'Hlavní Město'}
-                                      </text>
-                                    </g>
+                                    {/* Capital Banner - only show if player is NOT standing on this hex to prevent overlap */}
+                                    {(!activeLocation || activeLocation.q !== hexData.q || activeLocation.r !== hexData.r) && (
+                                      <g transform="translate(0, 15)">
+                                        <rect x="-30" y="-7" width="60" height="13" rx="3" fill="#fef3c7" stroke="#b45309" strokeWidth="1" className="shadow" />
+                                        <text x="0" y="0" textAnchor="middle" dominantBaseline="middle" className="text-[7px] font-cinzel font-black fill-[#78350f] uppercase tracking-wider">
+                                          {hexData.nazev || 'Hlavní Město'}
+                                        </text>
+                                      </g>
+                                    )}
                                   </g>
                                 )}
 
@@ -516,11 +518,13 @@ export default function HexMap({
 
                   {/* 2. Kingdom Watermark Names (Antique Cartographic Text) */}
                   {kingdomCenters.map(kc => {
+                    const playerHex = activeLocation ? grid.toArray().find(h => h.q === activeLocation.q && h.r === activeLocation.r) : null;
+                    const isPlayerNear = playerHex && Math.hypot(kc.x - playerHex.x, kc.y - playerHex.y) < 48;
                     return (
                       <g 
                         key={`kingdom-label-${kc.kingdomId}`} 
-                        transform={`translate(${kc.x}, ${kc.y - 20})`}
-                        className="pointer-events-none select-none opacity-50"
+                        transform={`translate(${kc.x}, ${isPlayerNear ? kc.y - 34 : kc.y - 20})`}
+                        className={`pointer-events-none select-none transition-opacity duration-300 ${isPlayerNear ? 'opacity-20' : 'opacity-50'}`}
                       >
                         <text 
                           x="0" 
@@ -588,6 +592,11 @@ export default function HexMap({
                   {activeLocation && (() => {
                     const playerHex = grid.toArray().find(h => h.q === activeLocation.q && h.r === activeLocation.r);
                     if (!playerHex) return null;
+                    const playerHexData = hexes.find(h => h.q === activeLocation.q && h.r === activeLocation.r);
+                    const locLabel = playerHexData?.nazev || (playerHexData?.poi === 'Capital' ? 'Hlavní Město' : null);
+                    const bannerText = locLabel ? `HRDINA • ${locLabel}` : 'HRDINA';
+                    const bannerWidth = Math.max(50, Math.min(140, bannerText.length * 6.2 + 16));
+
                     return (
                       <g transform={`translate(${playerHex.x}, ${playerHex.y})`} className="pointer-events-none z-40">
                         {/* Radar Ping */}
@@ -600,9 +609,25 @@ export default function HexMap({
                         </g>
                         {/* Sleek Hero Banner */}
                         <g transform="translate(0, -19)">
-                          <rect x="-24" y="-7" width="48" height="13" rx="3" fill="#451a03" stroke="#fbbf24" strokeWidth="1" className="shadow-md" />
-                          <text x="0" y="0.5" textAnchor="middle" dominantBaseline="middle" className="text-[7.5px] font-cinzel font-black fill-amber-100 uppercase tracking-wider">
-                            HRDINA
+                          <rect 
+                            x={-bannerWidth / 2} 
+                            y="-7" 
+                            width={bannerWidth} 
+                            height="14" 
+                            rx="3" 
+                            fill="#451a03" 
+                            stroke="#fbbf24" 
+                            strokeWidth="1" 
+                            className="shadow-md" 
+                          />
+                          <text 
+                            x="0" 
+                            y="0.5" 
+                            textAnchor="middle" 
+                            dominantBaseline="middle" 
+                            className="text-[7.5px] font-cinzel font-black fill-amber-100 uppercase tracking-wider"
+                          >
+                            {bannerText}
                           </text>
                         </g>
                       </g>

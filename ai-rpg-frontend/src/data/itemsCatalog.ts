@@ -18,6 +18,7 @@ export interface ItemDef {
   allowedClasses?: string[]; // pokud prázdné, všichni
   attack_bonus?: number;
   damageDice?: string; // např. "1d8", "2d6"
+  damageBonus?: number;
   defense_bonus?: number; // AC bonus
   flatDamageReduction?: number; // snížení fyzického zranění
   resistances?: {
