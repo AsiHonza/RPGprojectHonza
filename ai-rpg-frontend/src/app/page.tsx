@@ -574,49 +574,61 @@ export default function Home() {
         let lastAudioQueue: {text: string, type: "narrator" | "npc_muz" | "npc_zena"}[] = [];
 
         const loadedHistory = (data.character.history || []).map((msg: any) => {
+          if (!msg) return null;
           if (msg.role === "user" || msg.type === "player") {
-            return { type: "player", text: msg.text || msg.content };
+            return { type: "player", text: msg.text || msg.content || "" };
           }
           if (msg.role === "assistant" || msg.role === "model" || msg.type === "dm") {
+            const rawText = msg.text || msg.content;
+            if (!rawText) return null;
+
             try {
-              const rawText = msg.text || msg.content;
               const dm_data = typeof rawText === "string" ? JSON.parse(rawText) : rawText;
               
-              if (dm_data.nabizene_akce) {
-                lastSuggestedActions = dm_data.nabizene_akce;
-              }
+              if (dm_data && typeof dm_data === "object") {
+                if (dm_data.nabizene_akce) {
+                  lastSuggestedActions = dm_data.nabizene_akce;
+                }
 
-              lastAudioQueue = [];
-              if (dm_data.vypravec) {
-                lastAudioQueue.push({ text: dm_data.vypravec, type: "narrator" });
-              }
-              if (dm_data.npc_dialogy && Array.isArray(dm_data.npc_dialogy)) {
-                for (const npc of dm_data.npc_dialogy) {
-                  const npcText = npc.text || npc.replika;
-                  if (npcText) {
-                    lastAudioQueue.push({
-                      text: npcText,
-                      type: npc.pohlavi === "zena" ? "npc_zena" : "npc_muz"
-                    });
+                lastAudioQueue = [];
+                if (dm_data.vypravec) {
+                  lastAudioQueue.push({ text: dm_data.vypravec, type: "narrator" });
+                }
+                if (dm_data.npc_dialogy && Array.isArray(dm_data.npc_dialogy)) {
+                  for (const npc of dm_data.npc_dialogy) {
+                    const npcText = npc.text || npc.replika;
+                    if (npcText) {
+                      lastAudioQueue.push({
+                        text: npcText,
+                        type: npc.pohlavi === "zena" ? "npc_zena" : "npc_muz"
+                      });
+                    }
                   }
                 }
-              }
 
-              return { 
-                type: "dm", 
-                popis_okoli: dm_data.popis_okoli,
-                image_prompt: dm_data.image_prompt,
-                vypravec: dm_data.vypravec,
-                system_log: dm_data.system_log,
-                npc_dialogy: dm_data.npc_dialogy,
-                v_boji: dm_data.v_boji,
-                nepratele: dm_data.nepratele,
-                typ_lokace: dm_data.typ_lokace,
-                aktualni_region: dm_data.aktualni_region,
-                vyznamna_mista: dm_data.vyznamna_mista
-              };
-            } catch (e) {
-                console.error("JSON parse failed on:", msg.text, "\nError:", e);
+                return { 
+                  type: "dm", 
+                  popis_okoli: dm_data.popis_okoli,
+                  image_prompt: dm_data.image_prompt,
+                  vypravec: dm_data.vypravec || "",
+                  system_log: dm_data.system_log,
+                  npc_dialogy: dm_data.npc_dialogy,
+                  v_boji: dm_data.v_boji,
+                  nepratele: dm_data.nepratele,
+                  typ_lokace: dm_data.typ_lokace,
+                  aktualni_region: dm_data.aktualni_region,
+                  vyznamna_mista: dm_data.vyznamna_mista
+                };
+              }
+              return { type: "dm", vypravec: String(dm_data) };
+            } catch {
+              // Graceful fallback for non-JSON string entries (like narrative plain text from travel or combat)
+              if (typeof rawText === 'string' && rawText.trim()) {
+                return {
+                  type: "dm",
+                  vypravec: rawText
+                };
+              }
               return { type: "error", text: "Chybný formát zprávy z historie." };
             }
           }

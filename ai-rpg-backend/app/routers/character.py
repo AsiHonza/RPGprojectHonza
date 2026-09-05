@@ -46,6 +46,29 @@ async def load_game(req: LoadGameRequest):
         state = char_data.get('state') or {}
         state_modified = False
 
+        # Self-healing history sanitizer: ensures both 'text' and 'content' keys exist
+        history = char_data.get('history') or []
+        history_modified = False
+        normalized_history = []
+        for msg in history:
+            if not isinstance(msg, dict):
+                continue
+            role = msg.get('role') or ('user' if msg.get('type') == 'player' else 'model')
+            text = msg.get('text') or msg.get('content') or ''
+            if msg.get('text') != text or msg.get('content') != text or msg.get('role') != role:
+                history_modified = True
+            normalized_history.append({
+                'role': role,
+                'text': text,
+                'content': text
+            })
+        if history_modified:
+            char_data['history'] = normalized_history
+            try:
+                supabase.table('characters').update({'history': normalized_history}).eq('api_key', char_data['api_key']).execute()
+            except Exception as he:
+                print('Could not auto-save normalized history in load_game:', he)
+
         if not state.get('playerLocation') and state.get('world_data'):
             w_data = state.get('world_data')
             cap = next((p for p in w_data.get('pois', []) if p.get('type') == 'Capital' and p.get('kingdom_id') != 5), None)

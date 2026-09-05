@@ -229,10 +229,23 @@ export const DesktopSidePanel: React.FC<DesktopSidePanelProps> = ({
           </span>
         </div>
 
-        {pointsOfInterest.length > 0 && (
-          <div className="text-xs text-amber-900/80 font-lora">
-            <span className="font-bold text-amber-950">Význačná místa: </span>
-            {pointsOfInterest.join(', ')}
+        {pointsOfInterest && pointsOfInterest.length > 0 && (
+          <div className="text-xs text-amber-900/80 font-lora flex flex-col gap-1">
+            <span className="font-bold text-amber-950">Význačná místa:</span>
+            <div className="flex flex-wrap gap-1.5 pt-0.5">
+              {pointsOfInterest.map((p, idx) => {
+                const name = typeof p === 'string' ? p : (p.nazev || p.name || 'Zajímavost');
+                return (
+                  <span 
+                    key={idx}
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-100/90 border border-amber-900/15 text-[11px] font-cinzel font-semibold text-amber-950 shadow-2xs"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-600"></span>
+                    {name}
+                  </span>
+                );
+              })}
+            </div>
           </div>
         )}
 

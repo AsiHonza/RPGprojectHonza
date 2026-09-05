@@ -26,18 +26,25 @@ async def play_action(req: PlayerActionRequest):
         client = genai.Client(api_key=req.api_key if req.api_key and req.api_key != 'DUMMY' else os.environ.get('GEMINI_API_KEY'))
         contents = []
         for msg in history[-6:]:
-            if msg['role'] == 'user':
-                contents.append(types.Content(role='user', parts=[types.Part.from_text(text=msg['text'])]))
+            if not isinstance(msg, dict):
+                continue
+            role = msg.get('role', 'user')
+            msg_text = msg.get('text') or msg.get('content') or ''
+            if role == 'user':
+                contents.append(types.Content(role='user', parts=[types.Part.from_text(text=msg_text)]))
             else:
                 try:
                     import json
-                    dm_data = json.loads(msg['text'])
-                    story_text = dm_data.get('vypravec', '')
-                    for npc in dm_data.get('npc_dialogy', []):
-                        story_text += f"\n{npc.get('jmeno')}: {npc.get('text')}"
-                    contents.append(types.Content(role='model', parts=[types.Part.from_text(text=story_text)]))
-                except:
-                    contents.append(types.Content(role='model', parts=[types.Part.from_text(text=msg['text'])]))
+                    dm_data = json.loads(msg_text)
+                    if isinstance(dm_data, dict):
+                        story_text = dm_data.get('vypravec', '')
+                        for npc in dm_data.get('npc_dialogy', []):
+                            story_text += f"\n{npc.get('jmeno')}: {npc.get('text')}"
+                        contents.append(types.Content(role='model', parts=[types.Part.from_text(text=story_text)]))
+                    else:
+                        contents.append(types.Content(role='model', parts=[types.Part.from_text(text=str(dm_data))]))
+                except Exception:
+                    contents.append(types.Content(role='model', parts=[types.Part.from_text(text=msg_text)]))
         state_dict = char_data.get('state', {})
         travel_days_left = state_dict.get('travel_days_left', 0)
         is_traveling = state_dict.get('travel_mode', False) or travel_days_left > 0
@@ -394,7 +401,10 @@ ZÁZNAMY PRO FRONTEND A EFEKTIVITA TOKENŮ:
         story_text = dm_json.get('vypravec', '')
         for npc in dm_json.get('npc_dialogy', []):
             story_text += f"\n{npc.get('jmeno')}: {npc.get('text')}"
-        updated_history = history + [{'role': 'user', 'text': action_str}, {'role': 'model', 'text': story_text}]
+        updated_history = history + [
+            {'role': 'user', 'text': action_str, 'content': action_str},
+            {'role': 'model', 'text': story_text, 'content': story_text}
+        ]
 
         # 6. Periodic rolling chronicle compression (L2 memory)
         turns_count = state_dict.get('turns_since_compression', 0) + 1
@@ -622,8 +632,9 @@ Vrať POUZE validní JSON:
         image_prompt = ai_data.get('image_prompt', '') or f"fantasy landscape {dest_name}"
         system_log_text = ' | '.join(system_logs)
 
-        history.append({'role': 'user', 'content': f'[CESTOVÁNÍ] Cesta do: {dest_name} ({tgt_q}, {tgt_r})'})
-        history.append({'role': 'model', 'content': narrative_text})
+        travel_user_msg = f'[CESTOVÁNÍ] Cesta do: {dest_name} ({tgt_q}, {tgt_r})'
+        history.append({'role': 'user', 'text': travel_user_msg, 'content': travel_user_msg})
+        history.append({'role': 'model', 'text': narrative_text, 'content': narrative_text})
 
         state['currentRegion'] = dest_name
         state['current_region'] = dest_name
@@ -767,8 +778,9 @@ async def resolve_combat(req: CombatResolutionRequest):
                 state['inventory'] = state.get('inventory', []) + new_items
                 
         # Append combat resolution to history
-        history.append({'role': 'user', 'content': f'[BOJ] Poraženi nepřátelé: {enemies_str}'})
-        history.append({'role': 'model', 'content': narrative})
+        combat_user_msg = f'[BOJ] Poraženi nepřátelé: {enemies_str}'
+        history.append({'role': 'user', 'text': combat_user_msg, 'content': combat_user_msg})
+        history.append({'role': 'model', 'text': narrative, 'content': narrative})
         
         supabase.table('characters').update({'state': state, 'history': history}).eq('api_key', db_key).execute()
         
