@@ -111,7 +111,7 @@ export default function Home() {
     suggestedActions, setSuggestedActions, pointsOfInterest, setPointsOfInterest, currentLocationImage, setCurrentLocationImage, 
     currentLocationDesc, setCurrentLocationDesc, currentImage, setCurrentImage, combatLog, setCombatLog, reputation, setReputation, 
     updateReputation, chronicle, setChronicle, worldFlags, setWorldFlags, consequenceToast, setConsequenceToast,
-    activeBuffs, addBuff, activeMount, setActiveMount
+    activeBuffs, addBuff, activeMount, setActiveMount, resetCharacterCreation
   } = useGameStore();
 
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -439,21 +439,29 @@ export default function Home() {
   };
 
   const generateBackstory = async () => {
-    if (!name || !keywords) return alert("Zadejte jméno a klíčová slova!");
+    if (!name || !name.trim()) return alert("Nejprve zadejte jméno postavy v kroku 2!");
+    if (!keywords || !keywords.trim()) return alert("Zadejte alespoň několik klíčových slov o minulosti postavy!");
     setLoading(true);
     try {
       const res = await fetch(`${API_URL}/generate-backstory`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ api_key: "DUMMY", name, race, dnd_class: dndClass, keywords }),
+        body: JSON.stringify({ 
+          api_key: "DUMMY", 
+          name: name.trim(), 
+          race: race || "Člověk", 
+          dnd_class: dndClass || "Bojovník", 
+          keywords: keywords.trim() 
+        }),
       });
       if (res.ok) {
         setBackstory(await res.json());
       } else {
-        alert("Chyba při generování.");
+        const errData = await res.json().catch(() => ({}));
+        alert(errData.detail || "Chyba při generování pozadí postavy.");
       }
     } catch (err) {
-      alert("Chyba připojení.");
+      alert("Chyba připojení k serveru.");
     }
     setLoading(false);
   };
@@ -1198,7 +1206,10 @@ export default function Home() {
                     <p className="text-xs sm:text-sm text-slate-600 font-lora">Dosud nemáš vytvořenou žádnou postavu pro tento účet. Je čas probudit hrdinu a zapsat své jméno do kronik sedmi království.</p>
                   </div>
                   <button 
-                    onClick={() => setGameState("creation")}
+                    onClick={() => {
+                      resetCharacterCreation();
+                      setGameState("creation");
+                    }}
                     className="w-full py-4 bg-red-800 hover:bg-red-700 active:bg-red-900 border-2 border-red-900/50 text-white font-cinzel font-bold text-xl rounded-2xl shadow-[0_0_25px_rgba(183,75,75,0.5)] hover:shadow-[0_0_30px_rgba(183,75,75,0.8)] transition uppercase tracking-widest cursor-pointer flex items-center justify-center gap-2.5"
                   >
                     Zrození Hrdiny
@@ -1233,6 +1244,7 @@ export default function Home() {
                 onDeleteCharacter={(e, charName) => deleteCharacter(e, charName)}
                 onCreateNew={() => {
                   audioManager.stopTts();
+                  resetCharacterCreation();
                   setGameState("creation");
                 }}
                 getAvatarVideo={getAvatarVideo}

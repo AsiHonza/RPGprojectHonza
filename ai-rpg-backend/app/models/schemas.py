@@ -97,10 +97,10 @@ class AuthRequest(BaseModel):
     email: str
 
 class BackstoryRequest(BaseModel):
-    api_key: str
+    api_key: Optional[str] = "DUMMY"
     name: str
-    race: str
-    dnd_class: str
+    race: Optional[str] = "Člověk"
+    dnd_class: Optional[str] = "Bojovník"
     keywords: str
 
 class GenerateBackstoryResponse(BaseModel):

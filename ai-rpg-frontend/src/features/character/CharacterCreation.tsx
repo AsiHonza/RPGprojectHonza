@@ -46,7 +46,9 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
   } = useGameStore();
 
   React.useEffect(() => {
-    setStats(calculateBaseStats(dndClass, race));
+    if (dndClass && race) {
+      setStats(calculateBaseStats(dndClass, race));
+    }
   }, [dndClass, race, setStats]);
 
   const handleNext = () => setStep(prev => Math.min(prev + 1, 4));
@@ -89,8 +91,8 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
 
   const currentKingdomData = WORLD_LORE.kingdoms.find(k => k.id === selectedKingdom) || WORLD_LORE.kingdoms[0];
   const currentGodData = WORLD_LORE.gods.find(g => g.id === selectedGod) || WORLD_LORE.gods[0];
-  const currentRaceData = RACES[race] || RACES["Člověk"];
-  const currentClassTree = CLASS_SKILL_TREES[dndClass];
+  const currentRaceData = race ? (RACES[race] || RACES["Člověk"]) : null;
+  const currentClassTree = dndClass ? CLASS_SKILL_TREES[dndClass] : null;
 
   return (
     <div className="min-h-screen w-full bg-[#12181f] text-slate-900 flex flex-col items-center justify-center p-2 sm:p-4 lg:p-6 overflow-y-auto overflow-x-hidden relative select-none">
@@ -161,72 +163,99 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
           {/* Left Hero Companion Column (Visible on lg+) */}
           <aside className="hidden lg:flex lg:col-span-4 xl:col-span-4 flex-col gap-3 h-full bg-amber-950/5 p-4 rounded-2xl border border-amber-900/15 overflow-y-auto custom-scrollbar shrink-0 select-none">
             {/* Ornate Video Frame */}
-            <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden border-2 border-amber-600/60 shadow-md bg-[#12181f] shrink-0">
-              {getAvatarVideo && getAvatarVideo(race) ? (
+            <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden border-2 border-amber-600/60 shadow-md bg-[#12181f] shrink-0 flex items-center justify-center">
+              {race && getAvatarVideo && getAvatarVideo(race) ? (
                 <SeamlessVideo src={getAvatarVideo(race)!} className="w-full h-full object-cover" />
-              ) : (
+              ) : race ? (
                 <img 
-                  src={`https://image.pollinations.ai/prompt/vibrant%20fable%20style%20magical%20fantasy%20portrait%20of%20a%20${encodeURIComponent(race)}%20${encodeURIComponent(dndClass)}%20RPG%20character?width=360&height=270&nologo=true&seed=42`} 
+                  src={`https://image.pollinations.ai/prompt/vibrant%20fable%20style%20magical%20fantasy%20portrait%20of%20a%20${encodeURIComponent(race)}%20${encodeURIComponent(dndClass || 'adventurer')}%20RPG%20character?width=360&height=270&nologo=true&seed=42`} 
                   alt={race} 
                   className="w-full h-full object-cover" 
                 />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-b from-[#1a232f] via-[#12181f] to-[#080b0f] flex flex-col items-center justify-center p-4 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(217,119,6,0.18)_0,transparent_70%)] pointer-events-none" />
+                  <div className="w-16 h-16 rounded-full bg-amber-950/60 border border-amber-500/30 flex items-center justify-center mb-2 shadow-[0_0_20px_rgba(217,119,6,0.25)]">
+                    <Ghost size={32} className="text-amber-300/80 animate-pulse" />
+                  </div>
+                  <span className="font-cinzel text-amber-200 font-bold text-xs tracking-wider z-10">Čistý list osudu</span>
+                  <span className="font-lora text-[10px] text-slate-400 text-center mt-0.5 z-10">Podoba se zjeví po volbě rasy</span>
+                </div>
               )}
               <div className="absolute top-2.5 left-2.5 bg-black/65 backdrop-blur-xs text-amber-300 px-2.5 py-0.5 rounded-full font-cinzel font-bold text-[10px] border border-amber-500/30 flex items-center gap-1">
-                <Sparkles size={11} /> Živá legenda
+                {race ? <><Sparkles size={11} /> Živá legenda</> : <><Crown size={11} /> Čistý štít</>}
               </div>
               <div className="absolute bottom-2.5 inset-x-2.5 bg-black/75 backdrop-blur-xs px-3 py-1 rounded-xl text-center text-amber-100 font-cinzel font-bold text-sm border border-amber-500/25 truncate">
-                {name.trim() || "Bezejmenný Hrdina"}
+                {name.trim() || "Nepojmenovaný Hrdina"}
               </div>
             </div>
 
             {/* Race & Class Badge */}
             <div className="flex items-center justify-between gap-2 bg-white/75 p-2.5 rounded-xl border border-amber-900/15 shadow-2xs shrink-0">
               <div className="flex items-center gap-2">
-                <span className="p-1.5 rounded-lg bg-amber-100 text-amber-900 border border-amber-900/20">
-                  {getRaceIcon(race)}
+                <span className={`p-1.5 rounded-lg border ${race ? 'bg-amber-100 text-amber-900 border-amber-900/20' : 'bg-slate-100 text-slate-400 border-slate-300'}`}>
+                  {race ? getRaceIcon(race) : <Crown size={18} className="opacity-50" />}
                 </span>
                 <div>
-                  <div className="font-cinzel font-bold text-xs text-amber-950">{race}</div>
-                  <div className="font-lora text-[10px] text-slate-500">Rasa</div>
+                  <div className={`font-cinzel font-bold text-xs ${race ? 'text-amber-950' : 'text-slate-400 italic'}`}>
+                    {race || "Zatím nezvolena"}
+                  </div>
+                  <div className="font-lora text-[10px] text-slate-500">Rasa (Krok 2)</div>
                 </div>
               </div>
               <div className="h-6 w-px bg-amber-900/15" />
               <div className="flex items-center gap-2 text-right">
                 <div>
-                  <div className="font-cinzel font-bold text-xs text-amber-950">{dndClass}</div>
-                  <div className="font-lora text-[10px] text-slate-500">Povolání</div>
+                  <div className={`font-cinzel font-bold text-xs ${dndClass ? 'text-amber-950' : 'text-slate-400 italic'}`}>
+                    {dndClass || "Zatím nezvoleno"}
+                  </div>
+                  <div className="font-lora text-[10px] text-slate-500">Povolání (Krok 3)</div>
                 </div>
-                <span className="p-1.5 rounded-lg bg-amber-100 text-amber-900 border border-amber-900/20">
-                  {getClassIcon(dndClass)}
+                <span className={`p-1.5 rounded-lg border ${dndClass ? 'bg-amber-100 text-amber-900 border-amber-900/20' : 'bg-slate-100 text-slate-400 border-slate-300'}`}>
+                  {dndClass ? getClassIcon(dndClass) : <Shield size={18} className="opacity-50" />}
                 </span>
               </div>
             </div>
 
             {/* Active Race Bonuses Card */}
-            <div className="bg-white/75 p-3 rounded-xl border border-amber-900/15 shadow-2xs flex flex-col gap-1.5 text-xs font-lora shrink-0">
-              <div className="flex items-center justify-between font-cinzel font-bold text-amber-950 text-xs border-b border-amber-900/10 pb-1">
-                <span className="flex items-center gap-1"><Sparkles size={13} className="text-amber-700" /> Rasové přednosti</span>
-                <span className="text-emerald-800 font-bold bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-600/30 text-[10px]">
-                  {currentRaceData.displayBonuses}
-                </span>
+            {race && currentRaceData ? (
+              <div className="bg-white/75 p-3 rounded-xl border border-amber-900/15 shadow-2xs flex flex-col gap-1.5 text-xs font-lora shrink-0">
+                <div className="flex items-center justify-between font-cinzel font-bold text-amber-950 text-xs border-b border-amber-900/10 pb-1">
+                  <span className="flex items-center gap-1"><Sparkles size={13} className="text-amber-700" /> Rasové přednosti</span>
+                  <span className="text-emerald-800 font-bold bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-600/30 text-[10px]">
+                    {currentRaceData.displayBonuses}
+                  </span>
+                </div>
+                <div className="text-slate-900 font-bold font-cinzel text-xs flex items-center gap-1 mt-0.5">
+                  <span>⚔️</span> {currentRaceData.trait.name}
+                </div>
+                <p className="text-slate-600 text-[11px] leading-tight">
+                  {currentRaceData.trait.description}
+                </p>
               </div>
-              <div className="text-slate-900 font-bold font-cinzel text-xs flex items-center gap-1 mt-0.5">
-                <span>⚔️</span> {currentRaceData.trait.name}
+            ) : (
+              <div className="bg-white/60 p-3 rounded-xl border border-dashed border-amber-900/25 shadow-2xs flex flex-col gap-1 text-xs font-lora shrink-0 text-slate-500">
+                <div className="flex items-center justify-between font-cinzel font-bold text-slate-600 text-xs border-b border-amber-900/10 pb-1">
+                  <span className="flex items-center gap-1"><Sparkles size={13} className="text-amber-600/60" /> Rasové dědictví</span>
+                  <span className="text-[10px] text-slate-400 italic">Čistý štít</span>
+                </div>
+                <p className="text-[11px] italic leading-tight text-slate-500 pt-0.5">
+                  Krev tvého rodu se probudí v Kroku 2 – získáš unikátní rasový rys a bonusy k atributům.
+                </p>
               </div>
-              <p className="text-slate-600 text-[11px] leading-tight">
-                {currentRaceData.trait.description}
-              </p>
-            </div>
+            )}
 
             {/* Core Stats Overview */}
             <div className="bg-white/75 p-3 rounded-xl border border-amber-900/15 shadow-2xs shrink-0">
               <div className="text-[10px] font-cinzel uppercase font-bold text-amber-900 tracking-wider mb-2 flex items-center justify-between">
                 <span>Atributy postavy</span>
-                <span className="text-[10px] font-lora text-slate-500 italic">Včetně rasových bonusů</span>
+                <span className="text-[10px] font-lora text-slate-500 italic">
+                  {dndClass ? (race ? "Včetně rasových bonusů" : "Podle povolání") : "Základní hodnoty"}
+                </span>
               </div>
               <div className="grid grid-cols-3 gap-1.5 text-center">
                 {Object.entries(stats).map(([stat, val]) => {
-                  const bonus = currentRaceData.bonuses?.[stat as keyof typeof currentRaceData.bonuses];
+                  const bonus = currentRaceData?.bonuses?.[stat as keyof typeof currentRaceData.bonuses];
                   return (
                     <div key={stat} className="bg-[#f9f6e6] p-1.5 rounded-lg border border-amber-900/10 text-center">
                       <div className="text-[9px] uppercase font-bold text-amber-900">{stat}</div>
@@ -473,67 +502,77 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
                     </div>
 
                     {/* NEW: Comprehensive Race Bonuses & Traits Showcase */}
-                    <div className="bg-white/80 border-2 border-amber-900/20 p-4 rounded-2xl shadow-sm space-y-3">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-900/15 pb-2">
-                        <div className="flex items-center gap-2">
-                          <span className="p-1.5 rounded-xl bg-amber-100 text-amber-900 border border-amber-900/20">
-                            {getRaceIcon(race)}
-                          </span>
-                          <div>
-                            <h3 className="font-cinzel font-bold text-base text-amber-950 flex items-center gap-2">
-                              <span>Rasové bonusy: {race}</span>
-                            </h3>
-                            <span className="text-[11px] font-lora text-slate-500 italic">D&D 5e rasová pravidla</span>
+                    {race && currentRaceData ? (
+                      <div className="bg-white/80 border-2 border-amber-900/20 p-4 rounded-2xl shadow-sm space-y-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-900/15 pb-2">
+                          <div className="flex items-center gap-2">
+                            <span className="p-1.5 rounded-xl bg-amber-100 text-amber-900 border border-amber-900/20">
+                              {getRaceIcon(race)}
+                            </span>
+                            <div>
+                              <h3 className="font-cinzel font-bold text-base text-amber-950 flex items-center gap-2">
+                                <span>Rasové bonusy: {race}</span>
+                              </h3>
+                              <span className="text-[11px] font-lora text-slate-500 italic">D&D 5e rasová pravidla</span>
+                            </div>
+                          </div>
+
+                          {/* Display Stat Bonuses Pill */}
+                          <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-100/90 border border-emerald-600/30 rounded-full text-emerald-950 font-cinzel font-bold text-xs shadow-2xs self-start sm:self-auto">
+                            <span>✨</span>
+                            <span>{currentRaceData.displayBonuses}</span>
                           </div>
                         </div>
 
-                        {/* Display Stat Bonuses Pill */}
-                        <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-100/90 border border-emerald-600/30 rounded-full text-emerald-950 font-cinzel font-bold text-xs shadow-2xs self-start sm:self-auto">
-                          <span>✨</span>
-                          <span>{currentRaceData.displayBonuses}</span>
-                        </div>
-                      </div>
-
-                      {/* Unique Trait & Lore */}
-                      <div className="space-y-2 text-xs font-lora text-slate-800">
-                        <div className="p-2.5 bg-amber-50 rounded-xl border border-amber-900/10">
-                          <div className="font-cinzel font-bold text-xs text-amber-950 flex items-center gap-1.5 mb-1">
-                            <Zap size={14} className="text-amber-700" />
-                            <span>Unikátní rasový rys: {currentRaceData.trait.name}</span>
+                        {/* Unique Trait & Lore */}
+                        <div className="space-y-2 text-xs font-lora text-slate-800">
+                          <div className="p-2.5 bg-amber-50 rounded-xl border border-amber-900/10">
+                            <div className="font-cinzel font-bold text-xs text-amber-950 flex items-center gap-1.5 mb-1">
+                              <Zap size={14} className="text-amber-700" />
+                              <span>Unikátní rasový rys: {currentRaceData.trait.name}</span>
+                            </div>
+                            <p className="text-slate-700 leading-relaxed text-[11px] sm:text-xs">
+                              {currentRaceData.trait.description}
+                            </p>
                           </div>
-                          <p className="text-slate-700 leading-relaxed text-[11px] sm:text-xs">
-                            {currentRaceData.trait.description}
+
+                          {/* Passive perks checklist */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1">
+                            {currentRaceData.passivesList.map((traitItem, i) => (
+                              <div key={i} className="flex items-center gap-1.5 text-[11px] text-slate-700 bg-white/60 px-2.5 py-1.5 rounded-lg border border-amber-900/10">
+                                <CheckCircle2 size={13} className="text-emerald-700 shrink-0" />
+                                <span>{traitItem}</span>
+                              </div>
+                            ))}
+                          </div>
+
+                          <p className="text-[11px] text-slate-600 italic pt-1 border-t border-amber-900/10">
+                            {currentRaceData.lore}
                           </p>
                         </div>
 
-                        {/* Passive perks checklist */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1">
-                          {currentRaceData.passivesList.map((traitItem, i) => (
-                            <div key={i} className="flex items-center gap-1.5 text-[11px] text-slate-700 bg-white/60 px-2.5 py-1.5 rounded-lg border border-amber-900/10">
-                              <CheckCircle2 size={13} className="text-emerald-700 shrink-0" />
-                              <span>{traitItem}</span>
+                        {/* Compact mobile avatar preview (lg shows in left column) */}
+                        {getAvatarVideo && getAvatarVideo(race) && (
+                          <div className="lg:hidden flex items-center gap-3 bg-amber-100/60 p-2.5 rounded-xl border border-amber-900/15">
+                            <div className="w-12 h-12 rounded-xl overflow-hidden border border-amber-600/50 shadow-xs shrink-0">
+                              <SeamlessVideo src={getAvatarVideo(race)!} className="w-full h-full object-cover" />
                             </div>
-                          ))}
-                        </div>
-
-                        <p className="text-[11px] text-slate-600 italic pt-1 border-t border-amber-900/10">
-                          {currentRaceData.lore}
+                            <div className="text-left">
+                              <span className="font-cinzel font-bold text-xs text-amber-950 block">Živý portrét: {race}</span>
+                              <span className="font-lora text-[11px] text-slate-600">Animovaný vzhled v legendách</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="bg-white/60 border-2 border-dashed border-amber-900/25 p-5 rounded-2xl shadow-sm text-center flex flex-col items-center justify-center gap-2 text-slate-600">
+                        <span className="text-2xl opacity-60">🛡️</span>
+                        <h3 className="font-cinzel font-bold text-xs sm:text-sm text-amber-950">Zvol rasu svého hrdiny</h3>
+                        <p className="font-lora text-[11px] sm:text-xs text-slate-500 max-w-md">
+                          Výběrem rasy probudíš pradávné dědictví svého rodu, získáš unikátní rasové přednosti a bonusy k atributům.
                         </p>
                       </div>
-
-                      {/* Compact mobile avatar preview (lg shows in left column) */}
-                      {getAvatarVideo && getAvatarVideo(race) && (
-                        <div className="lg:hidden flex items-center gap-3 bg-amber-100/60 p-2.5 rounded-xl border border-amber-900/15">
-                          <div className="w-12 h-12 rounded-xl overflow-hidden border border-amber-600/50 shadow-xs shrink-0">
-                            <SeamlessVideo src={getAvatarVideo(race)!} className="w-full h-full object-cover" />
-                          </div>
-                          <div className="text-left">
-                            <span className="font-cinzel font-bold text-xs text-amber-950 block">Živý portrét: {race}</span>
-                            <span className="font-lora text-[11px] text-slate-600">Animovaný vzhled v legendách</span>
-                          </div>
-                        </div>
-                      )}
-                    </div>
+                    )}
                   </motion.div>
                 )}
 
@@ -574,12 +613,12 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
                             <Settings2 size={14} className="text-amber-700" /> Atributy (Standard Array)
                           </h3>
                           <span className="text-[10px] text-slate-600 font-lora italic">
-                            Optimalizováno pro {dndClass}
+                            {dndClass ? `Optimalizováno pro ${dndClass}` : "Základní rozdělení"}
                           </span>
                         </div>
                         <div className="grid grid-cols-6 gap-1.5 text-center">
                           {Object.entries(stats).map(([stat, val]) => {
-                            const bonus = currentRaceData.bonuses?.[stat as keyof typeof currentRaceData.bonuses];
+                            const bonus = currentRaceData?.bonuses?.[stat as keyof typeof currentRaceData.bonuses];
                             return (
                               <div key={stat} className="bg-[#f9f6e6] p-1.5 rounded-lg border border-amber-900/10">
                                 <div className="text-[9px] uppercase text-amber-900 font-bold tracking-wider">{stat}</div>
@@ -600,11 +639,11 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
                             <Shield size={14} className="text-amber-700" /> Počáteční výstroj
                           </span>
                           <span className="text-[9px] uppercase font-cinzel font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-600/30">
-                            Připraveno k boji
+                            {dndClass ? "Připraveno k boji" : "Zatím nezvoleno"}
                           </span>
                         </div>
                         <div className="flex flex-wrap gap-1.5 text-[11px] font-lora text-slate-800">
-                          {STARTING_GEAR[dndClass] && (
+                          {dndClass && STARTING_GEAR[dndClass] ? (
                             <>
                               <span className="bg-white/85 border border-amber-900/10 px-2 py-0.5 rounded-lg flex items-center gap-1">
                                 ⚔️ {STARTING_GEAR[dndClass].weapon}
@@ -621,64 +660,78 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
                                 🧪 {STARTING_GEAR[dndClass].potion}
                               </span>
                             </>
+                          ) : (
+                            <span className="text-slate-500 italic text-[11px]">
+                              Výstroj se zobrazí po výběru povolání.
+                            </span>
                           )}
                         </div>
                       </div>
                     </div>
 
                     {/* NEW: Class Abilities & Spells Preview Showcase */}
-                    <div className="bg-white/85 border-2 border-amber-900/20 p-4 rounded-2xl shadow-sm space-y-2.5">
-                      <div className="flex items-center justify-between border-b border-amber-900/15 pb-2">
-                        <div className="flex items-center gap-2">
-                          <span className="p-1.5 rounded-xl bg-amber-100 text-amber-900 border border-amber-900/20">
-                            {getClassIcon(dndClass)}
-                          </span>
-                          <div>
-                            <h3 className="font-cinzel font-bold text-sm sm:text-base text-amber-950 flex items-center gap-2">
-                              Bojové schopnosti a kouzla: {dndClass}
-                            </h3>
-                            <span className="text-[11px] font-lora text-slate-500">
-                              {currentClassTree?.description || 'Přehled dovedností a talentového stromu.'}
+                    {dndClass && currentClassTree ? (
+                      <div className="bg-white/85 border-2 border-amber-900/20 p-4 rounded-2xl shadow-sm space-y-2.5">
+                        <div className="flex items-center justify-between border-b border-amber-900/15 pb-2">
+                          <div className="flex items-center gap-2">
+                            <span className="p-1.5 rounded-xl bg-amber-100 text-amber-900 border border-amber-900/20">
+                              {getClassIcon(dndClass)}
                             </span>
-                          </div>
-                        </div>
-                        <span className="text-[10px] font-cinzel font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 border border-amber-900/20 hidden sm:inline">
-                          Primární: {currentClassTree?.primaryStat?.toUpperCase()}
-                        </span>
-                      </div>
-
-                      {/* Display Top Class Skills Preview Cards */}
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
-                        {currentClassTree?.skills.slice(0, 3).map((skill) => {
-                          const firstRank = skill.ranks[0];
-                          return (
-                            <div key={skill.id} className="bg-[#fdfbf7] p-2.5 rounded-xl border border-amber-900/15 flex flex-col justify-between shadow-2xs">
-                              <div>
-                                <div className="flex items-start justify-between gap-1 mb-1">
-                                  <span className="font-cinzel font-bold text-xs text-amber-950 leading-tight">
-                                    {skill.name}
-                                  </span>
-                                  <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-100 text-amber-900 border border-amber-900/15 shrink-0">
-                                    {skill.apCost || 1} AP
-                                  </span>
-                                </div>
-                                <p className="text-[11px] font-lora text-slate-700 leading-snug">
-                                  {firstRank.desc}
-                                </p>
-                              </div>
-                              <div className="flex items-center justify-between text-[10px] text-slate-500 font-cinzel mt-2 pt-1 border-t border-amber-900/10">
-                                <span>{skill.type === 'active' ? '⚔️ Aktivní' : '✨ Pasivní'}</span>
-                                {skill.cooldown ? <span>⏳ CD: {skill.cooldown} kola</span> : <span>Připraveno</span>}
-                              </div>
+                            <div>
+                              <h3 className="font-cinzel font-bold text-sm sm:text-base text-amber-950 flex items-center gap-2">
+                                Bojové schopnosti a kouzla: {dndClass}
+                              </h3>
+                              <span className="text-[11px] font-lora text-slate-500">
+                                {currentClassTree?.description || 'Přehled dovedností a talentového stromu.'}
+                              </span>
                             </div>
-                          );
-                        })}
-                      </div>
+                          </div>
+                          <span className="text-[10px] font-cinzel font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 border border-amber-900/20 hidden sm:inline">
+                            Primární: {currentClassTree?.primaryStat?.toUpperCase()}
+                          </span>
+                        </div>
 
-                      <div className="text-[11px] font-lora text-slate-600 italic text-center pt-1">
-                        V průběhu hry získáš v talentovém stromu celkem 10 unikátních schopností (5 aktivních a 5 pasivních).
+                        {/* Display Top Class Skills Preview Cards */}
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
+                          {currentClassTree?.skills.slice(0, 3).map((skill) => {
+                            const firstRank = skill.ranks[0];
+                            return (
+                              <div key={skill.id} className="bg-[#fdfbf7] p-2.5 rounded-xl border border-amber-900/15 flex flex-col justify-between shadow-2xs">
+                                <div>
+                                  <div className="flex items-start justify-between gap-1 mb-1">
+                                    <span className="font-cinzel font-bold text-xs text-amber-950 leading-tight">
+                                      {skill.name}
+                                    </span>
+                                    <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-100 text-amber-900 border border-amber-900/15 shrink-0">
+                                      {skill.apCost || 1} AP
+                                    </span>
+                                  </div>
+                                  <p className="text-[11px] font-lora text-slate-700 leading-snug">
+                                    {firstRank.desc}
+                                  </p>
+                                </div>
+                                <div className="flex items-center justify-between text-[10px] text-slate-500 font-cinzel mt-2 pt-1 border-t border-amber-900/10">
+                                  <span>{skill.type === 'active' ? '⚔️ Aktivní' : '✨ Pasivní'}</span>
+                                  {skill.cooldown ? <span>⏳ CD: {skill.cooldown} kola</span> : <span>Připraveno</span>}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        <div className="text-[11px] font-lora text-slate-600 italic text-center pt-1">
+                          V průběhu hry získáš v talentovém stromu celkem 10 unikátních schopností (5 aktivních a 5 pasivních).
+                        </div>
                       </div>
-                    </div>
+                    ) : (
+                      <div className="bg-white/60 border-2 border-dashed border-amber-900/25 p-5 rounded-2xl shadow-sm text-center flex flex-col items-center justify-center gap-2 text-slate-600">
+                        <span className="text-2xl opacity-60">⚔️</span>
+                        <h3 className="font-cinzel font-bold text-xs sm:text-sm text-amber-950">Zvol své povolání</h3>
+                        <p className="font-lora text-[11px] sm:text-xs text-slate-500 max-w-md">
+                          Vyber si výše jedno z povolání, abys odemkl talentový strom, dovednosti a kouzla pro své dobrodružství.
+                        </p>
+                      </div>
+                    )}
                   </motion.div>
                 )}
 
@@ -772,7 +825,7 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
               {step < 4 ? (
                 <button 
                   onClick={handleNext} 
-                  disabled={step === 2 && !name.trim()}
+                  disabled={(step === 2 && (!name.trim() || !race)) || (step === 3 && !dndClass)}
                   className="px-6 sm:px-8 py-2.5 bg-amber-800 hover:bg-amber-900 text-white font-cinzel font-bold tracking-wider text-xs sm:text-sm rounded-xl transition disabled:opacity-40 flex items-center gap-1.5 shadow-md cursor-pointer"
                 >
                   <span>{step === 1 ? "Vstoupit do tvorby" : "Dále"}</span>
@@ -781,7 +834,7 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
               ) : (
                 <button 
                   onClick={startNewGame} 
-                  disabled={loading || !name.trim()} 
+                  disabled={loading || !name.trim() || !race || !dndClass} 
                   className="px-6 sm:px-8 py-3 bg-red-800 hover:bg-red-700 text-white font-cinzel font-bold text-sm sm:text-base tracking-widest rounded-xl transition disabled:opacity-40 shadow-[0_0_20px_rgba(183,75,75,0.5)] flex items-center gap-2 cursor-pointer"
                 >
                   {loading ? (

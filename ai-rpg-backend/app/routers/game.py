@@ -257,7 +257,7 @@ ZÁZNAMY PRO FRONTEND A EFEKTIVITA TOKENŮ:
 - Pro NPC použij VÝHRADNĚ 'npc_dialogy' (pohlavi="muz"/"zena"). Přímá řeč NESMÍ být ve vypravěči!
 - VŽDY vygeneruj 3 až 5 logických 'nabizene_akce'.
 """
-        response = client.models.generate_content(model='gemini-3.6-flash', contents=contents, config=types.GenerateContentConfig(system_instruction=system_prompt, response_mime_type='application/json', response_schema=dm_schema_dict, temperature=0.7))
+        response = client.models.generate_content(model='gemini-2.5-flash', contents=contents, config=types.GenerateContentConfig(system_instruction=system_prompt, response_mime_type='application/json', response_schema=dm_schema_dict, temperature=0.7))
         dm_json = json.loads(response.text)
 
         # Loot Sanitizer & Level Cap Enforcement
@@ -604,7 +604,7 @@ Vrať POUZE validní JSON:
   "image_prompt": "vibrant fantasy landscape concept art of {dest_name} in {target_hex.get('terrain')}, detailed 2D painterly style, high quality"
 }}"""
             try:
-                resp = client.models.generate_content(model='gemini-3.6-flash', contents=prompt, config=types.GenerateContentConfig(response_mime_type='application/json'))
+                resp = client.models.generate_content(model='gemini-2.5-flash', contents=prompt, config=types.GenerateContentConfig(response_mime_type='application/json'))
                 clean_text = resp.text.strip().removeprefix('```json').removesuffix('```').strip()
                 ai_data = json.loads(clean_text)
                 if isinstance(ai_data, dict):
@@ -721,7 +721,7 @@ async def resolve_combat(req: CombatResolutionRequest):
         }
         
         resp = client.models.generate_content(
-            model='gemini-3.6-flash', 
+            model='gemini-2.5-flash', 
             contents=prompt, 
             config=types.GenerateContentConfig(response_mime_type='application/json', response_schema=resolution_schema)
         )

@@ -14,13 +14,31 @@ router = APIRouter(prefix="", tags=["Character"])
 @router.post('/generate-backstory')
 async def generate_backstory(req: BackstoryRequest):
     try:
-        client = genai.Client(api_key=req.api_key if req.api_key and 'DUMMY' not in req.api_key else os.environ.get('GEMINI_API_KEY'))
-        prompt = f'Vytvoř D&D pozadí pro postavu. Jméno: {req.name}, Rasa: {req.race}, Povolání: {req.dnd_class}. Klíčová slova od hráče: {req.keywords}.'
-        response = client.models.generate_content(model='gemini-3.6-flash', contents=prompt, config=types.GenerateContentConfig(system_instruction='Jsi expert na D&D lore. Vygeneruj přesně 3 věci: appearance (vzhled), personality (chování) a backstory (historie).', response_mime_type='application/json', response_schema=GenerateBackstoryResponse, temperature=0.8))
+        api_key = req.api_key if req.api_key and 'DUMMY' not in req.api_key else os.environ.get('GEMINI_API_KEY')
+        if not api_key:
+            raise HTTPException(status_code=500, detail="Chybí platný GEMINI_API_KEY v konfiguraci serveru.")
+        client = genai.Client(api_key=api_key)
+        prompt = f'Vytvoř D&D pozadí pro postavu. Jméno: {req.name}, Rasa: {req.race or "Člověk"}, Povolání: {req.dnd_class or "Bojovník"}. Klíčová slova od hráče: {req.keywords}.'
+        backstory_schema = GenerateBackstoryResponse.model_json_schema()
+        clean_schema(backstory_schema)
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                system_instruction='Jsi expert na D&D lore. Vygeneruj přesně 3 věci: appearance (vzhled), personality (chování) a backstory (historie).',
+                response_mime_type='application/json',
+                response_schema=backstory_schema,
+                temperature=0.8
+            )
+        )
         import json
-        return json.loads(response.text)
+        clean_text = response.text.strip().removeprefix('```json').removesuffix('```').strip()
+        return json.loads(clean_text)
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f'Chyba: {str(e)}')
+        print("Backstory generation error:", e)
+        raise HTTPException(status_code=400, detail=f'Chyba při generování: {str(e)}')
 
 @router.post('/list-characters')
 async def list_characters(req: ListCharactersRequest):
@@ -168,7 +186,7 @@ async def create_character(req: CharacterCreateRequest):
             math_world = world_generator.generate_world_data()
             client = genai.Client(api_key=req.api_key if req.api_key and 'DUMMY' not in req.api_key else os.environ.get('GEMINI_API_KEY'))
             world_prompt = f"""\nNAVRHUJEŠ WORLD BIBLE PRO HIGH FANTASY KAMPAŇ (AELTHGARD).\n\nABSOLUTNÍ PRAVIDLA SVĚTA:\n1. Tón: Mix Fable a Zaklínače (Pohádkový vizuál, ale dospělé, krvavé a zkorumpované problémy).\n2. Magie: Nedá se učit. Je to "Probuzení", vzácný dar nebo kletba od bohů. Jsou to "Vyvolení".\n3. Zjevení: Bohové (Solarian - Řád a Krev, Vyldia - Příroda a Chaos, Kull - Stíny a Lži) se začínají zjevovat lidem.\n4. Království: Kontinent je rozdělen na 7 království. \n\nZde jsou základní archetypy 7 království (kingdom_id 1 až 7):\n  1K (Valerijské Impérium): Upadající Impérium (Zkorumpovaná šlechta)\n  2K (Svatá říše Solariova): Teokracie (Náboženští fanatici Řádu)\n  3K (Kmeny z Hlubokých hvozdů): Divoké Kmeny (Přeživší v bažinách/lesích, krevní rituály)\n  4K (Svobodná města): Obchodní Gildy (Žoldáci a peníze, žádný král)\n  5K (Karanténní Zóna): Magická pustina, zamořená monstry\n  6K (Železný Práh): Severní Hradba (Militarizovaná stráž před zlem)\n  7K (Tajemné Útočiště): Izolované útočiště Vyvolených (Mágové)\n\n  DŮLEŽITÉ: Ve výstupech (názvech lokací ani popisech) NIKDY nepoužívej generické názvy jako "Království 6". Místo toho vždy použij název dané frakce/území z tohoto seznamu (např. Železný Práh).\n\nTady je JSON se všemi body zájmu (POI) na vygenerované mapě:\n{json.dumps(math_world['pois'], ensure_ascii=False)}\n\nTvým úkolem je vrátit POUZE validní JSON (žádný markdown, žádné komentáře). Vygeneruj MAXIMÁLNĚ 5 nejzajímavějších lokací a 5 klíčových NPC s následující strukturou:\n{{\n  "main_plot": "Krátký popis hlavní zápletky světa (1 odstavec)",\n  "locations": [\n    {{"id": 1, "name": "Město X", "description": "Popis města a co se tam děje", "ruler": "Kdo tam vládne"}}\n  ],\n  "key_npcs": [\n    {{"name": "Jméno", "role": "Frakce/Role", "motive": "Co chce?"}}\n  ]\n}}\n"""
-            response = client.models.generate_content(model='gemini-3.6-flash', contents=world_prompt, config=types.GenerateContentConfig(response_mime_type='application/json'))
+            response = client.models.generate_content(model='gemini-2.5-flash', contents=world_prompt, config=types.GenerateContentConfig(response_mime_type='application/json'))
             clean_text = response.text.strip().removeprefix('```json').removesuffix('```').strip()
             ai_world_data = json.loads(clean_text)
             world_data = {'hex_grid': math_world.get('hex_grid', []), 'pois': math_world['pois'], 'main_plot': ai_world_data.get('main_plot'), 'locations': ai_world_data.get('locations'), 'key_npcs': ai_world_data.get('key_npcs')}
@@ -323,7 +341,7 @@ Vrať POUZE json ve formátu:
 }}
 '''
         response = client.models.generate_content(
-            model='gemini-3.6-flash',
+            model='gemini-2.5-flash',
             contents=prompt,
             config=types.GenerateContentConfig(response_mime_type='application/json')
         )

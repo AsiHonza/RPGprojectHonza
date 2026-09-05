@@ -175,6 +175,7 @@ interface GameState {
   setGameMode: (m: string) => void;
   backstory: any;
   setBackstory: (b: any) => void;
+  resetCharacterCreation: () => void;
 
   // RPG Stats
   hp: number;
@@ -304,11 +305,11 @@ export const useGameStore = create<GameState>((set) => ({
 
   name: "",
   setName: (name) => set({ name }),
-  dndClass: "Bojovník",
+  dndClass: "",
   setDndClass: (dndClass) => set({ dndClass }),
-  race: "Člověk",
+  race: "",
   setRace: (race) => set({ race }),
-  stats: { str: 15, dex: 14, con: 13, intel: 12, wis: 10, cha: 8 },
+  stats: { str: 10, dex: 10, con: 10, intel: 10, wis: 10, cha: 10 },
   setStats: (stats) => set({ stats }),
   keywords: "",
   setKeywords: (keywords) => set({ keywords }),
@@ -316,6 +317,15 @@ export const useGameStore = create<GameState>((set) => ({
   setGameMode: (gameMode) => set({ gameMode }),
   backstory: null,
   setBackstory: (backstory) => set({ backstory }),
+  resetCharacterCreation: () => set({
+    name: "",
+    dndClass: "",
+    race: "",
+    stats: { str: 10, dex: 10, con: 10, intel: 10, wis: 10, cha: 10 },
+    keywords: "",
+    backstory: null,
+    gameMode: "campaign"
+  }),
 
   hp: 100,
   setHp: (hp) => set((state) => ({ hp: typeof hp === "function" ? hp(state.hp) : hp })),
