@@ -13,8 +13,16 @@ def format_prompt_memory(state_dict: dict) -> str:
     if fakta:
         sections.append("[TRVALÁ FAKTA A ZNALOSTI SVĚTA (NPC si toto pamatují)]:\n" + "\n".join([f"• {f}" for f in fakta[-12:]]))
         
-    reputace = state_dict.get('reputace', {})
-    active_rep = [f"{k}: {v:+d}" for k, v in reputace.items() if v != 0]
+    reputace = state_dict.get('reputace') or {}
+    active_rep = []
+    for k, v in reputace.items():
+        try:
+            val = int(v)
+            if val != 0:
+                active_rep.append(f"{k}: {val:+d}")
+        except Exception:
+            if v:
+                active_rep.append(f"{k}: {v}")
     if active_rep:
         sections.append("[REPUTACE U FRAKCÍ A BOHŮ]:\n" + ", ".join(active_rep))
         

@@ -242,8 +242,8 @@ PSYCHOLOGIE A ŽIVOT NPC POSTAV (SOUL & SUBTEXT ENGINE):
 ZÁZNAMY PRO FRONTEND A EFEKTIVITA TOKENŮ:
 - **DELTA REŽIM:** Pokud hráč pokračuje v dialogu nebo běžné činnosti na stejném místě, nastav `nova_scena: false`. Pole `vyznamna_mista`, `popis_okoli` a `image_prompt` vyplňuj VÝHRADNĚ tehdy, pokud je `nova_scena: true` (nová lokace/budova). Při `nova_scena: false` je nechej prázdné nebo null!
 - **TRVALÁ FAKTA A PAMĚŤ:** Do `dulezita_fakta` zapiš stručná klíčová zjištění, sliby NPC nebo milníky, které si má svět pamatovat navždy (např. "Hráč zachránil syna kováře Borise").
-- **REPUTACE FRAKCÍ:** Pokud čin hráče ovlivnil některé ze 7 království nebo 3 bohy, uveď změnu v `reputace_zmena` (např. {"valerium": -5, "solarian": 10}).
-- **MUTACE LOKACÍ NA MAPĚ:** Pokud hráč trvale změnil stav této lokace (vyčištěn dungeon, zničen tábor banditů, posvěcena svatyně), vyplň `hex_mutace` (např. {"stav": "vycisteno", "popis": "Doupě goblinů bylo vyčištěno a je bezpečné"}).
+- **REPUTACE FRAKCÍ:** Pokud čin hráče ovlivnil některé ze 7 království nebo 3 bohy, uveď změnu v `reputace_zmena` (např. {{"valerium": -5, "solarian": 10}}).
+- **MUTACE LOKACÍ NA MAPĚ:** Pokud hráč trvale změnil stav této lokace (vyčištěn dungeon, zničen tábor banditů, posvěcena svatyně), vyplň `hex_mutace` (např. {{"stav": "vycisteno", "popis": "Doupě goblinů bylo vyčištěno a je bezpečné"}}).
 - Do 'image_prompt' detailně popište aktuální scénu (bez textu, pouze pokud je nova_scena: true). VŽDY NA KONEC PŘIDEJTE: "style of detailed 2D painterly fantasy concept art, bright vibrant colors, majestic epic scale, cozy atmosphere, studio ghibli meets classic D&D illustrations".
 - Do 'vypravec' pište POUZE beletristické vyprávění světa. NIKDY sem nepsat technické detaily (čísla hodů, XP, poškození).
 - Do 'system_log' zapiš VŠECHNY technické herní mechaniky odděleně: výsledky hodů d20, způsobené/přijaté poškození, získané XP, nalezený loot.
