@@ -1227,11 +1227,11 @@ export default function Home() {
 
           </div>
 
-          <div className="relative flex gap-1.5 sm:gap-3 bg-[#f9f6e6]/80 backdrop-blur-md border border-amber-900/15 p-1.5 sm:p-2 rounded-2xl shadow-xl items-center justify-center">
+          <div className="relative z-30 flex gap-1.5 sm:gap-3 bg-[#f9f6e6]/80 backdrop-blur-md border border-amber-900/15 p-1.5 sm:p-2 rounded-2xl shadow-xl items-center justify-center">
             {/* Click outside overlay for dropdowns */}
             {(heroDropdownOpen || menuDropdownOpen) && (
               <div 
-                className="fixed inset-0 z-20" 
+                className="fixed inset-0 z-40 bg-black/20 backdrop-blur-[1px] transition-opacity" 
                 onClick={() => { setHeroDropdownOpen(false); setMenuDropdownOpen(false); }} 
               />
             )}
@@ -1257,7 +1257,7 @@ export default function Home() {
               </button>
 
               {heroDropdownOpen && (
-                <div className="absolute top-full left-0 mt-2 w-52 bg-[#fdfbf7] border border-amber-900/20 rounded-2xl shadow-2xl p-2 z-40 flex flex-col gap-1 backdrop-blur-md">
+                <div className="absolute top-full left-0 mt-2 w-56 bg-[#fdfbf7] border border-amber-900/30 rounded-2xl shadow-2xl p-2 z-50 flex flex-col gap-1 backdrop-blur-xl">
                   <button 
                     onClick={() => { setStatsOpen(true); setHeroDropdownOpen(false); }}
                     className="w-full text-left px-3 py-2 text-slate-800 hover:bg-amber-100/70 rounded-xl transition flex items-center gap-2.5 text-xs sm:text-sm font-cinzel font-bold"
@@ -1339,7 +1339,7 @@ export default function Home() {
               </button>
 
               {menuDropdownOpen && (
-                <div className="absolute top-full right-0 mt-2 w-56 bg-[#fdfbf7] border border-amber-900/20 rounded-2xl shadow-2xl p-2 z-40 flex flex-col gap-1 backdrop-blur-md">
+                <div className="absolute top-full right-0 mt-2 w-56 bg-[#fdfbf7] border border-amber-900/30 rounded-2xl shadow-2xl p-2 z-50 flex flex-col gap-1 backdrop-blur-xl">
                   <button 
                     onClick={() => { setJournalOpen(true); setMenuDropdownOpen(false); }}
                     className="w-full text-left px-3 py-2 text-slate-800 hover:bg-amber-100/70 rounded-xl transition flex items-center gap-2.5 text-xs sm:text-sm font-cinzel font-bold"

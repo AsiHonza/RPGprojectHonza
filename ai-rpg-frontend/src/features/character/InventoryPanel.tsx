@@ -153,7 +153,7 @@ export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem 
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 flex flex-col lg:flex-row gap-5 custom-scrollbar">
           
           {/* Column 1: Equipment & Stats */}
-          <div className="flex-1 flex flex-col gap-4">
+          <div className="w-full h-auto shrink-0 lg:flex-1 flex flex-col gap-4">
             {/* Equipment Grid */}
             <div className="bg-white/70 border border-amber-900/15 p-4 rounded-xl flex flex-col items-center gap-3 shadow-sm">
               <h3 className="text-amber-950 uppercase font-cinzel font-bold text-xs tracking-widest border-b border-amber-900/10 w-full text-center pb-2">
@@ -250,7 +250,7 @@ export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem 
           </div>
 
           {/* Column 2: Selected Item Details */}
-          <div className="flex-1 bg-white/70 border border-amber-900/15 p-5 rounded-xl flex flex-col items-center text-center relative min-h-[340px] shadow-sm">
+          <div className="w-full h-auto shrink-0 lg:flex-1 bg-white/70 border border-amber-900/15 p-4 sm:p-5 rounded-xl flex flex-col items-center text-center relative shadow-sm">
             {selectedItem ? (
               (() => {
                 const rConfig = getRarityConfig(selectedItem.rarity);
@@ -343,7 +343,7 @@ export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem 
                       <span className="text-amber-900">{selectedItem.sell_price || 5} Zl.</span>
                     </div>
                     
-                    <div className="mt-auto w-full flex flex-col gap-2">
+                    <div className="mt-4 pt-2 border-t border-amber-900/10 w-full flex flex-col gap-2">
                       {/* Potion Drink Action */}
                       {isPotion && (
                         <button
@@ -421,7 +421,7 @@ export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem 
           </div>
 
           {/* Column 3: Bag Grid */}
-          <div className="flex-1 bg-white/70 border border-amber-900/15 p-4 rounded-xl flex flex-col shadow-sm">
+          <div className="w-full h-auto shrink-0 lg:flex-1 bg-white/70 border border-amber-900/15 p-4 rounded-xl flex flex-col shadow-sm">
             <div className="flex justify-between items-center border-b border-amber-900/10 pb-2 mb-4">
               <h3 className="text-amber-950 uppercase font-cinzel font-bold text-xs tracking-widest">
                 Batoh ({inventory.length} / 20)

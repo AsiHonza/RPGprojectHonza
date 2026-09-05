@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
-import { Settings2, Sparkles, ChevronRight, ChevronLeft, Crown, Shield, Wand2, Axe, Ghost, Skull, Book, Flame, X, Loader2 } from 'lucide-react';
+import { 
+  Settings2, Sparkles, ChevronRight, ChevronLeft, Crown, Shield, 
+  Wand2, Axe, Ghost, Skull, Book, Flame, X, Loader2, Globe, Eye, Sun, Compass 
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SeamlessVideo } from '../../components/ui/SeamlessVideo';
 import { calculateBaseStats } from '../../utils/statsCalculator';
 import { RACES } from '../../data/races';
+import { WORLD_LORE, GodLore, KingdomLore } from '../../data/worldLore';
 
 const STARTING_GEAR: Record<string, { weapon: string; armor: string; offhand?: string; potion: string }> = {
   "Barbar": { weapon: "Obouruční sekera (+2)", armor: "Kožené hadry", potion: "Léčivý lektvar" },
@@ -23,6 +27,10 @@ const STARTING_GEAR: Record<string, { weapon: string; armor: string; offhand?: s
 
 export const CharacterCreation = ({ startNewGame, loading, backstory, generateBackstory, onClose, getAvatarVideo }: any) => {
   const [step, setStep] = useState(1);
+  const [selectedGod, setSelectedGod] = useState<string>('solarian');
+  const [selectedKingdom, setSelectedKingdom] = useState<number>(1);
+  const [loreTab, setLoreTab] = useState<'overview' | 'gods' | 'kingdoms'>('overview');
+
   const classes = ["Barbar", "Bard", "Klerik", "Druid", "Bojovník", "Mnich", "Paladin", "Hraničář", "Tulák", "Čaroděj", "Černokněžník", "Kouzelník"];
   const races = ["Člověk", "Elf", "Trpaslík", "Půlčík", "Drakorozený", "Tiefling", "Půlork", "Gnóm"];
   
@@ -39,14 +47,13 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
     setStats(calculateBaseStats(dndClass, race));
   }, [dndClass, race, setStats]);
 
-
-  const handleNext = () => setStep(prev => Math.min(prev + 1, 3));
+  const handleNext = () => setStep(prev => Math.min(prev + 1, 4));
   const handlePrev = () => setStep(prev => Math.max(prev - 1, 1));
 
   const pageVariants = {
-    initial: { opacity: 0, x: 30 },
+    initial: { opacity: 0, x: 25 },
     in: { opacity: 1, x: 0 },
-    out: { opacity: 0, x: -30 }
+    out: { opacity: 0, x: -25 }
   };
 
   const getRaceIcon = (r: string) => {
@@ -75,6 +82,9 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
     }
   };
 
+  const currentKingdomData = WORLD_LORE.kingdoms.find(k => k.id === selectedKingdom) || WORLD_LORE.kingdoms[0];
+  const currentGodData = WORLD_LORE.gods.find(g => g.id === selectedGod) || WORLD_LORE.gods[0];
+
   return (
     <div className="min-h-screen w-full bg-[#12181f] text-slate-900 flex flex-col items-center justify-center p-2 sm:p-4 overflow-y-auto overflow-x-hidden relative">
       
@@ -102,21 +112,22 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
         className="w-full max-w-3xl max-h-[94dvh] overflow-y-auto bg-[#f9f6e6]/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-amber-900/20 p-4 sm:p-6 md:p-8 relative z-10 flex flex-col justify-between custom-scrollbar"
       >
         {/* Header */}
-        <div className="flex justify-between items-center mb-5 sm:mb-6 border-b border-amber-900/15 pb-4 shrink-0">
+        <div className="flex justify-between items-center mb-4 sm:mb-5 border-b border-amber-900/15 pb-3 shrink-0">
           <div>
             <h2 className="text-xl sm:text-3xl font-cinzel font-bold text-amber-950">
-              {step === 1 && "Zrození Hrdiny"}
-              {step === 2 && "Cesta Meče a Magie"}
-              {step === 3 && "Kniha Osudu"}
+              {step === 1 && "Svět Aelthgardu"}
+              {step === 2 && "Zrození Hrdiny"}
+              {step === 3 && "Cesta Meče a Magie"}
+              {step === 4 && "Kniha Osudu"}
             </h2>
-            <p className="text-[11px] sm:text-xs font-lora text-slate-600 mt-0.5">Krok {step} ze 3</p>
+            <p className="text-[11px] sm:text-xs font-lora text-slate-600 mt-0.5">Krok {step} ze 4</p>
           </div>
           <div className="flex items-center gap-3">
             <div className="flex gap-1.5 sm:gap-2">
-              {[1, 2, 3].map(i => (
+              {[1, 2, 3, 4].map(i => (
                 <div 
                   key={i} 
-                  className={`h-1.5 sm:h-2 w-7 sm:w-10 rounded-full transition-all duration-500 ${step >= i ? 'bg-amber-700 shadow-[0_0_8px_rgba(180,83,9,0.5)]' : 'bg-amber-900/15'}`} 
+                  className={`h-1.5 sm:h-2 w-5 sm:w-8 rounded-full transition-all duration-500 ${step >= i ? 'bg-amber-700 shadow-[0_0_8px_rgba(180,83,9,0.5)]' : 'bg-amber-900/15'}`} 
                 />
               ))}
             </div>
@@ -135,8 +146,196 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
         {/* Form Body */}
         <div className="flex-1 py-1">
           <AnimatePresence mode="wait">
+            {/* STEP 1: WORLD LORE & PROLOGUE */}
             {step === 1 && (
-              <motion.div key="step1" variants={pageVariants} initial="initial" animate="in" exit="out" className="space-y-6">
+              <motion.div key="step1" variants={pageVariants} initial="initial" animate="in" exit="out" className="space-y-4">
+                
+                {/* World Introduction Banner */}
+                <div className="bg-gradient-to-r from-amber-950 via-slate-900 to-amber-950 p-4 rounded-xl text-white shadow-md border border-amber-500/30">
+                  <div className="flex items-center gap-2 mb-1 text-amber-400 font-cinzel font-bold text-xs uppercase tracking-widest">
+                    <Globe size={14} />
+                    <span>Kronika Světa • {WORLD_LORE.subtitle}</span>
+                  </div>
+                  <h3 className="font-cinzel text-lg sm:text-xl font-bold text-amber-200 mb-1">
+                    Vítej v zemi, kde pohádka končí krví
+                  </h3>
+                  <p className="text-xs sm:text-sm font-lora text-slate-300 leading-relaxed italic">
+                    „{WORLD_LORE.overview}“
+                  </p>
+                </div>
+
+                {/* Lore Navigation Tabs */}
+                <div className="flex gap-1.5 border-b border-amber-900/15 pb-2">
+                  <button
+                    onClick={() => setLoreTab('overview')}
+                    className={`px-3 py-1.5 rounded-lg font-cinzel text-xs font-bold transition flex items-center gap-1.5 ${
+                      loreTab === 'overview'
+                        ? 'bg-amber-800 text-white shadow-xs'
+                        : 'bg-white/60 text-slate-700 hover:bg-white'
+                    }`}
+                  >
+                    <Compass size={13} /> Přehled & Procitnutí
+                  </button>
+                  <button
+                    onClick={() => setLoreTab('gods')}
+                    className={`px-3 py-1.5 rounded-lg font-cinzel text-xs font-bold transition flex items-center gap-1.5 ${
+                      loreTab === 'gods'
+                        ? 'bg-amber-800 text-white shadow-xs'
+                        : 'bg-white/60 text-slate-700 hover:bg-white'
+                    }`}
+                  >
+                    <Sun size={13} /> 3 Válčící Bohové
+                  </button>
+                  <button
+                    onClick={() => setLoreTab('kingdoms')}
+                    className={`px-3 py-1.5 rounded-lg font-cinzel text-xs font-bold transition flex items-center gap-1.5 ${
+                      loreTab === 'kingdoms'
+                        ? 'bg-amber-800 text-white shadow-xs'
+                        : 'bg-white/60 text-slate-700 hover:bg-white'
+                    }`}
+                  >
+                    <Crown size={13} /> 7 Království
+                  </button>
+                </div>
+
+                {/* Tab 1: Overview & Magic */}
+                {loreTab === 'overview' && (
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
+                    <div className="bg-white/70 border border-amber-900/15 p-4 rounded-xl shadow-xs">
+                      <h4 className="font-cinzel font-bold text-sm text-amber-950 mb-1 flex items-center gap-1.5">
+                        <Sparkles size={16} className="text-amber-700" />
+                        Tajemství Magie: „Procitnutí“
+                      </h4>
+                      <p className="text-xs sm:text-sm font-lora text-slate-800 leading-relaxed">
+                        {WORLD_LORE.magicConcept}
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="bg-[#fcfbf7] border border-amber-900/15 p-3 rounded-xl">
+                        <div className="font-cinzel font-bold text-xs text-amber-900 mb-1 uppercase tracking-wider">
+                          ⚔️ Tón Světa
+                        </div>
+                        <p className="text-xs font-lora text-slate-700 leading-relaxed">
+                          Pohádkově malebný vizuál skrývá drsnou realitu: morální volby bez jednoznačného dobra a zla, intriky šlechty a nebezpečné nestvůry.
+                        </p>
+                      </div>
+                      <div className="bg-[#fcfbf7] border border-amber-900/15 p-3 rounded-xl">
+                        <div className="font-cinzel font-bold text-xs text-amber-900 mb-1 uppercase tracking-wider">
+                          📜 Tvá Role
+                        </div>
+                        <p className="text-xs font-lora text-slate-700 leading-relaxed">
+                          Ať už jsi válečník hledající vykoupení, tulák bažící po bohatství nebo procitnutý mág, tvé volby ovlivní osudy celého kontinentu.
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Tab 2: The 3 Gods */}
+                {loreTab === 'gods' && (
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
+                    <div className="grid grid-cols-3 gap-2">
+                      {WORLD_LORE.gods.map(god => (
+                        <button
+                          key={god.id}
+                          onClick={() => setSelectedGod(god.id)}
+                          className={`p-2.5 rounded-xl border text-center transition flex flex-col items-center gap-1 ${
+                            selectedGod === god.id
+                              ? 'bg-amber-100/90 border-amber-700 shadow-sm font-bold scale-[1.02]'
+                              : 'bg-white/50 border-amber-900/15 text-slate-700 hover:bg-white/80'
+                          }`}
+                        >
+                          <span className="text-xl">{god.icon}</span>
+                          <span className="font-cinzel text-xs font-bold text-amber-950">{god.name}</span>
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="bg-white/80 border border-amber-900/20 p-4 rounded-xl shadow-xs">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="font-cinzel font-bold text-base text-amber-950 flex items-center gap-2">
+                          <span className="text-lg">{currentGodData.icon}</span>
+                          <span>{currentGodData.name}</span>
+                          <span className="text-xs font-normal text-slate-500 italic">({currentGodData.title})</span>
+                        </span>
+                        <span className="text-[10px] font-cinzel font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-900/20">
+                          {currentGodData.domain}
+                        </span>
+                      </div>
+                      <p className="text-xs sm:text-sm font-lora text-slate-800 leading-relaxed mb-3">
+                        {currentGodData.description}
+                      </p>
+                      <div className="p-2.5 bg-amber-50 rounded-lg border border-amber-900/10 text-xs font-lora italic text-amber-950">
+                        „{currentGodData.philosophy}“
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Tab 3: The 7 Kingdoms */}
+                {loreTab === 'kingdoms' && (
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
+                    {/* Horizontal kingdom selector buttons */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 max-h-36 overflow-y-auto p-1 custom-scrollbar">
+                      {WORLD_LORE.kingdoms.map(k => (
+                        <button
+                          key={k.id}
+                          onClick={() => setSelectedKingdom(k.id)}
+                          className={`p-2 rounded-lg border text-left transition flex items-center gap-1.5 ${
+                            selectedKingdom === k.id
+                              ? 'bg-amber-200/90 border-amber-700 shadow-xs font-bold'
+                              : 'bg-white/50 border-amber-900/15 text-slate-700 hover:bg-white/80'
+                          }`}
+                        >
+                          <span className="text-sm shrink-0">{k.badge}</span>
+                          <span className="font-cinzel text-[11px] truncate">{k.name}</span>
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Selected Kingdom Inspection Card */}
+                    <div className="bg-white/80 border border-amber-900/20 p-4 rounded-xl shadow-xs">
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl">{currentKingdomData.badge}</span>
+                          <div>
+                            <h4 className="font-cinzel font-bold text-sm sm:text-base text-amber-950">
+                              {currentKingdomData.name}
+                            </h4>
+                            <span className="text-[10px] font-lora italic text-slate-500">
+                              {currentKingdomData.archetype}
+                            </span>
+                          </div>
+                        </div>
+                        <span className="text-[10px] font-cinzel font-bold text-amber-900 bg-amber-100 px-2 py-0.5 rounded border border-amber-900/15">
+                          Království #{currentKingdomData.id}
+                        </span>
+                      </div>
+
+                      <p className="text-xs sm:text-sm font-lora text-slate-800 leading-relaxed my-2">
+                        {currentKingdomData.description}
+                      </p>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-2 border-t border-amber-900/10">
+                        <div>
+                          <strong className="font-cinzel text-amber-900">Vládci: </strong>
+                          <span className="text-slate-700 font-lora">{currentKingdomData.rulerArchetype}</span>
+                        </div>
+                        <div>
+                          <strong className="font-cinzel text-red-800">Hrozba: </strong>
+                          <span className="text-slate-700 font-lora">{currentKingdomData.threat}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </motion.div>
+            )}
+
+            {/* STEP 2: CHARACTER NAME & RACE */}
+            {step === 2 && (
+              <motion.div key="step2" variants={pageVariants} initial="initial" animate="in" exit="out" className="space-y-6">
                 <div>
                   <label className="block font-lora font-semibold text-base sm:text-lg mb-2 text-slate-800">
                     Jaké jméno ponese tvá legenda?
@@ -154,7 +353,6 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
                   <label className="block font-lora font-semibold text-base sm:text-lg mb-2 text-slate-800">
                     Krev jakého rodu ti koluje v žilách?
                   </label>
-                  {/* Clean 2-column grid on mobile, 4-column on desktop - NO horizontal overflow! */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
                     {races.map(r => (
                       <button 
@@ -194,13 +392,13 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
               </motion.div>
             )}
 
-            {step === 2 && (
-              <motion.div key="step2" variants={pageVariants} initial="initial" animate="in" exit="out" className="space-y-5">
+            {/* STEP 3: CLASS & STATS */}
+            {step === 3 && (
+              <motion.div key="step3" variants={pageVariants} initial="initial" animate="in" exit="out" className="space-y-5">
                 <div>
                   <label className="block font-lora font-semibold text-base sm:text-lg mb-2 text-slate-800">
                     Jakému řemeslu ses upsal?
                   </label>
-                  {/* Clean 3-column grid on mobile, 4-column on sm/desktop with vertical scroll - NO cutoffs! */}
                   <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-48 sm:max-h-56 overflow-y-auto p-1 custom-scrollbar">
                     {classes.map(c => (
                       <button 
@@ -221,7 +419,7 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
                   </div>
                 </div>
 
-                {/* Attributes: 3-column grid on mobile (2 neat rows of 3), 6-column on sm/desktop */}
+                {/* Attributes */}
                 <div className="bg-white/60 p-3 sm:p-5 rounded-xl border border-amber-900/15 shadow-sm">
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 mb-2.5">
                     <h3 className="font-cinzel text-amber-950 font-bold text-sm sm:text-base flex items-center gap-1.5">
@@ -281,8 +479,9 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
               </motion.div>
             )}
 
-            {step === 3 && (
-              <motion.div key="step3" variants={pageVariants} initial="initial" animate="in" exit="out" className="space-y-4 sm:space-y-5">
+            {/* STEP 4: BACKSTORY & MODE */}
+            {step === 4 && (
+              <motion.div key="step4" variants={pageVariants} initial="initial" animate="in" exit="out" className="space-y-4 sm:space-y-5">
                 <div>
                   <label className="block font-lora font-semibold text-base sm:text-lg mb-1 text-slate-800">
                     Prolog (Volitelný)
@@ -343,13 +542,13 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
             <ChevronLeft size={18} /> {step === 1 ? "Zpět do menu" : "Zpět"}
           </button>
           
-          {step < 3 ? (
+          {step < 4 ? (
             <button 
               onClick={handleNext} 
-              disabled={step === 1 && !name.trim()}
+              disabled={step === 2 && !name.trim()}
               className="px-6 sm:px-8 py-2.5 bg-amber-800 hover:bg-amber-900 text-white font-cinzel font-bold tracking-wider text-xs sm:text-sm rounded-xl transition disabled:opacity-40 flex items-center gap-1.5 shadow-md cursor-pointer"
             >
-              <span>Dále</span>
+              <span>{step === 1 ? "Vstoupit do tvorby" : "Dále"}</span>
               <ChevronRight size={18} />
             </button>
           ) : (
