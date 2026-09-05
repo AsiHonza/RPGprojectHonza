@@ -29,6 +29,8 @@ import { CombatArena } from '../features/combat/CombatArena';
 import { PATCH_NOTES } from '../data/patchNotes';
 import { SeamlessVideo } from '../components/ui/SeamlessVideo';
 import { CharacterCarousel } from '../components/character/CharacterCarousel';
+import { audioManager } from '../services/audio/audioManager';
+import { CURRENT_GAME_VERSION } from '../services/version/gameVersion';
 
 const getAvatarVideo = (r?: string) => {
   if (!r) return null;
@@ -97,8 +99,33 @@ const FormattedSystemLog = ({ text }: { text: string }) => {
 
 
 export default function Home() {
-  const { bgVolume, setBgVolume, currentTrack, setCurrentTrack, ttsVolume, setTtsVolume, ttsProvider, setTtsProvider, musicPlaying, setMusicPlaying, unreadQuests, setUnreadQuests, gameState, setGameState, loading, setLoading, name, setName, dndClass, setDndClass, race, setRace, stats, setStats, keywords, setKeywords, gameMode, setGameMode, backstory, setBackstory, hp, setHp, maxHp, setMaxHp, level, setLevel, xp, setXp, gold, setGold, rations, setRations, skillPoints, setSkillPoints, inventory, setInventory, equipped, setEquipped, worldData, setWorldData, journal, setJournal, quests, setQuests, npcs, setNpcs, currentRegion, setCurrentRegion, locationType, setLocationType, currentSpellSlots, setCurrentSpellSlots, maxSpellSlots, setMaxSpellSlots, skills, setSkills, availableSkills, setAvailableSkills, inCombat, setInCombat, enemies, setEnemies , playerLocation, setPlayerLocation, setDay, history, setHistory, suggestedActions, setSuggestedActions, pointsOfInterest, setPointsOfInterest, currentLocationImage, setCurrentLocationImage, currentLocationDesc, setCurrentLocationDesc, currentImage, setCurrentImage, combatLog, setCombatLog, setReputation, updateReputation, setChronicle, setWorldFlags, consequenceToast, setConsequenceToast } = useGameStore();
+  const { 
+    bgVolume, setBgVolume, currentTrack, setCurrentTrack, ttsVolume, setTtsVolume, ttsProvider, setTtsProvider, 
+    musicPlaying, setMusicPlaying, unreadQuests, setUnreadQuests, gameState, setGameState, loading, setLoading, 
+    name, setName, dndClass, setDndClass, race, setRace, stats, setStats, keywords, setKeywords, gameMode, setGameMode, 
+    backstory, setBackstory, hp, setHp, maxHp, setMaxHp, level, setLevel, xp, setXp, gold, setGold, rations, setRations, 
+    skillPoints, setSkillPoints, inventory, setInventory, equipped, setEquipped, worldData, setWorldData, journal, setJournal, 
+    quests, setQuests, npcs, setNpcs, currentRegion, setCurrentRegion, locationType, setLocationType, currentSpellSlots, 
+    setCurrentSpellSlots, maxSpellSlots, setMaxSpellSlots, skills, setSkills, availableSkills, setAvailableSkills, 
+    inCombat, setInCombat, enemies, setEnemies, playerLocation, setPlayerLocation, day, setDay, history, setHistory, 
+    suggestedActions, setSuggestedActions, pointsOfInterest, setPointsOfInterest, currentLocationImage, setCurrentLocationImage, 
+    currentLocationDesc, setCurrentLocationDesc, currentImage, setCurrentImage, combatLog, setCombatLog, reputation, setReputation, 
+    updateReputation, chronicle, setChronicle, worldFlags, setWorldFlags, consequenceToast, setConsequenceToast,
+    activeBuffs, addBuff, activeMount, setActiveMount
+  } = useGameStore();
 
+  const [isSpeaking, setIsSpeaking] = useState(false);
+
+  useEffect(() => {
+    const unsub = audioManager.subscribeSpeaking(setIsSpeaking);
+    return () => unsub();
+  }, []);
+
+  useEffect(() => {
+    if (gameState !== "playing") {
+      audioManager.stopTts();
+    }
+  }, [gameState]);
 
   const [actionsOpen, setActionsOpen] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
@@ -391,48 +418,24 @@ export default function Home() {
           name: name,
           state: {
             hp, max_hp: maxHp, inventory, equipped, level, xp, skillPoints, skills, inCombat, enemies, quests,
-            locationType, currentRegion, pointsOfInterest, stats, rations, currentImage, currentImageError, currentLocationDesc, travel_mode: travelMode, travel_days_left: travelDaysLeft, travel_destination: travelDestination, zname_postavy: npcs, world_data: worldData, playerLocation: playerLocation
+            locationType, currentRegion, pointsOfInterest, stats, rations, currentImage, currentImageError, currentLocationDesc,
+            travel_mode: travelMode, travel_days_left: travelDaysLeft, travel_destination: travelDestination,
+            zname_postavy: npcs, world_data: worldData, playerLocation: playerLocation,
+            gold, currentSpellSlots, maxSpellSlots, activeBuffs, activeMount, reputation, chronicle, worldFlags, day,
+            version: CURRENT_GAME_VERSION
           }
         }),
       }).catch(err => console.error("Autosave failed", err));
     }, 2000);
     return () => clearTimeout(timer);
-  }, [hp, maxHp, inventory, equipped, level, xp, skillPoints, skills, inCombat, enemies, quests, locationType, currentRegion, pointsOfInterest, gameState, stats, gold, currentSpellSlots, maxSpellSlots, rations, currentImage, currentImageError, travelMode, travelDaysLeft, travelDestination, npcs, worldData, playerLocation]);
+  }, [hp, maxHp, inventory, equipped, level, xp, skillPoints, skills, inCombat, enemies, quests, locationType, currentRegion, pointsOfInterest, gameState, stats, gold, currentSpellSlots, maxSpellSlots, rations, currentImage, currentImageError, travelMode, travelDaysLeft, travelDestination, npcs, worldData, playerLocation, activeBuffs, activeMount, reputation, chronicle, worldFlags, day]);
 
   const playAudio = (text: string, voiceType: "narrator" | "npc_muz" | "npc_zena" = "narrator"): Promise<void> => {
-    return new Promise((resolve) => {
-      let voice = "cs-CZ-AntoninNeural";
-      if (voiceType === "npc_zena") voice = "cs-CZ-VlastaNeural";
-      if (voiceType === "npc_muz") voice = "cs-CZ-AntoninNeural";
-
-      const url = `${API_URL}/tts?text=${encodeURIComponent(text)}&voice_type=${voiceType}&provider=${ttsProvider}&voice=${voice}`;
-        fetch(url)
-          .then(res => res.blob())
-          .then(blob => {
-            const blobUrl = URL.createObjectURL(blob);
-            const audio = new Audio(blobUrl);
-            audio.volume = ttsVolume;
-            audio.onended = () => { URL.revokeObjectURL(blobUrl); resolve(); };
-            audio.onerror = () => { URL.revokeObjectURL(blobUrl); resolve(); };
-            audio.play().catch(e => {
-              console.error("Chyba přehrávání:", e);
-              URL.revokeObjectURL(blobUrl);
-              resolve();
-            });
-          })
-          .catch(e => {
-            console.error("Network chyba TTS:", e);
-            resolve();
-          });
-    });
+    return audioManager.playSingleTts(API_URL, text, voiceType, ttsProvider, ttsVolume);
   };
 
   const playAudioSequentially = async (texts: {text: string, type: "narrator" | "npc_muz" | "npc_zena"}[]) => {
-    for (const item of texts) {
-      if (item.text) {
-        await playAudio(item.text, item.type);
-      }
-    }
+    await audioManager.playSequence(API_URL, texts, ttsProvider, ttsVolume);
   };
 
   const generateBackstory = async () => {
@@ -551,6 +554,7 @@ export default function Home() {
 
   const loadGame = async (characterName: string, overrideEmail: string = email) => {
     if (!overrideEmail || !characterName) return alert("Přihlaste se a vyberte postavu!");
+    audioManager.stopTts();
     setLoading(true);
     try {
       const res = await fetch(`${API_URL}/load-game`, {
@@ -561,33 +565,45 @@ export default function Home() {
       const data = await res.json();
       
       if (res.ok) {
-                setName(data.character.name);
+        setName(data.character.name);
         setRace(data.character.race);
         setDndClass(data.character.dnd_class);
         
+        // Parsování historie
         let lastSuggestedActions: string[] = [];
-        let lastImage = null;
-          let lastAudioQueue: {text: string, type: "narrator"|"npc_muz"|"npc_zena"}[] = [];
-        
-        const loadedHistory = data.character.history.map((msg: any) => {
-          if (msg.role === "user") {
-            return { type: "player", text: msg.text };
+        let lastAudioQueue: {text: string, type: "narrator" | "npc_muz" | "npc_zena"}[] = [];
+
+        const loadedHistory = (data.character.history || []).map((msg: any) => {
+          if (msg.role === "user" || msg.type === "player") {
+            return { type: "player", text: msg.text || msg.content };
           }
-          if (msg.role === "model") {
+          if (msg.role === "assistant" || msg.role === "model" || msg.type === "dm") {
             try {
-                let t = msg.text.trim();
-                if (t.startsWith('```json')) t = t.substring(7);
-                if (t.endsWith('```')) t = t.substring(0, t.length - 3);
-                t = t.trim();
-                const dm_data = JSON.parse(t);
-              if (dm_data.nabizene_akce) lastSuggestedActions = dm_data.nabizene_akce;
-              if (dm_data.image_prompt) lastImage = dm_data.image_prompt;
-                lastAudioQueue = [];
-                if (dm_data.vypravec) lastAudioQueue.push({text: dm_data.vypravec, type: "narrator"});
-                if (dm_data.npc_dialogy) dm_data.npc_dialogy.forEach((n: any) => { if (n.text) lastAudioQueue.push({text: n.text, type: n.pohlavi === "muz" ? "npc_muz" : "npc_zena"}) });
+              const rawText = msg.text || msg.content;
+              const dm_data = typeof rawText === "string" ? JSON.parse(rawText) : rawText;
               
-              return {
-                type: "dm",
+              if (dm_data.nabizene_akce) {
+                lastSuggestedActions = dm_data.nabizene_akce;
+              }
+
+              lastAudioQueue = [];
+              if (dm_data.vypravec) {
+                lastAudioQueue.push({ text: dm_data.vypravec, type: "narrator" });
+              }
+              if (dm_data.npc_dialogy && Array.isArray(dm_data.npc_dialogy)) {
+                for (const npc of dm_data.npc_dialogy) {
+                  const npcText = npc.text || npc.replika;
+                  if (npcText) {
+                    lastAudioQueue.push({
+                      text: npcText,
+                      type: npc.pohlavi === "zena" ? "npc_zena" : "npc_muz"
+                    });
+                  }
+                }
+              }
+
+              return { 
+                type: "dm", 
                 popis_okoli: dm_data.popis_okoli,
                 image_prompt: dm_data.image_prompt,
                 vypravec: dm_data.vypravec,
@@ -638,10 +654,19 @@ export default function Home() {
         setInCombat(state.inCombat || false);
         setEnemies(state.enemies || []);
         setQuests(deduplicateQuests(state.quests || []));
-      setJournal(state.journal || []);
+        setJournal(state.journal || []);
         if (data.character.stats) setStats(data.character.stats);
         if (state.locationType) setLocationType(state.locationType);
         if (state.currentRegion) setCurrentRegion(state.currentRegion);
+
+        if (state.activeBuffs && Array.isArray(state.activeBuffs)) {
+          state.activeBuffs.forEach((b: any) => addBuff(b));
+        }
+        if (state.activeMount !== undefined) setActiveMount(state.activeMount);
+        if (state.reputation) setReputation(state.reputation);
+        if (state.chronicle) setChronicle(state.chronicle);
+        if (state.worldFlags) setWorldFlags(state.worldFlags);
+        if (state.day !== undefined) setDay(state.day);
 
         if (state.travel_mode !== undefined) setTravelMode(state.travel_mode);
         if (state.travel_days_left !== undefined) setTravelDaysLeft(state.travel_days_left);
@@ -739,6 +764,7 @@ export default function Home() {
 
 
   const handleTravel = async (q: number, r: number, targetHex?: any) => {
+    audioManager.stopTts();
     // 1. Immediately close map and reset all stale local choices so they don't linger!
     setMapOpen(false);
     setLoading(true);
@@ -803,10 +829,10 @@ export default function Home() {
           playAudio(data.narrative, "narrator");
         }
       } else {
-        setHistory(prev => [...prev, { type: "error", text: `Cestování se nezdařilo: ${data.detail || "Chyba serveru"}` }]);
+        alert(formatError(data.detail, "Chyba při cestování."));
       }
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
+      console.error(err);
       setHistory(prev => [...prev, { type: "error", text: "Chyba spojení se serverem při cestování." }]);
     } finally {
       setLoading(false);
@@ -814,6 +840,7 @@ export default function Home() {
   };
   const isResolvingCombatRef = useRef(false);
   const handleCombatResolution = async () => {
+    audioManager.stopTts();
     if (isResolvingCombatRef.current) return;
     isResolvingCombatRef.current = true;
     setLoading(true);
@@ -879,6 +906,7 @@ export default function Home() {
 
   const sendAction = async (actionText: string) => {
     if (!actionText.trim() || loading) return;
+    audioManager.stopTts();
     
     let finalActionText = actionText;
       if (isOOC) {
@@ -1169,6 +1197,7 @@ export default function Home() {
                     </button>
                     <button 
                       onClick={() => {
+                        audioManager.stopTts();
                         localStorage.removeItem("aethelgard_session_email");
                         localStorage.removeItem("aethelgard_active_char");
                         window.location.reload();
@@ -1187,12 +1216,16 @@ export default function Home() {
                 characters={savedCharacters}
                 onSelectCharacter={(charName) => loadGame(charName)}
                 onDeleteCharacter={(e, charName) => deleteCharacter(e, charName)}
-                onCreateNew={() => setGameState("creation")}
+                onCreateNew={() => {
+                  audioManager.stopTts();
+                  setGameState("creation");
+                }}
                 getAvatarVideo={getAvatarVideo}
               />
 
               <button 
                 onClick={() => {
+                  audioManager.stopTts();
                   localStorage.removeItem("aethelgard_session_email");
                   localStorage.removeItem("aethelgard_active_char");
                   window.location.reload();
@@ -1263,6 +1296,18 @@ export default function Home() {
             </div>
 
             <div className="flex items-center gap-2 sm:gap-4">
+              {/* Active TTS Speaking Indicator with Stop Button */}
+              {isSpeaking && (
+                <button
+                  onClick={() => audioManager.stopTts()}
+                  className="px-2.5 sm:px-3 py-1 bg-amber-900/90 hover:bg-red-800 text-amber-100 hover:text-white rounded-full text-[11px] sm:text-xs font-cinzel font-bold flex items-center gap-1.5 shadow-md backdrop-blur-sm transition-all animate-pulse cursor-pointer border border-amber-500/40 shrink-0"
+                  title="Klikni pro okamžité ztišení vypravěče"
+                >
+                  <VolumeX size={13} className="text-amber-300" />
+                  <span className="hidden sm:inline">Ztišit hlas</span>
+                  <span className="sm:hidden">Ztišit</span>
+                </button>
+              )}
               <div className="flex items-center gap-1 sm:gap-2" title="Životy">
                 <Heart size={16} className="text-rpg-blood" />
                 <div className="font-cinzel text-[#2d3748] text-sm sm:text-base font-bold">
@@ -1475,6 +1520,7 @@ export default function Home() {
                   <div className="h-[1px] bg-amber-900/10 my-1" />
                   <button 
                     onClick={() => {
+                      audioManager.stopTts();
                       localStorage.removeItem("aethelgard_active_char");
                       window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
                       setMenuDropdownOpen(false);

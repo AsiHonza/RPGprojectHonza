@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, X, Sparkles, Sword } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, Sparkles, Sword, ShieldAlert } from 'lucide-react';
 import { SeamlessVideo } from '../ui/SeamlessVideo';
+import { isLegacyCharacter, isLegacyAcknowledged } from '../../services/version/gameVersion';
+import { LegacyCharacterNoticeModal } from '../../features/character/LegacyCharacterNoticeModal';
 
 interface Character {
   name: string;
@@ -26,6 +28,18 @@ export const CharacterCarousel: React.FC<CharacterCarouselProps> = ({
   getAvatarVideo,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [legacyModalChar, setLegacyModalChar] = useState<string | null>(null);
+
+  const hasAnyLegacy = characters.some(isLegacyCharacter);
+
+  const handleCharacterClick = (charName: string) => {
+    const char = characters.find(c => c.name === charName);
+    if (char && isLegacyCharacter(char) && !isLegacyAcknowledged(charName)) {
+      setLegacyModalChar(charName);
+    } else {
+      onSelectCharacter(charName);
+    }
+  };
 
   // Keep index within bounds if characters array shrinks
   useEffect(() => {
@@ -77,10 +91,20 @@ export const CharacterCarousel: React.FC<CharacterCarouselProps> = ({
   return (
     <div className="w-full max-w-full flex flex-col items-center select-none overflow-hidden shrink-0">
       {/* Title */}
-      <div className="text-center mb-2 sm:mb-3">
+      <div className="text-center mb-1.5 sm:mb-2">
         <h3 className="text-slate-800 font-cinzel font-bold text-lg sm:text-xl tracking-wider">Tvé Legendy</h3>
         <div className="h-0.5 w-20 bg-gradient-to-r from-transparent via-amber-600 to-transparent mx-auto mt-0.5" />
       </div>
+
+      {/* Global Legacy Notice Banner if any character is from older version */}
+      {hasAnyLegacy && (
+        <div className="mb-2 px-3 sm:px-4 py-1.5 rounded-xl bg-amber-50/90 border border-amber-500/40 text-amber-900 text-xs font-lora flex items-center gap-2 max-w-lg text-center shadow-xs">
+          <ShieldAlert size={15} className="text-amber-700 shrink-0" />
+          <span>
+            Svět Aelthgardu prošel velkou aktualizací (v2.1). U postav ze starších verzí doporučujeme stvořit novou legendu pro plný zážitek.
+          </span>
+        </div>
+      )}
 
       {/* Stage Container */}
       <div className="relative w-full max-w-4xl h-[370px] sm:h-[410px] flex items-center justify-center overflow-hidden">
@@ -133,6 +157,7 @@ export const CharacterCarousel: React.FC<CharacterCarouselProps> = ({
             const isLeft = diff === -1;
             const isRight = diff === 1;
             const isVisible = isFocused || isLeft || isRight;
+            const isCharLegacy = isLegacyCharacter(char);
 
             // Compute positions
             let xOffset = 0;
@@ -182,7 +207,7 @@ export const CharacterCarousel: React.FC<CharacterCarouselProps> = ({
                 }}
                 onClick={() => {
                   if (isFocused) {
-                    onSelectCharacter(char.name);
+                    handleCharacterClick(char.name);
                   } else {
                     setCurrentIndex(idx);
                   }
@@ -219,14 +244,22 @@ export const CharacterCarousel: React.FC<CharacterCarouselProps> = ({
 
                 {/* Card Foreground Elements */}
                 <div className="absolute inset-0 z-20 flex flex-col p-4 sm:p-5 justify-between pointer-events-none">
-                  {/* Top Bar: Delete Button */}
-                  <div className="flex justify-end pointer-events-auto">
+                  {/* Top Bar: Legacy Badge & Delete Button */}
+                  <div className="flex justify-between items-center pointer-events-auto w-full">
+                    {isCharLegacy ? (
+                      <div className="px-2 py-0.5 rounded-full bg-amber-950/85 border border-amber-400/50 text-amber-200 text-[10px] font-cinzel font-bold flex items-center gap-1 shadow-sm backdrop-blur-xs">
+                        <ShieldAlert size={11} className="text-amber-400" />
+                        <span>Starší verze</span>
+                      </div>
+                    ) : (
+                      <div />
+                    )}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         onDeleteCharacter(e, char.name);
                       }}
-                      className="p-1.5 text-slate-700/60 hover:text-red-700 hover:bg-red-100/70 rounded-full transition-all shadow-sm"
+                      className="p-1.5 text-slate-700/60 hover:text-red-700 hover:bg-red-100/70 rounded-full transition-all shadow-sm cursor-pointer"
                       title="Smazat postavu"
                     >
                       <X size={18} />
@@ -248,9 +281,9 @@ export const CharacterCarousel: React.FC<CharacterCarouselProps> = ({
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          onSelectCharacter(char.name);
+                          handleCharacterClick(char.name);
                         }}
-                        className="w-full mt-1 py-2 bg-amber-700 hover:bg-amber-800 text-white rounded-xl font-cinzel font-bold text-xs uppercase tracking-widest shadow-md transition-all flex items-center justify-center gap-1.5 hover:scale-[1.02] active:scale-[0.98]"
+                        className="w-full mt-1 py-2 bg-amber-700 hover:bg-amber-800 text-white rounded-xl font-cinzel font-bold text-xs uppercase tracking-widest shadow-md transition-all flex items-center justify-center gap-1.5 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                       >
                         <Sword size={14} /> Vstoupit do hry
                       </button>
@@ -262,6 +295,23 @@ export const CharacterCarousel: React.FC<CharacterCarouselProps> = ({
           })}
         </motion.div>
       </div>
+
+      <LegacyCharacterNoticeModal 
+        isOpen={!!legacyModalChar}
+        characterName={legacyModalChar || ''}
+        onClose={() => setLegacyModalChar(null)}
+        onProceed={() => {
+          if (legacyModalChar) {
+            const charName = legacyModalChar;
+            setLegacyModalChar(null);
+            onSelectCharacter(charName);
+          }
+        }}
+        onCreateNew={() => {
+          setLegacyModalChar(null);
+          onCreateNew();
+        }}
+      />
 
       {/* Dots Indicator */}
       {characters.length > 1 && (

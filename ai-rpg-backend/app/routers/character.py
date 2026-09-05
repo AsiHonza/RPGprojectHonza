@@ -69,6 +69,25 @@ async def load_game(req: LoadGameRequest):
                 state['equipped'] = new_equipped
                 state_modified = True
 
+        if 'rations' not in state:
+            state['rations'] = 3
+            state_modified = True
+        if 'activeBuffs' not in state or not isinstance(state.get('activeBuffs'), list):
+            state['activeBuffs'] = []
+            state_modified = True
+        if 'activeMount' not in state:
+            state['activeMount'] = None
+            state_modified = True
+        if 'reputation' not in state or not isinstance(state.get('reputation'), dict):
+            state['reputation'] = {str(i): 0 for i in range(1, 8)}
+            state_modified = True
+        if 'day' not in state:
+            state['day'] = 1
+            state_modified = True
+        if 'chronicle' not in state:
+            state['chronicle'] = []
+            state_modified = True
+
         if state_modified:
             try:
                 supabase.table('characters').update({'state': state}).eq('api_key', char_data['api_key']).execute()
@@ -329,7 +348,15 @@ Vrať POUZE json ve formátu:
         'vyznamna_mista': [], 
         'zname_postavy': [], 
         'rations': 3,
-        'backstory': getattr(req, 'backstory', '') or ''
+        'backstory': getattr(req, 'backstory', '') or '',
+        'version': '2.1.0',
+        'activeBuffs': [],
+        'activeMount': None,
+        'reputation': {str(i): 0 for i in range(1, 8)},
+        'currentSpellSlots': 2 if any(c in (req.dnd_class or '').lower() for c in ['čaroděj', 'kouzelník', 'klerik', 'druid', 'bard', 'černokněžník']) else 0,
+        'maxSpellSlots': 2 if any(c in (req.dnd_class or '').lower() for c in ['čaroděj', 'kouzelník', 'klerik', 'druid', 'bard', 'černokněžník']) else 0,
+        'day': 1,
+        'chronicle': []
     }
     
 

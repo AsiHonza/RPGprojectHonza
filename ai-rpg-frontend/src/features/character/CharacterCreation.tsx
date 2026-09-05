@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { 
   Settings2, Sparkles, ChevronRight, ChevronLeft, Crown, Shield, 
-  Wand2, Axe, Ghost, Skull, Book, Flame, X, Loader2, Globe, Eye, Sun, Compass 
+  Wand2, Axe, Ghost, Skull, Book, Flame, X, Loader2, Globe, Eye, Sun, Compass, ArrowLeft 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SeamlessVideo } from '../../components/ui/SeamlessVideo';
@@ -134,10 +134,11 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
             {onClose && (
               <button 
                 onClick={onClose} 
-                className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-black/5 transition cursor-pointer"
-                title="Zavřít a zpět do menu"
+                className="px-2.5 py-1.5 rounded-xl border border-amber-900/20 text-slate-700 hover:text-amber-950 hover:bg-amber-100/60 font-cinzel font-bold text-xs transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                title="Zpět k výběru postav"
               >
-                <X size={20} />
+                <ArrowLeft size={14} />
+                <span className="hidden sm:inline">Zpět k postavám</span>
               </button>
             )}
           </div>

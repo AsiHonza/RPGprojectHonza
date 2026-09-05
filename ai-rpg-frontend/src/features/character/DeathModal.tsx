@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Skull, Loader2 } from 'lucide-react';
 import { useGameStore } from '../../store/gameStore';
 
+import { audioManager } from '../../services/audio/audioManager';
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
 export const DeathModal = ({ onClose }: { onClose: () => void }) => {
@@ -12,6 +14,7 @@ export const DeathModal = ({ onClose }: { onClose: () => void }) => {
   if (hp > 0) return null;
 
   const handleDeath = async () => {
+    audioManager.stopTts();
     setLoading(true);
     try {
       await fetch(`${API_URL}/delete-character`, {
@@ -22,6 +25,7 @@ export const DeathModal = ({ onClose }: { onClose: () => void }) => {
     } catch (e) {
       console.error("Failed to delete character", e);
     } finally {
+      audioManager.stopTts();
       setLoading(false);
       localStorage.removeItem("aethelgard_active_char");
       setGameState("menu");

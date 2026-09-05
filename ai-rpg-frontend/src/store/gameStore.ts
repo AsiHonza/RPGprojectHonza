@@ -461,10 +461,20 @@ export const useGameStore = create<GameState>((set) => ({
   combatRound: 1,
   setCombatRound: (combatRound) => set((state) => ({ combatRound: typeof combatRound === 'function' ? combatRound(state.combatRound) : combatRound })),
 
-  bgVolume: 0.2,
-  setBgVolume: (bgVolume) => set({ bgVolume }),
-  ttsVolume: 1.0,
-  setTtsVolume: (ttsVolume) => set({ ttsVolume }),
+  bgVolume: (typeof window !== "undefined" && localStorage.getItem("aethelgard_bg_volume")) ? Number(localStorage.getItem("aethelgard_bg_volume")) : 0.2,
+  setBgVolume: (bgVolume) => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("aethelgard_bg_volume", String(bgVolume));
+    }
+    set({ bgVolume });
+  },
+  ttsVolume: (typeof window !== "undefined" && localStorage.getItem("aethelgard_tts_volume")) ? Number(localStorage.getItem("aethelgard_tts_volume")) : 1.0,
+  setTtsVolume: (ttsVolume) => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("aethelgard_tts_volume", String(ttsVolume));
+    }
+    set({ ttsVolume });
+  },
   ttsProvider: (typeof window !== "undefined" && (localStorage.getItem("aethelgard_tts_provider") as any)) || "elevenlabs",
   setTtsProvider: (ttsProvider) => {
     if (typeof window !== "undefined") {
@@ -474,10 +484,15 @@ export const useGameStore = create<GameState>((set) => ({
   },
   currentTrack: '/music/theme.mp3',
   setCurrentTrack: (currentTrack) => set({ currentTrack }),
-  musicPlaying: true,
+  musicPlaying: typeof window !== "undefined" && localStorage.getItem("aethelgard_music_playing") !== null ? localStorage.getItem("aethelgard_music_playing") === "true" : true,
   unreadQuests: false,
   setUnreadQuests: (unreadQuests) => set((state) => ({ unreadQuests: typeof unreadQuests === "function" ? unreadQuests(state.unreadQuests) : unreadQuests })),
-  setMusicPlaying: (musicPlaying) => set({ musicPlaying }),
+  setMusicPlaying: (musicPlaying) => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("aethelgard_music_playing", String(musicPlaying));
+    }
+    set({ musicPlaying });
+  },
 
   // Buffs & Mounts
   activeBuffs: [],
