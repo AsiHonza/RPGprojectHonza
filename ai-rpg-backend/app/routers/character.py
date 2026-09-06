@@ -216,103 +216,52 @@ async def create_character(req: CharacterCreateRequest):
             world_data = {'hex_grid': math_world.get('hex_grid', []), 'pois': math_world['pois'], 'main_plot': ai_world_data.get('main_plot'), 'locations': ai_world_data.get('locations'), 'key_npcs': ai_world_data.get('key_npcs')}
         except Exception as e:
             raise HTTPException(status_code=500, detail=f'Chyba při generování světa: {str(e)}')
-    initial_location = None
-    start_kingdom_name = 'Začátek cesty'
+    # ===== SPAWN LOCK: Oakhaven (Valerijské Impérium) =====
+    # Hráč vždy začíná v Oakhaven – výchozím uzlu světa.
+    # Mapa (current_node_id) i uvítací intro musí odrážet tuto lokaci.
+    initial_location = {'q': 0, 'r': 0, 'biome': 'Plains', 'kingdom_id': 1}
+    start_kingdom_name = 'Valerijské Impérium'
     start_loc_type = 'mesto'
-    if world_data and world_data.get('pois'):
-        import random
-        # Dynamický a pestrý výběr startovní lokace (nejen hlavní město)
-        # Striktně vylučujeme Království 5 (Karanténní Zóna) - zamořená pustina pro vysoké úrovně
-        all_candidate_pois = [
-            p for p in world_data['pois'] 
-            if p.get('type') in ['Capital', 'Village', 'Shrine', 'Ruin'] 
-            and p.get('kingdom_id') != 5
-        ]
-        if not all_candidate_pois:
-            all_candidate_pois = [p for p in world_data['pois'] if p.get('kingdom_id') != 5]
-        if not all_candidate_pois:
-            all_candidate_pois = world_data['pois']
-            
-        cls_lower = (req.dnd_class or "").lower()
-        if any(c in cls_lower for c in ['druid', 'hranič', 'barbar']):
-            preferred = ['Village', 'Shrine', 'Ruin', 'Capital']
-        elif any(c in cls_lower for c in ['klerik', 'paladin']):
-            preferred = ['Shrine', 'Capital', 'Village']
-        elif any(c in cls_lower for c in ['tulák', 'bard']):
-            preferred = ['Capital', 'Village']
-        elif any(c in cls_lower for c in ['čaroděj', 'kouzelník', 'warlock', 'mág']):
-            preferred = ['Shrine', 'Ruin', 'Capital', 'Village']
-        else:
-            preferred = ['Capital', 'Village', 'Shrine']
-            
-        matched = [p for p in all_candidate_pois if p.get('type') in preferred]
-        start_poi = random.choice(matched if matched else all_candidate_pois)
-        initial_location = {
-            'q': start_poi['q'], 
-            'r': start_poi['r'], 
-            'biome': start_poi.get('terrain', 'Plains'), 
-            'kingdom_id': start_poi.get('kingdom_id')
-        }
-        p_type = start_poi.get('type', 'Capital')
-        if p_type == 'Capital':
-            start_loc_type = 'mesto'
-        elif p_type == 'Village':
-            start_loc_type = 'vesnice'
-        elif p_type == 'Shrine':
-            start_loc_type = 'chram'
-        elif p_type == 'Ruin':
-            start_loc_type = 'ruiny'
-        else:
-            start_loc_type = 'divocina'
-    else:
-        initial_location = {'q': 0, 'r': 0, 'biome': 'Plains'}
+    start_loc_name = 'Oakhaven'
+
+    # Načteme popis Oakhaven z naší Obsidian knowledge base
+    try:
+        from app.data.world_map import get_node as _get_node
+        _oakhaven = _get_node('oakhaven')
+        oakhaven_description = _oakhaven.get('description', 'Pohraničním městečkem Oakhaven projíždějí kupci z celého kontinentu. Kamenné domy lemují dlážděné náměstí a v povětří voní čerstvý chléb smíšený s pachem stájí.') if _oakhaven else 'Pohraničním městečkem Oakhaven projíždějí kupci z celého kontinentu.'
+    except Exception:
+        oakhaven_description = 'Pohraničním městečkem Oakhaven projíždějí kupci z celého kontinentu.'
 
     try:
         client = genai.Client(api_key=req.api_key if req.api_key and 'DUMMY' not in req.api_key else os.environ.get('GEMINI_API_KEY'))
-        world_context = ''
-        if world_data:
-            import json, random
-            kingdom_names = {
-                1: 'Valerijské Impérium', 
-                2: 'Svatá říše Solariova', 
-                3: 'Kmeny z Hlubokých hvozdů', 
-                4: 'Svobodná města', 
-                5: 'Karanténní Zóna', 
-                6: 'Železný Práh', 
-                7: 'Tajemné útočiště'
+        import json, random
+
+        # 5 pestrých startovních archetypů zakotvených v Oakhaven
+        start_archetypes = [
+            {
+                "theme": "ZÁHADA A NÁLEZ (Průzkum)",
+                "situation": "Postava dorazila do Oakhaven a hned u vstupní brány zahlédla cosi znepokojivého: záhadný zapečetěný dopis položený na kameni s jejím jménem, nebo podivný magický symbol vyrytý do zdi mlýna. Cílem je probudit zvědavost a umožnit vyšetřování."
+            },
+            {
+                "theme": "POUTNÍK A SPOLEČNOST (Sociální interakce a zvěsti)",
+                "situation": "Postava po dlouhé cestě dorazila do Oakhaven a sedí u krbu v hostinci 'U Zlomeného štítu'. Zaslechne šeptající cizince hovořit o ztraceném prstenu mlynáře Borise, nebo k ní přistoupí unavený posel s prosbou o pomoc."
+            },
+            {
+                "theme": "ŽIVEL A PŘEŽITÍ (Atmosférický příchod)",
+                "situation": "Oblast právě zasáhla náhlá prudká bouře. Postava hledá úkryt v Oakhaven pod střechou hostince 'U Zlomeného štítu', kde se tísní cestovatelé, mlynář Boris a pár ustarané gardy strážmistra Aldrice."
+            },
+            {
+                "theme": "OSOBNÍ STOPA (Napojení na minulost a cíl)",
+                "situation": "Postava dorazila do Oakhaven sledujíc stopu svého minulého života. Právě zahlédla symbol nebo tvář, která ji sem přivedla. V náměstí stojí strážmistr Aldric a sleduje ji přísným pohledem."
+            },
+            {
+                "theme": "MORÁLNÍ DILEMA A NAPĚTÍ (Konflikt beze zbraní)",
+                "situation": "Na Oakhavenském náměstí probíhá vyhrocený spor: výběrčí daní od valerijského Impéria nespravedlivě viní mlynáře Borise ze zadržení dávky mouky. Kolem stojí hlouček. Žádné vytasené meče – jen slova, autorita a lest."
             }
-            start_kingdom_id = initial_location.get('kingdom_id') if initial_location else 1
-            if start_kingdom_id == 5 or not start_kingdom_id:
-                start_kingdom_id = 1
-                if initial_location:
-                    initial_location['kingdom_id'] = 1
-            start_kingdom_name = kingdom_names.get(start_kingdom_id, 'Valerijské Impérium')
-            
-            # 5 pestrých startovních archetypů (žádné vnucené rvačky a popravy v 1. tahu)
-            start_archetypes = [
-                {
-                    "theme": "ZÁHADA A NÁLEZ (Průzkum)",
-                    "situation": "Postava dorazila na místo nebo se probouzí a objevuje znepokojivou stopu: záhadný zapečetěný dopis/svitek určený pro ni, podivný magický symbol vyrytý na kameni, nebo zjišťuje, že zdejší studna či oltář začaly slabě zářit. Cílem je probudit zvědavost a umožnit vyšetřování."
-                },
-                {
-                    "theme": "POUTNÍK A SPOLEČNOST (Sociální interakce a zvěsti)",
-                    "situation": "Postava po dlouhé cestě sedí u krbu v hostinci, na rušném tržišti nebo u táborového ohně. Zaslechne dramatický rozhovor šeptajících cizinců o chystané zradě či pokladu, anebo k ní přistoupí místní kupec/posel s prosbou o pomoc a nabídkou odměny."
-                },
-                {
-                    "theme": "ŽIVEL A PŘEŽITÍ (Atmosférický příchod)",
-                    "situation": "Oblast právě zasáhla náhlá prudká bouře, hustá mlha nebo krupobití. Postava nachází narychlo úkryt pod střechou kaple, pod skalním převisem nebo ve staré kovárně, kde se už tísní několik dalších poutníků sdílejících oheň a své příběhy."
-                },
-                {
-                    "theme": "OSOBNÍ STOPA (Napojení na minulost a cíl)",
-                    "situation": "Úvod přímo navazuje na povolání nebo původ postavy. Sleduje stopu po svém ztraceném mistrovi, plní posvátné vnuknutí, nebo dorazila vyhledat dávného známého. Právě zahlédla stopu, známou tvář nebo symbol, který hledala."
-                },
-                {
-                    "theme": "MORÁLNÍ DILEMA A NAPĚTÍ (Konflikt beze zbraní)",
-                    "situation": "Na místě právě probíhá vyhrocený spor: místní správce či výběrčí nespravedlivě viní chudou bylinkářku nebo mladého tuláka z krádeže. Kolem stojí rozpačitý hlouček. Žádná poprava ani vytasené meče! Hráč má možnost zasáhnout slovem, autoritou, lstí, nebo se nepozorovaně prosmýknout kolem."
-                }
-            ]
-            chosen_arch = random.choice(start_archetypes)
-            raw_backstory = getattr(req, 'backstory', '') or ''
+        ]
+        chosen_arch = random.choice(start_archetypes)
+
+        raw_backstory = getattr(req, 'backstory', '') or ''
         if isinstance(raw_backstory, dict):
             parts = []
             if raw_backstory.get('appearance'): parts.append(f"Vzhled: {raw_backstory['appearance']}")
@@ -324,29 +273,31 @@ async def create_character(req: CharacterCreateRequest):
         else:
             backstory_info = "Neuvedeno (začíná jako nový poutník bez zapsané minulosti)."
 
-            world_context = f"""
-[HRAJE SE PŘÍBĚHOVÁ KAMPAŇ]:
-Zápletka kontinentu: {world_data.get('main_plot')}
-Místo startu: Frakce {start_kingdom_name} (Souřadnice: [{initial_location['q']}, {initial_location['r']}], Typ prostředí: {start_loc_type}).
-Klíčová NPC ve světě: {json.dumps(world_data.get('key_npcs', []), ensure_ascii=False)}
+        main_plot_line = world_data.get('main_plot', '') if world_data else ''
+        world_context = f"""
+[SVĚT AELTHGARD – POHRANIČÍ VALERIJSKÉHO IMPÉRIA]:
+{f"Zápletka kontinentu: {main_plot_line}" if main_plot_line else ""}
+Místo startu: OAKHAVEN – pohraničním obchodním město v říši Valerijského Impéria.
+Popis prostředí: {oakhaven_description}
+Přítomné postavy: Strážmistr Aldric (cynický veterán gardy, přísný ale spravedlivý) a mlynář Boris Mlynář (unavený muž v padesátce, smutné oči, zlatý prsten mu nedávno ukradli).
 
 [POSTAVA HRÁČE]:
 - Jméno: {req.name}
 - Povolání: {req.dnd_class} | Rasa: {req.race}
 - Příběhové pozadí (Backstory): {backstory_info}
 
-[STARTOVNÍ SCÉNÁŘ - TÉMA: {chosen_arch['theme']}]:
+[STARTOVNÍ SCÉNÁŘ – TÉMA: {chosen_arch['theme']}]:
 {chosen_arch['situation']}
 
 [PŘÍSNÁ PRAVIDLA PRO INTRO]:
-1. PŘÍSNÝ ZÁKAZ AUTOMATICKÉHO BOJE V 1. TAHU! ŽÁDNÁ inkvizice, žádné přepadení se zbraní v ruce, žádný nucený souboj! Hráč se má v klidu rozkoukat, seznámit se světem a zvolit si svůj vlastní styl.
-2. PŘÍSNÝ ZÁKAZ STARTOVAT V KARANTÉNNÍ ZÓNĚ (Království 5)! Hráč 1. úrovně začíná v obyvatelné, civilizované nebo pohraniční říši '{start_kingdom_name}'.
-3. Ve 2-3 větách atmosféricky nalaď prostředí lokace (zvuky, počasí, atmosféra typu '{start_loc_type}' v říši '{start_kingdom_name}').
+1. PŘÍSNÝ ZÁKAZ AUTOMATICKÉHO BOJE V 1. TAHU! ŽÁDNÁ inkvizice, žádné přepadení, žádný souboj. Hráč se má rozkoukat a zvolit svůj styl.
+2. Hráč začíná VÝHRADNĚ V OAKHAVEN. Nezačínej jinde!
+3. Ve 2-3 větách atmosféricky nalaď prostředí Oakhavenu (zvuky, počasí, vůně, atmosféra pohraničního města).
 4. Poté představ výše popsanou startovní situaci.
 5. 'nabizene_akce' MUSÍ nabídnout 3 ZCELA ODLIŠNÉ PŘÍSTUPY:
-   - Možnost 1: Průzkum / Pozorování / Zkoumání detailů okolí.
-   - Možnost 2: Sociální interakce / Rozhovor s přítomnou postavou.
-   - Možnost 3: Akce specifická pro povolání/rasu ({req.dnd_class}/{req.race}) nebo poklidný odchod jinam.
+   - Možnost 1: Průzkum / Pozorování / Zkoumání detailů okolí Oakhavenu.
+   - Možnost 2: Sociální interakce / Rozhovor s Borisem nebo Aldricem.
+   - Možnost 3: Akce specifická pro povolání/rasu ({req.dnd_class}/{req.race}).
    NIKDY nenabízej útočné bojové akce v 1. tahu!
 """
         prompt = f'''
@@ -385,23 +336,16 @@ Vrať POUZE json ve formátu:
     except Exception as e:
         raise HTTPException(status_code=500, detail=f'Chyba při generování intro textu: {str(e)}')
         
-    initial_history = [{
-        'role': 'model', 
-        'text': json.dumps({
-            'aktualni_region': start_kingdom_name if world_data else 'Začátek cesty', 
-            'popis_okoli': popis_okoli, 
-            'vypravec': intro_text, 
-            'nabizene_akce': nabizene_akce
-        }, ensure_ascii=False)
-    }]
-    
+    initial_history = [{'role': 'model', 'text': json.dumps({
+        'aktualni_region': 'Oakhaven',
+        'popis_okoli': popis_okoli,
+        'vypravec': intro_text,
+        'nabizene_akce': nabizene_akce
+    }, ensure_ascii=False)}]
+
     cls_data = CLASS_TEMPLATES.get(req.dnd_class, CLASS_TEMPLATES['Bojovník'])
-    start_loc_name = start_kingdom_name
-    if initial_location and world_data and world_data.get('pois'):
-        matching_poi = next((p for p in world_data['pois'] if p.get('q') == initial_location.get('q') and p.get('r') == initial_location.get('r')), None)
-        if matching_poi and matching_poi.get('name'):
-            start_loc_name = matching_poi.get('name')
-            
+    start_loc_name = 'Oakhaven'  # pevně nastaveno výše, nikdy nepřepisovat
+    
     initial_equipped = auto_equip_items(cls_data['inventory'], cls_data.get('equipped'))
     state = {
         'hp': 100, 
