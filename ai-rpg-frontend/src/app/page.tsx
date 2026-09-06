@@ -31,7 +31,8 @@ import { SeamlessVideo } from '../components/ui/SeamlessVideo';
 import { CharacterCarousel } from '../components/character/CharacterCarousel';
 import { audioManager } from '../services/audio/audioManager';
 import { CURRENT_GAME_VERSION } from '../services/version/gameVersion';
-import { AmbientBackground } from '../components/ui/AmbientBackground';
+import { AmbientBackground } from "@/components/AmbientBackground";
+import { WorldMapModal } from "@/components/WorldMapModal";
 
 const getAvatarVideo = (r?: string) => {
   if (!r) return null;
@@ -150,6 +151,9 @@ export default function Home() {
   }, [gameState]);
 
   const [actionsOpen, setActionsOpen] = useState(false);
+  const [questsOpen, setQuestsOpen] = useState(false);
+  const [isMapOpen, setIsMapOpen] = useState(false);
+  const [currentNodeId, setCurrentNodeId] = useState('oakhaven');
   const [isRegistering, setIsRegistering] = useState(false);
   
   // Character Creation Form
@@ -732,6 +736,7 @@ export default function Home() {
         if (data.character.stats) setStats(data.character.stats);
         if (state.locationType) setLocationType(state.locationType);
         if (state.currentRegion) setCurrentRegion(state.currentRegion);
+        if (state.current_node_id) setCurrentNodeId(state.current_node_id);
 
         if (state.activeBuffs && Array.isArray(state.activeBuffs)) {
           state.activeBuffs.forEach((b: any) => addBuff(b));
@@ -979,7 +984,7 @@ export default function Home() {
     }
   };
 
-  const sendAction = async (actionText: string) => {
+  const sendAction = async (actionText: string, targetNode?: string) => {
     if (!actionText.trim() || loading) return;
     audioManager.stopTts();
     
@@ -1004,7 +1009,10 @@ export default function Home() {
           action: finalActionText,
           action_text: finalActionText,
           stats: stats,
+          inventory: inventory,
           level: level,
+          player_hp: hp,
+          target_node: targetNode,
           skills: skills
         }),
       });
@@ -1050,6 +1058,7 @@ export default function Home() {
           if (data.zmeny_stavu.travel_mode_set !== undefined && data.zmeny_stavu.travel_mode_set !== null) setTravelMode(data.zmeny_stavu.travel_mode_set);
           if (data.zmeny_stavu.travel_days_left_set !== undefined && data.zmeny_stavu.travel_days_left_set !== null) setTravelDaysLeft(data.zmeny_stavu.travel_days_left_set);
           if (data.zmeny_stavu.travel_destination_set !== undefined && data.zmeny_stavu.travel_destination_set !== null) setTravelDestination(data.zmeny_stavu.travel_destination_set);
+          if (data.zmeny_stavu.current_node_id) setCurrentNodeId(data.zmeny_stavu.current_node_id);
 
           if (data.zmeny_stavu.zname_postavy_zmena && data.zmeny_stavu.zname_postavy_zmena.length > 0) {
             setNpcs(prev => {
@@ -1368,6 +1377,14 @@ export default function Home() {
       {/* Settings Modal */}
       <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
 
+      <WorldMapModal 
+        isOpen={isMapOpen} 
+        onClose={() => setIsMapOpen(false)} 
+        currentNodeId={currentNodeId} 
+        onTravel={(nodeId) => sendAction(`Cestuji do lokace: ${nodeId}`, nodeId)}
+        isTraveling={loading} 
+      />
+
       {/* --- AELTHGARD IMMERSIVE GAMEPLAY UI --- */}
       
       {/* Background Layer with Live Ambient Crossfading Videos */}
@@ -1649,6 +1666,15 @@ export default function Home() {
                 </div>
               )}
             </div>
+
+            {/* Map Button */}
+            <button
+              onClick={() => setIsMapOpen(true)}
+              className="flex-shrink-0 p-2 sm:p-2.5 rounded-xl transition flex items-center justify-center text-xs font-cinzel font-bold text-slate-700 dark:text-amber-300 hover:text-amber-950 dark:hover:text-amber-100 hover:bg-white/80 dark:hover:bg-white/10 border border-transparent dark:border-amber-500/20 cursor-pointer"
+              title="Otevřít mapu Aelthgardu"
+            >
+              <Compass size={17} className="text-rpg-magic dark:text-amber-400" />
+            </button>
 
             {/* Quick Theme Toggle Button */}
             <button

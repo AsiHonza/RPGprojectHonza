@@ -23,6 +23,64 @@ async def play_action(req: PlayerActionRequest):
         if not db_res.data:
             raise HTTPException(status_code=404, detail='Postava nenalezena.')
         char_data = db_res.data[0]
+        state_dict = char_data.get('state', {})
+        
+        # 🗺️ WORLD MAP FAST TRAVEL INTERCEPTION
+        if getattr(req, 'target_node', None):
+            from app.data.world_map import get_node
+            current_node = state_dict.get('current_node_id', 'oakhaven')
+            node_data = get_node(req.target_node)
+            
+            # Simple validation (is connected?)
+            curr_data = get_node(current_node)
+            valid = False
+            if curr_data and req.target_node in curr_data.get('connections', []):
+                valid = True
+            
+            if valid and node_data:
+                # Bleskový přesun bez Gemini
+                state_dict['current_node_id'] = req.target_node
+                
+                # Snížení jídla
+                inventory = state_dict.get('inventory', [])
+                food_item = next((i for i in inventory if getattr(i, 'name', i.get('name', '')) == 'Cestovní zásoby'), None)
+                system_log_txt = "Došel jsi na nové místo."
+                davky_zmena = 0
+                if food_item and food_item.get('quantity', 0) > 0:
+                    food_item['quantity'] -= 1
+                    davky_zmena = -1
+                    system_log_txt = "Cesta tě stála 1 dávku jídla."
+                else:
+                    system_log_txt = "Cestoval jsi o hladu (nemáš Cestovní zásoby)."
+                    
+                # Vytvoření "Fake" Gemini JSON Response
+                dm_json = {
+                    "vypravec": node_data.get('description', ''),
+                    "popis_okoli": f"Nacházíš se: {node_data.get('name')}.",
+                    "typ_lokace": node_data.get('type', 'divocina'),
+                    "nova_scena": True,
+                    "image_prompt": f"Fantasy scenery: {node_data.get('name')}, {node_data.get('type')}, RPG art style",
+                    "system_log": system_log_txt,
+                    "nabizene_akce": [
+                        {"text": "Prozkoumat okolí"},
+                        {"text": "Podívat se po lidech"},
+                        {"text": "Rozbít tábor"}
+                    ],
+                    "zmeny_stavu": {
+                        "davky_jidla_zmena": davky_zmena,
+                        "current_node_id": req.target_node
+                    }
+                }
+                
+                history = char_data.get('history', [])
+                history.append({'role': 'user', 'text': f'[CESTOVÁNÍ MAPOU] Přesun na uzel {req.target_node}.', 'content': f'Přesun: {req.target_node}'})
+                history.append({'role': 'model', 'text': json.dumps(dm_json, ensure_ascii=False), 'content': json.dumps(dm_json, ensure_ascii=False)})
+                
+                # Uložit do DB
+                supabase.table('characters').update({'state': state_dict, 'history': history}).eq('api_key', db_key).execute()
+                
+                return dm_json
+
         history = char_data.get('history', [])
         client = genai.Client(api_key=req.api_key if req.api_key and req.api_key != 'DUMMY' else os.environ.get('GEMINI_API_KEY'))
         contents = []

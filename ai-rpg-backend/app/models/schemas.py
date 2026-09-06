@@ -62,7 +62,20 @@ class StateChanges(BaseModel):
     travel_mode_set: Optional[bool] = None
     travel_days_left_set: Optional[int] = None
     travel_destination_set: Optional[str] = None
+    current_node_id: Optional[str] = Field(default=None, description="Změna uzlu na mapě")
     zname_postavy_zmena: List[NPCRecord] = Field(default=[])
+
+class PlayerActionRequest(BaseModel):
+    action: str = Field(description="Akce hráče (např. 'prozkoumám okolí', 'zaútočím')")
+    name: str = Field(description="Jméno postavy")
+    email: str = Field(description="Email uživatele (klíč)")
+    level: int = Field(default=1, description="Aktuální úroveň hráče")
+    player_hp: int = Field(default=100, description="Aktuální životy hráče")
+    target_node: Optional[str] = Field(default=None, description="Cílová lokace pro map-based travel")
+    ac: int = Field(description="Obranné číslo (Armor Class)")
+    intent: str = Field(default="attack", description="Záměr pro první kolo: 'attack', 'defend', 'heavy_attack', 'idle'")
+    intentDamage: int = Field(default=0, description="Předpokládané zranění, pokud je intent attack")
+    status: str = Field(default="none", description="Aktuální stav (none, bleeding, stunned, burning)")
 
 class CombatEnemy(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()), description="Unikátní ID nepřítele")
