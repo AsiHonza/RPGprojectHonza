@@ -16,11 +16,20 @@ class Item(BaseModel):
     healing_amount: int = Field(default=0, description="Léčení pro lektvary (např. 25)")
     stats: str = Field(default="", description="Stručný přehled vlastností (např. 'Útok +1')")
 
+class QuestStep(BaseModel):
+    text: str = Field(description="Popis konkrétního dílčího cíle / kroku úkolu")
+    splneno: bool = Field(default=False, description="Zda je tento dílčí krok již splněn")
+
 class Ukol(BaseModel):
-    id: Optional[str] = Field(default=None, description="Unikátní ID úkolu")
-    nazev: str
-    popis: str
-    stav: str
+    id: Optional[str] = Field(default=None, description="Unikátní ID úkolu (např. 'amulet_jeremias')")
+    nazev: str = Field(description="Pevný název úkolu")
+    popis: str = Field(default="", description="Příběhové pozadí úkolu")
+    stav: str = Field(default="aktivni", description="Stav: 'aktivni', 'splněno', 'selhání'")
+    kategorie: str = Field(default="vedlejsi", description="Kategorie: 'hlavni', 'vedlejsi', 'zakazka'")
+    zadavatel: Optional[str] = Field(default=None, description="Kdo úkol zadal (např. 'Kupec Jeremiáš')")
+    lokace: Optional[str] = Field(default=None, description="Místo úkolu")
+    kroky: List[QuestStep] = Field(default=[], description="Postupné fáze a kroky úkolu")
+    odmena_text: Optional[str] = Field(default=None, description="Slíbená odměna (např. '30 zl, 100 XP')")
 
 class PointOfInterest(BaseModel):
     nazev: str

@@ -9,6 +9,7 @@ import json
 import uuid
 import random
 from app.services.game_service import *
+from app.services.quest_engine import build_quests_prompt_context, process_quests_lifecycle
 from app.utils.loot_generator import generate_loot
 from app.utils.intent_router import get_action_intent
 
@@ -167,9 +168,17 @@ ZÁVAZNÉ PRAVIDLO: V každém souboji striktně použij tyto hodnoty v `system_
                     skills_summary_list.append(f"- {s}")
         skills_summary = "\n".join(skills_summary_list) if skills_summary_list else "Zatím žádné odemknuté schopnosti (hráč spoléhá na základní výbavu a instinkty)."
 
-        context_action = f"[Dlouhodobá paměť (relevantní fakta z minulosti):]\n{relevant_memories}\n{world_prompt_str}\n\n{spatial_grounding}\n\n{combat_stats_summary}\n\n{travel_prompt}\n\n[Akce hráče:]\n{action_str}\n"
+        quests_prompt_str = build_quests_prompt_context(state_dict.get('quests', []))
+
+        context_action = f"[Dlouhodobá paměť (relevantní fakta z minulosti):]\n{relevant_memories}\n{world_prompt_str}\n\n{spatial_grounding}\n\n{quests_prompt_str}\n\n{combat_stats_summary}\n\n{travel_prompt}\n\n[Akce hráče:]\n{action_str}\n"
         contents.append(types.Content(role='user', parts=[types.Part.from_text(text=context_action)]))
         system_prompt = f"""Jsi Pán jeskyně ve fantasy světě Aethelgard. Hráč je momentálně na {req_level}. úrovni.
+
+PRAVIDLA PRO ÚKOLY (STRIKTNÍ QUEST ENGINE - ZÁKAZ SPAMU):
+- NIKDY negeneruj nový úkol pro běžnou konverzaci, dotaz na cestu, nákup nebo popis situace! V takovém případě VŽDY vrať `ukoly: []` v `zmeny_stavu`.
+- Pokud hráč řeší existující úkol (viz seznam otevřených úkolů výše), VŽDY použij jeho přesné ID v poli 'id' a buď aktualizuj jeho cíl v 'kroky', nebo nastav 'stav': 'splněno'!
+- PŘÍSNÝ ZÁKAZ DUPLIKÁTŮ V MINULÉM ČASE: Nikdy nevytvářej nový úkol s textem "Navrátil jsi amulet...", "Pomohl jsi...". Místo toho označ existující úkol jako 'splněno'!
+- Nový úkol vytvoř POUZE tehdy, pokud NPC hráče výslovně požádá o pomoc a hráč s úkolem aktivně souhlasí. Uveď smysluplné 'id' (např. 'krysy_ve_sklepe'), 'zadavatel', 'lokace' a 2-3 fáze do 'kroky' (např. [{{"text": "Najdi doupě", "splneno": false}}]).
 
 
 ODEMKNUTÉ SCHOPNOSTI, KOUZLA A DOVEDNOSTI HRÁČE:
@@ -280,9 +289,26 @@ ZÁZNAMY PRO FRONTEND A EFEKTIVITA TOKENŮ:
                 cleaned_loot.append(item)
             dm_json['zmeny_stavu']['inventar_pridat'] = cleaned_loot
 
-        # Quest Sanitizer & Deduplication
-        if dm_json.get('zmeny_stavu') and dm_json['zmeny_stavu'].get('ukoly'):
-            dm_json['zmeny_stavu']['ukoly'] = sanitize_and_deduplicate_quests(dm_json['zmeny_stavu']['ukoly'])
+        # Hybrid Quest Engine: Lifecycle, Anti-Spam Gatekeeper & Reconciler
+        incoming_quests = dm_json.get('zmeny_stavu', {}).get('ukoly', [])
+        curr_inventory = list(state_dict.get('inventory', []))
+        if dm_json.get('zmeny_stavu', {}).get('inventar_pridat'):
+            curr_inventory.extend(dm_json['zmeny_stavu']['inventar_pridat'])
+
+        updated_quests, quest_logs = process_quests_lifecycle(
+            incoming_quests=incoming_quests,
+            current_quests=state_dict.get('quests', []),
+            player_action=action_str,
+            inventory=curr_inventory
+        )
+        state_dict['quests'] = updated_quests
+        if 'zmeny_stavu' not in dm_json:
+            dm_json['zmeny_stavu'] = {}
+        dm_json['zmeny_stavu']['ukoly'] = updated_quests
+        if quest_logs:
+            existing_sys_log = dm_json.get('system_log', '')
+            log_str = " | ".join(quest_logs)
+            dm_json['system_log'] = f"{existing_sys_log} | {log_str}".strip(' |')
         import unicodedata
         import re
         region = dm_json.get('aktualni_region') or curr_region or 'Neznámá oblast'

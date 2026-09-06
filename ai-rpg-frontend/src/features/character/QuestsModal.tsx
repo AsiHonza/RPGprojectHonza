@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, ScrollText, CheckCircle2, AlertCircle, Clock, BookOpen, Sparkles } from 'lucide-react';
+import { X, ScrollText, CheckCircle2, AlertCircle, Clock, BookOpen, Sparkles, Star, Target, MapPin, User, Award, Circle } from 'lucide-react';
 import { useGameStore, deduplicateQuests } from '../../store/gameStore';
 
 interface QuestsModalProps {
@@ -9,7 +9,7 @@ interface QuestsModalProps {
 }
 
 export const QuestsModal: React.FC<QuestsModalProps> = ({ isOpen, onClose, onSwitchToJournal }) => {
-  const { quests: rawQuests } = useGameStore();
+  const { quests: rawQuests, pinnedQuestId, setPinnedQuestId } = useGameStore();
   const quests = deduplicateQuests(rawQuests);
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
 
@@ -56,7 +56,7 @@ export const QuestsModal: React.FC<QuestsModalProps> = ({ isOpen, onClose, onSwi
                   onClose();
                   onSwitchToJournal();
                 }}
-                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-amber-900/15 bg-white/60 hover:bg-white text-xs font-cinzel font-bold text-amber-900 transition shadow-sm"
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-amber-900/15 bg-white/60 hover:bg-white text-xs font-cinzel font-bold text-amber-900 transition shadow-sm cursor-pointer"
                 title="Přejít do kroniky příběhu"
               >
                 <BookOpen size={14} /> Kronika příběhu
@@ -64,7 +64,7 @@ export const QuestsModal: React.FC<QuestsModalProps> = ({ isOpen, onClose, onSwi
             )}
             <button 
               onClick={onClose} 
-              className="text-amber-900/60 hover:text-amber-950 p-1.5 rounded-xl hover:bg-amber-900/10 transition"
+              className="text-amber-900/60 hover:text-amber-950 p-1.5 rounded-xl hover:bg-amber-900/10 transition cursor-pointer"
               title="Zavřít"
             >
               <X size={24} />
@@ -77,7 +77,7 @@ export const QuestsModal: React.FC<QuestsModalProps> = ({ isOpen, onClose, onSwi
           <div className="flex items-center gap-2 text-xs font-cinzel font-bold">
             <button
               onClick={() => setFilter('all')}
-              className={`px-3 py-1 rounded-lg transition ${
+              className={`px-3 py-1 rounded-lg transition cursor-pointer ${
                 filter === 'all'
                   ? 'bg-amber-800 text-white shadow-sm'
                   : 'bg-white/60 text-slate-700 hover:bg-white border border-amber-900/10'
@@ -87,7 +87,7 @@ export const QuestsModal: React.FC<QuestsModalProps> = ({ isOpen, onClose, onSwi
             </button>
             <button
               onClick={() => setFilter('active')}
-              className={`px-3 py-1 rounded-lg transition flex items-center gap-1.5 ${
+              className={`px-3 py-1 rounded-lg transition flex items-center gap-1.5 cursor-pointer ${
                 filter === 'active'
                   ? 'bg-amber-800 text-white shadow-sm'
                   : 'bg-white/60 text-slate-700 hover:bg-white border border-amber-900/10'
@@ -98,7 +98,7 @@ export const QuestsModal: React.FC<QuestsModalProps> = ({ isOpen, onClose, onSwi
             </button>
             <button
               onClick={() => setFilter('completed')}
-              className={`px-3 py-1 rounded-lg transition flex items-center gap-1.5 ${
+              className={`px-3 py-1 rounded-lg transition flex items-center gap-1.5 cursor-pointer ${
                 filter === 'completed'
                   ? 'bg-amber-800 text-white shadow-sm'
                   : 'bg-white/60 text-slate-700 hover:bg-white border border-amber-900/10'
@@ -115,7 +115,7 @@ export const QuestsModal: React.FC<QuestsModalProps> = ({ isOpen, onClose, onSwi
                 onClose();
                 onSwitchToJournal();
               }}
-              className="sm:hidden text-[11px] font-cinzel font-bold text-amber-900 underline flex items-center gap-1"
+              className="sm:hidden text-[11px] font-cinzel font-bold text-amber-900 underline flex items-center gap-1 cursor-pointer"
             >
               <BookOpen size={12} /> Kronika
             </button>
@@ -145,22 +145,53 @@ export const QuestsModal: React.FC<QuestsModalProps> = ({ isOpen, onClose, onSwi
               {filteredQuests.map((quest, idx) => {
                 const isCompleted = quest.stav === 'splneno' || quest.stav === 'splněno';
                 const isFailed = quest.stav === 'selhani' || quest.stav === 'selhání';
+                const isPinned = pinnedQuestId === quest.id;
+                const kroky: any[] = Array.isArray(quest.kroky) ? quest.kroky : [];
 
                 return (
                   <div
                     key={quest.id || idx}
-                    className={`p-4 sm:p-5 rounded-xl border transition shadow-sm ${
+                    className={`p-4 sm:p-5 rounded-xl border transition shadow-sm flex flex-col gap-3 ${
                       isCompleted
                         ? 'bg-emerald-50/70 border-emerald-600/30'
                         : isFailed
                         ? 'bg-red-50/70 border-red-600/30 opacity-75'
-                        : 'bg-white/80 border-amber-900/20 hover:border-amber-700/40 shadow-sm'
+                        : isPinned
+                        ? 'bg-amber-50/90 border-amber-600/60 shadow-md ring-1 ring-amber-600/20'
+                        : 'bg-white/85 border-amber-900/20 hover:border-amber-700/40 shadow-sm'
                     }`}
                   >
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
-                      <div className="flex items-center gap-2">
-                        <span className="font-cinzel font-bold text-lg text-amber-950">
+                    {/* Top Row: Category, Title, Pin & Status */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-900/10 pb-2.5">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {/* Pin Button */}
+                        {!isCompleted && !isFailed && (
+                          <button
+                            onClick={() => setPinnedQuestId(isPinned ? null : quest.id)}
+                            className={`p-1.5 rounded-lg border transition cursor-pointer flex items-center justify-center ${
+                              isPinned
+                                ? 'bg-amber-500 text-white border-amber-600 shadow-xs'
+                                : 'bg-white text-slate-400 hover:text-amber-700 border-amber-900/15'
+                            }`}
+                            title={isPinned ? 'Zrušit sledování na obrazovce' : 'Sledovat tento úkol na obrazovce (HUD)'}
+                          >
+                            <Star size={14} className={isPinned ? 'fill-white' : ''} />
+                          </button>
+                        )}
+
+                        <span className="font-cinzel font-bold text-base sm:text-lg text-amber-950">
                           {quest.nazev}
+                        </span>
+
+                        {/* Category Badge */}
+                        <span className={`text-[10px] font-cinzel font-bold px-2 py-0.5 rounded-full border ${
+                          quest.kategorie === 'hlavni'
+                            ? 'bg-amber-200 text-amber-950 border-amber-400'
+                            : quest.kategorie === 'zakazka'
+                            ? 'bg-red-100 text-red-900 border-red-300'
+                            : 'bg-slate-100 text-slate-800 border-slate-300'
+                        }`}>
+                          {quest.kategorie === 'hlavni' ? '🌟 Hlavní linie' : quest.kategorie === 'zakazka' ? '⚔️ Zakázka' : '📜 Vedlejší úkol'}
                         </span>
                       </div>
 
@@ -170,7 +201,7 @@ export const QuestsModal: React.FC<QuestsModalProps> = ({ isOpen, onClose, onSwi
                             ? 'bg-emerald-100 text-emerald-900 border-emerald-500/40'
                             : isFailed
                             ? 'bg-red-100 text-red-900 border-red-500/40'
-                            : 'bg-amber-100 text-amber-900 border-amber-700/30 animate-pulse'
+                            : 'bg-amber-100 text-amber-900 border-amber-700/30'
                         }`}
                       >
                         {isCompleted ? (
@@ -183,15 +214,77 @@ export const QuestsModal: React.FC<QuestsModalProps> = ({ isOpen, onClose, onSwi
                           </>
                         ) : (
                           <>
-                            <Sparkles size={13} className="text-amber-700" /> Aktivní úkol
+                            <Sparkles size={13} className="text-amber-700" /> Aktivní
                           </>
                         )}
                       </span>
                     </div>
 
-                    <p className="font-lora text-sm sm:text-base text-slate-800 leading-relaxed">
-                      {quest.popis}
-                    </p>
+                    {/* Metadata Badges: Giver, Location, Reward */}
+                    {(quest.zadavatel || quest.lokace || quest.odmena_text) && (
+                      <div className="flex flex-wrap items-center gap-2.5 text-xs font-lora text-slate-600">
+                        {quest.zadavatel && (
+                          <span className="inline-flex items-center gap-1 bg-amber-900/5 px-2 py-0.5 rounded-md border border-amber-900/10">
+                            <User size={12} className="text-amber-800" />
+                            <strong>Zadavatel:</strong> {quest.zadavatel}
+                          </span>
+                        )}
+                        {quest.lokace && (
+                          <span className="inline-flex items-center gap-1 bg-amber-900/5 px-2 py-0.5 rounded-md border border-amber-900/10">
+                            <MapPin size={12} className="text-amber-800" />
+                            <strong>Místo:</strong> {quest.lokace}
+                          </span>
+                        )}
+                        {quest.odmena_text && (
+                          <span className="inline-flex items-center gap-1 bg-amber-100/70 text-amber-950 px-2 py-0.5 rounded-md border border-amber-900/15 font-cinzel font-bold text-[11px]">
+                            <Award size={12} className="text-amber-700" />
+                            {quest.odmena_text}
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Quest Description */}
+                    {quest.popis && (
+                      <p className="font-lora text-xs sm:text-sm text-slate-800 leading-relaxed bg-white/50 p-2.5 rounded-lg border border-amber-900/10">
+                        {quest.popis}
+                      </p>
+                    )}
+
+                    {/* Steps / Objectives Checklist */}
+                    {kroky.length > 0 && (
+                      <div className="space-y-1.5 pt-1">
+                        <span className="text-[11px] font-cinzel font-bold text-amber-950 uppercase tracking-wider flex items-center gap-1">
+                          <Target size={12} className="text-amber-700" /> Cíle úkolu:
+                        </span>
+                        <div className="space-y-1 pl-1">
+                          {kroky.map((krok: any, kIdx: number) => {
+                            const stepText = typeof krok === 'string' ? krok : (krok?.text || '');
+                            const stepDone = typeof krok === 'object' ? Boolean(krok?.splneno) : false;
+
+                            return (
+                              <div
+                                key={kIdx}
+                                className={`flex items-start gap-2 text-xs font-lora p-1.5 rounded-lg transition ${
+                                  stepDone
+                                    ? 'text-slate-400 line-through bg-emerald-50/40'
+                                    : 'text-slate-900 font-medium bg-amber-100/40 border border-amber-900/10'
+                                }`}
+                              >
+                                <span className="mt-0.5 shrink-0">
+                                  {stepDone ? (
+                                    <CheckCircle2 size={13} className="text-emerald-600" />
+                                  ) : (
+                                    <Circle size={13} className="text-amber-700" />
+                                  )}
+                                </span>
+                                <span>{stepText}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -204,7 +297,7 @@ export const QuestsModal: React.FC<QuestsModalProps> = ({ isOpen, onClose, onSwi
           <span>Celkem úkolů v knize: {quests.length}</span>
           <button
             onClick={onClose}
-            className="px-4 py-1.5 bg-amber-800 hover:bg-amber-700 text-white rounded-xl font-cinzel font-bold text-xs tracking-wider transition shadow-sm"
+            className="px-4 py-1.5 bg-amber-800 hover:bg-amber-700 text-white rounded-xl font-cinzel font-bold text-xs tracking-wider transition shadow-sm cursor-pointer"
           >
             Zavřít
           </button>

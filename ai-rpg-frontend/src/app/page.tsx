@@ -2,7 +2,7 @@
 
 import HexMap from "../components/map/HexMap";
 import { motion } from 'framer-motion';
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useGameStore, isSameQuest, normalizeQuestTitle, deduplicateQuests, autoEquipItems } from '../store/gameStore';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
@@ -11,7 +11,7 @@ import { ItemIcon } from '../components/ui/ItemIcon';
 import { InventoryPanel } from '../features/character/InventoryPanel';
 import { DeathModal } from '../features/character/DeathModal';
 import ReactPlayer from 'react-player';
-import { Send, Heart, Flame, Package, Sword, Shield, FlaskConical, Gem, Shirt, ScrollText, X, Volume2, VolumeX, User, Users, Settings2, Map, Sparkles, Skull, BookOpen, MapPin, Drumstick, Mail, Loader2, Trash2 , Brain , Menu, RotateCcw, ShoppingBag } from "lucide-react";
+import { Send, Heart, Flame, Package, Sword, Shield, FlaskConical, Gem, Shirt, ScrollText, X, Volume2, VolumeX, User, Users, Settings2, Map, Sparkles, Skull, BookOpen, MapPin, Drumstick, Mail, Loader2, Trash2 , Brain , Menu, RotateCcw, ShoppingBag, Target } from "lucide-react";
 import { CharacterCreation } from '../features/character/CharacterCreation';
 import { MapModal } from '../features/map/MapModal';
 import { QuestsModal } from '../features/character/QuestsModal';
@@ -105,7 +105,7 @@ export default function Home() {
     name, setName, dndClass, setDndClass, race, setRace, stats, setStats, keywords, setKeywords, gameMode, setGameMode, 
     backstory, setBackstory, hp, setHp, maxHp, setMaxHp, level, setLevel, xp, setXp, gold, setGold, rations, setRations, 
     skillPoints, setSkillPoints, inventory, setInventory, equipped, setEquipped, worldData, setWorldData, journal, setJournal, 
-    quests, setQuests, npcs, setNpcs, currentRegion, setCurrentRegion, locationType, setLocationType, currentSpellSlots, 
+    quests, setQuests, pinnedQuestId, setPinnedQuestId, npcs, setNpcs, currentRegion, setCurrentRegion, locationType, setLocationType, currentSpellSlots, 
     setCurrentSpellSlots, maxSpellSlots, setMaxSpellSlots, skills, setSkills, availableSkills, setAvailableSkills, 
     inCombat, setInCombat, enemies, setEnemies, playerLocation, setPlayerLocation, day, setDay, history, setHistory, 
     suggestedActions, setSuggestedActions, pointsOfInterest, setPointsOfInterest, currentLocationImage, setCurrentLocationImage, 
@@ -113,6 +113,18 @@ export default function Home() {
     updateReputation, chronicle, setChronicle, worldFlags, setWorldFlags, consequenceToast, setConsequenceToast,
     activeBuffs, addBuff, activeMount, setActiveMount, resetCharacterCreation
   } = useGameStore();
+
+  const activeTrackedQuest = useMemo(() => {
+    if (!quests || !Array.isArray(quests) || quests.length === 0) return null;
+    const activeList = quests.filter(q => q.stav === 'aktivni' || (!q.stav?.includes('spln') && !q.stav?.includes('selh')));
+    if (pinnedQuestId) {
+      const found = quests.find(q => q.id === pinnedQuestId);
+      if (found && (found.stav === 'aktivni' || (!found.stav?.includes('spln') && !found.stav?.includes('selh')))) {
+        return found;
+      }
+    }
+    return activeList[0] || null;
+  }, [quests, pinnedQuestId]);
 
   const [isSpeaking, setIsSpeaking] = useState(false);
 
@@ -382,6 +394,7 @@ export default function Home() {
 
   // Standard Array logic
   useEffect(() => {
+    if (!dndClass) return;
     // Basic auto-assignment of Standard Array (15, 14, 13, 12, 10, 8) based on class
     const assign = (primary: string, secondary: string, tertiary: string) => {
       const base = { str: 8, dex: 8, con: 8, intel: 8, wis: 8, cha: 8 };
@@ -396,12 +409,18 @@ export default function Home() {
     };
 
     switch(dndClass) {
-      case "Barbarian": setStats(assign("str", "con", "dex")); break;
-      case "Fighter": setStats(assign("str", "con", "dex")); break;
-      case "Rogue": setStats(assign("dex", "intel", "cha")); break;
-      case "Wizard": setStats(assign("intel", "con", "dex")); break;
-      case "Cleric": setStats(assign("wis", "con", "str")); break;
+      case "Barbar": case "Barbarian": setStats(assign("str", "con", "dex")); break;
+      case "Bojovník": case "Fighter": setStats(assign("str", "con", "dex")); break;
+      case "Tulák": case "Rogue": setStats(assign("dex", "intel", "cha")); break;
+      case "Kouzelník": case "Wizard": setStats(assign("intel", "con", "dex")); break;
+      case "Klerik": case "Cleric": setStats(assign("wis", "con", "str")); break;
       case "Bard": setStats(assign("cha", "dex", "con")); break;
+      case "Hraničář": case "Ranger": setStats(assign("dex", "wis", "con")); break;
+      case "Paladin": setStats(assign("str", "cha", "con")); break;
+      case "Čaroděj": case "Sorcerer": setStats(assign("cha", "con", "dex")); break;
+      case "Černokněžník": case "Warlock": setStats(assign("cha", "con", "dex")); break;
+      case "Druid": setStats(assign("wis", "con", "dex")); break;
+      case "Mnich": case "Monk": setStats(assign("dex", "wis", "con")); break;
       default: setStats(assign("str", "dex", "con")); break;
     }
   }, [dndClass]);
@@ -1576,6 +1595,48 @@ export default function Home() {
             {/* Left Column: Primary Narrative & Action Stream */}
             <div className="flex-1 min-w-0 flex flex-col h-full min-h-0 overflow-hidden">
               
+              {/* HUD Mini-Tracker for Active/Pinned Quest */}
+              {activeTrackedQuest && (
+                <div 
+                  onClick={() => { setQuestsOpen(true); setUnreadQuests(false); }}
+                  className="mb-2 px-3.5 sm:px-4 py-2 rounded-xl bg-[#fdfbf7]/90 hover:bg-[#fdfbf7] border border-amber-900/20 shadow-xs backdrop-blur-md transition cursor-pointer flex items-center justify-between gap-3 group shrink-0"
+                  title="Klikni pro otevření Knihy úkolů"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="p-1.5 rounded-lg bg-amber-100 text-amber-900 shrink-0 border border-amber-900/10">
+                      <ScrollText size={15} />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-cinzel font-bold text-xs sm:text-sm text-amber-950 truncate">
+                          {activeTrackedQuest.nazev}
+                        </span>
+                        <span className={`text-[9px] font-cinzel font-bold px-1.5 py-0.2 rounded-full shrink-0 border ${
+                          activeTrackedQuest.kategorie === 'hlavni'
+                            ? 'bg-amber-200 text-amber-950 border-amber-400'
+                            : 'bg-amber-100 text-amber-900 border-amber-900/15'
+                        }`}>
+                          {activeTrackedQuest.kategorie === 'hlavni' ? '🌟 HLAVNÍ' : '📜 ÚKOL'}
+                        </span>
+                      </div>
+                      <div className="font-lora text-[11px] text-slate-700 truncate flex items-center gap-1.5 mt-0.5">
+                        <Target size={11} className="text-amber-700 shrink-0" />
+                        <span className="truncate">
+                          {(() => {
+                            const kroky = activeTrackedQuest.kroky || [];
+                            const curr = kroky.find((k: any) => !k?.splneno);
+                            return curr?.text || activeTrackedQuest.popis || 'Probíhá plnění...';
+                          })()}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-cinzel font-bold text-amber-800/70 group-hover:text-amber-900 transition shrink-0 hidden sm:inline">
+                    Otevřít deník →
+                  </span>
+                </div>
+              )}
+
               {/* Story Log (Middle) */}
               <div className="flex-1 min-h-0 overflow-hidden relative mb-3">
                 <div className="absolute inset-0 bg-[#f9f6e6]/70 backdrop-blur-lg border border-amber-900/10 rounded-2xl shadow-2xl p-4 sm:p-6 overflow-y-auto custom-scrollbar flex flex-col gap-5 sm:gap-6" >

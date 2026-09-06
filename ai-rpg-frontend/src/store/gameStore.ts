@@ -12,12 +12,54 @@ export function normalizeQuestTitle(title: string): string {
     .trim();
 }
 
+const STOP_WORDS = new Set([
+  "tento", "tato", "toto", "tyto", "jeho", "jeji", "jejich", "tvoje", "svuj", "svou",
+  "pomoz", "ziskej", "najdi", "dones", "doruc", "vrat", "zpatky", "zpet", "jsem",
+  "jsi", "byl", "byla", "bylo", "bude", "budou", "koupit", "prodat", "jit", "dojit",
+  "pro", "od", "do", "ve", "na", "se", "si", "po", "ze", "za", "pred", "nad", "pod",
+  "nebo", "ale", "kdyz", "protoze", "aby", "jako", "ktery", "ktera", "ktere", "ukol"
+]);
+
+export function extractQuestTokens(text: string): Set<string> {
+  if (!text) return new Set();
+  const rawWords = String(text).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').match(/[a-z0-9]{3,}/g) || [];
+  const tokens = new Set<string>();
+  for (const w of rawWords) {
+    if (!STOP_WORDS.has(w)) {
+      tokens.add(w);
+    }
+  }
+  return tokens;
+}
+
 export function isSameQuest(a: any, b: any): boolean {
   if (!a || !b) return false;
   if (a.id && b.id && a.id === b.id) return true;
+  
   const normA = normalizeQuestTitle(a.nazev || a.title || '');
   const normB = normalizeQuestTitle(b.nazev || b.title || '');
-  return Boolean(normA && normB && normA === normB);
+  if (normA && normB && normA === normB) return true;
+
+  // Token Jaccard matching
+  const tokensA = extractQuestTokens(`${a.nazev || ''} ${a.popis || ''}`);
+  const tokensB = extractQuestTokens(`${b.nazev || ''} ${b.popis || ''}`);
+  if (tokensA.size === 0 || tokensB.size === 0) return false;
+
+  let intersectionCount = 0;
+  tokensA.forEach(t => { if (tokensB.has(t)) intersectionCount++; });
+  const unionCount = tokensA.size + tokensB.size - intersectionCount;
+  const jaccard = unionCount > 0 ? intersectionCount / unionCount : 0;
+
+  // Check zadavatel
+  const zadA = normalizeQuestTitle(a.zadavatel || '');
+  const zadB = normalizeQuestTitle(b.zadavatel || '');
+  const sameZad = Boolean(zadA && zadB && (zadA.includes(zadB) || zadB.includes(zadA)));
+
+  if (sameZad && intersectionCount >= 1) return true;
+  if (intersectionCount >= 2 && jaccard >= 0.25) return true;
+  if (jaccard >= 0.45) return true;
+
+  return false;
 }
 
 export function deduplicateQuests(questList: any[]): any[] {
@@ -30,25 +72,53 @@ export function deduplicateQuests(questList: any[]): any[] {
 
     if (existingIdx === -1) {
       const normTitle = normalizeQuestTitle(q.nazev || '');
+      const kroky = Array.isArray(q.kroky) ? q.kroky : (q.popis ? [{ text: q.popis, splneno: q.stav === 'splněno' || q.stav === 'splneno' }] : []);
       result.push({
         ...q,
         id: q.id || (normTitle ? `quest_${normTitle}` : `quest_${Math.random().toString(36).substring(2, 9)}`),
         nazev: q.nazev || 'Neznámý úkol',
         popis: q.popis || '',
         stav: q.stav || 'aktivni',
+        kategorie: q.kategorie || 'vedlejsi',
+        zadavatel: q.zadavatel || null,
+        lokace: q.lokace || null,
+        kroky: kroky,
+        odmena_text: q.odmena_text || null
       });
     } else {
       const existing = result[existingIdx];
       const isCompleted = q.stav === 'splněno' || q.stav === 'splneno' || existing.stav === 'splněno' || existing.stav === 'splneno';
       const isFailed = !isCompleted && (q.stav === 'selhání' || q.stav === 'selhani' || existing.stav === 'selhání' || existing.stav === 'selhani');
 
+      // Sloučení kroků
+      const existingSteps = Array.isArray(existing.kroky) ? existing.kroky : [];
+      const newSteps = Array.isArray(q.kroky) ? q.kroky : [];
+      const mergedSteps = [...existingSteps];
+
+      for (const ns of newSteps) {
+        const text = typeof ns === 'string' ? ns : ns?.text;
+        const splneno = typeof ns === 'object' ? ns?.splneno : false;
+        if (!text) continue;
+        const exIdx = mergedSteps.findIndex(es => (es.text && es.text === text) || isSameQuest({ nazev: es.text }, { nazev: text }));
+        if (exIdx !== -1) {
+          mergedSteps[exIdx] = { ...mergedSteps[exIdx], splneno: mergedSteps[exIdx].splneno || splneno };
+        } else {
+          mergedSteps.push({ text, splneno: Boolean(splneno) });
+        }
+      }
+
       result[existingIdx] = {
         ...existing,
         ...q,
         id: existing.id || q.id,
-        nazev: (q.nazev && q.nazev.length >= (existing.nazev?.length || 0)) ? q.nazev : existing.nazev,
+        nazev: existing.nazev || q.nazev,
         popis: (q.popis && q.popis.length >= (existing.popis?.length || 0)) ? q.popis : existing.popis,
         stav: isCompleted ? 'splněno' : (isFailed ? 'selhání' : (q.stav || existing.stav || 'aktivni')),
+        kategorie: q.kategorie || existing.kategorie || 'vedlejsi',
+        zadavatel: q.zadavatel || existing.zadavatel,
+        lokace: q.lokace || existing.lokace,
+        odmena_text: q.odmena_text || existing.odmena_text,
+        kroky: mergedSteps.length > 0 ? mergedSteps : (existing.kroky || [])
       };
     }
   }
@@ -228,6 +298,8 @@ interface GameState {
   setJournal: (journal: string[] | ((prev: string[]) => string[])) => void;
   quests: any[];
   setQuests: (quests: any[] | ((prev: any[]) => any[])) => void;
+  pinnedQuestId: string | null;
+  setPinnedQuestId: (id: string | null) => void;
   npcs: any[];
   setNpcs: (npcs: any[] | ((prev: any[]) => any[])) => void;
   setWorldData: (data: any) => void;
@@ -409,6 +481,8 @@ export const useGameStore = create<GameState>((set) => ({
     const raw = typeof quests === 'function' ? quests(state.quests) : quests;
     return { quests: deduplicateQuests(raw) };
   }),
+  pinnedQuestId: null,
+  setPinnedQuestId: (pinnedQuestId) => set({ pinnedQuestId }),
   npcs: [],
   setNpcs: (npcs) => set((state) => ({ npcs: typeof npcs === 'function' ? npcs(state.npcs) : npcs })),
   setWorldData: (worldData) => set({ worldData }),
