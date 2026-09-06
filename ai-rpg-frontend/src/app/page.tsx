@@ -11,7 +11,7 @@ import { ItemIcon } from '../components/ui/ItemIcon';
 import { InventoryPanel } from '../features/character/InventoryPanel';
 import { DeathModal } from '../features/character/DeathModal';
 import ReactPlayer from 'react-player';
-import { Send, Heart, Flame, Package, Sword, Shield, FlaskConical, Gem, Shirt, ScrollText, X, Volume2, VolumeX, User, Users, Settings2, Map, Sparkles, Skull, BookOpen, MapPin, Drumstick, Mail, Loader2, Trash2 , Brain , Menu, RotateCcw, ShoppingBag, Target, Sun, Moon } from "lucide-react";
+import { Send, Heart, Flame, Package, Sword, Shield, FlaskConical, Gem, Shirt, ScrollText, X, Volume2, VolumeX, User, Users, Settings2, Map, Sparkles, Skull, BookOpen, MapPin, Drumstick, Mail, Loader2, Trash2 , Brain , Menu, RotateCcw, ShoppingBag, Target, Sun, Moon, Compass } from "lucide-react";
 import { CharacterCreation } from '../features/character/CharacterCreation';
 import { MapModal } from '../features/map/MapModal';
 import { QuestsModal } from '../features/character/QuestsModal';
