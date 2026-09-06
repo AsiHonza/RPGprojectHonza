@@ -31,8 +31,8 @@ import { SeamlessVideo } from '../components/ui/SeamlessVideo';
 import { CharacterCarousel } from '../components/character/CharacterCarousel';
 import { audioManager } from '../services/audio/audioManager';
 import { CURRENT_GAME_VERSION } from '../services/version/gameVersion';
-import { AmbientBackground } from "@/components/AmbientBackground";
-import { WorldMapModal } from "@/components/WorldMapModal";
+import { AmbientBackground } from '../components/ui/AmbientBackground';
+import { WorldMapModal } from '../components/WorldMapModal';
 
 const getAvatarVideo = (r?: string) => {
   if (!r) return null;
@@ -151,8 +151,6 @@ export default function Home() {
   }, [gameState]);
 
   const [actionsOpen, setActionsOpen] = useState(false);
-  const [questsOpen, setQuestsOpen] = useState(false);
-  const [isMapOpen, setIsMapOpen] = useState(false);
   const [currentNodeId, setCurrentNodeId] = useState('oakhaven');
   const [isRegistering, setIsRegistering] = useState(false);
   
@@ -1378,8 +1376,8 @@ export default function Home() {
       <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
 
       <WorldMapModal 
-        isOpen={isMapOpen} 
-        onClose={() => setIsMapOpen(false)} 
+        isOpen={mapOpen} 
+        onClose={() => setMapOpen(false)} 
         currentNodeId={currentNodeId} 
         onTravel={(nodeId) => sendAction(`Cestuji do lokace: ${nodeId}`, nodeId)}
         isTraveling={loading} 
@@ -1669,7 +1667,7 @@ export default function Home() {
 
             {/* Map Button */}
             <button
-              onClick={() => setIsMapOpen(true)}
+              onClick={() => setMapOpen(true)}
               className="flex-shrink-0 p-2 sm:p-2.5 rounded-xl transition flex items-center justify-center text-xs font-cinzel font-bold text-slate-700 dark:text-amber-300 hover:text-amber-950 dark:hover:text-amber-100 hover:bg-white/80 dark:hover:bg-white/10 border border-transparent dark:border-amber-500/20 cursor-pointer"
               title="Otevřít mapu Aelthgardu"
             >
