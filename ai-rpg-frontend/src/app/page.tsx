@@ -651,10 +651,12 @@ export default function Home() {
                   vyznamna_mista: dm_data.vyznamna_mista
                 };
               }
+              lastAudioQueue = [{ text: String(dm_data), type: "narrator" }];
               return { type: "dm", vypravec: String(dm_data) };
             } catch {
               // Graceful fallback for non-JSON string entries (like narrative plain text from travel or combat)
               if (typeof rawText === 'string' && rawText.trim()) {
+                lastAudioQueue = [{ text: rawText.trim(), type: "narrator" }];
                 return {
                   type: "dm",
                   vypravec: rawText
@@ -666,6 +668,29 @@ export default function Home() {
           return null;
         }).filter(Boolean);
         
+        // Ensure lastAudioQueue and lastSuggestedActions truly correspond to the final DM message in history
+        const lastDmMsg = [...loadedHistory].reverse().find((m: any) => m && m.type === "dm");
+        if (lastDmMsg) {
+          const queue: {text: string, type: "narrator" | "npc_muz" | "npc_zena"}[] = [];
+          if (lastDmMsg.vypravec) {
+            queue.push({ text: lastDmMsg.vypravec, type: "narrator" });
+          }
+          if (lastDmMsg.npc_dialogy && Array.isArray(lastDmMsg.npc_dialogy)) {
+            for (const npc of lastDmMsg.npc_dialogy) {
+              const npcText = npc.text || npc.replika;
+              if (npcText) {
+                queue.push({
+                  text: npcText,
+                  type: npc.pohlavi === "zena" ? "npc_zena" : "npc_muz"
+                });
+              }
+            }
+          }
+          if (queue.length > 0) {
+            lastAudioQueue = queue;
+          }
+        }
+
         setHistory(loadedHistory);
         setSuggestedActions(lastSuggestedActions);
         
