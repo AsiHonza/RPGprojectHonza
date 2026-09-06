@@ -1,0 +1,188 @@
+{
+  "old_mine": {
+    "id": "old_mine",
+    "name": "Opuštěný důl",
+    "type": "dungeon",
+    "x": 10,
+    "y": 30,
+    "connections": [
+      "oakhaven"
+    ],
+    "description": "Bývalý stříbrný a železný důl patřící pod dohled cechu z Železný Práh. Před šesti měsíci byla těžba náhle ukončena po masivním závalu a podivných zvucích z nejhlubší šachty. Vstup do dolu je zčásti zabedněný prkny s varovnými nápisy v krvi a uhlí.",
+    "faction_id": "zelezny_prah",
+    "kingdom_id": 6,
+    "npcs": [],
+    "quests": [],
+    "default_actions": [
+      "Prozkoumat okolí",
+      "Podívat se po lidech",
+      "Rozbít tábor"
+    ],
+    "encounters": [],
+    "source_file": "📍 Locations\\Opuštěný důl.md"
+  },
+  "monastery_ruins": {
+    "id": "monastery_ruins",
+    "name": "Ruiny kláštera",
+    "type": "dungeon",
+    "x": 65,
+    "y": 55,
+    "connections": [
+      "crossroads"
+    ],
+    "description": "Rozpadlé zbytky opatství sv. Judity, které před sto lety patřilo řádu Solarianových mnichů. Podle kronik byl klášter vypálen během jediné noci neznámými útočníky – zdi jsou ohořelé a vitráže rozbité.",
+    "faction_id": "",
+    "kingdom_id": 0,
+    "npcs": [],
+    "quests": [],
+    "default_actions": [
+      "Prozkoumat okolí",
+      "Podívat se po lidech",
+      "Rozbít tábor"
+    ],
+    "encounters": [],
+    "source_file": "📍 Locations\\Ruiny kláštera.md"
+  },
+  "elf_camp": {
+    "id": "elf_camp",
+    "name": "Skrytý tábor elfů",
+    "type": "vesnice",
+    "x": 90,
+    "y": 15,
+    "connections": [
+      "dark_forest"
+    ],
+    "description": "Předsunutá základna lesních elfů z Kmeny z hvozdů, postavená vysoko ve větvích gigantických tisů a spojená provazovými lávkami. Ze země je tábor prakticky neviditelný, chráněný iluzí a přirozeným maskováním.",
+    "faction_id": "kmeny_z_hvozdu",
+    "kingdom_id": 3,
+    "npcs": [],
+    "quests": [],
+    "default_actions": [
+      "Prozkoumat okolí",
+      "Podívat se po lidech",
+      "Rozbít tábor"
+    ],
+    "encounters": [],
+    "source_file": "📍 Locations\\Skrytý tábor elfů.md"
+  },
+  "crossroads": {
+    "id": "crossroads",
+    "name": "Stará křižovatka",
+    "type": "divocina",
+    "x": 45,
+    "y": 35,
+    "connections": [
+      "oakhaven",
+      "dark_forest",
+      "monastery_ruins"
+    ],
+    "description": "Prastará křižovatka dlážděná omšelými valerijskými kvádry. Uprostřed stojí zvětralý kamenný obelisk zasvěcený bohu Solarianovi, jehož sluneční symbol je znesvěcený vyrytými klanovými runami. Na větvích starého jilmu visí rezavé klece a varovná znamení. Místo je nebezpečné zejména po setmění – potulují se zde vlci, zběhové z armády a občas i předsunuté hlídky z Kmeny z hvozdů.",
+    "faction_id": "",
+    "kingdom_id": 0,
+    "npcs": [],
+    "quests": [
+      "Q001"
+    ],
+    "default_actions": [
+      "Prozkoumat okolí",
+      "Podívat se po lidech",
+      "Rozbít tábor"
+    ],
+    "encounters": [],
+    "source_file": "📍 Locations\\Stará křižovatka.md"
+  },
+  "dark_forest": {
+    "id": "dark_forest",
+    "name": "Temný hvozd",
+    "type": "divocina",
+    "x": 70,
+    "y": 20,
+    "connections": [
+      "crossroads",
+      "elf_camp"
+    ],
+    "description": "Prastarý hvozd, kam lidská sekera nepronikla po celá staletí. Koruny staletých dubů a pokroucených borovic tvoří nepropustnou klenbu, skrze niž proniká jen minimum slunečního svitu. Mech tlumí každý krok a les jako by neustále naslouchal. Území pod duchovní patronací bohyně Vyldie.",
+    "faction_id": "kmeny_z_hvozdu",
+    "kingdom_id": 3,
+    "npcs": [],
+    "quests": [
+      "Q101"
+    ],
+    "default_actions": [
+      "Prozkoumat okolí",
+      "Podívat se po lidech",
+      "Rozbít tábor"
+    ],
+    "encounters": [],
+    "source_file": "📍 Locations\\Temný hvozd.md"
+  },
+  "oakhaven": {
+    "id": "oakhaven",
+    "name": "Oakhaven",
+    "type": "mesto",
+    "x": 20,
+    "y": 50,
+    "connections": [
+      "crossroads",
+      "old_mine"
+    ],
+    "description": "---",
+    "faction_id": "valerijske_imperium",
+    "kingdom_id": 1,
+    "npcs": [
+      "boris_mlynar",
+      "strazmistr_aldric"
+    ],
+    "quests": [
+      "Q001",
+      "Q101"
+    ],
+    "default_actions": [
+      "Prozkoumat okolí",
+      "Podívat se po lidech",
+      "Rozbít tábor"
+    ],
+    "encounters": [],
+    "source_file": "📍 Locations\\Oakhaven\\Oakhaven.md"
+  },
+  "hostinec_u_zlomenho_ttu": {
+    "id": "hostinec_u_zlomenho_ttu",
+    "name": "Hostinec U Zlomeného štítu",
+    "type": "divocina",
+    "x": 50,
+    "y": 50,
+    "connections": [],
+    "description": "Masivní dvoupatrová hrázděná krčma s krbem velkým jako vůz. Nad vchodem visí oprýskaný dřevěný štít rozštípnutý válečnou sekerou. Schází se zde jak místní rolníci, tak projíždějící kupci a žoldáci.",
+    "faction_id": "",
+    "kingdom_id": 0,
+    "npcs": [],
+    "quests": [],
+    "default_actions": [
+      "Prozkoumat okolí",
+      "Podívat se po lidech",
+      "Rozbít tábor"
+    ],
+    "encounters": [],
+    "source_file": "📍 Locations\\Oakhaven\\PointsOfInterest\\Hostinec U Zlomeného štítu.md"
+  },
+  "star_mln": {
+    "id": "star_mln",
+    "name": "Starý mlýn",
+    "type": "divocina",
+    "x": 50,
+    "y": 50,
+    "connections": [],
+    "description": "Mohutný kamenný mlýn s klapajícím vodním kolem. Zdi jsou pokryté břečťanem a moučným prachem. Dříve prosperující hospodářství, dnes mírně zanedbané od té doby, co Boris přišel o svou ženu Annu.",
+    "faction_id": "",
+    "kingdom_id": 0,
+    "npcs": [],
+    "quests": [],
+    "default_actions": [
+      "Prozkoumat okolí",
+      "Podívat se po lidech",
+      "Rozbít tábor"
+    ],
+    "encounters": [],
+    "source_file": "📍 Locations\\Oakhaven\\PointsOfInterest\\Starý mlýn.md"
+  }
+}

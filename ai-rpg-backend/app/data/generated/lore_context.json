@@ -1,0 +1,50 @@
+{
+  "world_tone": "Mix Fable (pohádkový vizuál) a Zaklínače (dospělé morální volby, cynismus, následky).",
+  "magic_rules": "## 1. Magie a Probuzení\n- **Magie se nedá naučit.** Neexistují žádné univerzity ani knihy, z nichž by se prostý člověk mohl naučit kouzlit.\n- **Probuzení (The Awakening):** Magie do člověka vstoupí náhle – v momentě hlubokého traumatu, extáze, klinické smrti nebo čisté náhody.\n- **Dar i kletba:**\n  - Většina probuzených nekontrolovaně vyhoří nebo zešílí.\n  - V očích Teokracie Solariova je nekontrolované Probuzení hříchem a zkažeností těla.\n  - V Kmeny z hvozdů je Probuzený uctíván jako mluvčí duchů.\n  - V Tajemné Útočiště hledají probuzení azyl před inkvizicí i lynčem.\n\n---",
+  "religion": "# Panteon a Náboženství Aelthgardu\n\nV Aelthgardu neexistuje abstraktní víra bez důkazů – zásahy a projevy tří velkých entit jsou hmatatelné, kruté a neúprosné. Společnost balancuje mezi jejich vlivem.\n\n---\n\n## Solarian – Bůh Slunce, Řádu a Krve\n- **Doména:** Světlo, hierarchie, právo, purifikace ohněm, krevní oběti za ochranu.\n- **Symbol:** Zlaté slunce protnuté svislým mečem, z jehož hrotu kape kapka krve.\n- **Uctívači:** Teokracie Solariova, rytíři Valerijské Impérium, inkvizitoři a městská garda.\n- **Dogma:** *\"Chaos je slabost, slabost je hřích. Čistota vzešlá z krve a plamene zaručuje řád.\"*\n- **Temná stránka:** Nesmiřitelný fanatismus. Nemilosrdné pronásledování těch, kteří zažili Probuzení bez posvěcení církví.\n\n---\n\n## Vyldia – Bohyně Pří",
+  "kingdoms_summary": [
+    {
+      "name": "Karanténní Zóna",
+      "leader": "Žádná centrální vláda (frakce mrchožroutů, mutantů a zapomenutých posádek)",
+      "attitude_to_magic": "anomálie",
+      "one_liner": "Oblast před sto lety zdevastovaná kataklyzmatickým selháním rituálu masového Probuzení. Dnes je obehnána masivní zdí a příkopem z tekutého stříbra, které střeží posádky Impéria."
+    },
+    {
+      "name": "Kmeny z hvozdů",
+      "leader": "Rada Šamanů a Matka Hvozdu",
+      "attitude_to_magic": "posvatne",
+      "one_liner": "Volné společenství divokých klanů, lovců, druidů a lesních elfů obývající nekonečné pralesy, které se táhnou až za Temný hvozd. Neuznávají feudální hranice ani peněžní měnu."
+    },
+    {
+      "name": "Svobodná města",
+      "leader": "Koncil pěti mincí (Oligarchové a cechmistři)",
+      "attitude_to_magic": "pragmaticke",
+      "one_liner": "Síť pobřežních městských států spojených obchodní ligou. Město, kde má každá věc svou cenu – od bochníku chleba přes lidský život až po královskou korunu."
+    },
+    {
+      "name": "Tajemné Útočiště",
+      "leader": "Kruh probuzených (Architektka Elara)",
+      "attitude_to_magic": "posvatne",
+      "one_liner": "Skrytá autonomní enkláva, kterou založili mocní mágové, jimž se podařilo přežít své Probuzení a uniknout inkvizitorům z Teokracie Solariova."
+    },
+    {
+      "name": "Teokracie Solariova",
+      "leader": "Nejvyšší Primát Malachai",
+      "attitude_to_magic": "odpor",
+      "one_liner": "Země zasvěcená fanatickému uctívání boha Solariana. Zde neexistuje rozdíl mezi zákonem a církevním dogmatem. Společnost je přísně hierarchická, řízená sborem prelátů a ozbrojeným řádem Plamenného meče"
+    },
+    {
+      "name": "Valerijské Impérium",
+      "leader": "Císař Titus III. Valerijský",
+      "attitude_to_magic": "tolerance",
+      "one_liner": "Největší a nejstarší feudální mocnost na kontinentu. Navenek se pyšní honosnou architekturou, dlážděnými cestami a těžkou jízdou v leštěném plátu. Pod povrchem však hnije byrokracií, korupcí zemských "
+    },
+    {
+      "name": "Železný Práh",
+      "leader": "Velmistr cechovní pece Vorn Železoprstý",
+      "attitude_to_magic": "odpor",
+      "one_liner": "Horská říše kovářů, horníků, inženýrů a pevnostních pánů. Obyvatelé Železného Prahu věří v ocel, kámen a poctivou práci. Pohrdají planými řečmi kněží i nebezpečnou magií."
+    }
+  ],
+  "current_region_template": "Hráč se nachází v lokaci \"{location_name}\" ({location_type}). {location_description}"
+}

@@ -113,6 +113,31 @@ async def play_action(req: PlayerActionRequest):
             current_region = state_dict.get('currentRegion') or state_dict.get('aktualni_region')
             local_locations = [loc for loc in (world_data.get('locations') or []) if isinstance(loc, dict) and loc.get('nazev') == current_region]
             world_prompt_str = f"\n[TOTO JE ŘÍZENÝ SANDBOX! Svět je pevně dán:]\nZápletka: {world_data.get('main_plot', '')}\nAktuální lokace info: {json.dumps(local_locations, ensure_ascii=False)}\n\n[KRITICKÉ PRAVIDLO PRO TAJEMSTVÍ]: Všechna 'tajemstvi_nebo_problem' a 'skryty_motiv' jsou před hráčem PŘÍSNĚ SKRYTÁ. Nesmíš je hráči vyžvanit v úvodním popisu lokace! Hráč na ně musí přijít sám pomocí průzkumu, dedukce nebo dialogů s NPC.\n"
+
+        # Node-based World Map & Obsidian Knowledge Integration
+        from app.data.world_map import get_node, get_npc, get_quest
+        current_node_id = state_dict.get('current_node_id', 'oakhaven')
+        node_data = get_node(current_node_id)
+        node_prompt_str = ''
+        if node_data:
+            local_npc_lines = []
+            for nid in node_data.get('npcs', []):
+                npc_obj = get_npc(nid)
+                if npc_obj:
+                    local_npc_lines.append(f"  * {npc_obj.get('name')} ({npc_obj.get('type')}, postoj: {npc_obj.get('disposition')}): {npc_obj.get('personality', '')}. Motivace: {npc_obj.get('motivation', '')}")
+            local_npcs_rendered = "\n".join(local_npc_lines) if local_npc_lines else "  Žádná specifická známá NPC přímo na tomto místě."
+
+            local_quest_lines = []
+            for qid in node_data.get('quests', []):
+                q_obj = get_quest(qid)
+                if q_obj:
+                    local_quest_lines.append(f"  * Quest {q_obj.get('title')} (ID: {qid}, Typ: {q_obj.get('type')})")
+            local_quests_rendered = "\n".join(local_quest_lines) if local_quest_lines else "  Žádné aktivní úkoly přímo zde."
+
+            active_flags = state_dict.get('decision_flags', [])
+            flags_rendered = ", ".join(active_flags) if active_flags else "Žádná (začátek hry)"
+
+            node_prompt_str = f"""\n======================================================================\n[KANONICKÁ DATA LOKACE ZE SVĚTA AELTHGARD (OBSIDIAN KNOWLEDGE BASE)]:\n- Uzel: {node_data.get('name')} (ID: {current_node_id}, Typ: {node_data.get('type')})\n- Popis prostředí: {node_data.get('description')}\n- PŘÍTOMNÁ KANONICKÁ NPC (Mluv a jednej za ně přesně v tomto duchu):\n{local_npcs_rendered}\n- DOSTUPNÉ ZÁPLETKY A ÚKOLY:\n{local_quests_rendered}\n- ODEHRANÁ ROZHODNUTÍ HRÁČE (DECISION FLAGS - respektuj minulé volby!):\n  {flags_rendered}\n======================================================================\n"""
         travel_prompt = ''
         if is_traveling:
             roll = random.randint(1, 20)
@@ -228,7 +253,7 @@ ZÁVAZNÉ PRAVIDLO: V každém souboji striktně použij tyto hodnoty v `system_
 
         quests_prompt_str = build_quests_prompt_context(state_dict.get('quests', []))
 
-        context_action = f"[Dlouhodobá paměť (relevantní fakta z minulosti):]\n{relevant_memories}\n{world_prompt_str}\n\n{spatial_grounding}\n\n{quests_prompt_str}\n\n{combat_stats_summary}\n\n{travel_prompt}\n\n[Akce hráče:]\n{action_str}\n"
+        context_action = f"[Dlouhodobá paměť (relevantní fakta z minulosti):]\n{relevant_memories}\n{world_prompt_str}\n{node_prompt_str}\n\n{spatial_grounding}\n\n{quests_prompt_str}\n\n{combat_stats_summary}\n\n{travel_prompt}\n\n[Akce hráče:]\n{action_str}\n"
         contents.append(types.Content(role='user', parts=[types.Part.from_text(text=context_action)]))
         system_prompt = f"""Jsi Pán jeskyně ve fantasy světě Aethelgard. Hráč je momentálně na {req_level}. úrovni.
 
@@ -412,6 +437,14 @@ ZÁZNAMY PRO FRONTEND A EFEKTIVITA TOKENŮ:
             state_dict['currentLocationDesc'] = dm_json['popis_okoli']
             state_dict['popis_okoli'] = dm_json['popis_okoli']
         known_npcs = state_dict.setdefault('zname_postavy', [])
+        # Process decision flags from state changes
+        flag_changes = (dm_json.get('zmeny_stavu') or {}).get('decision_flags_pridat') or []
+        if flag_changes and isinstance(flag_changes, list):
+            flags = state_dict.setdefault('decision_flags', [])
+            for fl in flag_changes:
+                if fl and fl not in flags:
+                    flags.append(fl)
+
         # Process NPC updates from state changes (Soul & Subtext Engine)
         npc_changes = (dm_json.get('zmeny_stavu') or {}).get('zname_postavy_zmena') or []
         for npc_rec in npc_changes:

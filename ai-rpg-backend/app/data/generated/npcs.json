@@ -1,0 +1,111 @@
+{
+  "boris_mlynar": {
+    "npc_id": "boris_mlynar",
+    "name": "Boris Mlynář",
+    "location_id": "oakhaven",
+    "gender": "muz",
+    "type": "quest-giver, merchant",
+    "disposition": "friendly",
+    "faction_id": "",
+    "quests": [
+      "Q001"
+    ],
+    "trade_items": [
+      {
+        "name": "Ovesné placky",
+        "type": "jídlo",
+        "price": 2
+      },
+      {
+        "name": "Sušená jablka",
+        "type": "jídlo",
+        "price": 1
+      },
+      {
+        "name": "Pytel obilí",
+        "type": "surovina",
+        "price": 3
+      }
+    ],
+    "appearance": "Korpulentní muž v padesátce s moukou v prošedivělých vousech a vlasech. Nosí zapranou lněnou košili a koženou zástěru, na které je patrné mnohaleté opotřebení. V očích má stálý unavený smutek.",
+    "personality": "Tiše trpí, vyhýbá se konfliktům a snaží se nevyvolávat problémy s městskou gardou ani s výběrčími daní. Když se však napije medoviny v krčmě, rozhovoří se o své zesnulé ženě Anně.",
+    "motivation": "Chce za každou cenu získat zpět zlatý prsten po své ženě. Je to jediná hmatatelná vzpomínka, kterou po ní má. Bojí se, že pokud prsten skončí v rukou zlodějů nebo goblinů, zapomene i na její tvář.",
+    "dialog_greeting": {
+      "default": "Vítej, poutníku... Promiň ten nepořádek. Od té doby, co odešla Anna, mlýn jen tiše chátrá. Hledáš mouku, nebo jen přístřeší před deštěm?",
+      "if_flag_set": {
+        "Q001_completed_A": "Á, příteli! Pokaždé, když ten prsten sevřu v dlani, cítím, jako by Anna stála vedle mě. Děkuji ti z celého srdce.",
+        "Q001_completed_B": "Vítej... Pořád přemýšlím o tom, co jsi mi řekl o Anně. O té runě... Celá léta jsem žil vedle někoho, koho jsem vlastně neznal. Přesto ti děkuji za pravdu.",
+        "Q001_completed_C": "Ty... Prsten jsi nenašel, viď? Cítím v kostech, že mi něco tajíš. Prosím, nech mě o samotě s mým žalem."
+      }
+    },
+    "dialog_topics": [
+      {
+        "topic": "O mlýně",
+        "text": "Tenhle mlýn postavil můj praděd. Dřív sem jezdili sedláci z celého kraje. Dnes? Pole pustoší havěť a císařská daňová komora bere i poslední pytel otrub."
+      },
+      {
+        "topic": "O Anně",
+        "text": "Byla to nejtišší a nejlaskavější žena v celém Oakhaven. Nikdy nemluvila o své rodině ani odkud přišla. Jen ten prsten... nosila ho na stříbrném řetízku na krku a nikdy ho nesundala."
+      },
+      {
+        "topic": "O strážmistrovi Aldricovi",
+        "text": "Aldric je starý pes. Sloužili jsme spolu v pohraničí, když jsme byli mladí. Je zatrpklý a vidí jen hrozby a čísla, ale město drží pohromadě."
+      }
+    ],
+    "dialog_quest": {
+      "Q001": {
+        "offer": "Poutníku... Vidím, že nosíš zbraň a nebojíš se cesty. Před dvěma dny mi lupiči vyplenili komoru a sebrali Annin prsten. Utekli ke Staré křižovatce. Aldric mi nepomůže. Přines mi ho zpět, zaplatím ti vším, co mi zbývá!",
+        "in_progress": "Už jsi byl na Staré křižovatce? Prosím, pospěš si, než ten prsten překupníci odvezou do Svobodných měst.",
+        "complete_A": "Můj bože... to je on! Vracíš mi mou duši. Tady, vezmi si těchto 25 zlaťáků a pecen čerstvého chleba. Oakhaven ti nikdy nezapomene tuto laskavost!",
+        "complete_B": "Cože to říkáš? Magická runa Kulla? Tajemné Útočiště?! Anna... byla Probuzená čarodějka?! Proč mi to nikdy neřekla... Vezmi si tenhle klíč. Patřil jí. Odemkne truhlu pod podlahou, kterou jsem nikdy nedokázal otevřít."
+      }
+    },
+    "source_file": "👥 Characters\\NPCs\\Boris Mlynář.md"
+  },
+  "strazmistr_aldric": {
+    "npc_id": "strazmistr_aldric",
+    "name": "Strážmistr Aldric",
+    "location_id": "oakhaven",
+    "gender": "muz",
+    "type": "quest-giver, autorita",
+    "disposition": "neutral",
+    "faction_id": "valerijske_imperium",
+    "quests": [
+      "Q101"
+    ],
+    "trade_items": [],
+    "appearance": "Padesátiletý zjizvený muž se strništěm, oděný v obouchané zbroji z valerijské ocele. Na rameni nosí vybledlý plášť s císařským sluncem. Pravou nohu při chůzi mírně napadá – památka na válku v pohraničí.",
+    "personality": "Cynický pragmatik. Už dávno ztratil iluze o cti rytířstva a spravedlnosti říše. Jeho jedinou prioritou je udržet město Oakhaven v celku a zbytečně neriskovat životy svých málo placených chlapů.",
+    "motivation": "Udržet křehký pořádek ve městě, odrazit noční nájezdy goblinů z pole a nemuset žádat o posily z hlavního města, což by přitáhlo pozornost kruté císařské inkvizice.",
+    "dialog_greeting": {
+      "default": "Stůj, cizinče. V Oakhaven máme dost vlastních potíží a nepotřebujeme dalšího tuláka s mečem u pasu. Pokud jsi tu za obchodem, jdi do krčmy. Pokud hledáš trable, skončíš v šatlavě.",
+      "if_flag_set": {
+        "Q101_completed_A": "Á, podívejme se... lovec goblinů. Sedláci na severních polích už nebrečí a já se konečně vyspal. Dobrá práce.",
+        "Q101_completed_B": "Sedláci říkají, že goblini utekli do hvozdu. Odvedl jsi svou práci, i když ne tak důkladně, jak bych čekal. Tady máš stříbro."
+      }
+    },
+    "dialog_topics": [
+      {
+        "topic": "O bezpečnosti města",
+        "text": "Mám dvanáct chlapů na celé město a dvě stě sáhů hradeb. Císařský dvůr posílá jen výběrčí daní, ale když žádám o posily, dělají, že neslyší. Každý den navíc bez krveprolití je pro mě vyhraná bitva."
+      },
+      {
+        "topic": "O Borisi Mlynářovi",
+        "text": "Boris je dobrý chlap, ale žije v minulosti. Jeho žena Anna zemřela před rokem a on pořád hledá její prstýnek. Kdybych měl posílat stráže za každým ztraceným šperkem, kdo by hlídal brány před gobliny a bandity z křižovatky?"
+      },
+      {
+        "topic": "O Temném hvozdu",
+        "text": "Tam nechoď. Les patří kmenům a divočině. Pokud tam vlezeš, nikdo tě hledat nepůjde. A ty elfí šípy nevarují předem."
+      }
+    ],
+    "dialog_quest": {
+      "Q101": {
+        "offer": "Hledáš práci? Sedlákům za hradbami někdo v noci podřezává dobytek a pálí stohy. Jsou to goblini z okraje Temného hvozdu. Zlikviduj je a přines mi důkaz. Vypíšu ti odměnu z městské pokladny – 15 stříbrňáků a dobrou loveckou dýku.",
+        "in_progress": "Už jsi vyčistil ta pole? Každou noc, co čekáš, tratí sedláci další krávu.",
+        "complete_A": "Vidím krev na tvé čepeli. Goblini se poučili. Tady je tvých 15 stříbrňáků a tahle vyvážená dýka z valerijské oceli. Zasloužil sis ji.",
+        "complete_B": "Říkáš, že jsi je zahnal hluboko do lesa? Radši bych viděl jejich uši na provázku, ale klid na polích je klid. Tady máš odměnu."
+      }
+    },
+    "source_file": "👥 Characters\\NPCs\\Strážmistr Aldric.md"
+  }
+}

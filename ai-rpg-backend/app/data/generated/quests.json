@@ -1,0 +1,216 @@
+{
+  "Q001": {
+    "quest_id": "Q001",
+    "title": "Q001 - Ztracený prsten",
+    "type": "main",
+    "giver_id": "boris_mlynar",
+    "start_location_id": "oakhaven",
+    "target_location_ids": [
+      "crossroads"
+    ],
+    "prerequisite_quests": [],
+    "prerequisite_flags": [],
+    "kingdom_id": 1,
+    "level_range": "1-3",
+    "reward": {
+      "gold": 25,
+      "xp": 50,
+      "items": [
+        "Čerstvý bochník chleba"
+      ],
+      "reputation": {
+        "valerijske_imperium": 2
+      }
+    },
+    "steps": [
+      {
+        "id": 1,
+        "objective": "Promluv s Borisem Mlynářem u Starého mlýna",
+        "location_id": "oakhaven",
+        "trigger": "interact_npc:boris_mlynar",
+        "narrative": "Boris Mlynář tě oslovuje s prosbou v hlase. Vypráví o krádeži zlatého prstenu po své zesnulé ženě Anně. Stopa vede na Starou křižovatku.\n",
+        "on_complete_flag": "Q001_step1_done"
+      },
+      {
+        "id": 2,
+        "objective": "Vydej se na Starou křižovatku a prozkoumej opuštěný tábor",
+        "location_id": "crossroads",
+        "trigger": "explore",
+        "narrative": "Na Staré křižovatce nalézáš mezi křovím stopy po spěšném táboření. Popel je ještě vlažný. V blátě leží kožený váček a v něm... prsten. Když ho vezmeš do dlaně, prsty ti projede mrazivé brnění. Na vnitřní straně je vyrytá runa boha Kulla. Anna nebyla obyčejná vesničanka.\n",
+        "on_complete_flag": "Q001_step2_done"
+      },
+      {
+        "id": 3,
+        "objective": "Rozhodni o osudu prstenu u Borise Mlynáře",
+        "location_id": "oakhaven",
+        "trigger": "branch_choice",
+        "narrative": "Stojíš znovu před Borisem. V kapse tě hřeje Annin prsten se záhadnou runou. Boris na tebe hledí plný naděje."
+      }
+    ],
+    "branches": {
+      "A": {
+        "label": "Vrátit prsten a zachovat milosrdnou lež",
+        "narrative": "Podáváš Borisovi prsten a neříkáš nic o runě ani tajemství jeho ženy. Boris se rozpláče vděčností, tiskne šperk k hrudi a dává ti své úspory i čerstvý chléb. Odcházíš s čistým svědomím, ale tajemství zůstává pohřbeno.\n",
+        "set_flags": [
+          "Q001_completed_A",
+          "boris_grateful"
+        ],
+        "reward": {
+          "gold": 25,
+          "xp": 50,
+          "items": [
+            "Čerstvý bochník chleba"
+          ]
+        },
+        "reputation_change": {
+          "valerijske_imperium": 2
+        },
+        "unlock_quests": [
+          "Q002"
+        ],
+        "world_event": "Boris Mlynář znovu nachází vůli žít. V Oakhaven se o tobě mluví jako o čestném poutníkovi."
+      },
+      "B": {
+        "label": "Říct Borisovi pravdu o Anně a runě Kulla",
+        "narrative": "Ukazuješ Borisovi runu a vysvětluješ mu, že Anna byla Probuzená a někdo po ní šel. Boris je otřesen – svět, kterému věřil, se zhroutil. Po dlouhém mlčení však vytahuje rezavý klíč. 'Měla truhlu ve sklepě mlýna... Nikdy jsem ji nedokázal otevřít. Vezmi si to. Zasloužíš si vědět víc než já.'\n",
+        "set_flags": [
+          "Q001_completed_B",
+          "knows_anna_secret"
+        ],
+        "reward": {
+          "gold": 10,
+          "xp": 75,
+          "items": [
+            "Klíč k Annině truhle"
+          ]
+        },
+        "unlock_quests": [
+          "Q002_AnninaTruhla",
+          "Q003_StopaTajemnehoUtociste"
+        ],
+        "world_event": "Odhalena existence sítě Tajemného Útočiště v pohraničí. Hráč získává přístup k tajnému archivu."
+      },
+      "C": {
+        "label": "Prsten si nechat pro jeho skrytou magickou moc",
+        "narrative": "Lžeš Borisovi do očí – tvrdíš, že lupiči už byli pryč a prsten je ztracený. Boris se zlomí a beze slova se vrací do mlýna. Jakmile se dotkneš runy o samotě, cítíš, jak v tobě rezonuje zárodečné Probuzení...\n",
+        "set_flags": [
+          "Q001_completed_C",
+          "has_kull_ring",
+          "player_is_cynical"
+        ],
+        "reward": {
+          "gold": 0,
+          "xp": 40,
+          "items": [
+            "Prsten boha Kulla (+1 slot kouzel, aura stínu)"
+          ]
+        },
+        "reputation_change": {
+          "oakhaven": -5,
+          "tajemne_utociste": 5
+        },
+        "unlock_quests": [
+          "Q004_VyzvaStinu"
+        ],
+        "world_event": "V hráči procitá temnější aspekt Probuzení. Oakhavenští se na tebe dívají s podezřením."
+      }
+    },
+    "source_file": "📜 Quests\\Main\\Q001_ZtrazenýPrsten.md"
+  },
+  "Q101": {
+    "quest_id": "Q101",
+    "title": "Q101 - Gobliní záškodníci",
+    "type": "side",
+    "giver_id": "strazmistr_aldric",
+    "start_location_id": "oakhaven",
+    "target_location_ids": [
+      "dark_forest"
+    ],
+    "prerequisite_quests": [],
+    "prerequisite_flags": [],
+    "kingdom_id": 1,
+    "level_range": "1-3",
+    "reward": {
+      "gold": 15,
+      "xp": 40,
+      "items": [
+        "Lovecká dýka"
+      ],
+      "reputation": {
+        "valerijske_imperium": 3
+      }
+    },
+    "steps": [
+      {
+        "id": 1,
+        "objective": "Přijmi zakázku od Strážmistra Aldrice v Oakhaven",
+        "location_id": "oakhaven",
+        "trigger": "interact_npc:strazmistr_aldric",
+        "narrative": "Strážmistr Aldric tě seznámí se situací na severních polích. Nabízí 15 stříbrňáků a armádní dýku za vyčištění gobliního hnízda.\n",
+        "on_complete_flag": "Q101_step1_done"
+      },
+      {
+        "id": 2,
+        "objective": "Vystopuj gobliny k okraji Temného hvozdu",
+        "location_id": "dark_forest",
+        "trigger": "combat",
+        "narrative": "U paty vyvráceného dubu na okraji Temného hvozdu nacházíš provizorní brloh. Tři vyhladovělí goblini se na tebe vrhnou s rezavými srpy.\n",
+        "on_complete_flag": "Q101_step2_done"
+      },
+      {
+        "id": 3,
+        "objective": "Prozkoumej doupě a učiň rozhodnutí",
+        "location_id": "dark_forest",
+        "trigger": "branch_choice",
+        "narrative": "Boj skončil. V hloubi kořenového doupěte se třesou dvě gobliní mláďata přikrčená u ohlodaných kostí. Na stěně z hlíny vidíš vyškrábané varování – kresbu obřího zvířete s rohy a modrýma očima. Goblini sem neutekli loupit, ale schovat se před něčím v hloubi hvozdu."
+      }
+    ],
+    "branches": {
+      "A": {
+        "label": "Vyhladit doupě bez milosti a odnést trofeje Aldricovi",
+        "narrative": "Zakončuješ práci, za kterou jsi placený. Vracíš se k Aldricovi s uťatýma ušima jako důkazem. Aldric tě pochválí za chladnokrevnost a vyplácí plnou odměnu.\n",
+        "set_flags": [
+          "Q101_completed_A",
+          "merciless_slayer"
+        ],
+        "reward": {
+          "gold": 15,
+          "xp": 45,
+          "items": [
+            "Lovecká dýka"
+          ]
+        },
+        "reputation_change": {
+          "valerijske_imperium": 4,
+          "kmeny_z_hvozdu": -3
+        },
+        "world_event": "Sedláci v Oakhaven oslavují konec gobliních nájezdů. V hloubi Temného hvozdu však cosi zlověstného zůstává nepovšimnuto."
+      },
+      "B": {
+        "label": "Ušetřit přeživší a varovat je; Aldricovi říct, že jsou zahnáni",
+        "narrative": "Zasouváš zbraň do pochvy a ukazuješ goblinům, ať táhnou na západ. Berou si pár zbytků a mizí v křoví. Aldricovi nahlásíš, že doupě bylo vyčištěno a přeživší uprchli za řeku. Aldric ti zaplatí, ačkoliv brumlá, že radši vidí krev. V noci tě u táborového ohně navštíví šepot větru – bohyně Vyldia tvůj soucit zaznamenala.\n",
+        "set_flags": [
+          "Q101_completed_B",
+          "mercy_to_goblins",
+          "vyldia_favor"
+        ],
+        "reward": {
+          "gold": 10,
+          "xp": 60,
+          "items": [
+            "Amulet z dubové kůry (+1 k přežití)"
+          ]
+        },
+        "reputation_change": {
+          "valerijske_imperium": 1,
+          "kmeny_z_hvozdu": 5
+        },
+        "unlock_quests": [
+          "Q102_StinVHvozdu"
+        ],
+        "world_event": "Kmeny z hvozdů se dozvídají o cizinci, který nejedná jako běžní řezníci z Impéria."
+      }
+    },
+    "source_file": "📜 Quests\\Side\\Q101_GobliniFarma.md"
+  }
+}
