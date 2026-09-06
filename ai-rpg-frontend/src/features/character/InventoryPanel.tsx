@@ -5,11 +5,11 @@ import { useGameStore } from '../../store/gameStore';
 import { RACES } from '../../data/races';
 
 const RARITY_MAP: Record<string, { label: string; border: string; text: string; bg: string }> = {
-  common: { label: 'Běžný', border: 'border-amber-900/20', text: 'text-slate-700', bg: 'bg-amber-100/70' },
-  uncommon: { label: 'Magický', border: 'border-emerald-600/40', text: 'text-emerald-800', bg: 'bg-emerald-100/80' },
-  rare: { label: 'Vzácný', border: 'border-sky-600/40', text: 'text-sky-800', bg: 'bg-sky-100/80' },
-  epic: { label: 'Epický', border: 'border-purple-600/40', text: 'text-purple-800', bg: 'bg-purple-100/80' },
-  legendary: { label: 'Legendární', border: 'border-amber-600/60', text: 'text-amber-900', bg: 'bg-amber-200/90' },
+  common: { label: 'Běžný', border: 'border-amber-900/20 dark:border-amber-500/20', text: 'text-slate-700 dark:text-slate-200', bg: 'bg-amber-100/70 dark:bg-amber-950/60' },
+  uncommon: { label: 'Magický', border: 'border-emerald-600/40 dark:border-emerald-500/40', text: 'text-emerald-800 dark:text-emerald-300', bg: 'bg-emerald-100/80 dark:bg-emerald-950/60' },
+  rare: { label: 'Vzácný', border: 'border-sky-600/40 dark:border-sky-500/40', text: 'text-sky-800 dark:text-sky-300', bg: 'bg-sky-100/80 dark:bg-sky-950/60' },
+  epic: { label: 'Epický', border: 'border-purple-600/40 dark:border-purple-500/40', text: 'text-purple-800 dark:text-purple-300', bg: 'bg-purple-100/80 dark:bg-purple-950/60' },
+  legendary: { label: 'Legendární', border: 'border-amber-600/60 dark:border-amber-400/60', text: 'text-amber-900 dark:text-amber-300', bg: 'bg-amber-200/90 dark:bg-amber-950/80' },
 };
 
 export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem }: any) => {
@@ -94,9 +94,9 @@ export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem 
 
     return (
       <div 
-        className={`w-16 h-16 bg-[#fcfbf7] border-2 rounded-xl flex flex-col justify-center items-center cursor-pointer transition relative shadow-sm
-          ${item ? `${rConfig?.border} hover:border-amber-700` : 'border-amber-900/15 hover:border-amber-700/40'}
-          ${selectedItem?.id === itemId ? 'ring-2 ring-amber-800' : ''}
+        className={`w-16 h-16 bg-[#fcfbf7] dark:bg-[#192231] border-2 rounded-xl flex flex-col justify-center items-center cursor-pointer transition relative shadow-sm
+          ${item ? `${rConfig?.border} hover:border-amber-700 dark:hover:border-amber-400` : 'border-amber-900/15 dark:border-amber-500/20 hover:border-amber-700/40 dark:hover:border-amber-400/40'}
+          ${selectedItem?.id === itemId ? 'ring-2 ring-amber-800 dark:ring-amber-400' : ''}
         `}
         onClick={() => setSelectedItem(item || null)}
         title={item ? `${item.name} (${slotName})` : slotName}
@@ -104,10 +104,10 @@ export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem 
         {item ? (
           <>
             <ItemIcon iconName={item.icon || defaultIcon} itemId={item.id} className="transform scale-75" />
-            <span className="text-[9px] font-cinzel font-bold text-amber-950 truncate max-w-[56px] text-center px-0.5">{item.name}</span>
+            <span className="text-[9px] font-cinzel font-bold text-amber-950 dark:text-amber-200 truncate max-w-[56px] text-center px-0.5">{item.name}</span>
           </>
         ) : (
-          <span className="text-slate-600 text-[10px] uppercase font-cinzel font-bold tracking-tighter">{slotName}</span>
+          <span className="text-slate-600 dark:text-slate-400 text-[10px] uppercase font-cinzel font-bold tracking-tighter">{slotName}</span>
         )}
       </div>
     );
@@ -115,33 +115,33 @@ export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem 
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
-      <div className="w-full max-w-5xl bg-[#f9f6e6]/95 backdrop-blur-xl rounded-2xl border border-amber-900/20 shadow-2xl overflow-hidden flex flex-col max-h-[92vh] text-slate-900">
+      <div className="w-full max-w-5xl bg-[#f9f6e6]/95 dark:bg-[#121823]/95 backdrop-blur-xl rounded-2xl border border-amber-900/20 dark:border-amber-500/30 shadow-2xl overflow-hidden flex flex-col max-h-[92vh] text-slate-900 dark:text-[#e2d9c8]">
         
         {/* Modal Header */}
-        <div className="bg-gradient-to-r from-amber-900/5 via-transparent to-amber-900/5 px-6 py-4 flex justify-between items-center border-b border-amber-900/15">
+        <div className="bg-gradient-to-r from-amber-900/5 via-transparent to-amber-900/5 dark:from-amber-500/10 dark:to-amber-500/10 px-6 py-4 flex justify-between items-center border-b border-amber-900/15 dark:border-amber-500/20">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-amber-100 rounded-xl border border-amber-900/15 text-amber-900">
+            <div className="p-2 bg-amber-100 dark:bg-amber-950/60 rounded-xl border border-amber-900/15 dark:border-amber-500/30 text-amber-900 dark:text-amber-300">
               <Package size={24} />
             </div>
             <div>
-              <h2 className="font-cinzel font-bold text-xl sm:text-2xl text-amber-950 tracking-wide">
+              <h2 className="font-cinzel font-bold text-xl sm:text-2xl text-amber-950 dark:text-[#e2d9c8] tracking-wide">
                 Inventář a Výstroj
               </h2>
-              <p className="text-xs font-lora text-slate-600">
+              <p className="text-xs font-lora text-slate-600 dark:text-slate-400">
                 Správa předmětů, zbraní, šperků a bojových atributů ({dndClass})
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-100 border border-amber-900/20 rounded-xl font-cinzel font-bold text-amber-950 text-sm shadow-inner">
+            <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-100 dark:bg-amber-950/70 border border-amber-900/20 dark:border-amber-500/30 rounded-xl font-cinzel font-bold text-amber-950 dark:text-amber-200 text-sm shadow-inner">
               <span className="w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center font-bold text-black text-[10px]">Z</span>
               <span>{gold} Zl.</span>
             </div>
 
             <button 
               onClick={() => onClose()} 
-              className="text-amber-900/60 hover:text-amber-950 p-1.5 rounded-xl hover:bg-amber-900/10 transition"
+              className="text-amber-900/60 dark:text-slate-400 hover:text-amber-950 dark:hover:text-amber-300 p-1.5 rounded-xl hover:bg-amber-900/10 dark:hover:bg-[#1c2637] transition cursor-pointer"
               title="Zavřít"
             >
               <X size={24} />
@@ -155,8 +155,8 @@ export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem 
           {/* Column 1: Equipment & Stats */}
           <div className="w-full h-auto shrink-0 lg:flex-1 flex flex-col gap-4">
             {/* Equipment Grid */}
-            <div className="bg-white/70 border border-amber-900/15 p-4 rounded-xl flex flex-col items-center gap-3 shadow-sm">
-              <h3 className="text-amber-950 uppercase font-cinzel font-bold text-xs tracking-widest border-b border-amber-900/10 w-full text-center pb-2">
+            <div className="bg-white/70 dark:bg-[#141c28]/70 border border-amber-900/15 dark:border-amber-500/20 p-4 rounded-xl flex flex-col items-center gap-3 shadow-sm">
+              <h3 className="text-amber-950 dark:text-amber-200 uppercase font-cinzel font-bold text-xs tracking-widest border-b border-amber-900/10 dark:border-amber-500/15 w-full text-center pb-2">
                 Bojová Výstroj
               </h3>
               
@@ -176,42 +176,42 @@ export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem 
             </div>
 
             {/* Combat Totals & RPG Stats */}
-            <div className="bg-white/70 border border-amber-900/15 p-4 rounded-xl text-slate-800 flex flex-col gap-3 shadow-sm">
-              <h3 className="uppercase font-cinzel font-bold text-xs tracking-widest text-amber-950 border-b border-amber-900/10 pb-2">
+            <div className="bg-white/70 dark:bg-[#141c28]/70 border border-amber-900/15 dark:border-amber-500/20 p-4 rounded-xl text-slate-800 dark:text-slate-200 flex flex-col gap-3 shadow-sm">
+              <h3 className="uppercase font-cinzel font-bold text-xs tracking-widest text-amber-950 dark:text-amber-200 border-b border-amber-900/10 dark:border-amber-500/15 pb-2">
                 Atributy a Boj
               </h3>
 
               {/* Combat Summary Badges */}
-              <div className="grid grid-cols-2 gap-2 bg-[#fcfbf7] p-2.5 rounded-xl border border-amber-900/15">
+              <div className="grid grid-cols-2 gap-2 bg-[#fcfbf7] dark:bg-[#192231] p-2.5 rounded-xl border border-amber-900/15 dark:border-amber-500/20">
                 <div className="flex items-center gap-2">
-                  <Swords size={20} className="text-amber-700 shrink-0" />
+                  <Swords size={20} className="text-amber-700 dark:text-amber-400 shrink-0" />
                   <div>
-                    <div className="text-[10px] uppercase font-cinzel font-bold text-slate-500">Celkový Útok</div>
-                    <div className="font-cinzel font-bold text-base text-amber-950">+{totalAttack}</div>
+                    <div className="text-[10px] uppercase font-cinzel font-bold text-slate-500 dark:text-slate-400">Celkový Útok</div>
+                    <div className="font-cinzel font-bold text-base text-amber-950 dark:text-amber-300">+{totalAttack}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Shield size={20} className="text-sky-700 shrink-0" />
+                  <Shield size={20} className="text-sky-700 dark:text-sky-400 shrink-0" />
                   <div>
-                    <div className="text-[10px] uppercase font-cinzel font-bold text-slate-500">Třída Zbroje (AC)</div>
-                    <div className="font-cinzel font-bold text-base text-sky-950">{totalAc}</div>
+                    <div className="text-[10px] uppercase font-cinzel font-bold text-slate-500 dark:text-slate-400">Třída Zbroje (AC)</div>
+                    <div className="font-cinzel font-bold text-base text-sky-950 dark:text-sky-300">{totalAc}</div>
                   </div>
                 </div>
               </div>
 
               {/* Health */}
-              <div className="flex justify-between items-center py-1 border-b border-amber-900/10 text-sm">
-                <span className="flex items-center gap-1.5 font-cinzel font-bold text-slate-700"><Heart size={16} className="text-red-600" /> Zdraví:</span>
-                <span className="font-cinzel font-bold text-slate-900 text-base">{hp} / {maxHp} HP</span>
+              <div className="flex justify-between items-center py-1 border-b border-amber-900/10 dark:border-amber-500/15 text-sm">
+                <span className="flex items-center gap-1.5 font-cinzel font-bold text-slate-700 dark:text-slate-300"><Heart size={16} className="text-red-600 dark:text-red-400" /> Zdraví:</span>
+                <span className="font-cinzel font-bold text-slate-900 dark:text-[#e2d9c8] text-base">{hp} / {maxHp} HP</span>
               </div>
 
               {/* Skill Points Available Banner */}
               {skillPoints > 0 && (
-                <div className="bg-amber-100 border border-amber-700/40 p-2.5 rounded-xl flex items-center justify-between shadow-sm">
-                  <span className="text-amber-950 text-xs font-cinzel font-bold flex items-center gap-1.5">
-                    <Sparkles size={14} className="text-amber-700" /> Volné body: {skillPoints}
+                <div className="bg-amber-100 dark:bg-amber-950/70 border border-amber-700/40 dark:border-amber-500/40 p-2.5 rounded-xl flex items-center justify-between shadow-sm">
+                  <span className="text-amber-950 dark:text-amber-200 text-xs font-cinzel font-bold flex items-center gap-1.5">
+                    <Sparkles size={14} className="text-amber-700 dark:text-amber-400" /> Volné body: {skillPoints}
                   </span>
-                  <span className="text-[10px] font-lora text-amber-900 italic">Klikni [+] pro vylepšení</span>
+                  <span className="text-[10px] font-lora text-amber-900 dark:text-amber-300 italic">Klikni [+] pro vylepšení</span>
                 </div>
               )}
 
@@ -228,14 +228,14 @@ export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem 
                   const mod = Math.floor((st.val - 10) / 2);
                   return (
                     <div key={st.key} className="flex justify-between items-center py-0.5">
-                      <span className="font-lora text-slate-700 text-xs sm:text-sm">{st.label}:</span>
+                      <span className="font-lora text-slate-700 dark:text-slate-300 text-xs sm:text-sm">{st.label}:</span>
                       <div className="flex items-center gap-2">
-                        <span className="font-cinzel font-bold text-amber-950 text-sm">{st.val}</span>
-                        <span className="text-[10px] font-lora text-slate-500 font-bold">({mod >= 0 ? `+${mod}` : mod})</span>
+                        <span className="font-cinzel font-bold text-amber-950 dark:text-amber-300 text-sm">{st.val}</span>
+                        <span className="text-[10px] font-lora text-slate-500 dark:text-slate-400 font-bold">({mod >= 0 ? `+${mod}` : mod})</span>
                         {skillPoints > 0 && (
                           <button
                             onClick={() => spendSkillPoint(st.key)}
-                            className="w-5 h-5 bg-amber-800 hover:bg-amber-700 text-white rounded flex items-center justify-center transition shadow font-bold"
+                            className="w-5 h-5 bg-amber-800 hover:bg-amber-700 dark:bg-amber-600 dark:hover:bg-amber-500 text-white rounded flex items-center justify-center transition shadow font-bold cursor-pointer"
                             title={`Přidat 1 bod k ${st.label}`}
                           >
                             <Plus size={14} />
@@ -250,7 +250,7 @@ export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem 
           </div>
 
           {/* Column 2: Selected Item Details */}
-          <div className="w-full h-auto shrink-0 lg:flex-1 bg-white/70 border border-amber-900/15 p-4 sm:p-5 rounded-xl flex flex-col items-center text-center relative shadow-sm">
+          <div className="w-full h-auto shrink-0 lg:flex-1 bg-white/70 dark:bg-[#141c28]/70 border border-amber-900/15 dark:border-amber-500/20 p-4 sm:p-5 rounded-xl flex flex-col items-center text-center relative shadow-sm">
             {selectedItem ? (
               (() => {
                 const rConfig = getRarityConfig(selectedItem.rarity);
@@ -260,58 +260,58 @@ export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem 
 
                 return (
                   <>
-                    <div className={`w-32 h-32 mx-auto mb-3 bg-[#fcfbf7] border-2 ${rConfig.border} rounded-2xl flex items-center justify-center shadow-inner relative`}>
+                    <div className={`w-32 h-32 mx-auto mb-3 bg-[#fcfbf7] dark:bg-[#192231] border-2 ${rConfig.border} rounded-2xl flex items-center justify-center shadow-inner relative`}>
                       <ItemIcon iconName={selectedItem.icon || 'Package'} itemId={selectedItem.id} size={90} />
                       <span className={`absolute bottom-1.5 right-2 text-[10px] font-cinzel font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border ${rConfig.bg} ${rConfig.text}`}>
                         {rConfig.label}
                       </span>
                     </div>
                     
-                    <h2 className={`text-xl font-cinzel font-bold mb-0.5 text-amber-950`}>{selectedItem.name}</h2>
-                    <p className="text-slate-500 text-xs font-cinzel uppercase tracking-wider mb-2">
+                    <h2 className={`text-xl font-cinzel font-bold mb-0.5 text-amber-950 dark:text-[#e2d9c8]`}>{selectedItem.name}</h2>
+                    <p className="text-slate-500 dark:text-slate-400 text-xs font-cinzel uppercase tracking-wider mb-2">
                       {selectedItem.type} • {selectedItem.slot || 'bez slotu'}
                     </p>
 
                     {/* Class Restriction Warning */}
                     {isClassLocked && (
-                      <div className="w-full mb-3 p-2 bg-red-100/90 text-red-900 border border-red-300 rounded-lg text-xs font-cinzel font-bold flex items-center justify-center gap-1.5 shadow-2xs">
+                      <div className="w-full mb-3 p-2 bg-red-100/90 dark:bg-red-950/70 text-red-900 dark:text-red-300 border border-red-300 dark:border-red-800 rounded-lg text-xs font-cinzel font-bold flex items-center justify-center gap-1.5 shadow-2xs">
                         <AlertTriangle size={14} />
                         <span>Vyžaduje třídu: {selectedItem.allowedClasses.join(", ")}</span>
                       </div>
                     )}
                     
-                    <div className="bg-[#fcfbf7] w-full p-4 rounded-xl text-sm mb-4 text-left border border-amber-900/15">
-                      <p className="mb-2 italic text-xs leading-relaxed font-lora text-slate-700">{selectedItem.description || selectedItem.desc || 'Obyčejný předmět nalezený na cestách po Aethelgardu.'}</p>
+                    <div className="bg-[#fcfbf7] dark:bg-[#192231] w-full p-4 rounded-xl text-sm mb-4 text-left border border-amber-900/15 dark:border-amber-500/20">
+                      <p className="mb-2 italic text-xs leading-relaxed font-lora text-slate-700 dark:text-slate-300">{selectedItem.description || selectedItem.desc || 'Obyčejný předmět nalezený na cestách po Aethelgardu.'}</p>
                       
                       {/* Numerical Modifiers & Status Effects */}
-                      <div className="flex flex-wrap gap-2 pt-2 border-t border-amber-900/10 text-xs">
+                      <div className="flex flex-wrap gap-2 pt-2 border-t border-amber-900/10 dark:border-amber-500/15 text-xs">
                         {Number(selectedItem.attack_bonus) > 0 && (
-                          <span className="font-cinzel font-bold text-amber-900 bg-amber-100 px-2 py-0.5 rounded border border-amber-700/30">
+                          <span className="font-cinzel font-bold text-amber-900 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/60 px-2 py-0.5 rounded border border-amber-700/30 dark:border-amber-500/30">
                             Útok: +{selectedItem.attack_bonus}
                           </span>
                         )}
                         {selectedItem.damageDice && (
-                          <span className="font-cinzel font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded border border-slate-300">
+                          <span className="font-cinzel font-bold text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-300 dark:border-slate-700">
                             Poškození: {selectedItem.damageDice}
                           </span>
                         )}
                         {Number(selectedItem.defense_bonus) > 0 && (
-                          <span className="font-cinzel font-bold text-sky-900 bg-sky-100 px-2 py-0.5 rounded border border-sky-700/30">
+                          <span className="font-cinzel font-bold text-sky-900 dark:text-sky-300 bg-sky-100 dark:bg-sky-950/60 px-2 py-0.5 rounded border border-sky-700/30 dark:border-sky-500/30">
                             Obrana: +{selectedItem.defense_bonus} AC
                           </span>
                         )}
                         {Number(selectedItem.flatDamageReduction) > 0 && (
-                          <span className="font-cinzel font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded border border-slate-300">
+                          <span className="font-cinzel font-bold text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-300 dark:border-slate-700">
                             Redukce: -{selectedItem.flatDamageReduction} dmg
                           </span>
                         )}
                         {selectedItem.statusAffliction && (
-                          <span className="font-cinzel font-bold text-amber-900 bg-amber-100 px-2 py-0.5 rounded border border-amber-600/40">
+                          <span className="font-cinzel font-bold text-amber-900 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/60 px-2 py-0.5 rounded border border-amber-600/40 dark:border-amber-500/30">
                             Status: {selectedItem.statusAffliction.type} ({Math.round(selectedItem.statusAffliction.chance * 100)}%)
                           </span>
                         )}
                         {Number(selectedItem.healing_amount) > 0 && (
-                          <span className="font-cinzel font-bold text-emerald-900 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-700/30">
+                          <span className="font-cinzel font-bold text-emerald-900 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-700/30 dark:border-emerald-500/30">
                             Léčení: +{selectedItem.healing_amount} HP
                           </span>
                         )}
@@ -319,10 +319,10 @@ export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem 
 
                       {/* Resistances */}
                       {selectedItem.resistances && (
-                        <div className="mt-2 text-[11px] font-cinzel text-slate-600 flex flex-wrap gap-2">
-                          <span className="font-bold text-slate-700">Odolnosti:</span>
+                        <div className="mt-2 text-[11px] font-cinzel text-slate-600 dark:text-slate-400 flex flex-wrap gap-2">
+                          <span className="font-bold text-slate-700 dark:text-slate-300">Odolnosti:</span>
                           {Object.entries(selectedItem.resistances).map(([k, v]) => (
-                            <span key={k} className="px-1.5 py-0.2 bg-amber-100/60 rounded border border-amber-900/15">
+                            <span key={k} className="px-1.5 py-0.2 bg-amber-100/60 dark:bg-amber-950/40 rounded border border-amber-900/15 dark:border-amber-500/20">
                               {k}: {Math.round((v as number) * 100)}%
                             </span>
                           ))}
@@ -331,24 +331,24 @@ export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem 
 
                       {/* Special Effect */}
                       {selectedItem.specialEffect && (
-                        <div className="mt-2 p-2 bg-amber-100/90 border border-amber-600/40 rounded-lg text-xs text-amber-950 font-medium leading-relaxed shadow-2xs">
-                          <span className="font-cinzel font-bold text-amber-900">Unikátní efekt: </span>
+                        <div className="mt-2 p-2 bg-amber-100/90 dark:bg-amber-950/60 border border-amber-600/40 dark:border-amber-500/30 rounded-lg text-xs text-amber-950 dark:text-amber-200 font-medium leading-relaxed shadow-2xs">
+                          <span className="font-cinzel font-bold text-amber-900 dark:text-amber-400">Unikátní efekt: </span>
                           {selectedItem.specialEffect}
                         </div>
                       )}
                     </div>
 
                     <div className="font-cinzel font-bold mb-4 text-sm flex items-center justify-between w-full px-2">
-                      <span className="text-slate-500">Cena u kupce:</span>
-                      <span className="text-amber-900">{selectedItem.sell_price || 5} Zl.</span>
+                      <span className="text-slate-500 dark:text-slate-400">Cena u kupce:</span>
+                      <span className="text-amber-900 dark:text-amber-300">{selectedItem.sell_price || 5} Zl.</span>
                     </div>
                     
-                    <div className="mt-4 pt-2 border-t border-amber-900/10 w-full flex flex-col gap-2">
+                    <div className="mt-4 pt-2 border-t border-amber-900/10 dark:border-amber-500/15 w-full flex flex-col gap-2">
                       {/* Potion Drink Action */}
                       {isPotion && (
                         <button
                           onClick={() => usePotion(selectedItem)}
-                          className="w-full py-2.5 bg-emerald-800 hover:bg-emerald-700 text-white font-cinzel font-bold uppercase text-xs tracking-wider transition shadow rounded-xl"
+                          className="w-full py-2.5 bg-emerald-800 hover:bg-emerald-700 dark:bg-emerald-700 dark:hover:bg-emerald-600 text-white font-cinzel font-bold uppercase text-xs tracking-wider transition shadow rounded-xl cursor-pointer"
                         >
                           Vypít lektvar (+{selectedItem.healing_amount || 25} HP)
                         </button>
@@ -364,7 +364,7 @@ export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem 
                                 setEquipped({ ...equipped, [slotKey]: null });
                               }
                             }}
-                            className="w-full py-2.5 bg-white border border-amber-900/20 text-slate-800 hover:bg-amber-100 font-cinzel font-bold uppercase text-xs tracking-wider transition rounded-xl"
+                            className="w-full py-2.5 bg-white dark:bg-[#192231] border border-amber-900/20 dark:border-amber-500/30 text-slate-800 dark:text-[#e2d9c8] hover:bg-amber-100 dark:hover:bg-[#222e42] font-cinzel font-bold uppercase text-xs tracking-wider transition rounded-xl cursor-pointer"
                           >
                             Odložit z výstroje
                           </button>
@@ -383,7 +383,7 @@ export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem 
                               
                               setEquipped({ ...equipped, [finalSlot]: selectedItem.id });
                             }}
-                            className="w-full py-2.5 bg-amber-800 hover:bg-amber-700 text-white font-cinzel font-bold uppercase text-xs tracking-wider transition shadow-lg rounded-xl disabled:opacity-40 disabled:cursor-not-allowed"
+                            className="w-full py-2.5 bg-amber-800 hover:bg-amber-700 dark:bg-amber-600 dark:hover:bg-amber-500 text-white font-cinzel font-bold uppercase text-xs tracking-wider transition shadow-lg rounded-xl disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                           >
                             {isClassLocked ? "Tuto výstroj nelze nasadit" : "Vybavit do výstroje"}
                           </button>
@@ -393,16 +393,16 @@ export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem 
                       {/* Sell Item Action */}
                       <button
                         onClick={() => sellItem(selectedItem)}
-                        className="w-full py-2 bg-white border border-amber-900/20 hover:bg-amber-100/60 text-amber-900 font-cinzel font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition shadow-2xs"
+                        className="w-full py-2 bg-white dark:bg-[#192231] border border-amber-900/20 dark:border-amber-500/30 hover:bg-amber-100/60 dark:hover:bg-[#222e42] text-amber-900 dark:text-amber-300 font-cinzel font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition shadow-2xs cursor-pointer"
                       >
-                        <Coins size={14} className="text-yellow-600" />
+                        <Coins size={14} className="text-yellow-600 dark:text-yellow-500" />
                         <span>Prodat obchodníkovi (+{selectedItem.sell_price || 5} Zl.)</span>
                       </button>
 
                       {/* Drop Item Action */}
                       <button
                         onClick={() => dropItem(selectedItem)}
-                        className="w-full py-1 text-xs text-red-700 hover:text-red-800 hover:bg-red-50 rounded-lg flex items-center justify-center gap-1.5 transition font-cinzel"
+                        className="w-full py-1 text-xs text-red-700 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg flex items-center justify-center gap-1.5 transition font-cinzel cursor-pointer"
                       >
                         <Trash2 size={13} /> Zahodit předmět
                       </button>
@@ -411,8 +411,8 @@ export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem 
                 );
               })()
             ) : (
-              <div className="flex-1 flex flex-col items-center justify-center text-slate-500 font-lora italic text-sm gap-3">
-                <div className="w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center text-amber-800">
+              <div className="flex-1 flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 font-lora italic text-sm gap-3">
+                <div className="w-14 h-14 rounded-full bg-amber-100 dark:bg-amber-950/60 flex items-center justify-center text-amber-800 dark:text-amber-300">
                   <Package size={28} />
                 </div>
                 <p className="max-w-xs">Vyberte předmět z batohu nebo výstroje pro zobrazení detailů a akcí.</p>
@@ -421,12 +421,12 @@ export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem 
           </div>
 
           {/* Column 3: Bag Grid */}
-          <div className="w-full h-auto shrink-0 lg:flex-1 bg-white/70 border border-amber-900/15 p-4 rounded-xl flex flex-col shadow-sm">
-            <div className="flex justify-between items-center border-b border-amber-900/10 pb-2 mb-4">
-              <h3 className="text-amber-950 uppercase font-cinzel font-bold text-xs tracking-widest">
+          <div className="w-full h-auto shrink-0 lg:flex-1 bg-white/70 dark:bg-[#141c28]/70 border border-amber-900/15 dark:border-amber-500/20 p-4 rounded-xl flex flex-col shadow-sm">
+            <div className="flex justify-between items-center border-b border-amber-900/10 dark:border-amber-500/15 pb-2 mb-4">
+              <h3 className="text-amber-950 dark:text-amber-200 uppercase font-cinzel font-bold text-xs tracking-widest">
                 Batoh ({inventory.length} / 20)
               </h3>
-              <span className="text-amber-950 font-cinzel font-bold text-xs bg-amber-100 px-2 py-0.5 rounded border border-amber-900/15">
+              <span className="text-amber-950 dark:text-amber-200 font-cinzel font-bold text-xs bg-amber-100 dark:bg-amber-950/70 px-2 py-0.5 rounded border border-amber-900/15 dark:border-amber-500/20">
                 Kapacita
               </span>
             </div>
@@ -441,9 +441,9 @@ export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem 
                   <div 
                     key={i} 
                     onClick={() => item && setSelectedItem(item)}
-                    className={`aspect-square bg-[#fcfbf7] border-2 rounded-xl flex justify-center items-center transition relative shadow-xs
-                      ${item ? `${rConfig?.border} cursor-pointer hover:border-amber-700 hover:scale-105` : 'border-amber-900/10'}
-                      ${selectedItem?.id === item?.id ? 'ring-2 ring-amber-800' : ''}
+                    className={`aspect-square bg-[#fcfbf7] dark:bg-[#192231] border-2 rounded-xl flex justify-center items-center transition relative shadow-xs
+                      ${item ? `${rConfig?.border} cursor-pointer hover:border-amber-700 dark:hover:border-amber-400 hover:scale-105` : 'border-amber-900/10 dark:border-amber-500/15'}
+                      ${selectedItem?.id === item?.id ? 'ring-2 ring-amber-800 dark:ring-amber-400' : ''}
                     `}
                     title={item ? `${item.name} (${rConfig?.label})` : undefined}
                   >
@@ -453,12 +453,12 @@ export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem 
                         
                         {/* Equipped Indicator Badge */}
                         {isItemEquipped && (
-                          <div className="absolute top-1 right-1 w-2.5 h-2.5 bg-amber-800 border border-white rounded-full shadow" title="Vybaveno v boji" />
+                          <div className="absolute top-1 right-1 w-2.5 h-2.5 bg-amber-800 dark:bg-amber-500 border border-white dark:border-slate-900 rounded-full shadow" title="Vybaveno v boji" />
                         )}
 
                         {/* Potion Indicator */}
                         {item.type === 'lektvar' && (
-                          <div className="absolute bottom-1 right-1 text-[8px] font-cinzel font-bold text-emerald-800 bg-emerald-100 px-1 rounded">
+                          <div className="absolute bottom-1 right-1 text-[8px] font-cinzel font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/80 px-1 rounded">
                             +{item.healing_amount || 25}
                           </div>
                         )}

@@ -284,9 +284,9 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#f9f6e6]/95 backdrop-blur-md rounded-2xl border-2 border-red-900/30 shadow-2xl overflow-hidden font-lora relative">
+    <div className="flex flex-col h-full bg-[#f9f6e6]/95 dark:bg-[#0b0f16]/95 backdrop-blur-md rounded-2xl border-2 border-red-900/30 dark:border-red-900/50 shadow-2xl overflow-hidden font-lora relative text-slate-900 dark:text-[#e2d9c8]">
       {/* Background Effect */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-red-950/20 via-[#f9f6e6]/90 to-[#e5dfc5]/95 pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-red-950/20 dark:from-red-950/40 via-[#f9f6e6]/90 dark:via-[#0b0f16]/90 to-[#e5dfc5]/95 dark:to-[#080b10]/95 pointer-events-none" />
 
       {/* Header */}
       <div className="bg-gradient-to-r from-red-900/90 to-red-950/90 border-b border-red-900/50 p-3 z-10 flex justify-between items-center shadow-md">
@@ -325,8 +325,8 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
                   exit={{ opacity: 0, scale: 0.8 }}
                   onClick={() => !isDead && setTargetId(enemy.id)}
                   className={`relative p-3.5 rounded-2xl border-2 transition-all cursor-pointer w-40 sm:w-48 shadow-lg
-                      ${isDead ? 'border-amber-900/20 bg-[#e5dfc5]/50 grayscale opacity-50' : 
-                        isTarget ? 'border-red-600 bg-white/90 shadow-red-600/30 scale-105' : 'border-amber-900/30 bg-[#fdfbf2]/90 hover:border-red-700/50 hover:bg-white'
+                      ${isDead ? 'border-amber-900/20 dark:border-slate-800 bg-[#e5dfc5]/50 dark:bg-slate-900/50 grayscale opacity-50' : 
+                        isTarget ? 'border-red-600 bg-white/90 dark:bg-[#1a2332] shadow-red-600/30 scale-105' : 'border-amber-900/30 dark:border-amber-600/30 bg-[#fdfbf2]/90 dark:bg-[#121824]/90 hover:border-red-700/50 hover:bg-white dark:hover:bg-[#1a2332]'
                       }`}
                 >
                   {isTarget && !isDead && (
@@ -335,7 +335,7 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
                     </div>
                   )}
 
-                  <div className="font-cinzel font-bold text-sm text-slate-900 text-center mb-1 truncate">
+                  <div className="font-cinzel font-bold text-sm text-slate-900 dark:text-amber-100 text-center mb-1 truncate">
                     {enemy.name}
                   </div>
                   
@@ -345,7 +345,7 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
                       {enemy.activeStatuses.map((st, i) => (
                         <span 
                           key={i} 
-                          className="text-[10px] px-1.5 py-0.2 rounded-lg font-bold flex items-center gap-0.5 bg-amber-100/90 border border-amber-900/30 text-amber-950 shadow-2xs"
+                          className="text-[10px] px-1.5 py-0.2 rounded-lg font-bold flex items-center gap-0.5 bg-amber-100/90 dark:bg-amber-950/60 border border-amber-900/30 dark:border-amber-600/30 text-amber-950 dark:text-amber-200 shadow-2xs"
                           title={`${st.name}: ${st.damagePerRound ? `${st.damagePerRound} dmg/kolo` : 'Aktivní'} (zbývá ${st.duration} kol)`}
                         >
                           {st.icon} {st.duration}k
@@ -355,29 +355,29 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
                   )}
                   
                   {/* HP Bar */}
-                  <div className="w-full bg-[#f4ecd8] h-2.5 rounded-full overflow-hidden border border-amber-900/40 relative mb-2 shadow-inner">
+                  <div className="w-full bg-[#f4ecd8] dark:bg-slate-800 h-2.5 rounded-full overflow-hidden border border-amber-900/40 dark:border-slate-700 relative mb-2 shadow-inner">
                     <motion.div 
                       className={`h-full ${isDead ? 'bg-slate-400' : 'bg-red-700'}`} 
                       animate={{ width: `${Math.max(0, (enemy.hp / enemy.max_hp) * 100)}%` }}
                       transition={{ duration: 0.3 }}
                     />
-                    <span className="absolute inset-0 flex items-center justify-center text-[8px] font-bold text-slate-900 leading-none drop-shadow-xs">
+                    <span className="absolute inset-0 flex items-center justify-center text-[8px] font-bold text-slate-900 dark:text-amber-100 leading-none drop-shadow-xs">
                       {Math.max(0, enemy.hp)} / {enemy.max_hp}
                     </span>
                   </div>
 
                   {/* Intent & AC */}
                   <div className="flex justify-between items-center text-xs font-cinzel">
-                    <span className="text-slate-600 flex items-center gap-1 font-bold" title="Obrana (AC)">
-                      <Shield size={12} className="text-amber-800" /> {enemy.ac}
+                    <span className="text-slate-600 dark:text-slate-400 flex items-center gap-1 font-bold" title="Obrana (AC)">
+                      <Shield size={12} className="text-amber-800 dark:text-amber-400" /> {enemy.ac}
                     </span>
                     
                     {!isDead && (
                       <span className={`font-bold px-1.5 py-0.5 rounded-md text-[10px] uppercase border ${
-                        enemy.intent === 'attack' ? 'bg-red-100 text-red-900 border-red-300' :
-                        enemy.intent === 'heavy_attack' ? 'bg-red-200 text-red-950 border-red-500 font-extrabold' :
-                        enemy.intent === 'defend' ? 'bg-blue-100 text-blue-900 border-blue-300' :
-                        'bg-slate-100 text-slate-700 border-slate-300'
+                        enemy.intent === 'attack' ? 'bg-red-100 dark:bg-red-950/60 text-red-900 dark:text-red-300 border-red-300 dark:border-red-700' :
+                        enemy.intent === 'heavy_attack' ? 'bg-red-200 dark:bg-red-900/60 text-red-950 dark:text-red-200 border-red-500 dark:border-red-600 font-extrabold' :
+                        enemy.intent === 'defend' ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-900 dark:text-blue-300 border-blue-300 dark:border-blue-700' :
+                        'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700'
                       }`}>
                         {enemy.intent === 'attack' && `Útok (${enemy.intentDamage || '2-7'})`}
                         {enemy.intent === 'heavy_attack' && `Drť (${enemy.intentDamage || '4-11'})`}
@@ -393,9 +393,9 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
         </div>
 
         {/* Combat Log */}
-        <div className="h-32 sm:h-36 bg-[#fdfbf2]/80 rounded-xl border border-amber-900/20 p-2 sm:p-3 overflow-y-auto font-lora text-xs flex flex-col gap-1 shadow-inner custom-scrollbar">
+        <div className="h-32 sm:h-36 bg-[#fdfbf2]/80 dark:bg-[#0f141d]/80 rounded-xl border border-amber-900/20 dark:border-amber-600/30 p-2 sm:p-3 overflow-y-auto font-lora text-xs flex flex-col gap-1 shadow-inner custom-scrollbar">
           {combatLog.map((log: string, idx: number) => (
-            <div key={idx} className="text-slate-800 border-b border-amber-900/5 pb-0.5 last:border-0 leading-tight">
+            <div key={idx} className="text-slate-800 dark:text-slate-200 border-b border-amber-900/5 dark:border-slate-800 pb-0.5 last:border-0 leading-tight">
               {log}
             </div>
           ))}
@@ -404,15 +404,15 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
       </div>
 
       {/* Footer: Player Actions */}
-      <div className="bg-[#f4ecd8] border-t-2 border-amber-900/20 p-3 sm:p-4 z-10 flex flex-col sm:flex-row gap-3">
+      <div className="bg-[#f4ecd8] dark:bg-[#0f1520] border-t-2 border-amber-900/20 dark:border-amber-600/30 p-3 sm:p-4 z-10 flex flex-col sm:flex-row gap-3">
         {/* Left: Player Profile & AP */}
-        <div className="flex sm:flex-col justify-between sm:justify-center items-center sm:items-start min-w-[140px] pr-2 sm:border-r border-amber-900/20">
+        <div className="flex sm:flex-col justify-between sm:justify-center items-center sm:items-start min-w-[140px] pr-2 sm:border-r border-amber-900/20 dark:border-amber-600/30">
           <div>
-            <div className="flex items-center gap-1.5 font-cinzel font-bold text-amber-950 text-sm">
-              <Heart size={16} className="text-red-700 fill-red-700" />
+            <div className="flex items-center gap-1.5 font-cinzel font-bold text-amber-950 dark:text-amber-200 text-sm">
+              <Heart size={16} className="text-red-700 fill-red-700 dark:text-red-500 dark:fill-red-500" />
               <span>{hp} / {maxHp}</span>
               {playerShield > 0 && (
-                <span className="text-blue-700 text-xs font-bold" title="Štít">(+{playerShield} 🛡️)</span>
+                <span className="text-blue-700 dark:text-blue-400 text-xs font-bold" title="Štít">(+{playerShield} 🛡️)</span>
               )}
             </div>
             
@@ -420,7 +420,7 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
             {playerStatuses.length > 0 && (
               <div className="flex gap-1 mt-1">
                 {playerStatuses.map((st, i) => (
-                  <span key={i} className="text-[9px] px-1 bg-amber-100 border border-amber-800/30 rounded font-bold" title={st.name}>
+                  <span key={i} className="text-[9px] px-1 bg-amber-100 dark:bg-amber-950/60 border border-amber-800/30 dark:border-amber-600/40 rounded font-bold text-amber-950 dark:text-amber-200" title={st.name}>
                     {st.icon} {st.duration}k
                   </span>
                 ))}
@@ -429,11 +429,11 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
           </div>
 
           <div className="flex items-center gap-1 mt-1 sm:mt-2">
-            <span className="text-xs font-cinzel font-bold text-slate-700 mr-1">AP:</span>
+            <span className="text-xs font-cinzel font-bold text-slate-700 dark:text-slate-300 mr-1">AP:</span>
             {Array(maxAP).fill(0).map((_, i) => (
               <div 
                 key={i} 
-                className={`w-4 h-4 rounded-full border border-blue-900 transition-all ${i < combatAp ? 'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]' : 'bg-slate-300 opacity-50'}`} 
+                className={`w-4 h-4 rounded-full border border-blue-900 dark:border-blue-400 transition-all ${i < combatAp ? 'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]' : 'bg-slate-300 dark:bg-slate-700 opacity-50'}`} 
               />
             ))}
           </div>
@@ -441,9 +441,9 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
 
         {/* Middle: Skills & Spells */}
         <div className="flex-1 overflow-x-auto custom-scrollbar">
-          <div className="text-[10px] text-amber-900 font-bold uppercase tracking-wider mb-1 flex items-center justify-between">
+          <div className="text-[10px] text-amber-900 dark:text-amber-300 font-bold uppercase tracking-wider mb-1 flex items-center justify-between">
             <span>Bojové schopnosti</span>
-            <span className="text-slate-500 font-normal">Připravená kouzla & Zbraň</span>
+            <span className="text-slate-500 dark:text-slate-400 font-normal">Připravená kouzla & Zbraň</span>
           </div>
           
           <div className="flex flex-wrap gap-2">
@@ -453,7 +453,7 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
                 disabled={isActionLocked || combatAp < 2 || dragonCooldown > 0}
                 onClick={handleDragonBreath}
                 className={`flex flex-col items-start p-2.5 rounded-xl border-2 transition-all min-w-[105px]
-                  ${isActionLocked || combatAp < 2 || dragonCooldown > 0 ? 'bg-slate-200 border-slate-300 opacity-50 cursor-not-allowed' : 'bg-red-50 border-red-900/20 hover:border-red-600 shadow-xs'}`}
+                  ${isActionLocked || combatAp < 2 || dragonCooldown > 0 ? 'bg-slate-200 dark:bg-slate-800 border-slate-300 dark:border-slate-700 opacity-50 cursor-not-allowed' : 'bg-red-50 dark:bg-red-950/40 border-red-900/20 dark:border-red-900/40 hover:border-red-600 shadow-xs'}`}
               >
                 <div className="flex justify-between w-full items-center mb-1">
                   <span className="text-base">🔥</span>
@@ -462,9 +462,9 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
                     <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
                   </div>
                 </div>
-                <div className="text-xs font-bold text-red-900 font-cinzel leading-tight">Dračí Dech</div>
-                <div className="text-[9px] text-red-700 leading-tight mt-0.5">[AoE] Oheň</div>
-                {dragonCooldown > 0 && <div className="text-[9px] text-red-600 font-bold mt-0.5">⏳ CD: {dragonCooldown}</div>}
+                <div className="text-xs font-bold text-red-900 dark:text-red-300 font-cinzel leading-tight">Dračí Dech</div>
+                <div className="text-[9px] text-red-700 dark:text-red-400 leading-tight mt-0.5">[AoE] Oheň</div>
+                {dragonCooldown > 0 && <div className="text-[9px] text-red-600 dark:text-red-400 font-bold mt-0.5">⏳ CD: {dragonCooldown}</div>}
               </button>
             )}
 
@@ -481,7 +481,7 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
                   disabled={isDisabled}
                   onClick={() => handleCastClassSkill(skill, rankData)}
                   className={`flex flex-col items-start p-2.5 rounded-xl border-2 transition-all min-w-[110px] relative
-                    ${isDisabled ? 'bg-slate-200 border-slate-300 opacity-50 cursor-not-allowed' : 'bg-amber-50 border-amber-900/30 hover:border-amber-700 hover:bg-amber-100/80 shadow-xs'}`}
+                    ${isDisabled ? 'bg-slate-200 dark:bg-slate-800 border-slate-300 dark:border-slate-700 opacity-50 cursor-not-allowed' : 'bg-amber-50 dark:bg-[#1a2332] border-amber-900/30 dark:border-amber-600/30 hover:border-amber-700 hover:bg-amber-100/80 dark:hover:bg-[#222e42] shadow-xs'}`}
                 >
                   <div className="flex justify-between w-full items-center mb-1">
                     <span className="text-base">✨</span>
@@ -491,14 +491,14 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
                       ))}
                     </div>
                   </div>
-                  <span className="font-cinzel font-bold text-amber-950 text-xs text-left leading-tight truncate w-full">
+                  <span className="font-cinzel font-bold text-amber-950 dark:text-amber-200 text-xs text-left leading-tight truncate w-full">
                     {skill.name.split('(')[0]}
                   </span>
-                  <span className="text-[9px] text-amber-800 mt-0.5 flex items-center gap-1 font-semibold">
+                  <span className="text-[9px] text-amber-800 dark:text-amber-400 mt-0.5 flex items-center gap-1 font-semibold">
                     {isAoE ? '[AoE Všichni]' : (rankData.healAmount ? `+ ${rankData.healAmount} HP` : (rankData.damageDice ? `${rankData.damageDice} dmg` : 'Podpora'))}
                   </span>
                   {cd > 0 && (
-                    <div className="text-[9px] text-red-600 font-bold mt-0.5">⏳ CD: {cd}k</div>
+                    <div className="text-[9px] text-red-600 dark:text-red-400 font-bold mt-0.5">⏳ CD: {cd}k</div>
                   )}
                 </button>
               );
@@ -511,7 +511,7 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
                 disabled={isActionLocked || combatAp < skill.apCost}
                 onClick={() => handlePlayerAction(skill)}
                 className={`flex flex-col items-start p-2.5 rounded-xl border-2 transition-all min-w-[105px]
-                  ${isActionLocked || combatAp < skill.apCost ? 'bg-slate-200 border-slate-300 opacity-50 cursor-not-allowed' : 'bg-white border-amber-900/20 hover:border-amber-600 hover:bg-amber-50 shadow-xs'}`}
+                  ${isActionLocked || combatAp < skill.apCost ? 'bg-slate-200 dark:bg-slate-800 border-slate-300 dark:border-slate-700 opacity-50 cursor-not-allowed' : 'bg-white dark:bg-[#161f2c] border-amber-900/20 dark:border-amber-600/30 hover:border-amber-600 hover:bg-amber-50 dark:hover:bg-[#1e2a3b] shadow-xs'}`}
               >
                 <div className="flex justify-between w-full items-center mb-1">
                   <span className="text-base">{skill.icon}</span>
@@ -521,8 +521,8 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
                     ))}
                   </div>
                 </div>
-                <span className="font-cinzel font-bold text-slate-900 text-xs text-left leading-tight">{skill.name}</span>
-                <span className="text-[9px] text-slate-500 mt-0.5">{skill.damageDice !== "0" ? `${skill.damageDice} dmg` : 'Podpora'}</span>
+                <span className="font-cinzel font-bold text-slate-900 dark:text-amber-100 text-xs text-left leading-tight">{skill.name}</span>
+                <span className="text-[9px] text-slate-500 dark:text-slate-400 mt-0.5">{skill.damageDice !== "0" ? `${skill.damageDice} dmg` : 'Podpora'}</span>
               </button>
             ))}
 
@@ -533,7 +533,7 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
                 disabled={isActionLocked || combatAp < 1}
                 onClick={() => handleUsePotion(potion)}
                 className={`flex flex-col items-start p-2.5 rounded-xl border-2 transition-all min-w-[105px]
-                  ${isActionLocked || combatAp < 1 ? 'bg-slate-200 border-slate-300 opacity-50 cursor-not-allowed' : 'bg-emerald-50 border-emerald-900/20 hover:border-emerald-600 hover:bg-emerald-100 shadow-xs'}`}
+                  ${isActionLocked || combatAp < 1 ? 'bg-slate-200 dark:bg-slate-800 border-slate-300 dark:border-slate-700 opacity-50 cursor-not-allowed' : 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-900/20 dark:border-emerald-600/30 hover:border-emerald-600 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 shadow-xs'}`}
               >
                 <div className="flex justify-between w-full items-center mb-1">
                   <span className="text-base">🧪</span>
@@ -541,8 +541,8 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
                     <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
                   </div>
                 </div>
-                <span className="font-cinzel font-bold text-emerald-900 text-xs text-left leading-tight truncate w-[85px]">{potion.name}</span>
-                <span className="text-[9px] text-emerald-700 mt-0.5">+{potion.healing_amount || 25} HP</span>
+                <span className="font-cinzel font-bold text-emerald-900 dark:text-emerald-200 text-xs text-left leading-tight truncate w-[85px]">{potion.name}</span>
+                <span className="text-[9px] text-emerald-700 dark:text-emerald-400 mt-0.5">+{potion.healing_amount || 25} HP</span>
               </button>
             ))}
           </div>
@@ -553,7 +553,7 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
           <button 
             onClick={endTurn}
             disabled={isActionLocked}
-            className={`flex-1 font-bold font-cinzel rounded-xl flex items-center justify-center gap-2 p-2 sm:py-3 transition-colors text-sm shadow-md ${allEnemiesDead ? 'bg-emerald-800 text-white cursor-not-allowed opacity-90' : 'bg-red-800 hover:bg-red-700 text-white disabled:opacity-50 disabled:bg-red-950/40 disabled:cursor-not-allowed'}`}
+            className={`flex-1 font-bold font-cinzel rounded-xl flex items-center justify-center gap-2 p-2 sm:py-3 transition-colors text-sm shadow-md ${allEnemiesDead ? 'bg-emerald-800 text-white cursor-not-allowed opacity-90' : 'bg-red-800 hover:bg-red-700 dark:bg-red-900 dark:hover:bg-red-800 text-white disabled:opacity-50 disabled:bg-red-950/40 disabled:cursor-not-allowed'}`}
           >
             {allEnemiesDead ? (
               <>
@@ -578,7 +578,7 @@ export const CombatArena = ({ onVictory }: { onVictory?: () => void }) => {
               onKeyDown={(e) => e.key === 'Enter' && handleCreativeAction()}
               placeholder="Vlastní akce (1 AP)..."
               disabled={isActionLocked || combatAp < 1}
-              className="w-full h-full bg-white/80 border border-amber-900/30 rounded-xl px-2.5 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-amber-700 shadow-inner disabled:opacity-50"
+              className="w-full h-full bg-white/80 dark:bg-[#141b26] border border-amber-900/30 dark:border-amber-600/30 rounded-xl px-2.5 py-1.5 text-xs text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-amber-700 shadow-inner disabled:opacity-50"
             />
           </div>
         </div>

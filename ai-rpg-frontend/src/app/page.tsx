@@ -11,7 +11,7 @@ import { ItemIcon } from '../components/ui/ItemIcon';
 import { InventoryPanel } from '../features/character/InventoryPanel';
 import { DeathModal } from '../features/character/DeathModal';
 import ReactPlayer from 'react-player';
-import { Send, Heart, Flame, Package, Sword, Shield, FlaskConical, Gem, Shirt, ScrollText, X, Volume2, VolumeX, User, Users, Settings2, Map, Sparkles, Skull, BookOpen, MapPin, Drumstick, Mail, Loader2, Trash2 , Brain , Menu, RotateCcw, ShoppingBag, Target } from "lucide-react";
+import { Send, Heart, Flame, Package, Sword, Shield, FlaskConical, Gem, Shirt, ScrollText, X, Volume2, VolumeX, User, Users, Settings2, Map, Sparkles, Skull, BookOpen, MapPin, Drumstick, Mail, Loader2, Trash2 , Brain , Menu, RotateCcw, ShoppingBag, Target, Sun, Moon } from "lucide-react";
 import { CharacterCreation } from '../features/character/CharacterCreation';
 import { MapModal } from '../features/map/MapModal';
 import { QuestsModal } from '../features/character/QuestsModal';
@@ -74,26 +74,26 @@ const TypewriterText = ({ text, delay = 25, animate = false }: { text: string, d
 const FormattedSystemLog = ({ text }: { text: string }) => {
     const lines = text.split('\n').map((line, idx) => {
       let html = line
-        .replace(/(Kritický úspěch!|Kritický úspěch|Kritický úspěch\.)/gi, '<span class="text-green-700 font-bold uppercase tracking-wider">$1</span>')
-        .replace(/(Kritické selhání!|Kritické selhání|Kritický neúspěch)/gi, '<span class="text-red-500 font-bold uppercase tracking-wider">$1</span>')
-        .replace(/(?<!\p{L})(Úspěch\.|Úspěch!|Úspěch:?)/giu, '<span class="text-green-700 font-bold">$1</span>')
-        .replace(/(?<!\p{L})(Selhání\.|Selhání!|Selhání:?|Neúspěch\.|Neúspěch!|Neúspěch:?)/giu, '<span class="text-red-700 font-bold">$1</span>')
-        .replace(/(Hráč ztrácí \d+ HP|ztrácí \d+ HP|způsobuje \d+ bodů poškození|Ztrácí \d+ HP)/gi, '<span class="text-red-700 font-bold">$1</span>')
-        .replace(/(d\d+\(\d+\))/g, '<span class="text-amber-700 font-bold">$1</span>')
-        .replace(/(\d+ vs DC \d+)/g, '<span class="text-amber-700 font-bold">$1</span>')
-        .replace(/(vs AC \d+)/g, '<span class="text-amber-700 font-bold">$1</span>')
-        .replace(/(Útok vlka|Útok nepřítele|Útok skřeta|Útok orka)/gi, '<span class="text-red-700 font-bold">$1</span>')
-        .replace(/(Útok hráče.*?:)/gi, '<span class="text-green-700 font-bold">$1</span>')
-        .replace(/(Zásah!)/g, '<span class="font-bold border-b border-red-400 text-red-700">$1</span>')
-        .replace(/(Hod na .*?:)/gi, '<span class="text-rpg-magic font-bold">$1</span>')
-        .replace(/(Aktivní akce:)/gi, '<span class="text-blue-300 font-bold">$1</span>')
-        .replace(/(Výsledek:)/gi, '<span class="text-slate-900 font-bold">$1</span>');
+        .replace(/(Kritický úspěch!|Kritický úspěch|Kritický úspěch\.)/gi, '<span class="text-green-700 dark:text-green-400 font-bold uppercase tracking-wider">$1</span>')
+        .replace(/(Kritické selhání!|Kritické selhání|Kritický neúspěch)/gi, '<span class="text-red-500 dark:text-red-400 font-bold uppercase tracking-wider">$1</span>')
+        .replace(/(?<!\p{L})(Úspěch\.|Úspěch!|Úspěch:?)/giu, '<span class="text-green-700 dark:text-green-400 font-bold">$1</span>')
+        .replace(/(?<!\p{L})(Selhání\.|Selhání!|Selhání:?|Neúspěch\.|Neúspěch!|Neúspěch:?)/giu, '<span class="text-red-700 dark:text-red-400 font-bold">$1</span>')
+        .replace(/(Hráč ztrácí \d+ HP|ztrácí \d+ HP|způsobuje \d+ bodů poškození|Ztrácí \d+ HP)/gi, '<span class="text-red-700 dark:text-red-400 font-bold">$1</span>')
+        .replace(/(d\d+\(\d+\))/g, '<span class="text-amber-700 dark:text-amber-400 font-bold">$1</span>')
+        .replace(/(\d+ vs DC \d+)/g, '<span class="text-amber-700 dark:text-amber-400 font-bold">$1</span>')
+        .replace(/(vs AC \d+)/g, '<span class="text-amber-700 dark:text-amber-400 font-bold">$1</span>')
+        .replace(/(Útok vlka|Útok nepřítele|Útok skřeta|Útok orka)/gi, '<span class="text-red-700 dark:text-red-400 font-bold">$1</span>')
+        .replace(/(Útok hráče.*?:)/gi, '<span class="text-green-700 dark:text-green-400 font-bold">$1</span>')
+        .replace(/(Zásah!)/g, '<span class="font-bold border-b border-red-400 text-red-700 dark:text-red-400">$1</span>')
+        .replace(/(Hod na .*?:)/gi, '<span class="text-rpg-magic dark:text-amber-300 font-bold">$1</span>')
+        .replace(/(Aktivní akce:)/gi, '<span class="text-blue-600 dark:text-blue-400 font-bold">$1</span>')
+        .replace(/(Výsledek:)/gi, '<span class="text-slate-900 dark:text-slate-200 font-bold">$1</span>');
       
       return (
         <div key={idx} className="mb-1 last:mb-0" dangerouslySetInnerHTML={{ __html: html }} />
       );
     });
-    return <div className="font-mono text-sm text-slate-800 leading-relaxed bg-[#f9f6e6]/60 p-4 rounded-xl border border-amber-900/10 shadow-inner mt-2">{lines}</div>;
+    return <div className="font-mono text-sm text-slate-800 dark:text-[#d1c7b7] leading-relaxed bg-[#f9f6e6]/60 dark:bg-[#0c1119]/80 p-4 rounded-xl border border-amber-900/10 dark:border-amber-500/15 shadow-inner mt-2">{lines}</div>;
   };
 
 
@@ -111,8 +111,12 @@ export default function Home() {
     suggestedActions, setSuggestedActions, pointsOfInterest, setPointsOfInterest, currentLocationImage, setCurrentLocationImage, 
     currentLocationDesc, setCurrentLocationDesc, currentImage, setCurrentImage, combatLog, setCombatLog, reputation, setReputation, 
     updateReputation, chronicle, setChronicle, worldFlags, setWorldFlags, consequenceToast, setConsequenceToast,
-    activeBuffs, addBuff, activeMount, setActiveMount, resetCharacterCreation
+    activeBuffs, addBuff, activeMount, setActiveMount, resetCharacterCreation,
+    theme, setTheme
   } = useGameStore();
+
+  const isDark = theme === 'dark' || (theme === 'auto' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  const toggleTheme = () => setTheme(isDark ? 'light' : 'dark');
 
   const activeTrackedQuest = useMemo(() => {
     if (!quests || !Array.isArray(quests) || quests.length === 0) return null;
@@ -1134,28 +1138,44 @@ export default function Home() {
   return (
     <>
       {gameState === "menu" && (
-        <div className="h-[100dvh] max-h-[100dvh] w-full max-w-full text-[#2d3748] flex flex-col items-center justify-center p-2 sm:p-4 font-serif relative overflow-hidden bg-[#e5dfc5]">
-          {/* Audio toggle in top right corner of menu */}
-          <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              const nextState = !musicPlaying;
-              setMusicPlaying(nextState);
-              if (nextState && bgAudioRef.current) {
-                bgAudioRef.current.play().catch(console.error);
-              }
-            }}
-            className="absolute top-3 right-3 sm:top-4 sm:right-4 z-30 p-2 sm:px-3 sm:py-1.5 rounded-full bg-[#f9f6e6]/80 hover:bg-[#f9f6e6] border border-amber-900/20 text-slate-700 shadow-md backdrop-blur-sm transition flex items-center gap-2 text-xs font-cinzel cursor-pointer"
-            title={musicPlaying ? "Vypnout hudbu" : "Zapnout hudbu"}
-          >
-            {musicPlaying ? <Volume2 size={16} className="text-amber-800" /> : <VolumeX size={16} className="text-slate-400" />}
-            <span className="hidden sm:inline font-bold">{musicPlaying ? "Hudba hraje" : "Hudba vypnuta"}</span>
-          </button>
+        <div className="h-[100dvh] max-h-[100dvh] w-full max-w-full text-[#2d3748] dark:text-[#e2d9c8] flex flex-col items-center justify-center p-2 sm:p-4 font-serif relative overflow-hidden bg-[#e5dfc5] dark:bg-[#0b0f16] transition-colors duration-500">
+          {/* Top right controls: Theme toggle & Audio toggle */}
+          <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-30 flex items-center gap-2">
+            {/* Quick Theme Toggle */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleTheme();
+              }}
+              className="p-2 sm:px-3 sm:py-1.5 rounded-full bg-[#f9f6e6]/80 hover:bg-[#f9f6e6] dark:bg-[#141c28]/90 dark:hover:bg-[#1a2332] border border-amber-900/20 dark:border-amber-500/30 text-slate-700 dark:text-amber-200 shadow-md backdrop-blur-sm transition flex items-center gap-1.5 text-xs font-cinzel cursor-pointer"
+              title={isDark ? "Přepnout na Světlý kodex" : "Přepnout na Černý grimoár"}
+            >
+              {isDark ? <Sun size={15} className="text-amber-400" /> : <Moon size={15} className="text-amber-800" />}
+              <span className="hidden sm:inline font-bold">{isDark ? "Grimoár" : "Sluneční"}</span>
+            </button>
+
+            {/* Audio Toggle */}
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                const nextState = !musicPlaying;
+                setMusicPlaying(nextState);
+                if (nextState && bgAudioRef.current) {
+                  bgAudioRef.current.play().catch(console.error);
+                }
+              }}
+              className="p-2 sm:px-3 sm:py-1.5 rounded-full bg-[#f9f6e6]/80 hover:bg-[#f9f6e6] dark:bg-[#141c28]/90 dark:hover:bg-[#1a2332] border border-amber-900/20 dark:border-amber-500/30 text-slate-700 dark:text-slate-300 shadow-md backdrop-blur-sm transition flex items-center gap-2 text-xs font-cinzel cursor-pointer"
+              title={musicPlaying ? "Vypnout hudbu" : "Zapnout hudbu"}
+            >
+              {musicPlaying ? <Volume2 size={16} className="text-amber-800 dark:text-amber-400" /> : <VolumeX size={16} className="text-slate-400 dark:text-slate-500" />}
+              <span className="hidden sm:inline font-bold">{musicPlaying ? "Hudba hraje" : "Hudba vypnuta"}</span>
+            </button>
+          </div>
         
         {/* Deep background fog */}
-        <SeamlessVideo src="/video/bg1.mp4" className="absolute inset-0 w-full h-full z-0 pointer-events-none opacity-60" />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#e5dfc5]/20 via-[#f9f6e6]/50 to-transparent z-0 pointer-events-none" />
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-rpg-magic/10 blur-[120px] rounded-full z-0 pointer-events-none" />
+        <SeamlessVideo src="/video/bg1.mp4" className="absolute inset-0 w-full h-full z-0 pointer-events-none opacity-60 dark:opacity-40" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#e5dfc5]/20 via-[#f9f6e6]/50 to-transparent dark:from-[#0b0f16]/60 dark:via-[#0b0f16]/80 dark:to-[#0b0f16]/95 z-0 pointer-events-none transition-colors duration-500" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-rpg-magic/10 dark:bg-amber-500/5 blur-[120px] rounded-full z-0 pointer-events-none" />
 
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
@@ -1171,14 +1191,14 @@ export default function Home() {
           </div>
 
           {!isLoggedIn ? (
-            <div className="w-full max-w-sm bg-[#f9f6e6]/60 backdrop-blur-md p-8 rounded-2xl border border-amber-900/10 shadow-2xl">
+            <div className="w-full max-w-sm bg-[#f9f6e6]/60 dark:bg-[#121823]/90 backdrop-blur-md p-8 rounded-2xl border border-amber-900/10 dark:border-amber-500/20 shadow-2xl">
               <div className="space-y-6">
                 <div>
                   <input 
                     type="email" 
                     value={email} 
                     onChange={e => setEmail(e.target.value)} 
-                    className="w-full p-3 bg-transparent border-b-2 border-amber-900/20 focus:border-rpg-magic outline-none text-[#2d3748] font-lora text-lg transition placeholder-slate-400" 
+                    className="w-full p-3 bg-transparent border-b-2 border-amber-900/20 dark:border-amber-500/30 focus:border-rpg-magic dark:focus:border-amber-400 outline-none text-[#2d3748] dark:text-[#e2d9c8] font-lora text-lg transition placeholder-slate-400 dark:placeholder-slate-500" 
                     placeholder="E-mail" 
                   />
                 </div>
@@ -1187,7 +1207,7 @@ export default function Home() {
                     type="password" 
                     value={password} 
                     onChange={e => setPassword(e.target.value)} 
-                    className="w-full p-3 bg-transparent border-b-2 border-amber-900/20 focus:border-rpg-magic outline-none text-[#2d3748] font-lora text-lg transition placeholder-slate-400" 
+                    className="w-full p-3 bg-transparent border-b-2 border-amber-900/20 dark:border-amber-500/30 focus:border-rpg-magic dark:focus:border-amber-400 outline-none text-[#2d3748] dark:text-[#e2d9c8] font-lora text-lg transition placeholder-slate-400 dark:placeholder-slate-500" 
                     placeholder="Heslo" 
                   />
                 </div>
@@ -1195,7 +1215,7 @@ export default function Home() {
                 <button 
                   onClick={() => handleAuth(isRegistering)}
                   disabled={loading || !email || !password}
-                  className="w-full py-4 bg-white/50 border border-amber-900/50 text-slate-800 font-cinzel font-bold text-xl rounded-xl hover:bg-white/70 hover:shadow-[0_0_15px_rgba(197,160,89,0.4)] transition uppercase tracking-widest disabled:opacity-50 flex items-center justify-center gap-3 mt-4"
+                  className="w-full py-4 bg-white/50 dark:bg-[#1a2434] border border-amber-900/50 dark:border-amber-500/40 text-slate-800 dark:text-amber-200 font-cinzel font-bold text-xl rounded-xl hover:bg-white/70 dark:hover:bg-[#232f44] hover:shadow-[0_0_15px_rgba(197,160,89,0.4)] transition uppercase tracking-widest disabled:opacity-50 flex items-center justify-center gap-3 mt-4"
                 >
                   {loading && <Loader2 size={24} className="animate-spin" />}
                   {isRegistering ? "Vytvořit Účet" : "Vstoupit"}
@@ -1204,7 +1224,7 @@ export default function Home() {
                 <div className="text-center mt-4">
                   <button 
                     onClick={() => setIsRegistering(!isRegistering)}
-                    className="text-slate-600 hover:text-[#2d3748] font-lora transition"
+                    className="text-slate-600 dark:text-slate-400 hover:text-[#2d3748] dark:hover:text-amber-300 font-lora transition"
                   >
                     {isRegistering ? "Zpět k přihlášení" : "Zaregistrovat se"}
                   </button>
@@ -1212,8 +1232,8 @@ export default function Home() {
               </div>
             </div>
           ) : savedCharacters.length === 0 ? (
-            <div className="text-center w-full max-w-lg bg-[#f9f6e6]/90 backdrop-blur-xl p-8 sm:p-10 rounded-3xl border-2 border-amber-900/20 shadow-2xl">
-              <p className="text-slate-700 font-lora mb-2 text-sm">Přihlášen: <span className="font-bold text-slate-900">{email}</span></p>
+            <div className="text-center w-full max-w-lg bg-[#f9f6e6]/90 dark:bg-[#121823]/95 backdrop-blur-xl p-8 sm:p-10 rounded-3xl border-2 border-amber-900/20 dark:border-amber-500/30 shadow-2xl">
+              <p className="text-slate-700 dark:text-slate-300 font-lora mb-2 text-sm">Přihlášen: <span className="font-bold text-slate-900 dark:text-white">{email}</span></p>
               {loading ? (
                 <div className="py-8 flex flex-col items-center gap-3 text-rpg-magic font-cinzel">
                   <Loader2 size={32} className="animate-spin" />
@@ -1222,8 +1242,8 @@ export default function Home() {
               ) : (
                 <>
                   <div className="mb-6 space-y-1.5">
-                    <h4 className="text-xl font-cinzel font-bold text-amber-950">Vítej v Aelthgardu</h4>
-                    <p className="text-xs sm:text-sm text-slate-600 font-lora">Dosud nemáš vytvořenou žádnou postavu pro tento účet. Je čas probudit hrdinu a zapsat své jméno do kronik sedmi království.</p>
+                    <h4 className="text-xl font-cinzel font-bold text-amber-950 dark:text-amber-100">Vítej v Aelthgardu</h4>
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-lora">Dosud nemáš vytvořenou žádnou postavu pro tento účet. Je čas probudit hrdinu a zapsat své jméno do kronik sedmi království.</p>
                   </div>
                   <button 
                     onClick={() => {
@@ -1234,10 +1254,10 @@ export default function Home() {
                   >
                     Zrození Hrdiny
                   </button>
-                  <div className="flex justify-between items-center mt-5 pt-3 border-t border-amber-900/10">
+                  <div className="flex justify-between items-center mt-5 pt-3 border-t border-amber-900/10 dark:border-amber-500/20">
                     <button 
                       onClick={() => fetchCharacters(email)}
-                      className="text-xs text-slate-600 hover:text-slate-900 font-lora transition flex items-center gap-1.5"
+                      className="text-xs text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-amber-200 font-lora transition flex items-center gap-1.5"
                     >
                       <RotateCcw size={13} /> Obnovit postavy
                     </button>
@@ -1248,7 +1268,7 @@ export default function Home() {
                         localStorage.removeItem("aethelgard_active_char");
                         window.location.reload();
                       }}
-                      className="text-xs text-red-600 hover:text-red-800 font-lora transition"
+                      className="text-xs text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 font-lora transition"
                     >
                       Odhlásit se
                     </button>
@@ -1277,7 +1297,7 @@ export default function Home() {
                   localStorage.removeItem("aethelgard_active_char");
                   window.location.reload();
                 }}
-                className="mt-2 px-4 py-1 text-slate-500 font-lora hover:text-slate-800 transition text-xs flex items-center gap-1 cursor-pointer shrink-0"
+                className="mt-2 px-4 py-1 text-slate-500 dark:text-slate-400 font-lora hover:text-slate-800 dark:hover:text-amber-200 transition text-xs flex items-center gap-1 cursor-pointer shrink-0"
               >
                 Odhlásit se
               </button>
@@ -1292,7 +1312,7 @@ export default function Home() {
     )}
 
     {gameState === "playing" && (
-      <div className="h-[100dvh] max-h-[100dvh] overflow-hidden bg-[#1b262c] p-1 md:p-6 gap-2 md:gap-4 font-serif flex flex-col items-center relative">
+      <div className="h-[100dvh] max-h-[100dvh] overflow-hidden bg-[#1b262c] dark:bg-[#0b0f16] p-1 md:p-6 gap-2 md:gap-4 font-serif flex flex-col items-center relative transition-colors duration-500">
         <DeathModal onClose={() => {}} />
 
       
@@ -1310,7 +1330,7 @@ export default function Home() {
           className="absolute inset-0 bg-cover bg-center transition-all duration-1000"
           style={{ backgroundImage: `url(${currentLocationImage || 'https://www.transparenttextures.com/patterns/black-scales.png'})` }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#f9f6e6]/95 via-[#f9f6e6]/70 to-[#f9f6e6]/30 backdrop-blur-sm" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#f9f6e6]/95 via-[#f9f6e6]/70 to-[#f9f6e6]/30 dark:from-[#0b0f16]/95 dark:via-[#0b0f16]/80 dark:to-[#0b0f16]/50 backdrop-blur-sm transition-colors duration-500" />
       </div>
 
       <div className="w-full max-w-[1720px] flex flex-col h-full relative z-10 p-1.5 sm:p-3 md:p-4 lg:p-6 pb-0">
@@ -1319,7 +1339,7 @@ export default function Home() {
         {/* Top HUD */}
         <div className="flex flex-col gap-2 md:gap-3 mb-2 md:mb-3 w-full mx-auto relative z-50">
           
-          <div className="flex items-center justify-between bg-[#f9f6e6]/60 backdrop-blur-md p-2 md:p-4 rounded-2xl border border-amber-900/10 shadow-lg">
+          <div className="flex items-center justify-between bg-[#f9f6e6]/60 dark:bg-[#121823]/80 backdrop-blur-md p-2 md:p-4 rounded-2xl border border-amber-900/10 dark:border-amber-500/20 shadow-lg">
             
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl overflow-hidden border border-rpg-magic shadow-[0_0_10px_rgba(197,160,89,0.3)] shrink-0 hidden sm:block relative">
@@ -1329,13 +1349,13 @@ export default function Home() {
                 )}
               </div>
               <div className="flex flex-col">
-                <h2 className="text-lg sm:text-xl font-cinzel text-[#2d3748] font-bold drop-shadow-md leading-tight">{name} <span className="text-rpg-magic text-xs">Lv.{level}</span></h2>
-                <div className="text-slate-700 font-lora text-xs flex items-center gap-1.5 flex-wrap">
+                <h2 className="text-lg sm:text-xl font-cinzel text-[#2d3748] dark:text-[#e2d9c8] font-bold drop-shadow-md leading-tight">{name} <span className="text-rpg-magic dark:text-amber-400 text-xs">Lv.{level}</span></h2>
+                <div className="text-slate-700 dark:text-slate-400 font-lora text-xs flex items-center gap-1.5 flex-wrap">
                   <span>{race} {dndClass}</span>
                   {currentRegion && (
                     <>
                       <span className="text-slate-400">•</span>
-                      <span className="text-rpg-magic font-cinzel font-bold flex items-center gap-0.5"><MapPin size={11} /> {currentRegion}</span>
+                      <span className="text-rpg-magic dark:text-amber-400 font-cinzel font-bold flex items-center gap-0.5"><MapPin size={11} /> {currentRegion}</span>
                     </>
                   )}
                 </div>
@@ -1357,23 +1377,23 @@ export default function Home() {
               )}
               <div className="flex items-center gap-1 sm:gap-2" title="Životy">
                 <Heart size={16} className="text-rpg-blood" />
-                <div className="font-cinzel text-[#2d3748] text-sm sm:text-base font-bold">
-                  <span className={hp <= 20 ? 'text-rpg-blood animate-pulse' : ''}>{hp}</span><span className="text-slate-600 text-xs">/100</span>
+                <div className="font-cinzel text-[#2d3748] dark:text-[#e2d9c8] text-sm sm:text-base font-bold">
+                  <span className={hp <= 20 ? 'text-rpg-blood animate-pulse' : ''}>{hp}</span><span className="text-slate-600 dark:text-slate-400 text-xs">/100</span>
                 </div>
               </div>
               <div className="flex items-center gap-1 sm:gap-2" title="Zásoby">
                 <Drumstick size={16} className={rations < 2 ? "text-rpg-blood animate-pulse" : "text-orange-400"} />
-                <div className="font-cinzel text-[#2d3748] text-sm sm:text-base font-bold">{rations}</div>
+                <div className="font-cinzel text-[#2d3748] dark:text-[#e2d9c8] text-sm sm:text-base font-bold">{rations}</div>
               </div>
               <div className="flex items-center gap-1 sm:gap-2" title="Zlato">
                 <div className="w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center font-bold text-black text-[10px] shadow-[0_0_8px_rgba(234,179,8,0.5)]">Z</div>
-                <div className="font-cinzel text-[#2d3748] text-sm sm:text-base font-bold">{gold}</div>
+                <div className="font-cinzel text-[#2d3748] dark:text-[#e2d9c8] text-sm sm:text-base font-bold">{gold}</div>
               </div>
             </div>
 
           </div>
 
-          <div className="relative z-50 flex gap-1.5 sm:gap-3 bg-[#f9f6e6]/80 backdrop-blur-md border border-amber-900/15 p-1.5 sm:p-2 rounded-2xl shadow-xl items-center justify-center">
+          <div className="relative z-50 flex gap-1.5 sm:gap-3 bg-[#f9f6e6]/80 dark:bg-[#121823]/90 backdrop-blur-md border border-amber-900/15 dark:border-amber-500/20 p-1.5 sm:p-2 rounded-2xl shadow-xl items-center justify-center transition-colors duration-300">
             {/* Click outside overlay for dropdowns */}
             {(heroDropdownOpen || menuDropdownOpen) && (
               <div 
@@ -1388,12 +1408,12 @@ export default function Home() {
                 onClick={() => { setHeroDropdownOpen(prev => !prev); setMenuDropdownOpen(false); }}
                 className={`flex-shrink-0 p-2 sm:p-2.5 rounded-xl transition flex items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold relative ${
                   heroDropdownOpen 
-                    ? 'bg-amber-200/90 text-amber-950 border border-amber-600/40 shadow-sm' 
-                    : 'text-slate-700 hover:text-amber-950 hover:bg-white/80'
+                    ? 'bg-amber-200/90 dark:bg-amber-500/25 text-amber-950 dark:text-amber-200 border border-amber-600/40 dark:border-amber-400/50 shadow-sm' 
+                    : 'text-slate-700 dark:text-slate-300 hover:text-amber-950 dark:hover:text-amber-100 hover:bg-white/80 dark:hover:bg-white/10'
                 }`}
                 title="Hrdina - Vlastnosti a schopnosti"
               >
-                <Shield size={17} className="text-amber-900" />
+                <Shield size={17} className="text-amber-900 dark:text-amber-400" />
                 <span>Hrdina</span>
                 {skillPoints > 0 && (
                   <span className="px-1.5 py-0.2 bg-amber-600 text-white text-[10px] rounded-full font-bold shadow-xs animate-pulse" title={`${skillPoints} volných dovednostních bodů`}>
@@ -1403,20 +1423,20 @@ export default function Home() {
               </button>
 
               {heroDropdownOpen && (
-                <div className="absolute top-full left-0 mt-2 w-56 max-w-[calc(100vw-32px)] bg-[#fdfbf7] border border-amber-900/30 rounded-2xl shadow-[0_10px_35px_rgba(0,0,0,0.35)] p-2 z-[60] flex flex-col gap-1 backdrop-blur-xl">
+                <div className="absolute top-full left-0 mt-2 w-56 max-w-[calc(100vw-32px)] bg-[#fdfbf7] dark:bg-[#141c28] border border-amber-900/30 dark:border-amber-500/30 rounded-2xl shadow-[0_10px_35px_rgba(0,0,0,0.35)] p-2 z-[60] flex flex-col gap-1 backdrop-blur-xl">
                   <button 
                     onClick={() => { setStatsOpen(true); setHeroDropdownOpen(false); }}
-                    className="w-full text-left px-3 py-2 text-slate-800 hover:bg-amber-100/70 rounded-xl transition flex items-center gap-2.5 text-xs sm:text-sm font-cinzel font-bold"
+                    className="w-full text-left px-3 py-2 text-slate-800 dark:text-slate-200 hover:bg-amber-100/70 dark:hover:bg-amber-500/15 rounded-xl transition flex items-center gap-2.5 text-xs sm:text-sm font-cinzel font-bold"
                   >
-                    <User size={16} className="text-amber-900" />
+                    <User size={16} className="text-amber-900 dark:text-amber-400" />
                     <span>Vlastnosti postavy</span>
                   </button>
                   <button 
                     onClick={() => { setSkillsOpen(true); setHeroDropdownOpen(false); }}
-                    className="w-full text-left px-3 py-2 text-slate-800 hover:bg-amber-100/70 rounded-xl transition flex items-center justify-between gap-2 text-xs sm:text-sm font-cinzel font-bold"
+                    className="w-full text-left px-3 py-2 text-slate-800 dark:text-slate-200 hover:bg-amber-100/70 dark:hover:bg-amber-500/15 rounded-xl transition flex items-center justify-between gap-2 text-xs sm:text-sm font-cinzel font-bold"
                   >
                     <div className="flex items-center gap-2.5">
-                      <Sparkles size={16} className="text-amber-900" />
+                      <Sparkles size={16} className="text-amber-900 dark:text-amber-400" />
                       <span>Kniha schopností</span>
                     </div>
                     {skillPoints > 0 && (
@@ -1432,10 +1452,10 @@ export default function Home() {
             {/* 2. Batoh (Inventář) */}
             <button 
               onClick={() => { setInventoryOpen(true); setHeroDropdownOpen(false); setMenuDropdownOpen(false); }} 
-              className="flex-1 md:flex-none p-2 sm:p-2.5 text-slate-700 hover:text-amber-950 hover:bg-white/80 rounded-xl transition flex items-center justify-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold"
+              className="flex-1 md:flex-none p-2 sm:p-2.5 text-slate-700 dark:text-slate-300 hover:text-amber-950 dark:hover:text-amber-100 hover:bg-white/80 dark:hover:bg-white/10 rounded-xl transition flex items-center justify-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold"
               title="Inventář a výbava"
             >
-              <Package size={17} className="text-amber-900" /> <span>Batoh</span>
+              <Package size={17} className="text-amber-900 dark:text-amber-400" /> <span>Batoh</span>
             </button>
             
             {/* 3. Úkoly */}
@@ -1443,12 +1463,12 @@ export default function Home() {
               onClick={() => { setQuestsOpen(true); setUnreadQuests(false); setHeroDropdownOpen(false); setMenuDropdownOpen(false); }} 
               className={`flex-1 md:flex-none p-2 sm:p-2.5 rounded-xl transition flex items-center justify-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold relative ${
                 unreadQuests 
-                  ? 'bg-amber-200/90 text-amber-950 border border-amber-600/50 shadow-[0_0_12px_rgba(212,175,55,0.4)]' 
-                  : 'text-slate-700 hover:text-amber-950 hover:bg-white/80'
+                  ? 'bg-amber-200/90 dark:bg-amber-500/25 text-amber-950 dark:text-amber-200 border border-amber-600/50 dark:border-amber-400/50 shadow-[0_0_12px_rgba(212,175,55,0.4)]' 
+                  : 'text-slate-700 dark:text-slate-300 hover:text-amber-950 dark:hover:text-amber-100 hover:bg-white/80 dark:hover:bg-white/10'
               }`}
               title="Kniha úkolů"
             >
-              <ScrollText size={17} className="text-amber-900" /> 
+              <ScrollText size={17} className="text-amber-900 dark:text-amber-400" /> 
               <span>Úkoly</span>
               {quests.filter(q => q.stav === 'aktivni' || (!q.stav?.includes('spln') && !q.stav?.includes('selh'))).length > 0 && (
                 <span className="px-1.5 py-0.2 bg-amber-800 text-white text-[10px] rounded-full font-bold shadow-xs">
@@ -1463,7 +1483,7 @@ export default function Home() {
             {/* 4. Mapa */}
             <button 
               onClick={() => { setMapOpen(true); setHeroDropdownOpen(false); setMenuDropdownOpen(false); }} 
-              className="flex-1 md:flex-none p-2 sm:p-2.5 text-amber-900 hover:bg-amber-100/60 rounded-xl transition flex items-center justify-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold"
+              className="flex-1 md:flex-none p-2 sm:p-2.5 text-amber-900 dark:text-amber-300 hover:bg-amber-100/60 dark:hover:bg-amber-500/15 rounded-xl transition flex items-center justify-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold"
               title="Mapa světa"
             >
               <Map size={17} /> <span>Mapa</span>
@@ -1472,19 +1492,19 @@ export default function Home() {
             {/* 4b. Tábor - visible on md+ */}
             <button 
               onClick={() => { setCampOpen(true); setHeroDropdownOpen(false); setMenuDropdownOpen(false); }} 
-              className="hidden md:flex flex-shrink-0 p-2 sm:p-2.5 text-amber-900 hover:bg-amber-100/60 rounded-xl transition items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold"
+              className="hidden md:flex flex-shrink-0 p-2 sm:p-2.5 text-amber-900 dark:text-amber-300 hover:bg-amber-100/60 dark:hover:bg-amber-500/15 rounded-xl transition items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold"
               title="Táboření a odpočinek"
             >
-              <Flame size={17} className="text-amber-600" /> <span>Tábor</span>
+              <Flame size={17} className="text-amber-600 dark:text-amber-400" /> <span>Tábor</span>
             </button>
 
             {/* 4c. Tržnice & Služby - visible on md+ */}
             <button 
               onClick={() => { setTownServicesOpen(true); setHeroDropdownOpen(false); setMenuDropdownOpen(false); }} 
-              className="hidden md:flex flex-shrink-0 p-2 sm:p-2.5 text-amber-950 bg-amber-200/90 hover:bg-amber-300/90 border border-amber-600/40 rounded-xl transition items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold shadow-2xs"
+              className="hidden md:flex flex-shrink-0 p-2 sm:p-2.5 text-amber-950 dark:text-amber-200 bg-amber-200/90 dark:bg-amber-600/30 hover:bg-amber-300/90 dark:hover:bg-amber-600/50 border border-amber-600/40 dark:border-amber-400/40 rounded-xl transition items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold shadow-2xs"
               title="Městské služby, kovář a tržnice"
             >
-              <ShoppingBag size={17} className="text-amber-800" /> <span>Tržnice</span>
+              <ShoppingBag size={17} className="text-amber-800 dark:text-amber-300" /> <span>Tržnice</span>
             </button>
 
             {/* 5. Menu Dropdown (Deník, Postavy, Nastavení, Návrat) */}
@@ -1493,32 +1513,32 @@ export default function Home() {
                 onClick={() => { setMenuDropdownOpen(prev => !prev); setHeroDropdownOpen(false); }}
                 className={`flex-shrink-0 p-2 sm:p-2.5 rounded-xl transition flex items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold ${
                   menuDropdownOpen 
-                    ? 'bg-amber-200/90 text-amber-950 border border-amber-600/40 shadow-sm' 
-                    : 'text-slate-700 hover:text-amber-950 hover:bg-white/80'
+                    ? 'bg-amber-200/90 dark:bg-amber-500/25 text-amber-950 dark:text-amber-200 border border-amber-600/40 dark:border-amber-400/50 shadow-sm' 
+                    : 'text-slate-700 dark:text-slate-300 hover:text-amber-950 dark:hover:text-amber-100 hover:bg-white/80 dark:hover:bg-white/10'
                 }`}
                 title="Další volby a systémové menu"
               >
-                <Menu size={17} className="text-amber-900" />
+                <Menu size={17} className="text-amber-900 dark:text-amber-400" />
                 <span className="hidden sm:inline">Menu</span>
               </button>
 
               {menuDropdownOpen && (
-                <div className="absolute top-full right-0 mt-2 w-64 max-w-[calc(100vw-32px)] bg-[#fdfbf7] border border-amber-900/30 rounded-2xl shadow-[0_10px_35px_rgba(0,0,0,0.35)] p-2.5 z-[60] flex flex-col gap-1 backdrop-blur-xl animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="absolute top-full right-0 mt-2 w-64 max-w-[calc(100vw-32px)] bg-[#fdfbf7] dark:bg-[#141c28] border border-amber-900/30 dark:border-amber-500/30 rounded-2xl shadow-[0_10px_35px_rgba(0,0,0,0.35)] p-2.5 z-[60] flex flex-col gap-1 backdrop-blur-xl animate-in fade-in slide-in-from-top-2 duration-150">
                   {/* Mobile Hero Actions */}
-                  <div className="md:hidden flex flex-col gap-1 border-b border-amber-900/10 pb-1.5 mb-1">
+                  <div className="md:hidden flex flex-col gap-1 border-b border-amber-900/10 dark:border-amber-500/20 pb-1.5 mb-1">
                     <button 
                       onClick={() => { setStatsOpen(true); setMenuDropdownOpen(false); }}
-                      className="w-full text-left px-3 py-2 text-slate-800 hover:bg-amber-100/70 rounded-xl transition flex items-center gap-2.5 text-xs sm:text-sm font-cinzel font-bold"
+                      className="w-full text-left px-3 py-2 text-slate-800 dark:text-slate-200 hover:bg-amber-100/70 dark:hover:bg-amber-500/15 rounded-xl transition flex items-center gap-2.5 text-xs sm:text-sm font-cinzel font-bold"
                     >
-                      <User size={16} className="text-amber-900" />
+                      <User size={16} className="text-amber-900 dark:text-amber-400" />
                       <span>Vlastnosti hrdiny</span>
                     </button>
                     <button 
                       onClick={() => { setSkillsOpen(true); setMenuDropdownOpen(false); }}
-                      className="w-full text-left px-3 py-2 text-slate-800 hover:bg-amber-100/70 rounded-xl transition flex items-center justify-between gap-2.5 text-xs sm:text-sm font-cinzel font-bold"
+                      className="w-full text-left px-3 py-2 text-slate-800 dark:text-slate-200 hover:bg-amber-100/70 dark:hover:bg-amber-500/15 rounded-xl transition flex items-center justify-between gap-2.5 text-xs sm:text-sm font-cinzel font-bold"
                     >
                       <div className="flex items-center gap-2.5">
-                        <Sparkles size={16} className="text-amber-900" />
+                        <Sparkles size={16} className="text-amber-900 dark:text-amber-400" />
                         <span>Kniha schopností</span>
                       </div>
                       {skillPoints > 0 && (
@@ -1531,40 +1551,40 @@ export default function Home() {
 
                   <button 
                     onClick={() => { setTownServicesOpen(true); setMenuDropdownOpen(false); }}
-                    className="w-full text-left px-3 py-2 text-amber-950 bg-amber-100/80 hover:bg-amber-200/80 rounded-xl transition flex items-center gap-2.5 text-xs sm:text-sm font-cinzel font-bold border border-amber-900/15"
+                    className="w-full text-left px-3 py-2 text-amber-950 dark:text-amber-200 bg-amber-100/80 dark:bg-amber-600/25 hover:bg-amber-200/80 dark:hover:bg-amber-600/40 rounded-xl transition flex items-center gap-2.5 text-xs sm:text-sm font-cinzel font-bold border border-amber-900/15 dark:border-amber-500/25"
                   >
-                    <ShoppingBag size={16} className="text-amber-800" />
+                    <ShoppingBag size={16} className="text-amber-800 dark:text-amber-300" />
                     <span>Tržnice & Služby</span>
                   </button>
                   <button 
                     onClick={() => { setCampOpen(true); setMenuDropdownOpen(false); }}
-                    className="w-full text-left px-3 py-2 text-slate-800 hover:bg-amber-100/70 rounded-xl transition flex items-center gap-2.5 text-xs sm:text-sm font-cinzel font-bold"
+                    className="w-full text-left px-3 py-2 text-slate-800 dark:text-slate-200 hover:bg-amber-100/70 dark:hover:bg-amber-500/15 rounded-xl transition flex items-center gap-2.5 text-xs sm:text-sm font-cinzel font-bold"
                   >
-                    <Flame size={16} className="text-amber-600" />
+                    <Flame size={16} className="text-amber-600 dark:text-amber-400" />
                     <span>Táboření a odpočinek</span>
                   </button>
                   <button 
                     onClick={() => { setJournalOpen(true); setMenuDropdownOpen(false); }}
-                    className="w-full text-left px-3 py-2 text-slate-800 hover:bg-amber-100/70 rounded-xl transition flex items-center gap-2.5 text-xs sm:text-sm font-cinzel font-bold"
+                    className="w-full text-left px-3 py-2 text-slate-800 dark:text-slate-200 hover:bg-amber-100/70 dark:hover:bg-amber-500/15 rounded-xl transition flex items-center gap-2.5 text-xs sm:text-sm font-cinzel font-bold"
                   >
-                    <BookOpen size={16} className="text-amber-900" />
+                    <BookOpen size={16} className="text-amber-900 dark:text-amber-400" />
                     <span>Deník a kronika</span>
                   </button>
                   <button 
                     onClick={() => { setNpcsOpen(true); setMenuDropdownOpen(false); }}
-                    className="w-full text-left px-3 py-2 text-slate-800 hover:bg-amber-100/70 rounded-xl transition flex items-center gap-2.5 text-xs sm:text-sm font-cinzel font-bold"
+                    className="w-full text-left px-3 py-2 text-slate-800 dark:text-slate-200 hover:bg-amber-100/70 dark:hover:bg-amber-500/15 rounded-xl transition flex items-center gap-2.5 text-xs sm:text-sm font-cinzel font-bold"
                   >
-                    <Users size={16} className="text-amber-900" />
+                    <Users size={16} className="text-amber-900 dark:text-amber-400" />
                     <span>Známé postavy</span>
                   </button>
                   <button 
                     onClick={() => { setSettingsOpen(true); setMenuDropdownOpen(false); }}
-                    className="w-full text-left px-3 py-2 text-slate-800 hover:bg-amber-100/70 rounded-xl transition flex items-center gap-2.5 text-xs sm:text-sm font-cinzel font-bold"
+                    className="w-full text-left px-3 py-2 text-slate-800 dark:text-slate-200 hover:bg-amber-100/70 dark:hover:bg-amber-500/15 rounded-xl transition flex items-center gap-2.5 text-xs sm:text-sm font-cinzel font-bold"
                   >
-                    <Settings2 size={16} className="text-amber-900" />
+                    <Settings2 size={16} className="text-amber-900 dark:text-amber-400" />
                     <span>Nastavení</span>
                   </button>
-                  <div className="h-[1px] bg-amber-900/10 my-1" />
+                  <div className="h-[1px] bg-amber-900/10 dark:bg-amber-500/20 my-1" />
                   <button 
                     onClick={() => {
                       audioManager.stopTts();
@@ -1574,14 +1594,23 @@ export default function Home() {
                       setGameState("menu");
                       fetchCharacters(email);
                     }}
-                    className="w-full text-left px-3 py-2 text-red-700 hover:bg-red-50 rounded-xl transition flex items-center gap-2.5 text-xs sm:text-sm font-cinzel font-bold"
+                    className="w-full text-left px-3 py-2 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-xl transition flex items-center gap-2.5 text-xs sm:text-sm font-cinzel font-bold"
                   >
-                    <Users size={16} className="text-red-700" />
+                    <Users size={16} className="text-red-700 dark:text-red-400" />
                     <span>Výběr hrdiny</span>
                   </button>
                 </div>
               )}
             </div>
+
+            {/* Quick Theme Toggle Button */}
+            <button
+              onClick={toggleTheme}
+              className="flex-shrink-0 p-2 sm:p-2.5 rounded-xl transition flex items-center justify-center text-xs font-cinzel font-bold text-slate-700 dark:text-amber-300 hover:text-amber-950 dark:hover:text-amber-100 hover:bg-white/80 dark:hover:bg-white/10 border border-transparent dark:border-amber-500/20 cursor-pointer"
+              title={isDark ? "Přepnout na Světlý kodex (Sluneční)" : "Přepnout na Tmavý režim (Černý grimoár)"}
+            >
+              {isDark ? <Sun size={17} className="text-amber-400" /> : <Moon size={17} className="text-amber-900" />}
+            </button>
           </div>
           
         </div>
@@ -1599,28 +1628,28 @@ export default function Home() {
               {activeTrackedQuest && (
                 <div 
                   onClick={() => { setQuestsOpen(true); setUnreadQuests(false); }}
-                  className="mb-2 px-3.5 sm:px-4 py-2 rounded-xl bg-[#fdfbf7]/90 hover:bg-[#fdfbf7] border border-amber-900/20 shadow-xs backdrop-blur-md transition cursor-pointer flex items-center justify-between gap-3 group shrink-0"
+                  className="mb-2 px-3.5 sm:px-4 py-2 rounded-xl bg-[#fdfbf7]/90 hover:bg-[#fdfbf7] dark:bg-[#141c28]/90 dark:hover:bg-[#1a2332] border border-amber-900/20 dark:border-amber-500/25 shadow-xs backdrop-blur-md transition cursor-pointer flex items-center justify-between gap-3 group shrink-0"
                   title="Klikni pro otevření Knihy úkolů"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="p-1.5 rounded-lg bg-amber-100 text-amber-900 shrink-0 border border-amber-900/10">
+                    <div className="p-1.5 rounded-lg bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 shrink-0 border border-amber-900/10 dark:border-amber-500/20">
                       <ScrollText size={15} />
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="font-cinzel font-bold text-xs sm:text-sm text-amber-950 truncate">
+                        <span className="font-cinzel font-bold text-xs sm:text-sm text-amber-950 dark:text-amber-100 truncate">
                           {activeTrackedQuest.nazev}
                         </span>
                         <span className={`text-[9px] font-cinzel font-bold px-1.5 py-0.2 rounded-full shrink-0 border ${
                           activeTrackedQuest.kategorie === 'hlavni'
-                            ? 'bg-amber-200 text-amber-950 border-amber-400'
-                            : 'bg-amber-100 text-amber-900 border-amber-900/15'
+                            ? 'bg-amber-200 dark:bg-amber-500/30 text-amber-950 dark:text-amber-200 border-amber-400 dark:border-amber-400/40'
+                            : 'bg-amber-100 dark:bg-amber-950/40 text-amber-900 dark:text-amber-300 border-amber-900/15 dark:border-amber-500/20'
                         }`}>
                           {activeTrackedQuest.kategorie === 'hlavni' ? '🌟 HLAVNÍ' : '📜 ÚKOL'}
                         </span>
                       </div>
-                      <div className="font-lora text-[11px] text-slate-700 truncate flex items-center gap-1.5 mt-0.5">
-                        <Target size={11} className="text-amber-700 shrink-0" />
+                      <div className="font-lora text-[11px] text-slate-700 dark:text-slate-300 truncate flex items-center gap-1.5 mt-0.5">
+                        <Target size={11} className="text-amber-700 dark:text-amber-400 shrink-0" />
                         <span className="truncate">
                           {(() => {
                             const kroky = activeTrackedQuest.kroky || [];
@@ -1631,7 +1660,7 @@ export default function Home() {
                       </div>
                     </div>
                   </div>
-                  <span className="text-[10px] font-cinzel font-bold text-amber-800/70 group-hover:text-amber-900 transition shrink-0 hidden sm:inline">
+                  <span className="text-[10px] font-cinzel font-bold text-amber-800/70 dark:text-amber-400/80 group-hover:text-amber-900 dark:group-hover:text-amber-200 transition shrink-0 hidden sm:inline">
                     Otevřít deník →
                   </span>
                 </div>
@@ -1639,16 +1668,16 @@ export default function Home() {
 
               {/* Story Log (Middle) */}
               <div className="flex-1 min-h-0 overflow-hidden relative mb-3">
-                <div className="absolute inset-0 bg-[#f9f6e6]/70 backdrop-blur-lg border border-amber-900/10 rounded-2xl shadow-2xl p-4 sm:p-6 overflow-y-auto custom-scrollbar flex flex-col gap-5 sm:gap-6" >
+                <div className="absolute inset-0 bg-[#f9f6e6]/70 dark:bg-[#0f141f]/85 backdrop-blur-lg border border-amber-900/10 dark:border-amber-500/20 rounded-2xl shadow-2xl p-4 sm:p-6 overflow-y-auto custom-scrollbar flex flex-col gap-5 sm:gap-6" >
                 
                 {history.map((msg, i) => (
                   <div key={i} className={`flex ${msg.type === "player" ? "justify-end" : "justify-start"}`}>
                     <div className={`max-w-[85%] md:max-w-[75%] p-5 rounded-2xl ${
                       msg.type === "player" 
-                        ? "bg-white/50 border border-amber-900/10 text-slate-800 font-lora" 
+                        ? "bg-white/50 dark:bg-[#1a2332]/70 border border-amber-900/10 dark:border-amber-500/15 text-slate-800 dark:text-[#e2d9c8] font-lora" 
                         : msg.type === "system" || msg.type === "error"
-                          ? "bg-[#f4ecd8] border border-amber-900/5 text-slate-700 font-cinzel text-sm italic"
-                          : "bg-[#f9f6e6]/80 border border-rpg-magic/30 text-[#2d3748] font-lora shadow-[0_0_15px_rgba(197,160,89,0.1)]"
+                          ? "bg-[#f4ecd8] dark:bg-[#161d2a] border border-amber-900/5 dark:border-amber-500/10 text-slate-700 dark:text-slate-300 font-cinzel text-sm italic"
+                          : "bg-[#f9f6e6]/80 dark:bg-[#141c28]/90 border border-rpg-magic/30 dark:border-amber-500/25 text-[#2d3748] dark:text-[#e2d9c8] font-lora shadow-[0_0_15px_rgba(197,160,89,0.1)]"
                     }`}>
                       {msg.type === "player" && (
                         <div className="leading-relaxed text-lg">{msg.text}</div>
@@ -1659,32 +1688,32 @@ export default function Home() {
                         <div className="flex flex-col gap-4">
                           {msg.vypravec && (
                             <div className="leading-relaxed text-lg">
-                              <button onClick={() => playAudio(msg.vypravec, 'narrator')} className="float-right ml-4 text-slate-600 hover:text-rpg-magic transition">
+                              <button onClick={() => playAudio(msg.vypravec, 'narrator')} className="float-right ml-4 text-slate-600 dark:text-slate-400 hover:text-rpg-magic dark:hover:text-amber-300 transition">
                                 <Volume2 size={18} />
                               </button>
                               <TypewriterText text={msg.vypravec} animate={i === history.length - 1} />
                             </div>
                           )}
                           {msg.popis_okoli && (
-                            <div className="text-slate-700 italic font-lora text-sm border-l-2 border-rpg-magic/50 pl-3">
+                            <div className="text-slate-700 dark:text-slate-300 italic font-lora text-sm border-l-2 border-rpg-magic/50 dark:border-amber-400/60 pl-3">
                               {msg.popis_okoli}
                             </div>
                           )}
                           {msg.npc_dialogy && msg.npc_dialogy.length > 0 && (
                             <div className="flex flex-col gap-2 mt-2">
                               {msg.npc_dialogy.map((npc: any, nIdx: number) => (
-                                <div key={nIdx} className="bg-[#f4ecd8]/90 p-3.5 rounded-2xl border border-amber-900/15 shadow-2xs">
+                                <div key={nIdx} className="bg-[#f4ecd8]/90 dark:bg-[#1b2433]/90 p-3.5 rounded-2xl border border-amber-900/15 dark:border-amber-500/20 shadow-2xs">
                                   <div className="flex justify-between items-center mb-1">
-                                    <span className="font-bold text-rpg-magic font-cinzel">{npc.jmeno}</span>
-                                    <button onClick={() => playAudio((npc.text || npc.replika), npc.pohlavi === 'zena' ? 'npc_zena' : 'npc_muz')} className="text-slate-600 hover:text-[#2d3748]"><Volume2 size={16} /></button>
+                                    <span className="font-bold text-rpg-magic dark:text-amber-400 font-cinzel">{npc.jmeno}</span>
+                                    <button onClick={() => playAudio((npc.text || npc.replika), npc.pohlavi === 'zena' ? 'npc_zena' : 'npc_muz')} className="text-slate-600 dark:text-slate-400 hover:text-[#2d3748] dark:hover:text-amber-200"><Volume2 size={16} /></button>
                                   </div>
-                                    <div className="text-slate-900">"{npc.text || npc.replika}"</div>
+                                    <div className="text-slate-900 dark:text-[#f1ede4]">"{npc.text || npc.replika}"</div>
                                 </div>
                               ))}
                             </div>
                           )}
                           {msg.system_log && (
-                            <div className="text-xs font-mono mt-2 opacity-90 border-t border-amber-900/10 pt-2">
+                            <div className="text-xs font-mono mt-2 opacity-90 border-t border-amber-900/10 dark:border-amber-500/15 pt-2">
                               <FormattedSystemLog text={msg.system_log} />
                             </div>
                           )}
@@ -1696,16 +1725,16 @@ export default function Home() {
 
                 {loading && (
                   <div className="flex justify-start animate-fade-in-up my-2">
-                    <div className="bg-[#f5eedc] border-2 border-amber-600/60 p-4 sm:p-5 rounded-2xl flex items-center gap-3.5 shadow-lg shadow-amber-900/10">
+                    <div className="bg-[#f5eedc] dark:bg-[#18202d] border-2 border-amber-600/60 dark:border-amber-500/50 p-4 sm:p-5 rounded-2xl flex items-center gap-3.5 shadow-lg shadow-amber-900/10 dark:shadow-black/40">
                       <div className="relative flex items-center justify-center w-9 h-9 rounded-full bg-amber-600 text-white shadow-md shrink-0">
                         <Sparkles className="animate-spin" size={18} />
                         <span className="absolute inset-0 rounded-full bg-amber-400 animate-ping opacity-50" />
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-amber-950 font-cinzel font-bold text-sm sm:text-base tracking-wide flex items-center gap-1.5">
+                        <span className="text-amber-950 dark:text-amber-100 font-cinzel font-bold text-sm sm:text-base tracking-wide flex items-center gap-1.5">
                           Vypravěč přemýšlí a spřádá osud...
                         </span>
-                        <span className="text-amber-800/80 font-lora text-xs italic">
+                        <span className="text-amber-800/80 dark:text-amber-300/80 font-lora text-xs italic">
                           Tvá volba právě mění chod příběhu
                         </span>
                       </div>
@@ -1714,8 +1743,8 @@ export default function Home() {
                 )}
                 {/* Embedded choices directly inside story log */}
                 {!loading && !inCombat && suggestedActions.length > 0 && (
-                  <div className="flex flex-col gap-2 pt-4 mt-2 border-t border-amber-900/15">
-                    <div className="text-xs font-cinzel text-slate-500 uppercase tracking-widest font-bold">
+                  <div className="flex flex-col gap-2 pt-4 mt-2 border-t border-amber-900/15 dark:border-amber-500/20">
+                    <div className="text-xs font-cinzel text-slate-500 dark:text-slate-400 uppercase tracking-widest font-bold">
                       Možné volby:
                     </div>
                     <div className="flex flex-col gap-2.5">
@@ -1723,10 +1752,10 @@ export default function Home() {
                         <button
                           key={`chat-act-${i}`}
                           onClick={() => sendAction(act)}
-                          className="w-full text-left bg-[#fcfaf2] hover:bg-amber-100/90 border-2 border-amber-900/15 hover:border-amber-600 hover:shadow-[0_4px_16px_rgba(180,83,9,0.25)] px-4 sm:px-5 py-3.5 rounded-xl text-slate-800 hover:text-amber-950 transition-all font-lora text-sm sm:text-base flex items-center justify-between group cursor-pointer"
+                          className="w-full text-left bg-[#fcfaf2] hover:bg-amber-100/90 dark:bg-[#171f2c] dark:hover:bg-[#1f2b3e] border-2 border-amber-900/15 hover:border-amber-600 dark:border-amber-500/20 dark:hover:border-amber-400 hover:shadow-[0_4px_16px_rgba(180,83,9,0.25)] px-4 sm:px-5 py-3.5 rounded-xl text-slate-800 hover:text-amber-950 dark:text-slate-200 dark:hover:text-amber-200 transition-all font-lora text-sm sm:text-base flex items-center justify-between group cursor-pointer"
                         >
                           <div className="flex items-center gap-3">
-                            <span className="w-6 h-6 rounded-full bg-amber-900/10 group-hover:bg-amber-700 group-hover:text-white flex items-center justify-center text-xs font-cinzel font-bold text-amber-900 transition-colors shrink-0">
+                            <span className="w-6 h-6 rounded-full bg-amber-900/10 dark:bg-amber-500/15 group-hover:bg-amber-700 dark:group-hover:bg-amber-600 group-hover:text-white flex items-center justify-center text-xs font-cinzel font-bold text-amber-900 dark:text-amber-300 transition-colors shrink-0">
                               {i + 1}
                             </span>
                             <span className="font-medium group-hover:font-bold transition-all">{act}</span>
@@ -1754,16 +1783,16 @@ export default function Home() {
                     <>
                       {pointsOfInterest.length > 0 && (
                         <div className="flex flex-wrap items-center gap-2 py-1">
-                          <span className="text-xs font-cinzel font-bold text-amber-950 flex items-center gap-1 uppercase tracking-wider mr-1">
-                            <MapPin size={14} className="text-amber-700" /> Lokace v okolí:
+                          <span className="text-xs font-cinzel font-bold text-amber-950 dark:text-amber-200 flex items-center gap-1 uppercase tracking-wider mr-1">
+                            <MapPin size={14} className="text-amber-700 dark:text-amber-400" /> Lokace v okolí:
                           </span>
                           {pointsOfInterest.map((poi, i) => (
                             <button 
                               key={`poi-${i}`} 
                               onClick={() => sendAction(`Jdu prozkoumat: ${poi.nazev}`)} 
-                              className="bg-[#f2ece1] hover:bg-amber-100 border border-amber-900/30 hover:border-amber-700 text-slate-900 hover:text-amber-950 px-3.5 py-2 rounded-xl text-xs font-cinzel font-bold transition-all shadow-sm flex items-center gap-1.5"
+                              className="bg-[#f2ece1] hover:bg-amber-100 dark:bg-[#161d2a] dark:hover:bg-[#1f2b3e] border border-amber-900/30 dark:border-amber-500/25 hover:border-amber-700 dark:hover:border-amber-400 text-slate-900 hover:text-amber-950 dark:text-slate-200 dark:hover:text-amber-200 px-3.5 py-2 rounded-xl text-xs font-cinzel font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
                             >
-                              <MapPin size={14} className="text-amber-700" />
+                              <MapPin size={14} className="text-amber-700 dark:text-amber-400" />
                               <span>{poi.nazev}</span>
                             </button>
                           ))}
@@ -1777,10 +1806,10 @@ export default function Home() {
               {/* Magical Input Box */}
               <div className="relative">
                 <div className="absolute -inset-1 bg-gradient-to-r from-transparent via-rpg-magic/20 to-transparent rounded-2xl blur-md pointer-events-none" />
-                <div className="relative flex flex-row items-center gap-2 sm:gap-3 bg-white/90 backdrop-blur-xl p-2 sm:p-3 rounded-2xl border border-rpg-magic/30 shadow-[0_0_30px_rgba(0,0,0,0.8)]">
+                <div className="relative flex flex-row items-center gap-2 sm:gap-3 bg-white/90 dark:bg-[#121823]/95 backdrop-blur-xl p-2 sm:p-3 rounded-2xl border border-rpg-magic/30 dark:border-amber-500/30 shadow-[0_0_30px_rgba(0,0,0,0.8)]">
                   <button
                     onClick={() => setIsOOC(!isOOC)}
-                    className={`p-2.5 sm:p-3.5 transition-all rounded-xl flex items-center justify-center shrink-0 cursor-pointer ${isOOC ? 'bg-indigo-900/40 text-indigo-800 border border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.2)]' : 'text-slate-600 hover:text-rpg-magic bg-white/50 border border-transparent'}`}
+                    className={`p-2.5 sm:p-3.5 transition-all rounded-xl flex items-center justify-center shrink-0 cursor-pointer ${isOOC ? 'bg-indigo-900/40 text-indigo-800 dark:text-indigo-300 border border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.2)]' : 'text-slate-600 dark:text-slate-400 hover:text-rpg-magic dark:hover:text-amber-300 bg-white/50 dark:bg-white/5 border border-transparent'}`}
                     title="OOC (Myšlenka)"
                   >
                     <Brain size={22} className={isOOC ? "animate-pulse text-indigo-600" : ""} />
@@ -1791,7 +1820,7 @@ export default function Home() {
                     onChange={(e) => setCustomAction(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && sendAction(customAction)}
                     placeholder={isOOC ? "Přemýšlím nad..." : "Co uděláš dál?"} 
-                    className={`flex-1 min-w-0 font-lora text-sm sm:text-lg bg-transparent px-2 sm:px-3 py-2 outline-none transition-colors ${isOOC ? 'text-indigo-900 placeholder-indigo-400' : 'text-[#2d3748] placeholder-gray-500'}`}
+                    className={`flex-1 min-w-0 font-lora text-sm sm:text-lg bg-transparent px-2 sm:px-3 py-2 outline-none transition-colors ${isOOC ? 'text-indigo-900 dark:text-indigo-200 placeholder-indigo-400' : 'text-[#2d3748] dark:text-[#e2d9c8] placeholder-gray-500 dark:placeholder-slate-500'}`}
                     disabled={loading}
                   />
                   <button 

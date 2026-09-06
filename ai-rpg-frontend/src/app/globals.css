@@ -1,27 +1,29 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f4ecd8;
+  --foreground: #1e293b;
+  --rpg-bg-canvas: #e5dfc5;
+  --rpg-bg-panel: rgba(249, 246, 230, 0.95);
+  --rpg-bg-box: #ffffff;
+  --rpg-text-main: #1e293b;
+  --rpg-text-muted: #64748b;
+  --rpg-border: rgba(120, 53, 15, 0.2);
+  --rpg-gold: #b45309;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-medieval: var(--font-medieval);
-  --font-garamond: var(--font-garamond);
-  --color-rpg-paper: #f9f6e6;
-  --color-rpg-obsidian: #2d3748;
-  --color-rpg-blood: #b91c1c;
-  --color-rpg-magic: #d97706;
-  --color-rpg-muted: #718096;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+[data-theme="dark"] {
+  --background: #0b0f16;
+  --foreground: #e2d9c8;
+  --rpg-bg-canvas: #0b0f16;
+  --rpg-bg-panel: rgba(18, 24, 35, 0.95);
+  --rpg-bg-box: #141c28;
+  --rpg-text-main: #e2d9c8;
+  --rpg-text-muted: #94a3b8;
+  --rpg-border: rgba(212, 175, 55, 0.25);
+  --rpg-gold: #d4af37;
 }
 
 html, body {

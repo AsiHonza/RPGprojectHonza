@@ -61,7 +61,7 @@ export const DesktopSidePanel: React.FC<DesktopSidePanelProps> = ({
     <aside className="hidden lg:flex flex-col gap-3.5 h-full w-full max-w-[380px] xl:max-w-[420px] shrink-0 font-serif select-none overflow-y-auto custom-scrollbar pr-1">
       
       {/* 1. Hero Identity & Vitals Card */}
-      <div className="bg-[#f9f6e6]/80 backdrop-blur-md border border-amber-900/20 rounded-2xl p-4 shadow-xl flex flex-col gap-3">
+      <div className="bg-[#f9f6e6]/80 dark:bg-[#121823]/90 backdrop-blur-md border border-amber-900/20 dark:border-amber-500/25 rounded-2xl p-4 shadow-xl flex flex-col gap-3 transition-colors duration-300">
         <div className="flex items-center gap-3">
           {/* Avatar / Animated Video */}
           <div 
@@ -87,7 +87,7 @@ export const DesktopSidePanel: React.FC<DesktopSidePanelProps> = ({
             <div className="flex items-center justify-between">
               <h3 
                 onClick={onOpenStats}
-                className="font-cinzel font-bold text-lg text-amber-950 truncate hover:text-amber-700 cursor-pointer transition leading-tight"
+                className="font-cinzel font-bold text-lg text-amber-950 dark:text-amber-100 truncate hover:text-amber-700 dark:hover:text-amber-300 cursor-pointer transition leading-tight"
               >
                 {name}
               </h3>
@@ -101,17 +101,17 @@ export const DesktopSidePanel: React.FC<DesktopSidePanelProps> = ({
                 </button>
               )}
             </div>
-            <p className="text-xs text-amber-900/80 font-lora">
+            <p className="text-xs text-amber-900/80 dark:text-slate-400 font-lora">
               {race} • {dndClass}
             </p>
             
             {/* Quick purse & rations */}
-            <div className="flex items-center gap-3 mt-1.5 text-xs font-cinzel font-bold text-amber-950">
+            <div className="flex items-center gap-3 mt-1.5 text-xs font-cinzel font-bold text-amber-950 dark:text-amber-200">
               <span className="flex items-center gap-1" title="Zlaťáky v měšci">
                 <span>🪙</span> <span>{gold} zl</span>
               </span>
               <span className="flex items-center gap-1" title="Cestovní dávky jídla">
-                <Drumstick size={13} className={rations < 2 ? 'text-red-700 animate-pulse' : 'text-orange-700'} />
+                <Drumstick size={13} className={rations < 2 ? 'text-red-700 animate-pulse' : 'text-orange-700 dark:text-orange-400'} />
                 <span>{rations}</span>
               </span>
             </div>
@@ -121,15 +121,15 @@ export const DesktopSidePanel: React.FC<DesktopSidePanelProps> = ({
         {/* Health Bar */}
         <div className="flex flex-col gap-1">
           <div className="flex items-center justify-between text-xs font-cinzel font-bold">
-            <span className="flex items-center gap-1 text-red-900">
+            <span className="flex items-center gap-1 text-red-900 dark:text-red-400">
               <Heart size={13} className="text-red-600 fill-red-600" />
               <span>Životy (HP)</span>
             </span>
-            <span className={hp <= 25 ? 'text-red-700 font-black animate-pulse' : 'text-amber-950'}>
+            <span className={hp <= 25 ? 'text-red-700 dark:text-red-400 font-black animate-pulse' : 'text-amber-950 dark:text-amber-200'}>
               {hp} / {maxHp}
             </span>
           </div>
-          <div className="w-full h-2.5 bg-amber-950/20 rounded-full overflow-hidden border border-amber-900/20">
+          <div className="w-full h-2.5 bg-amber-950/20 dark:bg-slate-900 rounded-full overflow-hidden border border-amber-900/20 dark:border-amber-500/20">
             <div 
               className={`h-full transition-all duration-500 rounded-full ${
                 hpPercent > 50 ? 'bg-gradient-to-r from-red-600 to-red-500' :
@@ -143,9 +143,9 @@ export const DesktopSidePanel: React.FC<DesktopSidePanelProps> = ({
 
         {/* Spell Slots if caster */}
         {maxSpellSlots > 0 && (
-          <div className="flex items-center justify-between text-xs font-cinzel font-bold bg-amber-100/60 px-3 py-1.5 rounded-xl border border-amber-900/10">
-            <span className="flex items-center gap-1.5 text-indigo-900">
-              <Sparkles size={13} className="text-indigo-600" />
+          <div className="flex items-center justify-between text-xs font-cinzel font-bold bg-amber-100/60 dark:bg-indigo-950/40 px-3 py-1.5 rounded-xl border border-amber-900/10 dark:border-indigo-500/30">
+            <span className="flex items-center gap-1.5 text-indigo-900 dark:text-indigo-300">
+              <Sparkles size={13} className="text-indigo-600 dark:text-indigo-400" />
               <span>Kouzelné sloty</span>
             </span>
             <div className="flex gap-1">
@@ -163,11 +163,11 @@ export const DesktopSidePanel: React.FC<DesktopSidePanelProps> = ({
 
         {/* XP Progress */}
         <div className="flex flex-col gap-0.5">
-          <div className="flex items-center justify-between text-[10px] font-cinzel font-bold text-amber-900/70">
+          <div className="flex items-center justify-between text-[10px] font-cinzel font-bold text-amber-900/70 dark:text-slate-400">
             <span>Zkušenosti (XP)</span>
             <span>{xp} / {xpNeeded}</span>
           </div>
-          <div className="w-full h-1 bg-amber-950/20 rounded-full overflow-hidden">
+          <div className="w-full h-1 bg-amber-950/20 dark:bg-slate-900 rounded-full overflow-hidden">
             <div 
               className="h-full bg-amber-600 transition-all duration-300"
               style={{ width: `${xpPercent}%` }}
@@ -178,23 +178,23 @@ export const DesktopSidePanel: React.FC<DesktopSidePanelProps> = ({
 
       {/* 2. Active Buffs & Transport Strip */}
       {(activeBuffs.length > 0 || activeMount) && (
-        <div className="bg-[#f9f6ea]/85 border border-amber-900/15 rounded-2xl p-3 shadow-md flex flex-col gap-2">
-          <div className="text-[11px] font-cinzel font-bold text-amber-900 uppercase tracking-wider flex items-center justify-between">
+        <div className="bg-[#f9f6ea]/85 dark:bg-[#141c28]/90 border border-amber-900/15 dark:border-amber-500/20 rounded-2xl p-3 shadow-md flex flex-col gap-2 transition-colors duration-300">
+          <div className="text-[11px] font-cinzel font-bold text-amber-900 dark:text-amber-300 uppercase tracking-wider flex items-center justify-between">
             <span>Aktivní bonusy a zvíře</span>
-            <span className="text-amber-700/60">{activeBuffs.length + (activeMount ? 1 : 0)}</span>
+            <span className="text-amber-700/60 dark:text-amber-400/60">{activeBuffs.length + (activeMount ? 1 : 0)}</span>
           </div>
           <div className="flex flex-wrap gap-1.5">
             {activeMount && (
-              <span className="bg-amber-200/80 border border-amber-700/30 text-amber-950 text-xs px-2.5 py-1 rounded-xl font-medium flex items-center gap-1.5 shadow-2xs">
+              <span className="bg-amber-200/80 dark:bg-amber-950/60 border border-amber-700/30 dark:border-amber-500/30 text-amber-950 dark:text-amber-200 text-xs px-2.5 py-1 rounded-xl font-medium flex items-center gap-1.5 shadow-2xs">
                 <span>{activeMount.icon}</span>
                 <span>{activeMount.name}</span>
-                <span className="bg-amber-800/20 px-1 rounded text-[10px] font-bold">+{activeMount.inventoryBonus} sl.</span>
+                <span className="bg-amber-800/20 dark:bg-amber-400/20 px-1 rounded text-[10px] font-bold">+{activeMount.inventoryBonus} sl.</span>
               </span>
             )}
             {activeBuffs.map(b => (
               <span 
                 key={b.id} 
-                className="bg-amber-200/80 border border-amber-700/30 text-amber-950 text-xs px-2.5 py-1 rounded-xl font-medium flex items-center gap-1.5 shadow-2xs"
+                className="bg-amber-200/80 dark:bg-amber-950/60 border border-amber-700/30 dark:border-amber-500/30 text-amber-950 dark:text-amber-200 text-xs px-2.5 py-1 rounded-xl font-medium flex items-center gap-1.5 shadow-2xs"
                 title={b.description}
               >
                 <span>{b.icon}</span>
@@ -216,31 +216,31 @@ export const DesktopSidePanel: React.FC<DesktopSidePanelProps> = ({
       )}
 
       {/* 3. Location & Navigation Card */}
-      <div className="bg-[#f9f6e6]/80 backdrop-blur-md border border-amber-900/20 rounded-2xl p-3.5 shadow-md flex flex-col gap-2.5">
+      <div className="bg-[#f9f6e6]/80 dark:bg-[#121823]/90 backdrop-blur-md border border-amber-900/20 dark:border-amber-500/25 rounded-2xl p-3.5 shadow-md flex flex-col gap-2.5 transition-colors duration-300">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 min-w-0">
-            <MapPin size={16} className="text-amber-800 shrink-0" />
-            <span className="font-cinzel font-bold text-sm text-amber-950 truncate">
+            <MapPin size={16} className="text-amber-800 dark:text-amber-400 shrink-0" />
+            <span className="font-cinzel font-bold text-sm text-amber-950 dark:text-amber-100 truncate">
               {currentRegion || 'Divočina Aelthgardu'}
             </span>
           </div>
-          <span className="text-[10px] font-cinzel font-bold px-2 py-0.5 rounded-full bg-amber-200/80 border border-amber-900/20 text-amber-900 uppercase">
+          <span className="text-[10px] font-cinzel font-bold px-2 py-0.5 rounded-full bg-amber-200/80 dark:bg-amber-950/60 border border-amber-900/20 dark:border-amber-500/30 text-amber-900 dark:text-amber-300 uppercase">
             {locationType === 'mesto' ? 'Město' : locationType === 'vesnice' ? 'Vesnice' : 'Divočina'}
           </span>
         </div>
 
         {pointsOfInterest && pointsOfInterest.length > 0 && (
-          <div className="text-xs text-amber-900/80 font-lora flex flex-col gap-1">
-            <span className="font-bold text-amber-950">Význačná místa:</span>
+          <div className="text-xs text-amber-900/80 dark:text-slate-400 font-lora flex flex-col gap-1">
+            <span className="font-bold text-amber-950 dark:text-amber-200">Význačná místa:</span>
             <div className="flex flex-wrap gap-1.5 pt-0.5">
               {pointsOfInterest.map((p, idx) => {
                 const name = typeof p === 'string' ? p : (p.nazev || p.name || 'Zajímavost');
                 return (
                   <span 
                     key={idx}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-100/90 border border-amber-900/15 text-[11px] font-cinzel font-semibold text-amber-950 shadow-2xs"
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-100/90 dark:bg-[#1a2332] border border-amber-900/15 dark:border-amber-500/20 text-[11px] font-cinzel font-semibold text-amber-950 dark:text-amber-200 shadow-2xs"
                   >
-                    <span className="w-1.5 h-1.5 rounded-full bg-amber-600"></span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-600 dark:bg-amber-400"></span>
                     {name}
                   </span>
                 );
@@ -253,32 +253,32 @@ export const DesktopSidePanel: React.FC<DesktopSidePanelProps> = ({
         <div className="grid grid-cols-2 gap-2 pt-1">
           <button
             onClick={onOpenMap}
-            className="py-1.5 px-2.5 bg-amber-100 hover:bg-amber-200/80 border border-amber-900/20 rounded-xl font-cinzel font-bold text-xs text-amber-950 transition flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+            className="py-1.5 px-2.5 bg-amber-100 hover:bg-amber-200/80 dark:bg-[#171f2c] dark:hover:bg-[#202b3c] border border-amber-900/20 dark:border-amber-500/25 rounded-xl font-cinzel font-bold text-xs text-amber-950 dark:text-amber-200 transition flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
           >
-            <Map size={14} className="text-amber-800" />
+            <Map size={14} className="text-amber-800 dark:text-amber-400" />
             <span>Mapa světa</span>
           </button>
           
           <button
             onClick={onOpenInventory}
-            className="py-1.5 px-2.5 bg-amber-100 hover:bg-amber-200/80 border border-amber-900/20 rounded-xl font-cinzel font-bold text-xs text-amber-950 transition flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+            className="py-1.5 px-2.5 bg-amber-100 hover:bg-amber-200/80 dark:bg-[#171f2c] dark:hover:bg-[#202b3c] border border-amber-900/20 dark:border-amber-500/25 rounded-xl font-cinzel font-bold text-xs text-amber-950 dark:text-amber-200 transition flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
           >
-            <Package size={14} className="text-amber-800" />
+            <Package size={14} className="text-amber-800 dark:text-amber-400" />
             <span>Batoh & Výbava</span>
           </button>
 
           <button
             onClick={onOpenCamp}
-            className="py-1.5 px-2.5 bg-amber-100 hover:bg-amber-200/80 border border-amber-900/20 rounded-xl font-cinzel font-bold text-xs text-amber-950 transition flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+            className="py-1.5 px-2.5 bg-amber-100 hover:bg-amber-200/80 dark:bg-[#171f2c] dark:hover:bg-[#202b3c] border border-amber-900/20 dark:border-amber-500/25 rounded-xl font-cinzel font-bold text-xs text-amber-950 dark:text-amber-200 transition flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
           >
-            <Flame size={14} className="text-amber-600" />
+            <Flame size={14} className="text-amber-600 dark:text-amber-400" />
             <span>Tábořiště</span>
           </button>
 
           {isInTown ? (
             <button
               onClick={onOpenTownServices}
-              className="py-1.5 px-2.5 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-amber-950 font-cinzel font-bold text-xs rounded-xl shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer animate-pulse"
+              className="py-1.5 px-2.5 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 dark:from-amber-700 dark:to-amber-800 text-amber-950 dark:text-amber-100 font-cinzel font-bold text-xs rounded-xl shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer animate-pulse"
             >
               <ShoppingBag size={14} />
               <span>Tržnice & Kovář</span>
@@ -286,9 +286,9 @@ export const DesktopSidePanel: React.FC<DesktopSidePanelProps> = ({
           ) : (
             <button
               onClick={onOpenQuests}
-              className="py-1.5 px-2.5 bg-amber-100 hover:bg-amber-200/80 border border-amber-900/20 rounded-xl font-cinzel font-bold text-xs text-amber-950 transition flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+              className="py-1.5 px-2.5 bg-amber-100 hover:bg-amber-200/80 dark:bg-[#171f2c] dark:hover:bg-[#202b3c] border border-amber-900/20 dark:border-amber-500/25 rounded-xl font-cinzel font-bold text-xs text-amber-950 dark:text-amber-200 transition flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
             >
-              <ScrollText size={14} className="text-amber-800" />
+              <ScrollText size={14} className="text-amber-800 dark:text-amber-400" />
               <span>Kniha úkolů</span>
             </button>
           )}
@@ -296,15 +296,15 @@ export const DesktopSidePanel: React.FC<DesktopSidePanelProps> = ({
       </div>
 
       {/* 4. Active Quests Tracker Card */}
-      <div className="bg-[#f9f6e6]/80 backdrop-blur-md border border-amber-900/20 rounded-2xl p-4 shadow-md flex-1 min-h-[160px] flex flex-col">
-        <div className="flex items-center justify-between border-b border-amber-900/15 pb-2 mb-2.5">
-          <div className="flex items-center gap-1.5 font-cinzel font-bold text-xs text-amber-950 uppercase tracking-wider">
-            <ScrollText size={14} className="text-amber-800" />
+      <div className="bg-[#f9f6e6]/80 dark:bg-[#121823]/90 backdrop-blur-md border border-amber-900/20 dark:border-amber-500/25 rounded-2xl p-4 shadow-md flex-1 min-h-[160px] flex flex-col transition-colors duration-300">
+        <div className="flex items-center justify-between border-b border-amber-900/15 dark:border-amber-500/20 pb-2 mb-2.5">
+          <div className="flex items-center gap-1.5 font-cinzel font-bold text-xs text-amber-950 dark:text-amber-100 uppercase tracking-wider">
+            <ScrollText size={14} className="text-amber-800 dark:text-amber-400" />
             <span>Sledované úkoly</span>
           </div>
           <button
             onClick={onOpenQuests}
-            className="text-[11px] font-cinzel font-bold text-amber-800 hover:text-amber-950 flex items-center gap-0.5 transition"
+            className="text-[11px] font-cinzel font-bold text-amber-800 dark:text-amber-400 hover:text-amber-950 dark:hover:text-amber-200 flex items-center gap-0.5 transition cursor-pointer"
           >
             <span>Všechny ({activeQuests.length})</span>
             <ChevronRight size={12} />
@@ -312,7 +312,7 @@ export const DesktopSidePanel: React.FC<DesktopSidePanelProps> = ({
         </div>
 
         {activeQuests.length === 0 ? (
-          <div className="flex-1 flex items-center justify-center text-center p-4 text-xs font-lora italic text-amber-900/60">
+          <div className="flex-1 flex items-center justify-center text-center p-4 text-xs font-lora italic text-amber-900/60 dark:text-slate-400">
             Žádné aktivní úkoly. Prozkoumej okolí nebo promluv s obyvateli.
           </div>
         ) : (
@@ -321,16 +321,16 @@ export const DesktopSidePanel: React.FC<DesktopSidePanelProps> = ({
               <div 
                 key={quest.id || idx}
                 onClick={onOpenQuests}
-                className="bg-white/60 hover:bg-white/90 border border-amber-900/15 hover:border-amber-600/50 p-2.5 rounded-xl transition cursor-pointer shadow-2xs"
+                className="bg-white/60 hover:bg-white/90 dark:bg-[#171f2c]/80 dark:hover:bg-[#1f2b3e] border border-amber-900/15 dark:border-amber-500/20 hover:border-amber-600/50 dark:hover:border-amber-400/50 p-2.5 rounded-xl transition cursor-pointer shadow-2xs"
               >
                 <div className="flex items-start justify-between gap-1.5">
-                  <h4 className="font-cinzel font-bold text-xs text-amber-950 leading-tight truncate">
+                  <h4 className="font-cinzel font-bold text-xs text-amber-950 dark:text-amber-100 leading-tight truncate">
                     {quest.nazev || quest.title || 'Neznámý úkol'}
                   </h4>
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-600 shrink-0 mt-1" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-600 dark:bg-amber-400 shrink-0 mt-1" />
                 </div>
                 {(quest.popis || quest.cile) && (
-                  <p className="text-[11px] text-amber-900/80 font-lora line-clamp-2 mt-1 leading-snug">
+                  <p className="text-[11px] text-amber-900/80 dark:text-slate-400 font-lora line-clamp-2 mt-1 leading-snug">
                     {quest.cile || quest.popis}
                   </p>
                 )}

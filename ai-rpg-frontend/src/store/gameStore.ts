@@ -319,6 +319,10 @@ interface GameState {
   consequenceToast: { text: string; faction?: string; delta?: number } | null;
   setConsequenceToast: (toast: { text: string; faction?: string; delta?: number } | null) => void;
   
+  // Theme
+  theme: "light" | "dark" | "auto";
+  setTheme: (t: "light" | "dark" | "auto") => void;
+  
   // Magic
   currentSpellSlots: number;
   setCurrentSpellSlots: (s: number | ((s: number) => number)) => void;
@@ -607,4 +611,19 @@ export const useGameStore = create<GameState>((set) => ({
   }),
   activeMount: null,
   setActiveMount: (activeMount) => set({ activeMount }),
+
+  theme: "auto",
+  setTheme: (theme) => {
+    try {
+      localStorage.setItem("aethelgard_theme", theme);
+      const isDark = theme === "dark" || (theme === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+      document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
+      if (isDark) {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+    } catch (e) {}
+    set({ theme });
+  },
 }));

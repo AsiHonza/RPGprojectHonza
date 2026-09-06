@@ -315,21 +315,21 @@ export default function HexMap({
             <div className="absolute bottom-6 right-4 sm:bottom-8 sm:right-6 flex flex-col gap-2 z-40">
               <button 
                 onClick={() => zoomIn(0.3)} 
-                className="w-10 h-10 bg-[#faf6ea] border-2 border-amber-900/40 rounded-xl flex items-center justify-center text-amber-950 hover:bg-amber-100 hover:border-amber-800 shadow-xl transition active:scale-95 cursor-pointer"
+                className="w-10 h-10 bg-[#faf6ea] dark:bg-[#121823] border-2 border-amber-900/40 dark:border-amber-600/40 rounded-xl flex items-center justify-center text-amber-950 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-[#1c2637] hover:border-amber-800 dark:hover:border-amber-500 shadow-xl transition active:scale-95 cursor-pointer"
                 title="Přiblížit (+)"
               >
                 <Plus size={20} className="stroke-[2.5]" />
               </button>
               <button 
                 onClick={() => zoomOut(0.3)} 
-                className="w-10 h-10 bg-[#faf6ea] border-2 border-amber-900/40 rounded-xl flex items-center justify-center text-amber-950 hover:bg-amber-100 hover:border-amber-800 shadow-xl transition active:scale-95 cursor-pointer"
+                className="w-10 h-10 bg-[#faf6ea] dark:bg-[#121823] border-2 border-amber-900/40 dark:border-amber-600/40 rounded-xl flex items-center justify-center text-amber-950 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-[#1c2637] hover:border-amber-800 dark:hover:border-amber-500 shadow-xl transition active:scale-95 cursor-pointer"
                 title="Oddálit (-)"
               >
                 <Minus size={20} className="stroke-[2.5]" />
               </button>
               <button 
                 onClick={() => centerOnHero(true)} 
-                className="w-10 h-10 bg-amber-900 border-2 border-amber-700 rounded-xl flex items-center justify-center text-amber-100 hover:bg-amber-950 shadow-xl transition active:scale-95 cursor-pointer" 
+                className="w-10 h-10 bg-amber-900 dark:bg-amber-800 border-2 border-amber-700 dark:border-amber-600 rounded-xl flex items-center justify-center text-amber-100 hover:bg-amber-950 dark:hover:bg-amber-700 shadow-xl transition active:scale-95 cursor-pointer" 
                 title="Centrovat na hrdinu"
               >
                 <Crosshair size={19} className="stroke-[2.5]" />
@@ -662,28 +662,28 @@ export default function HexMap({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#faf6ea]/95 backdrop-blur-md border-2 border-amber-900/40 px-4 py-2.5 rounded-xl shadow-2xl pointer-events-none z-50 text-center max-w-xs sm:max-w-sm"
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#faf6ea]/95 dark:bg-[#121823]/95 backdrop-blur-md border-2 border-amber-900/40 dark:border-amber-600/40 px-4 py-2.5 rounded-xl shadow-2xl pointer-events-none z-50 text-center max-w-xs sm:max-w-sm text-slate-900 dark:text-[#e2d9c8]"
           >
             {!hoveredHex.isExplored ? (
-              <div className="text-amber-950 font-cinzel font-bold text-sm">
+              <div className="text-amber-950 dark:text-amber-300 font-cinzel font-bold text-sm">
                 🌫️ Neznámé končiny (Mlha)
               </div>
             ) : hoveredHex.nazev ? (
               <>
-                <h3 className="font-cinzel font-bold text-amber-900 text-base">{hoveredHex.nazev}</h3>
-                {hoveredHex.popis && <p className="font-lora text-slate-800 text-xs line-clamp-2 mt-0.5">{hoveredHex.popis}</p>}
-                <div className="text-[11px] font-semibold text-amber-800 mt-1">
+                <h3 className="font-cinzel font-bold text-amber-900 dark:text-amber-300 text-base">{hoveredHex.nazev}</h3>
+                {hoveredHex.popis && <p className="font-lora text-slate-800 dark:text-slate-300 text-xs line-clamp-2 mt-0.5">{hoveredHex.popis}</p>}
+                <div className="text-[11px] font-semibold text-amber-800 dark:text-amber-400 mt-1">
                   {TERRAIN_CONFIG[hoveredHex.terrain]?.label || hoveredHex.terrain} 
                   {hoveredHex.kingdomName && ` • ${hoveredHex.kingdomName}`}
                 </div>
               </>
             ) : (
               <div>
-                <h3 className="font-cinzel font-bold text-slate-900 text-sm">
+                <h3 className="font-cinzel font-bold text-slate-900 dark:text-amber-200 text-sm">
                   {TERRAIN_CONFIG[hoveredHex.terrain]?.label || hoveredHex.terrain}
                 </h3>
                 {hoveredHex.kingdomName && (
-                  <p className="font-lora text-amber-800 text-xs mt-0.5">{hoveredHex.kingdomName}</p>
+                  <p className="font-lora text-amber-800 dark:text-amber-400 text-xs mt-0.5">{hoveredHex.kingdomName}</p>
                 )}
               </div>
             )}

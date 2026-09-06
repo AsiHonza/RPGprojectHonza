@@ -83,19 +83,19 @@ export const CampModal: React.FC<CampModalProps> = ({ isOpen, onClose, onRestCom
 
   return (
     <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 select-none">
-      <div className="w-full max-w-lg bg-[#faf6ea] bg-[url('https://www.transparenttextures.com/patterns/aged-paper.png')] rounded-2xl border-4 border-amber-950/80 shadow-2xl overflow-hidden flex flex-col text-slate-900">
+      <div className="w-full max-w-lg bg-[#faf6ea] dark:bg-[#121823] bg-[url('https://www.transparenttextures.com/patterns/aged-paper.png')] rounded-2xl border-4 border-amber-950/80 dark:border-amber-500/40 shadow-2xl overflow-hidden flex flex-col text-slate-900 dark:text-[#e2d9c8]">
         
         {/* Header */}
-        <div className="px-5 py-4 flex justify-between items-center border-b-2 border-amber-900/20 bg-amber-950 text-amber-100">
+        <div className="px-5 py-4 flex justify-between items-center border-b-2 border-amber-900/20 dark:border-amber-500/20 bg-amber-950 dark:bg-[#0b0f16] text-amber-100">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-amber-500/20 rounded-xl border border-amber-500/40 text-amber-400">
+            <div className="p-2 bg-amber-500/20 dark:bg-amber-950/60 rounded-xl border border-amber-500/40 text-amber-400">
               <Flame size={24} className="animate-pulse" />
             </div>
             <div>
-              <h2 className="font-cinzel font-bold text-xl text-amber-200 tracking-wide">
+              <h2 className="font-cinzel font-bold text-xl text-amber-200 dark:text-amber-300 tracking-wide">
                 Táboření a Odpočinek
               </h2>
-              <p className="text-xs font-lora text-amber-300/80">
+              <p className="text-xs font-lora text-amber-300/80 dark:text-amber-400/80">
                 {currentRegion} • {isSafeZone ? 'Bezpečná zóna' : 'Tábor v divočině'}
               </p>
             </div>
@@ -104,7 +104,7 @@ export const CampModal: React.FC<CampModalProps> = ({ isOpen, onClose, onRestCom
           <button 
             onClick={onClose} 
             disabled={resting}
-            className="text-amber-300/70 hover:text-amber-100 p-1.5 rounded-xl hover:bg-amber-900/40 transition cursor-pointer"
+            className="text-amber-300/70 dark:text-slate-400 hover:text-amber-100 dark:hover:text-amber-300 p-1.5 rounded-xl hover:bg-amber-900/40 dark:hover:bg-[#1c2637] transition cursor-pointer"
             title="Zavřít"
           >
             <X size={22} />
@@ -116,13 +116,13 @@ export const CampModal: React.FC<CampModalProps> = ({ isOpen, onClose, onRestCom
           {/* Zone status banner */}
           <div className={`p-3 rounded-xl border flex items-center gap-3 text-xs leading-relaxed ${
             isSafeZone 
-              ? 'bg-emerald-900/10 border-emerald-700/30 text-emerald-950' 
-              : 'bg-amber-900/10 border-amber-700/30 text-amber-950'
+              ? 'bg-emerald-900/10 dark:bg-emerald-950/40 border-emerald-700/30 dark:border-emerald-500/30 text-emerald-950 dark:text-emerald-300' 
+              : 'bg-amber-900/10 dark:bg-amber-950/40 border-amber-700/30 dark:border-amber-500/30 text-amber-950 dark:text-amber-300'
           }`}>
             {isSafeZone ? (
-              <CheckCircle2 size={20} className="text-emerald-700 shrink-0" />
+              <CheckCircle2 size={20} className="text-emerald-700 dark:text-emerald-400 shrink-0" />
             ) : (
-              <ShieldAlert size={20} className="text-amber-700 shrink-0" />
+              <ShieldAlert size={20} className="text-amber-700 dark:text-amber-400 shrink-0" />
             )}
             <div>
               <strong className="font-cinzel block text-xs">
@@ -137,22 +137,22 @@ export const CampModal: React.FC<CampModalProps> = ({ isOpen, onClose, onRestCom
           </div>
 
           {/* Current Player Resources */}
-          <div className="grid grid-cols-3 gap-2 py-2 text-center text-xs font-cinzel font-bold border-y border-amber-900/15">
-            <div className="p-2 bg-amber-900/5 rounded-lg border border-amber-900/10">
-              <span className="text-[10px] text-slate-600 block uppercase">Zdraví</span>
-              <span className="text-sm text-red-700 flex items-center justify-center gap-1 mt-0.5">
+          <div className="grid grid-cols-3 gap-2 py-2 text-center text-xs font-cinzel font-bold border-y border-amber-900/15 dark:border-amber-500/20">
+            <div className="p-2 bg-amber-900/5 dark:bg-[#141c28] rounded-lg border border-amber-900/10 dark:border-amber-500/20">
+              <span className="text-[10px] text-slate-600 dark:text-slate-400 block uppercase">Zdraví</span>
+              <span className="text-sm text-red-700 dark:text-red-400 flex items-center justify-center gap-1 mt-0.5">
                 <Heart size={14} /> {hp} / {maxHp}
               </span>
             </div>
-            <div className="p-2 bg-amber-900/5 rounded-lg border border-amber-900/10">
-              <span className="text-[10px] text-slate-600 block uppercase">Kouzla</span>
-              <span className="text-sm text-sky-700 flex items-center justify-center gap-1 mt-0.5">
+            <div className="p-2 bg-amber-900/5 dark:bg-[#141c28] rounded-lg border border-amber-900/10 dark:border-amber-500/20">
+              <span className="text-[10px] text-slate-600 dark:text-slate-400 block uppercase">Kouzla</span>
+              <span className="text-sm text-sky-700 dark:text-sky-400 flex items-center justify-center gap-1 mt-0.5">
                 <Sparkles size={14} /> {currentSpellSlots} / {maxSpellSlots}
               </span>
             </div>
-            <div className="p-2 bg-amber-900/5 rounded-lg border border-amber-900/10">
-              <span className="text-[10px] text-slate-600 block uppercase">Zásoby</span>
-              <span className={`text-sm flex items-center justify-center gap-1 mt-0.5 ${rations > 0 ? 'text-amber-900' : 'text-red-700 font-black'}`}>
+            <div className="p-2 bg-amber-900/5 dark:bg-[#141c28] rounded-lg border border-amber-900/10 dark:border-amber-500/20">
+              <span className="text-[10px] text-slate-600 dark:text-slate-400 block uppercase">Zásoby</span>
+              <span className={`text-sm flex items-center justify-center gap-1 mt-0.5 ${rations > 0 ? 'text-amber-900 dark:text-amber-300' : 'text-red-700 dark:text-red-400 font-black'}`}>
                 <Drumstick size={14} /> {rations} ks
               </span>
             </div>
@@ -160,8 +160,8 @@ export const CampModal: React.FC<CampModalProps> = ({ isOpen, onClose, onRestCom
 
           {/* Low food warning */}
           {rations < 2 && (
-            <div className="p-2.5 bg-amber-100 border border-amber-700/30 rounded-lg text-xs text-amber-950 flex items-center gap-2 font-medium">
-              <AlertTriangle size={16} className="text-amber-700 shrink-0" />
+            <div className="p-2.5 bg-amber-100 dark:bg-amber-950/70 border border-amber-700/30 dark:border-amber-500/30 rounded-lg text-xs text-amber-950 dark:text-amber-200 flex items-center gap-2 font-medium">
+              <AlertTriangle size={16} className="text-amber-700 dark:text-amber-400 shrink-0" />
               <span>
                 {rations === 1 
                   ? 'Zbývá ti pouze 1 zásoba jídla – stačí na Krátký odpočinek.' 
@@ -173,16 +173,16 @@ export const CampModal: React.FC<CampModalProps> = ({ isOpen, onClose, onRestCom
           {/* Rest Options */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
             {/* Option A: Short Rest */}
-            <div className="bg-[#f5ede0] border-2 border-amber-900/25 rounded-xl p-3.5 flex flex-col justify-between gap-3 shadow-sm hover:border-amber-800 transition">
+            <div className="bg-[#f5ede0] dark:bg-[#141c28] border-2 border-amber-900/25 dark:border-amber-500/25 rounded-xl p-3.5 flex flex-col justify-between gap-3 shadow-sm hover:border-amber-800 dark:hover:border-amber-500 transition">
               <div>
-                <div className="flex items-center gap-1.5 text-amber-900 font-cinzel font-bold text-sm mb-1">
+                <div className="flex items-center gap-1.5 text-amber-900 dark:text-amber-400 font-cinzel font-bold text-sm mb-1">
                   <Coffee size={16} />
                   <span>Krátký odpočinek</span>
                 </div>
-                <p className="text-xs text-slate-700 leading-snug">
+                <p className="text-xs text-slate-700 dark:text-slate-300 leading-snug">
                   Hodina ošetření ran u ohně. Obnoví <strong>35 % HP</strong> a <strong>1 kouzelný slot</strong>.
                 </p>
-                <div className="mt-2 text-[11px] font-bold text-amber-950 bg-amber-900/10 px-2 py-0.5 rounded inline-block">
+                <div className="mt-2 text-[11px] font-bold text-amber-950 dark:text-amber-200 bg-amber-900/10 dark:bg-amber-950/60 px-2 py-0.5 rounded inline-block">
                   Náklad: 1 jídlo • 1 hodina
                 </div>
               </div>
@@ -190,23 +190,23 @@ export const CampModal: React.FC<CampModalProps> = ({ isOpen, onClose, onRestCom
               <button
                 onClick={() => handleRest('short')}
                 disabled={resting}
-                className="w-full py-2 bg-amber-900 hover:bg-amber-950 text-amber-100 rounded-lg font-cinzel font-bold text-xs tracking-wider transition shadow-sm cursor-pointer disabled:opacity-50"
+                className="w-full py-2 bg-amber-900 hover:bg-amber-950 dark:bg-amber-700 dark:hover:bg-amber-600 text-amber-100 rounded-lg font-cinzel font-bold text-xs tracking-wider transition shadow-sm cursor-pointer disabled:opacity-50"
               >
                 {resting ? 'Odpočíváš...' : 'Rozdělat oheň (1h)'}
               </button>
             </div>
 
             {/* Option B: Long Rest */}
-            <div className="bg-[#f5ede0] border-2 border-amber-900/25 rounded-xl p-3.5 flex flex-col justify-between gap-3 shadow-sm hover:border-amber-800 transition">
+            <div className="bg-[#f5ede0] dark:bg-[#141c28] border-2 border-amber-900/25 dark:border-amber-500/25 rounded-xl p-3.5 flex flex-col justify-between gap-3 shadow-sm hover:border-amber-800 dark:hover:border-amber-500 transition">
               <div>
-                <div className="flex items-center gap-1.5 text-amber-900 font-cinzel font-bold text-sm mb-1">
+                <div className="flex items-center gap-1.5 text-amber-900 dark:text-amber-400 font-cinzel font-bold text-sm mb-1">
                   <Moon size={16} />
                   <span>Dlouhý spánek</span>
                 </div>
-                <p className="text-xs text-slate-700 leading-snug">
+                <p className="text-xs text-slate-700 dark:text-slate-300 leading-snug">
                   Celonoční spánek (8h). <strong>Plná obnova všech HP</strong> a <strong>všech kouzelných slotů</strong>.
                 </p>
-                <div className="mt-2 text-[11px] font-bold text-amber-950 bg-amber-900/10 px-2 py-0.5 rounded inline-block">
+                <div className="mt-2 text-[11px] font-bold text-amber-950 dark:text-amber-200 bg-amber-900/10 dark:bg-amber-950/60 px-2 py-0.5 rounded inline-block">
                   Náklad: 2 jídla • 8 hodin
                 </div>
               </div>
@@ -214,7 +214,7 @@ export const CampModal: React.FC<CampModalProps> = ({ isOpen, onClose, onRestCom
               <button
                 onClick={() => handleRest('long')}
                 disabled={resting}
-                className="w-full py-2 bg-amber-950 hover:bg-black text-amber-200 border border-amber-700/40 rounded-lg font-cinzel font-bold text-xs tracking-wider transition shadow-sm cursor-pointer disabled:opacity-50"
+                className="w-full py-2 bg-amber-950 hover:bg-black dark:bg-[#1c2637] dark:hover:bg-[#25334a] text-amber-200 dark:text-amber-300 border border-amber-700/40 dark:border-amber-500/40 rounded-lg font-cinzel font-bold text-xs tracking-wider transition shadow-sm cursor-pointer disabled:opacity-50"
               >
                 {resting ? 'Spíš...' : 'Ulehnout ke spánku (8h)'}
               </button>
@@ -231,12 +231,12 @@ export const CampModal: React.FC<CampModalProps> = ({ isOpen, onClose, onRestCom
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-3 border-t-2 border-amber-900/20 bg-amber-900/5 flex justify-between items-center text-xs font-lora text-slate-700">
+        <div className="px-5 py-3 border-t-2 border-amber-900/20 dark:border-amber-500/20 bg-amber-900/5 dark:bg-amber-950/20 flex justify-between items-center text-xs font-lora text-slate-700 dark:text-slate-400">
           <span>Aelthgard • Přežití a táboření</span>
           <button
             onClick={onClose}
             disabled={resting}
-            className="px-4 py-1.5 bg-amber-900/20 hover:bg-amber-900/30 text-amber-950 rounded-xl font-cinzel font-bold text-xs tracking-wider transition cursor-pointer"
+            className="px-4 py-1.5 bg-amber-900/20 dark:bg-amber-950/40 hover:bg-amber-900/30 dark:hover:bg-amber-900/60 text-amber-950 dark:text-amber-200 rounded-xl font-cinzel font-bold text-xs tracking-wider transition cursor-pointer"
           >
             Odejít od ohně
           </button>

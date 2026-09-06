@@ -180,27 +180,27 @@ export const MapModal = ({ isOpen, onClose, setSelectedItem, onTravel }: any) =>
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 backdrop-blur-sm select-none">
-      <div className="w-full h-full max-h-screen relative overflow-hidden bg-[#e8dfc8]">
+      <div className="w-full h-full max-h-screen relative overflow-hidden bg-[#e8dfc8] dark:bg-[#0b0f16]">
         
         {/* Top Header HUD */}
         <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-50 flex items-center gap-2 flex-wrap max-w-[calc(100vw-70px)] pointer-events-auto">
           {/* World Badge */}
-          <div className="bg-[#faf6ea]/95 backdrop-blur-md px-3 sm:px-4 py-2 rounded-xl border-2 border-amber-900/40 shadow-xl flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-amber-900/15 flex items-center justify-center text-amber-900 shrink-0">
+          <div className="bg-[#faf6ea]/95 dark:bg-[#121823]/95 backdrop-blur-md px-3 sm:px-4 py-2 rounded-xl border-2 border-amber-900/40 dark:border-amber-600/40 shadow-xl flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-amber-900/15 dark:bg-amber-950/40 flex items-center justify-center text-amber-900 dark:text-amber-300 shrink-0">
               <MapIcon size={18} />
             </div>
             <div>
-              <h2 className="text-[#8b1e1e] font-bold text-xs sm:text-sm font-medieval tracking-widest uppercase flex items-center gap-1.5 leading-tight">
+              <h2 className="text-[#8b1e1e] dark:text-amber-400 font-bold text-xs sm:text-sm font-medieval tracking-widest uppercase flex items-center gap-1.5 leading-tight">
                 Aelthgard
               </h2>
-              <div className="text-[10px] sm:text-xs font-lora font-semibold text-slate-800 flex items-center gap-2">
+              <div className="text-[10px] sm:text-xs font-lora font-semibold text-slate-800 dark:text-slate-300 flex items-center gap-2">
                 <span>⏱ Den <strong>{day}</strong></span>
                 <span>•</span>
                 <span>🍖 Zásoby: <strong>{rations}</strong></span>
                 {currentRegion && (
                   <>
                     <span className="hidden sm:inline">•</span>
-                    <span className="hidden sm:inline text-amber-900 font-bold truncate max-w-[140px]">{currentRegion}</span>
+                    <span className="hidden sm:inline text-amber-900 dark:text-amber-300 font-bold truncate max-w-[140px]">{currentRegion}</span>
                   </>
                 )}
               </div>
@@ -212,8 +212,8 @@ export const MapModal = ({ isOpen, onClose, setSelectedItem, onTravel }: any) =>
             onClick={() => setFogOfWarEnabled(prev => !prev)}
             className={`px-2.5 sm:px-3 py-2 rounded-xl border-2 font-cinzel text-xs font-bold transition flex items-center gap-1.5 shadow-md cursor-pointer ${
               fogOfWarEnabled 
-                ? 'bg-[#faf6ea] border-amber-900/40 text-amber-950 hover:bg-amber-100' 
-                : 'bg-amber-900 text-amber-100 border-amber-700 hover:bg-amber-950'
+                ? 'bg-[#faf6ea] dark:bg-[#141b26] border-amber-900/40 dark:border-amber-600/40 text-amber-950 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-[#1e2738]' 
+                : 'bg-amber-900 dark:bg-amber-800 text-amber-100 border-amber-700 dark:border-amber-600 hover:bg-amber-950 dark:hover:bg-amber-700'
             }`}
             title="Přepnout mlhu neznáma (Fog of War)"
           >
@@ -227,8 +227,8 @@ export const MapModal = ({ isOpen, onClose, setSelectedItem, onTravel }: any) =>
             onClick={toggleLegend}
             className={`px-2.5 sm:px-3 py-2 rounded-xl border-2 font-cinzel text-xs font-bold transition flex items-center gap-1.5 shadow-md cursor-pointer ${
               showLegend
-                ? 'bg-amber-900 text-amber-100 border-amber-700'
-                : 'bg-[#faf6ea] border-amber-900/40 text-amber-950 hover:bg-amber-100'
+                ? 'bg-amber-900 dark:bg-amber-800 text-amber-100 border-amber-700 dark:border-amber-600'
+                : 'bg-[#faf6ea] dark:bg-[#141b26] border-amber-900/40 dark:border-amber-600/40 text-amber-950 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-[#1e2738]'
             }`}
             title="Otevřít legendu mapy"
           >
@@ -240,7 +240,7 @@ export const MapModal = ({ isOpen, onClose, setSelectedItem, onTravel }: any) =>
         {/* Close Button */}
         <button 
           onClick={onClose} 
-          className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-amber-950 text-amber-100 w-10 h-10 rounded-xl flex items-center justify-center hover:bg-[#8b1e1e] transition z-50 border-2 border-amber-900/50 shadow-xl cursor-pointer active:scale-95"
+          className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-amber-950 dark:bg-[#1a2332] text-amber-100 w-10 h-10 rounded-xl flex items-center justify-center hover:bg-[#8b1e1e] dark:hover:bg-amber-700 transition z-50 border-2 border-amber-900/50 dark:border-amber-600/50 shadow-xl cursor-pointer active:scale-95"
           title="Zavřít mapu"
         >
           <X size={20} />
@@ -267,10 +267,10 @@ export const MapModal = ({ isOpen, onClose, setSelectedItem, onTravel }: any) =>
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 150, opacity: 0 }}
               transition={{ type: 'spring', damping: 26, stiffness: 320 }}
-              className="fixed sm:absolute bottom-0 inset-x-0 sm:inset-x-auto sm:right-6 sm:bottom-6 sm:w-[430px] max-h-[85vh] sm:max-h-[82vh] bg-[#faf6ea] bg-[url('https://www.transparenttextures.com/patterns/aged-paper.png')] border-t-4 sm:border-4 border-amber-950/80 rounded-t-3xl sm:rounded-2xl shadow-[0_-15px_40px_rgba(0,0,0,0.5)] z-[85] flex flex-col overflow-hidden"
+              className="fixed sm:absolute bottom-0 inset-x-0 sm:inset-x-auto sm:right-6 sm:bottom-6 sm:w-[430px] max-h-[85vh] sm:max-h-[82vh] bg-[#faf6ea] dark:bg-[#0f141d] bg-[url('https://www.transparenttextures.com/patterns/aged-paper.png')] border-t-4 sm:border-4 border-amber-950/80 dark:border-amber-600/40 rounded-t-3xl sm:rounded-2xl shadow-[0_-15px_40px_rgba(0,0,0,0.5)] z-[85] flex flex-col overflow-hidden text-slate-900 dark:text-[#e2d9c8]"
             >
               {/* Mobile Drag Indicator */}
-              <div className="w-12 h-1.5 bg-amber-900/25 rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
+              <div className="w-12 h-1.5 bg-amber-900/25 dark:bg-amber-600/30 rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
 
               <div className="p-4 sm:p-5 overflow-y-auto flex-1 flex flex-col gap-3">
                 {/* Header & Badges */}
@@ -283,34 +283,34 @@ export const MapModal = ({ isOpen, onClose, setSelectedItem, onTravel }: any) =>
                           {poiBadge.label}
                         </span>
                       )}
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-900/10 border border-amber-900/20 text-amber-950 text-[11px] font-lora font-semibold">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-900/10 dark:bg-amber-950/50 border border-amber-900/20 dark:border-amber-600/30 text-amber-950 dark:text-amber-200 text-[11px] font-lora font-semibold">
                         Terén: {translateTerrain(selectedHex.terrain)}
                       </span>
                       {selectedKingdom && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-900/10 border border-amber-900/20 text-amber-900 text-[11px] font-cinzel font-bold">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-900/10 dark:bg-amber-950/50 border border-amber-900/20 dark:border-amber-600/30 text-amber-900 dark:text-amber-300 text-[11px] font-cinzel font-bold">
                           {selectedKingdom.badge} {selectedKingdom.name}
                         </span>
                       )}
                     </div>
-                    <h3 className="font-cinzel font-bold text-amber-950 text-lg sm:text-xl leading-tight">
+                    <h3 className="font-cinzel font-bold text-amber-950 dark:text-amber-200 text-lg sm:text-xl leading-tight">
                       {selectedHex.nazev || translateTerrain(selectedHex.terrain)}
                     </h3>
                   </div>
 
                   <button 
                     onClick={() => setSelectedHex(null)} 
-                    className="text-amber-900/70 hover:text-amber-950 p-1.5 rounded-lg hover:bg-amber-900/10 transition cursor-pointer"
+                    className="text-amber-900/70 dark:text-slate-400 hover:text-amber-950 dark:hover:text-amber-200 p-1.5 rounded-lg hover:bg-amber-900/10 dark:hover:bg-slate-800 transition cursor-pointer"
                   >
                     <X size={18} />
                   </button>
                 </div>
 
                 {/* Lore / Atmosphere */}
-                <div className="bg-[#f2ecda] p-3 rounded-xl border border-amber-900/20 text-slate-800 font-lora text-xs sm:text-sm leading-relaxed">
+                <div className="bg-[#f2ecda] dark:bg-[#141b26] p-3 rounded-xl border border-amber-900/20 dark:border-amber-600/30 text-slate-800 dark:text-slate-200 font-lora text-xs sm:text-sm leading-relaxed">
                   {selectedHex.popis ? (
                     <p>{selectedHex.popis}</p>
                   ) : (
-                    <p className="italic text-slate-700">
+                    <p className="italic text-slate-700 dark:text-slate-300">
                       {selectedHex.terrain === 'Ocean' 
                         ? 'Nekonečné mořské dálavy a hlubiny, které brázdí pouze rybářské bárky a legendární mořské bestie.'
                         : selectedHex.terrain === 'Forest'
@@ -327,13 +327,13 @@ export const MapModal = ({ isOpen, onClose, setSelectedItem, onTravel }: any) =>
                 </div>
 
                 {/* Travel & Cost Section */}
-                <div className="bg-[#f6f0dd] p-3 rounded-xl border border-amber-900/25 flex flex-col gap-2">
+                <div className="bg-[#f6f0dd] dark:bg-[#17202d] p-3 rounded-xl border border-amber-900/25 dark:border-amber-600/30 flex flex-col gap-2">
                   <div className="flex items-center justify-between text-xs sm:text-sm font-lora">
-                    <span className="font-bold text-amber-950 flex items-center gap-1.5">
-                      <Compass size={16} className="text-amber-800" />
+                    <span className="font-bold text-amber-950 dark:text-amber-200 flex items-center gap-1.5">
+                      <Compass size={16} className="text-amber-800 dark:text-amber-400" />
                       Vzdálenost:
                     </span>
-                    <span className="font-bold text-amber-900">
+                    <span className="font-bold text-amber-900 dark:text-amber-300">
                       {travelStats.dist === 0 
                         ? 'Zde se nacházíš' 
                         : `${travelStats.dist} ${travelStats.dist === 1 ? 'hex' : travelStats.dist < 5 ? 'hexy' : 'hexů'}`}
@@ -341,9 +341,9 @@ export const MapModal = ({ isOpen, onClose, setSelectedItem, onTravel }: any) =>
                   </div>
 
                   {travelStats.dist > 0 && (
-                    <div className="border-t border-amber-900/15 pt-2 flex items-center justify-between text-xs sm:text-sm font-lora">
-                      <span className="text-slate-700">Náklady na 1 krok:</span>
-                      <div className="flex items-center gap-2 font-bold text-amber-900">
+                    <div className="border-t border-amber-900/15 dark:border-amber-500/20 pt-2 flex items-center justify-between text-xs sm:text-sm font-lora">
+                      <span className="text-slate-700 dark:text-slate-400">Náklady na 1 krok:</span>
+                      <div className="flex items-center gap-2 font-bold text-amber-900 dark:text-amber-300">
                         <span>⏱ 1 Den</span>
                         <span>•</span>
                         <span>🍖 {travelStats.foodCost} {travelStats.foodCost === 1 ? 'Zásoba' : 'Zásoby'}</span>
@@ -352,14 +352,14 @@ export const MapModal = ({ isOpen, onClose, setSelectedItem, onTravel }: any) =>
                   )}
 
                   {travelStats.dist > 1 && (
-                    <div className="text-[11px] text-slate-600 font-lora italic">
+                    <div className="text-[11px] text-slate-600 dark:text-slate-400 font-lora italic">
                       Celá expedice by zabrala přibližně {travelStats.dist} dní a {travelStats.dist * travelStats.foodCost} zásob jídla. Putování probíhá krok po kroku.
                     </div>
                   )}
 
                   {travelStats.error && travelStats.dist > 0 && (
-                    <div className="bg-red-50 border border-red-300 p-2 rounded-lg flex items-center gap-2 text-red-700 text-xs font-lora font-bold">
-                      <AlertTriangle size={15} className="shrink-0 text-red-600" />
+                    <div className="bg-red-50 dark:bg-red-950/50 border border-red-300 dark:border-red-700 p-2 rounded-lg flex items-center gap-2 text-red-700 dark:text-red-300 text-xs font-lora font-bold">
+                      <AlertTriangle size={15} className="shrink-0 text-red-600 dark:text-red-400" />
                       <span>{travelStats.error}</span>
                     </div>
                   )}
@@ -368,13 +368,13 @@ export const MapModal = ({ isOpen, onClose, setSelectedItem, onTravel }: any) =>
                 {/* Travel Action Buttons */}
                 <div className="pt-1">
                   {travelStats.dist === 0 ? (
-                    <div className="w-full py-2.5 px-4 bg-amber-900/15 border border-amber-900/30 rounded-xl text-center text-amber-950 font-cinzel font-bold text-xs sm:text-sm">
+                    <div className="w-full py-2.5 px-4 bg-amber-900/15 dark:bg-amber-950/40 border border-amber-900/30 dark:border-amber-600/40 rounded-xl text-center text-amber-950 dark:text-amber-200 font-cinzel font-bold text-xs sm:text-sm">
                       📍 Zde právě táboříš
                     </div>
                   ) : travelStats.canTravelDirect ? (
                     <button
                       onClick={handleDirectTravel}
-                      className="w-full bg-[#8b1e1e] hover:bg-red-800 text-amber-100 font-cinzel font-bold py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-2 text-sm sm:text-base cursor-pointer active:scale-98"
+                      className="w-full bg-[#8b1e1e] hover:bg-red-800 dark:bg-[#a62b2b] dark:hover:bg-[#bf3333] text-amber-100 font-cinzel font-bold py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-2 text-sm sm:text-base cursor-pointer active:scale-98"
                     >
                       <Footprints size={18} />
                       Vydat se do této lokace (1 den)
@@ -382,7 +382,7 @@ export const MapModal = ({ isOpen, onClose, setSelectedItem, onTravel }: any) =>
                   ) : travelStats.canTravelStep ? (
                     <button
                       onClick={handleStepTravel}
-                      className="w-full bg-amber-900 hover:bg-amber-950 text-amber-100 font-cinzel font-bold py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-2 text-sm sm:text-base cursor-pointer active:scale-98"
+                      className="w-full bg-amber-900 hover:bg-amber-950 dark:bg-amber-800 dark:hover:bg-amber-700 text-amber-100 font-cinzel font-bold py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-2 text-sm sm:text-base cursor-pointer active:scale-98"
                     >
                       <Compass size={18} />
                       Vydat se směrem k cíli (Krok 1/{travelStats.dist})
@@ -390,7 +390,7 @@ export const MapModal = ({ isOpen, onClose, setSelectedItem, onTravel }: any) =>
                   ) : (
                     <button
                       disabled
-                      className="w-full bg-slate-300 text-slate-600 font-cinzel font-bold py-3 rounded-xl transition cursor-not-allowed text-xs sm:text-sm flex items-center justify-center gap-2 opacity-80"
+                      className="w-full bg-slate-300 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-cinzel font-bold py-3 rounded-xl transition cursor-not-allowed text-xs sm:text-sm flex items-center justify-center gap-2 opacity-80"
                     >
                       ⛔ Nelze cestovat ({travelStats.error || 'Nedostupné'})
                     </button>
@@ -418,21 +418,21 @@ export const MapModal = ({ isOpen, onClose, setSelectedItem, onTravel }: any) =>
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="fixed inset-4 sm:inset-auto sm:top-16 sm:left-4 sm:w-[460px] sm:max-h-[82vh] z-[95] bg-[#faf6ea] bg-[url('https://www.transparenttextures.com/patterns/aged-paper.png')] border-4 border-amber-950/80 rounded-2xl shadow-2xl p-4 sm:p-5 flex flex-col overflow-hidden text-slate-900"
+                className="fixed inset-4 sm:inset-auto sm:top-16 sm:left-4 sm:w-[460px] sm:max-h-[82vh] z-[95] bg-[#faf6ea] dark:bg-[#0f141d] bg-[url('https://www.transparenttextures.com/patterns/aged-paper.png')] border-4 border-amber-950/80 dark:border-amber-600/40 rounded-2xl shadow-2xl p-4 sm:p-5 flex flex-col overflow-hidden text-slate-900 dark:text-[#e2d9c8]"
               >
                 {/* Legend Header */}
-                <div className="flex justify-between items-center pb-3 border-b-2 border-amber-900/25 shrink-0">
+                <div className="flex justify-between items-center pb-3 border-b-2 border-amber-900/25 dark:border-amber-500/20 shrink-0">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-amber-900/15 flex items-center justify-center text-amber-900">
+                    <div className="w-8 h-8 rounded-lg bg-amber-900/15 dark:bg-amber-950/40 flex items-center justify-center text-amber-900 dark:text-amber-300">
                       <Compass size={18} />
                     </div>
-                    <h3 className="font-cinzel font-bold text-amber-950 text-lg sm:text-xl">
+                    <h3 className="font-cinzel font-bold text-amber-950 dark:text-amber-200 text-lg sm:text-xl">
                       Legenda Mapy
                     </h3>
                   </div>
                   <button 
                     onClick={() => setShowLegend(false)}
-                    className="text-amber-900/70 hover:text-amber-950 p-1.5 rounded-lg hover:bg-amber-900/10 transition cursor-pointer"
+                    className="text-amber-900/70 dark:text-slate-400 hover:text-amber-950 dark:hover:text-amber-200 p-1.5 rounded-lg hover:bg-amber-900/10 dark:hover:bg-slate-800 transition cursor-pointer"
                     title="Zavřít legendu"
                   >
                     <X size={22} />
@@ -443,16 +443,16 @@ export const MapModal = ({ isOpen, onClose, setSelectedItem, onTravel }: any) =>
                 <div className="overflow-y-auto flex-1 py-3 flex flex-col gap-4 text-xs font-lora">
                   {/* 1. Kingdoms */}
                   <div>
-                    <h4 className="font-cinzel font-bold text-amber-900 text-sm mb-2 uppercase tracking-wider flex items-center gap-1.5">
+                    <h4 className="font-cinzel font-bold text-amber-900 dark:text-amber-300 text-sm mb-2 uppercase tracking-wider flex items-center gap-1.5">
                       <Shield size={15} /> 7 Království Aelthgardu
                     </h4>
                     <div className="grid grid-cols-1 gap-1.5">
                       {WORLD_LORE.kingdoms.map(k => (
-                        <div key={k.id} className="p-2 rounded-lg bg-amber-900/5 border border-amber-900/15 flex items-start gap-2">
+                        <div key={k.id} className="p-2 rounded-lg bg-amber-900/5 dark:bg-amber-950/40 border border-amber-900/15 dark:border-amber-500/20 flex items-start gap-2">
                           <span className="text-base">{k.badge}</span>
                           <div>
-                            <strong className="font-cinzel text-amber-950 block">{k.name}</strong>
-                            <span className="text-[11px] text-slate-700">{k.archetype}</span>
+                            <strong className="font-cinzel text-amber-950 dark:text-amber-200 block">{k.name}</strong>
+                            <span className="text-[11px] text-slate-700 dark:text-slate-400">{k.archetype}</span>
                           </div>
                         </div>
                       ))}
@@ -461,7 +461,7 @@ export const MapModal = ({ isOpen, onClose, setSelectedItem, onTravel }: any) =>
 
                   {/* 2. POIs */}
                   <div>
-                    <h4 className="font-cinzel font-bold text-amber-900 text-sm mb-2 uppercase tracking-wider flex items-center gap-1.5">
+                    <h4 className="font-cinzel font-bold text-amber-900 dark:text-amber-300 text-sm mb-2 uppercase tracking-wider flex items-center gap-1.5">
                       <Star size={15} /> Významná Místa (POIs)
                     </h4>
                     <div className="grid grid-cols-1 gap-2">
@@ -505,43 +505,43 @@ export const MapModal = ({ isOpen, onClose, setSelectedItem, onTravel }: any) =>
 
                   {/* 3. Terrains */}
                   <div>
-                    <h4 className="font-cinzel font-bold text-amber-900 text-sm mb-2 uppercase tracking-wider flex items-center gap-1.5">
+                    <h4 className="font-cinzel font-bold text-amber-900 dark:text-amber-300 text-sm mb-2 uppercase tracking-wider flex items-center gap-1.5">
                       <Info size={15} /> Terény & Zásoby
                     </h4>
                     <div className="grid grid-cols-2 gap-2 text-[11px]">
-                      <div className="p-2 rounded bg-amber-900/5 border border-amber-900/10">
-                        <strong className="block text-amber-950">🌾 Pláně</strong>
-                        <span className="text-slate-700">Náklad: 1 den, 1 jídlo</span>
+                      <div className="p-2 rounded bg-amber-900/5 dark:bg-amber-950/40 border border-amber-900/10 dark:border-amber-500/20">
+                        <strong className="block text-amber-950 dark:text-amber-200">🌾 Pláně</strong>
+                        <span className="text-slate-700 dark:text-slate-400">Náklad: 1 den, 1 jídlo</span>
                       </div>
-                      <div className="p-2 rounded bg-amber-900/5 border border-amber-900/10">
-                        <strong className="block text-amber-950">🌲 Lesy</strong>
-                        <span className="text-slate-700">Náklad: 1 den, 1 jídlo</span>
+                      <div className="p-2 rounded bg-amber-900/5 dark:bg-amber-950/40 border border-amber-900/10 dark:border-amber-500/20">
+                        <strong className="block text-amber-950 dark:text-amber-200">🌲 Lesy</strong>
+                        <span className="text-slate-700 dark:text-slate-400">Náklad: 1 den, 1 jídlo</span>
                       </div>
-                      <div className="p-2 rounded bg-amber-900/5 border border-amber-900/10">
-                        <strong className="block text-amber-950">⛰️ Hory</strong>
-                        <span className="text-slate-700">Náklad: 1 den, 2 jídla</span>
+                      <div className="p-2 rounded bg-amber-900/5 dark:bg-amber-950/40 border border-amber-900/10 dark:border-amber-500/20">
+                        <strong className="block text-amber-950 dark:text-amber-200">⛰️ Hory</strong>
+                        <span className="text-slate-700 dark:text-slate-400">Náklad: 1 den, 2 jídla</span>
                       </div>
-                      <div className="p-2 rounded bg-amber-900/5 border border-amber-900/10">
-                        <strong className="block text-amber-950">🌫️ Bažiny</strong>
-                        <span className="text-slate-700">Náklad: 1 den, 2 jídla</span>
+                      <div className="p-2 rounded bg-amber-900/5 dark:bg-amber-950/40 border border-amber-900/10 dark:border-amber-500/20">
+                        <strong className="block text-amber-950 dark:text-amber-200">🌫️ Bažiny</strong>
+                        <span className="text-slate-700 dark:text-slate-400">Náklad: 1 den, 2 jídla</span>
                       </div>
-                      <div className="p-2 rounded bg-amber-900/5 border border-amber-900/10">
-                        <strong className="block text-amber-950">🔥 Pustina</strong>
-                        <span className="text-slate-700">Náklad: 1 den, 2 jídla</span>
+                      <div className="p-2 rounded bg-amber-900/5 dark:bg-amber-950/40 border border-amber-900/10 dark:border-amber-500/20">
+                        <strong className="block text-amber-950 dark:text-amber-200">🔥 Pustina</strong>
+                        <span className="text-slate-700 dark:text-slate-400">Náklad: 1 den, 2 jídla</span>
                       </div>
-                      <div className="p-2 rounded bg-amber-900/5 border border-amber-900/10">
-                        <strong className="block text-amber-950">🌊 Oceán</strong>
-                        <span className="text-slate-700">Neprostupný bez lodi</span>
+                      <div className="p-2 rounded bg-amber-900/5 dark:bg-amber-950/40 border border-amber-900/10 dark:border-amber-500/20">
+                        <strong className="block text-amber-950 dark:text-amber-200">🌊 Oceán</strong>
+                        <span className="text-slate-700 dark:text-slate-400">Neprostupný bez lodi</span>
                       </div>
                     </div>
                   </div>
 
                   {/* 4. Fog of War */}
-                  <div className="p-3 rounded-xl bg-amber-900/10 border border-amber-900/25 text-[11px] leading-relaxed">
-                    <strong className="font-cinzel text-amber-950 font-bold block mb-1 text-xs flex items-center gap-1.5">
+                  <div className="p-3 rounded-xl bg-amber-900/10 dark:bg-amber-950/40 border border-amber-900/25 dark:border-amber-500/30 text-[11px] leading-relaxed">
+                    <strong className="font-cinzel text-amber-950 dark:text-amber-300 font-bold block mb-1 text-xs flex items-center gap-1.5">
                       <span>🌫️</span> Mlha Neznáma (Fog of War)
                     </strong>
-                    <p className="text-amber-950 font-medium font-lora">
+                    <p className="text-amber-950 dark:text-amber-200 font-medium font-lora">
                       Šrafované oblasti představují neprozkoumané země. Jakmile vstoupíš do sousedství nebo navštívíš daný hex, mlha se rozplyne a odhalí skrytá města, dungeony i krajinu. Mlhu lze kdykoli přepnout tlačítkem v záhlaví.
                     </p>
                   </div>

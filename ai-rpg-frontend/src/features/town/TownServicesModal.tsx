@@ -319,22 +319,22 @@ export const TownServicesModal: React.FC<TownServicesModalProps> = ({ isOpen, on
 
   return (
     <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-[100] flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-200">
-      <div className="bg-[#f9f6ea] border-4 border-amber-950/80 rounded-2xl w-full max-w-5xl h-[92vh] max-h-[850px] shadow-[0_20px_60px_rgba(0,0,0,0.6)] flex flex-col overflow-hidden text-amber-950 font-serif relative">
+      <div className="bg-[#f9f6ea] dark:bg-[#121823] border-4 border-amber-950/80 dark:border-amber-500/40 rounded-2xl w-full max-w-5xl h-[92vh] max-h-[850px] shadow-[0_20px_60px_rgba(0,0,0,0.6)] flex flex-col overflow-hidden text-amber-950 dark:text-[#e2d9c8] font-serif relative">
         
         {/* Modal Header */}
-        <div className="bg-gradient-to-r from-amber-900 via-amber-800 to-amber-900 text-amber-100 p-4 px-6 border-b-2 border-amber-950 flex items-center justify-between shadow-md shrink-0">
+        <div className="bg-gradient-to-r from-amber-900 via-amber-800 to-amber-900 dark:from-[#0b0f16] dark:via-[#141c28] dark:to-[#0b0f16] text-amber-100 p-4 px-6 border-b-2 border-amber-950 dark:border-amber-500/30 flex items-center justify-between shadow-md shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-950/60 border border-amber-400/40 flex items-center justify-center text-xl shadow-inner">
+            <div className="w-10 h-10 rounded-xl bg-amber-950/60 dark:bg-amber-950/80 border border-amber-400/40 flex items-center justify-center text-xl shadow-inner">
               🏛️
             </div>
             <div>
-              <h2 className="font-cinzel text-lg sm:text-2xl font-bold tracking-wider text-amber-200 flex items-center gap-2">
+              <h2 className="font-cinzel text-lg sm:text-2xl font-bold tracking-wider text-amber-200 dark:text-amber-300 flex items-center gap-2">
                 Městské Služby & Tržnice
               </h2>
-              <p className="text-xs text-amber-300/80 font-lora">
-                Lokace: <span className="font-bold text-amber-100">{currentRegion || 'Městské hradby'}</span>
+              <p className="text-xs text-amber-300/80 dark:text-slate-400 font-lora">
+                Lokace: <span className="font-bold text-amber-100 dark:text-[#e2d9c8]">{currentRegion || 'Městské hradby'}</span>
                 {localKingdomId && (
-                  <span className="ml-2 px-2 py-0.5 rounded-full text-[11px] bg-black/30 border border-amber-400/30">
+                  <span className="ml-2 px-2 py-0.5 rounded-full text-[11px] bg-black/30 dark:bg-black/50 border border-amber-400/30">
                     Reputace: <span className={currentRep >= 0 ? 'text-green-300' : 'text-red-300'}>{currentRep >= 0 ? `+${currentRep}` : currentRep}</span>
                   </span>
                 )}
@@ -344,7 +344,7 @@ export const TownServicesModal: React.FC<TownServicesModalProps> = ({ isOpen, on
 
           <div className="flex items-center gap-4">
             {/* Player's Purse */}
-            <div className="bg-amber-950/80 border border-amber-500/50 px-3.5 py-1.5 rounded-xl flex items-center gap-2 text-amber-300 font-cinzel font-bold text-sm sm:text-base shadow-inner">
+            <div className="bg-amber-950/80 dark:bg-[#192231] border border-amber-500/50 px-3.5 py-1.5 rounded-xl flex items-center gap-2 text-amber-300 font-cinzel font-bold text-sm sm:text-base shadow-inner">
               <span>🪙</span>
               <span>{gold}</span>
               <span className="text-xs text-amber-400/70 hidden sm:inline">zl</span>
@@ -352,7 +352,7 @@ export const TownServicesModal: React.FC<TownServicesModalProps> = ({ isOpen, on
 
             <button 
               onClick={onClose}
-              className="p-1.5 sm:p-2 rounded-xl bg-amber-950/40 hover:bg-red-950 text-amber-300 hover:text-white border border-amber-700/50 transition"
+              className="p-1.5 sm:p-2 rounded-xl bg-amber-950/40 dark:bg-[#192231] hover:bg-red-950 dark:hover:bg-red-950 text-amber-300 hover:text-white border border-amber-700/50 dark:border-amber-500/30 transition cursor-pointer"
               title="Zavřít tržnici"
             >
               <X size={20} />
@@ -362,25 +362,25 @@ export const TownServicesModal: React.FC<TownServicesModalProps> = ({ isOpen, on
 
         {/* Active Buffs & Mount Status Bar */}
         {(activeBuffs.length > 0 || activeMount) && (
-          <div className="bg-amber-100/90 border-b border-amber-900/20 px-4 py-2 flex items-center gap-3 overflow-x-auto text-xs shrink-0">
-            <span className="font-cinzel font-bold text-amber-900 shrink-0">Aktivní výhody:</span>
+          <div className="bg-amber-100/90 dark:bg-[#141c28] border-b border-amber-900/20 dark:border-amber-500/20 px-4 py-2 flex items-center gap-3 overflow-x-auto text-xs shrink-0">
+            <span className="font-cinzel font-bold text-amber-900 dark:text-amber-400 shrink-0">Aktivní výhody:</span>
             {activeMount && (
-              <span className="bg-amber-200/80 border border-amber-700/30 px-2.5 py-1 rounded-lg font-medium text-amber-950 flex items-center gap-1.5 shrink-0">
+              <span className="bg-amber-200/80 dark:bg-[#192231] border border-amber-700/30 dark:border-amber-500/30 px-2.5 py-1 rounded-lg font-medium text-amber-950 dark:text-[#e2d9c8] flex items-center gap-1.5 shrink-0">
                 <span>{activeMount.icon}</span>
                 <span>{activeMount.name} (+{activeMount.inventoryBonus} slotů)</span>
               </span>
             )}
             {activeBuffs.map(b => (
-              <span key={b.id} className="bg-amber-200/80 border border-amber-700/30 px-2.5 py-1 rounded-lg font-medium text-amber-950 flex items-center gap-1.5 shrink-0" title={b.description}>
+              <span key={b.id} className="bg-amber-200/80 dark:bg-[#192231] border border-amber-700/30 dark:border-amber-500/30 px-2.5 py-1 rounded-lg font-medium text-amber-950 dark:text-[#e2d9c8] flex items-center gap-1.5 shrink-0" title={b.description}>
                 <span>{b.icon}</span>
                 <span>{b.name}</span>
                 {b.durationBattles !== undefined && (
-                  <span className="bg-amber-800 text-white text-[10px] px-1.5 rounded-full font-bold">
+                  <span className="bg-amber-800 dark:bg-amber-600 text-white text-[10px] px-1.5 rounded-full font-bold">
                     {b.durationBattles} {b.durationBattles === 1 ? 'boj' : 'boje'}
                   </span>
                 )}
                 {b.durationDays !== undefined && (
-                  <span className="bg-amber-800 text-white text-[10px] px-1.5 rounded-full font-bold">
+                  <span className="bg-amber-800 dark:bg-amber-600 text-white text-[10px] px-1.5 rounded-full font-bold">
                     {b.durationDays} den
                   </span>
                 )}
@@ -392,9 +392,9 @@ export const TownServicesModal: React.FC<TownServicesModalProps> = ({ isOpen, on
         {/* Feedback Alert Toast */}
         {feedback && (
           <div className={`mx-4 mt-3 p-3 rounded-xl border text-sm font-medium flex items-center gap-2 shrink-0 animate-in fade-in ${
-            feedback.type === 'error' ? 'bg-red-100 border-red-400 text-red-900' :
-            feedback.type === 'info' ? 'bg-blue-100 border-blue-400 text-blue-900' :
-            'bg-green-100 border-green-400 text-green-900'
+            feedback.type === 'error' ? 'bg-red-100 dark:bg-red-950/70 border-red-400 dark:border-red-800 text-red-900 dark:text-red-300' :
+            feedback.type === 'info' ? 'bg-blue-100 dark:bg-blue-950/70 border-blue-400 dark:border-blue-800 text-blue-900 dark:text-blue-300' :
+            'bg-green-100 dark:bg-green-950/70 border-green-400 dark:border-green-800 text-green-900 dark:text-green-300'
           }`}>
             <AlertCircle size={16} className="shrink-0" />
             <span>{feedback.text}</span>
@@ -402,7 +402,7 @@ export const TownServicesModal: React.FC<TownServicesModalProps> = ({ isOpen, on
         )}
 
         {/* Navigation Tabs */}
-        <div className="flex border-b border-amber-900/20 bg-[#efe7d3] px-2 sm:px-6 pt-2 gap-1 sm:gap-2 overflow-x-auto shrink-0 scrollbar-none">
+        <div className="flex border-b border-amber-900/20 dark:border-amber-500/20 bg-[#efe7d3] dark:bg-[#10151f] px-2 sm:px-6 pt-2 gap-1 sm:gap-2 overflow-x-auto shrink-0 scrollbar-none">
           {[
             { id: 'market', shortLabel: 'Tržiště', label: 'Tržiště & Lektvary', icon: ShoppingBag },
             { id: 'blacksmith', shortLabel: 'Kovář', label: 'Kovářská dílna', icon: Hammer },
@@ -416,10 +416,10 @@ export const TownServicesModal: React.FC<TownServicesModalProps> = ({ isOpen, on
               <button
                 key={t.id}
                 onClick={() => setActiveTab(t.id as TabType)}
-                className={`flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-cinzel font-bold border-t-2 border-x-2 rounded-t-xl transition shrink-0 ${
+                className={`flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-cinzel font-bold border-t-2 border-x-2 rounded-t-xl transition shrink-0 cursor-pointer ${
                   isActive 
-                    ? 'bg-[#f9f6ea] border-amber-900/40 text-amber-950 shadow-xs' 
-                    : 'border-transparent text-amber-900/70 hover:text-amber-950 hover:bg-amber-200/50'
+                    ? 'bg-[#f9f6ea] dark:bg-[#121823] border-amber-900/40 dark:border-amber-500/40 text-amber-950 dark:text-amber-300 shadow-xs' 
+                    : 'border-transparent text-amber-900/70 dark:text-slate-400 hover:text-amber-950 dark:hover:text-amber-300 hover:bg-amber-200/50 dark:hover:bg-[#1c2637]'
                 }`}
               >
                 <Icon size={15} />
@@ -431,25 +431,25 @@ export const TownServicesModal: React.FC<TownServicesModalProps> = ({ isOpen, on
         </div>
 
         {/* Tab Content Area */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-[#f9f6ea]">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-[#f9f6ea] dark:bg-[#121823]">
           
           {/* TAB 1: MARKET */}
           {activeTab === 'market' && (
             <div className="flex flex-col gap-4">
-              <div className="flex flex-wrap items-center justify-between gap-3 bg-amber-100/60 p-3 rounded-xl border border-amber-900/20">
-                <div className="flex items-center gap-1.5 bg-amber-200/60 p-1 rounded-lg border border-amber-900/20">
+              <div className="flex flex-wrap items-center justify-between gap-3 bg-amber-100/60 dark:bg-[#141c28] p-3 rounded-xl border border-amber-900/20 dark:border-amber-500/20">
+                <div className="flex items-center gap-1.5 bg-amber-200/60 dark:bg-[#192231] p-1 rounded-lg border border-amber-900/20 dark:border-amber-500/20">
                   <button
                     onClick={() => setMarketMode('buy')}
-                    className={`px-4 py-1.5 rounded-md font-cinzel font-bold text-xs sm:text-sm transition ${
-                      marketMode === 'buy' ? 'bg-amber-900 text-white shadow-xs' : 'text-amber-950 hover:bg-amber-300/60'
+                    className={`px-4 py-1.5 rounded-md font-cinzel font-bold text-xs sm:text-sm transition cursor-pointer ${
+                      marketMode === 'buy' ? 'bg-amber-900 dark:bg-amber-600 text-white shadow-xs' : 'text-amber-950 dark:text-slate-300 hover:bg-amber-300/60 dark:hover:bg-[#222e42]'
                     }`}
                   >
                     Koupit zboží
                   </button>
                   <button
                     onClick={() => setMarketMode('sell')}
-                    className={`px-4 py-1.5 rounded-md font-cinzel font-bold text-xs sm:text-sm transition ${
-                      marketMode === 'sell' ? 'bg-amber-900 text-white shadow-xs' : 'text-amber-950 hover:bg-amber-300/60'
+                    className={`px-4 py-1.5 rounded-md font-cinzel font-bold text-xs sm:text-sm transition cursor-pointer ${
+                      marketMode === 'sell' ? 'bg-amber-900 dark:bg-amber-600 text-white shadow-xs' : 'text-amber-950 dark:text-slate-300 hover:bg-amber-300/60 dark:hover:bg-[#222e42]'
                     }`}
                   >
                     Prodat z batohu
@@ -462,8 +462,8 @@ export const TownServicesModal: React.FC<TownServicesModalProps> = ({ isOpen, on
                       <button
                         key={f}
                         onClick={() => setMarketFilter(f)}
-                        className={`px-3 py-1 rounded-lg text-xs font-semibold font-lora capitalize transition ${
-                          marketFilter === f ? 'bg-amber-800 text-white' : 'bg-amber-200/50 text-amber-900 hover:bg-amber-200'
+                        className={`px-3 py-1 rounded-lg text-xs font-semibold font-lora capitalize transition cursor-pointer ${
+                          marketFilter === f ? 'bg-amber-800 dark:bg-amber-600 text-white' : 'bg-amber-200/50 dark:bg-[#192231] text-amber-900 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-[#222e42]'
                         }`}
                       >
                         {f === 'all' ? 'Vše' : f === 'potions' ? 'Lektvary' : 'Výstroj'}
@@ -481,40 +481,40 @@ export const TownServicesModal: React.FC<TownServicesModalProps> = ({ isOpen, on
                     const hasMarkup = price > item.basePrice;
 
                     return (
-                      <div key={item.id} className="bg-white/70 border border-amber-900/20 rounded-xl p-3.5 flex flex-col justify-between shadow-xs hover:border-amber-700/50 transition">
+                      <div key={item.id} className="bg-white/70 dark:bg-[#141c28] border border-amber-900/20 dark:border-amber-500/20 rounded-xl p-3.5 flex flex-col justify-between shadow-xs hover:border-amber-700/50 dark:hover:border-amber-500 transition">
                         <div>
                           <div className="flex items-start justify-between gap-2 mb-1.5">
                             <div className="flex items-center gap-2">
                               <span className="text-2xl">{item.icon}</span>
                               <div>
-                                <h4 className="font-cinzel font-bold text-sm text-amber-950 leading-tight">{item.name}</h4>
-                                <span className="text-[10px] text-amber-800/80 uppercase font-semibold">{item.type}</span>
+                                <h4 className="font-cinzel font-bold text-sm text-amber-950 dark:text-[#e2d9c8] leading-tight">{item.name}</h4>
+                                <span className="text-[10px] text-amber-800/80 dark:text-amber-400 uppercase font-semibold">{item.type}</span>
                               </div>
                             </div>
                             <div className="text-right">
-                              <div className="font-cinzel font-bold text-amber-900 flex items-center gap-1 justify-end">
+                              <div className="font-cinzel font-bold text-amber-900 dark:text-amber-300 flex items-center gap-1 justify-end">
                                 <span>🪙</span>
                                 <span>{price}</span>
                               </div>
                               {hasDiscount && (
-                                <span className="text-[10px] text-green-700 font-bold flex items-center gap-0.5 justify-end">
+                                <span className="text-[10px] text-green-700 dark:text-emerald-400 font-bold flex items-center gap-0.5 justify-end">
                                   <TrendingDown size={11} /> Sleva ({item.basePrice} zl)
                                 </span>
                               )}
                               {hasMarkup && (
-                                <span className="text-[10px] text-red-700 font-bold flex items-center gap-0.5 justify-end">
+                                <span className="text-[10px] text-red-700 dark:text-red-400 font-bold flex items-center gap-0.5 justify-end">
                                   <TrendingUp size={11} /> Přirážka
                                 </span>
                               )}
                             </div>
                           </div>
-                          <p className="text-xs text-amber-900/80 font-lora mb-3">{item.desc}</p>
+                          <p className="text-xs text-amber-900/80 dark:text-slate-300 font-lora mb-3">{item.desc}</p>
                         </div>
 
                         <button
                           onClick={() => handleBuyItem(item)}
                           disabled={gold < price}
-                          className="w-full py-1.5 px-3 bg-amber-800 hover:bg-amber-900 active:bg-amber-950 text-white rounded-lg font-cinzel font-bold text-xs tracking-wider transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+                          className="w-full py-1.5 px-3 bg-amber-800 hover:bg-amber-900 active:bg-amber-950 dark:bg-amber-600 dark:hover:bg-amber-500 text-white rounded-lg font-cinzel font-bold text-xs tracking-wider transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 cursor-pointer"
                         >
                           <ShoppingBag size={14} />
                           <span>Koupit za {price} zl</span>
@@ -526,7 +526,7 @@ export const TownServicesModal: React.FC<TownServicesModalProps> = ({ isOpen, on
               ) : (
                 <div className="flex flex-col gap-3">
                   {inventory.length === 0 ? (
-                    <div className="text-center py-12 text-amber-800/70 font-lora italic">
+                    <div className="text-center py-12 text-amber-800/70 dark:text-slate-400 font-lora italic">
                       Váš batoh je zcela prázdný. Nemáte co prodat.
                     </div>
                   ) : (
@@ -537,14 +537,14 @@ export const TownServicesModal: React.FC<TownServicesModalProps> = ({ isOpen, on
                         const isEquipped = Object.values(equipped).includes(item.id);
 
                         return (
-                          <div key={`${item.id}_${idx}`} className="bg-white/70 border border-amber-900/20 rounded-xl p-3 flex items-center justify-between shadow-xs">
+                          <div key={`${item.id}_${idx}`} className="bg-white/70 dark:bg-[#141c28] border border-amber-900/20 dark:border-amber-500/20 rounded-xl p-3 flex items-center justify-between shadow-xs">
                             <div className="flex items-center gap-2.5 min-w-0">
-                              <div className="w-10 h-10 shrink-0 flex items-center justify-center rounded-lg bg-amber-900/10 border border-amber-900/20 overflow-hidden">
+                              <div className="w-10 h-10 shrink-0 flex items-center justify-center rounded-lg bg-amber-900/10 dark:bg-[#192231] border border-amber-900/20 dark:border-amber-500/20 overflow-hidden">
                                 <ItemIcon iconName={item.icon || item.type || 'item'} itemId={item.id} size={32} />
                               </div>
                               <div className="min-w-0">
-                                <h4 className="font-cinzel font-bold text-xs sm:text-sm text-amber-950 truncate">{item.name}</h4>
-                                <span className="text-[10px] text-amber-800/70 block font-lora">
+                                <h4 className="font-cinzel font-bold text-xs sm:text-sm text-amber-950 dark:text-[#e2d9c8] truncate">{item.name}</h4>
+                                <span className="text-[10px] text-amber-800/70 dark:text-amber-400 block font-lora">
                                   {isEquipped ? '⚔️ Právě nasazeno' : translateItemType(item.type)}
                                 </span>
                               </div>
@@ -553,7 +553,7 @@ export const TownServicesModal: React.FC<TownServicesModalProps> = ({ isOpen, on
                             <button
                               onClick={() => handleSellItem(item)}
                               disabled={isEquipped}
-                              className="shrink-0 ml-2 py-1 px-3 bg-amber-700 hover:bg-amber-800 text-white rounded-lg font-cinzel font-bold text-xs transition disabled:opacity-30 disabled:cursor-not-allowed"
+                              className="shrink-0 ml-2 py-1 px-3 bg-amber-700 hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-500 text-white rounded-lg font-cinzel font-bold text-xs transition disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
                               title={isEquipped ? 'Nejprve předmět sundej' : `Prodat za ${sellPrice} zl`}
                             >
                               Prodat +{sellPrice} zl
@@ -571,11 +571,11 @@ export const TownServicesModal: React.FC<TownServicesModalProps> = ({ isOpen, on
           {/* TAB 2: BLACKSMITH */}
           {activeTab === 'blacksmith' && (
             <div className="flex flex-col gap-4">
-              <div className="bg-amber-100/70 border border-amber-900/20 p-4 rounded-xl flex items-center gap-3">
+              <div className="bg-amber-100/70 dark:bg-[#141c28] border border-amber-900/20 dark:border-amber-500/20 p-4 rounded-xl flex items-center gap-3">
                 <span className="text-3xl">⚒️</span>
                 <div>
-                  <h3 className="font-cinzel font-bold text-base text-amber-950">Městská kovářská výheň</h3>
-                  <p className="text-xs text-amber-900/80 font-lora">
+                  <h3 className="font-cinzel font-bold text-base text-amber-950 dark:text-amber-200">Městská kovářská výheň</h3>
+                  <p className="text-xs text-amber-900/80 dark:text-slate-300 font-lora">
                     Kovář dokáže mistrně naostřit čepele, zpevnit nýty na zbroji nebo nanést posvátné stříbro účinné proti stínovým bestiím.
                   </p>
                 </div>
@@ -583,17 +583,17 @@ export const TownServicesModal: React.FC<TownServicesModalProps> = ({ isOpen, on
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {BLACKSMITH_SERVICES.map(service => (
-                  <div key={service.id} className="bg-white/80 border-2 border-amber-900/20 rounded-xl p-4 flex flex-col justify-between shadow-sm hover:border-amber-700/60 transition">
+                  <div key={service.id} className="bg-white/80 dark:bg-[#141c28] border-2 border-amber-900/20 dark:border-amber-500/20 rounded-xl p-4 flex flex-col justify-between shadow-sm hover:border-amber-700/60 dark:hover:border-amber-500 transition">
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-3xl">{service.icon}</span>
-                        <span className="font-cinzel font-bold text-amber-900 bg-amber-100 px-2.5 py-1 rounded-lg border border-amber-900/20 text-sm">
+                        <span className="font-cinzel font-bold text-amber-900 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/70 px-2.5 py-1 rounded-lg border border-amber-900/20 dark:border-amber-500/30 text-sm">
                           🪙 {service.cost} zl
                         </span>
                       </div>
-                      <h4 className="font-cinzel font-bold text-base text-amber-950 mb-1">{service.name}</h4>
-                      <p className="text-xs text-amber-900/70 font-lora mb-3">{service.description}</p>
-                      <div className="bg-amber-50 border border-amber-700/20 p-2 rounded-lg text-xs font-semibold text-amber-950 mb-4">
+                      <h4 className="font-cinzel font-bold text-base text-amber-950 dark:text-[#e2d9c8] mb-1">{service.name}</h4>
+                      <p className="text-xs text-amber-900/70 dark:text-slate-300 font-lora mb-3">{service.description}</p>
+                      <div className="bg-amber-50 dark:bg-[#192231] border border-amber-700/20 dark:border-amber-500/20 p-2 rounded-lg text-xs font-semibold text-amber-950 dark:text-amber-200 mb-4">
                         ✨ {service.effectDescription}
                       </div>
                     </div>
@@ -601,7 +601,7 @@ export const TownServicesModal: React.FC<TownServicesModalProps> = ({ isOpen, on
                     <button
                       onClick={() => handleBlacksmithService(service.id)}
                       disabled={gold < service.cost}
-                      className="w-full py-2 bg-amber-900 hover:bg-amber-950 text-white rounded-xl font-cinzel font-bold text-xs tracking-wider transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      className="w-full py-2 bg-amber-900 hover:bg-amber-950 dark:bg-amber-600 dark:hover:bg-amber-500 text-white rounded-xl font-cinzel font-bold text-xs tracking-wider transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
                     >
                       <Hammer size={15} />
                       <span>Objednat za {service.cost} zl</span>
@@ -617,22 +617,22 @@ export const TownServicesModal: React.FC<TownServicesModalProps> = ({ isOpen, on
             <div className="flex flex-col gap-6">
               {/* Tavern Services */}
               <div>
-                <h3 className="font-cinzel font-bold text-base text-amber-950 mb-3 flex items-center gap-2">
+                <h3 className="font-cinzel font-bold text-base text-amber-950 dark:text-[#e2d9c8] mb-3 flex items-center gap-2">
                   <span>🍺</span> Služby hostinského
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
                   {TAVERN_SERVICES.map(service => (
-                    <div key={service.id} className="bg-white/80 border border-amber-900/20 rounded-xl p-4 flex flex-col justify-between shadow-xs">
+                    <div key={service.id} className="bg-white/80 dark:bg-[#141c28] border border-amber-900/20 dark:border-amber-500/20 rounded-xl p-4 flex flex-col justify-between shadow-xs">
                       <div>
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-3xl">{service.icon}</span>
-                          <span className="font-cinzel font-bold text-amber-900 bg-amber-100 px-2 py-0.5 rounded-lg border border-amber-900/20 text-xs">
+                          <span className="font-cinzel font-bold text-amber-900 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/70 px-2 py-0.5 rounded-lg border border-amber-900/20 dark:border-amber-500/30 text-xs">
                             🪙 {service.cost} zl
                           </span>
                         </div>
-                        <h4 className="font-cinzel font-bold text-sm text-amber-950 mb-1">{service.name}</h4>
-                        <p className="text-xs text-amber-900/70 font-lora mb-2">{service.description}</p>
-                        <div className="bg-amber-50 p-2 rounded-lg text-[11px] font-medium text-amber-900 mb-3">
+                        <h4 className="font-cinzel font-bold text-sm text-amber-950 dark:text-[#e2d9c8] mb-1">{service.name}</h4>
+                        <p className="text-xs text-amber-900/70 dark:text-slate-300 font-lora mb-2">{service.description}</p>
+                        <div className="bg-amber-50 dark:bg-[#192231] p-2 rounded-lg text-[11px] font-medium text-amber-900 dark:text-amber-300 mb-3">
                           {service.effectDescription}
                         </div>
                       </div>
@@ -640,7 +640,7 @@ export const TownServicesModal: React.FC<TownServicesModalProps> = ({ isOpen, on
                       <button
                         onClick={() => handleTavernService(service.id)}
                         disabled={gold < service.cost}
-                        className="w-full py-1.5 bg-amber-800 hover:bg-amber-900 text-white rounded-lg font-cinzel font-bold text-xs transition disabled:opacity-40"
+                        className="w-full py-1.5 bg-amber-800 hover:bg-amber-900 dark:bg-amber-600 dark:hover:bg-amber-500 text-white rounded-lg font-cinzel font-bold text-xs transition disabled:opacity-40 cursor-pointer"
                       >
                         Zaplatit {service.cost} zl
                       </button>
@@ -650,13 +650,13 @@ export const TownServicesModal: React.FC<TownServicesModalProps> = ({ isOpen, on
               </div>
 
               {/* Tavern Gambling: Dragon's Eye */}
-              <div className="bg-gradient-to-br from-amber-950 to-[#2b1810] text-amber-100 p-4 sm:p-5 rounded-2xl border-2 border-amber-600/50 shadow-lg">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 border-b border-amber-700/40 pb-3">
+              <div className="bg-gradient-to-br from-amber-950 to-[#2b1810] dark:from-[#0b0f16] dark:to-[#141c28] text-amber-100 p-4 sm:p-5 rounded-2xl border-2 border-amber-600/50 dark:border-amber-500/50 shadow-lg">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 border-b border-amber-700/40 dark:border-amber-500/30 pb-3">
                   <div className="flex items-center gap-3">
                     <Dices size={28} className="text-amber-400 animate-bounce shrink-0" />
                     <div>
-                      <h4 className="font-cinzel font-bold text-base sm:text-lg text-amber-200">Krčemní kostky: Dračí oko</h4>
-                      <p className="text-xs text-amber-300/70 font-lora">
+                      <h4 className="font-cinzel font-bold text-base sm:text-lg text-amber-200 dark:text-amber-300">Krčemní kostky: Dračí oko</h4>
+                      <p className="text-xs text-amber-300/70 dark:text-slate-300 font-lora">
                         3d6 ty vs 3d6 hostinský. Vyšší součet bere bank. Trojice stejných čísel = trojnásobná výhra!
                       </p>
                     </div>
@@ -664,13 +664,13 @@ export const TownServicesModal: React.FC<TownServicesModalProps> = ({ isOpen, on
 
                   {/* Bet Selection */}
                   <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
-                    <span className="text-xs font-cinzel text-amber-300/80">Sázka:</span>
+                    <span className="text-xs font-cinzel text-amber-300/80 dark:text-slate-400">Sázka:</span>
                     {[5, 15, 30].map(bet => (
                       <button
                         key={bet}
                         onClick={() => setDiceBet(bet)}
-                        className={`px-3 py-1 rounded-lg text-xs font-cinzel font-bold transition ${
-                          diceBet === bet ? 'bg-amber-500 text-amber-950 font-black shadow-md' : 'bg-amber-900/60 text-amber-200 hover:bg-amber-800'
+                        className={`px-3 py-1 rounded-lg text-xs font-cinzel font-bold transition cursor-pointer ${
+                          diceBet === bet ? 'bg-amber-500 text-amber-950 font-black shadow-md' : 'bg-amber-900/60 dark:bg-[#192231] text-amber-200 dark:text-amber-300 hover:bg-amber-800 dark:hover:bg-[#25334a]'
                         }`}
                       >
                         {bet} zl
@@ -686,7 +686,7 @@ export const TownServicesModal: React.FC<TownServicesModalProps> = ({ isOpen, on
                       <span className="text-xs text-amber-300/80 font-cinzel uppercase block mb-1">Tvé kostky</span>
                       <div className="flex gap-2 justify-center mb-1">
                         {diceResult.playerRolls.map((r, i) => (
-                          <span key={i} className="w-9 h-9 bg-amber-100 text-amber-950 font-bold font-cinzel text-lg rounded-lg border-2 border-amber-600 flex items-center justify-center shadow-md">
+                          <span key={i} className="w-9 h-9 bg-amber-100 dark:bg-[#192231] text-amber-950 dark:text-amber-300 font-bold font-cinzel text-lg rounded-lg border-2 border-amber-600 dark:border-amber-500 flex items-center justify-center shadow-md">
                             {r}
                           </span>
                         ))}
@@ -702,7 +702,7 @@ export const TownServicesModal: React.FC<TownServicesModalProps> = ({ isOpen, on
                       <span className="text-xs text-amber-300/80 font-cinzel uppercase block mb-1">Hostinského kostky</span>
                       <div className="flex gap-2 justify-center mb-1">
                         {diceResult.npcRolls.map((r, i) => (
-                          <span key={i} className="w-9 h-9 bg-amber-900 text-amber-100 font-bold font-cinzel text-lg rounded-lg border-2 border-amber-700 flex items-center justify-center shadow-md">
+                          <span key={i} className="w-9 h-9 bg-amber-900 dark:bg-[#10151f] text-amber-100 font-bold font-cinzel text-lg rounded-lg border-2 border-amber-700 dark:border-amber-600 flex items-center justify-center shadow-md">
                             {r}
                           </span>
                         ))}
@@ -729,11 +729,11 @@ export const TownServicesModal: React.FC<TownServicesModalProps> = ({ isOpen, on
           {/* TAB 4: STABLES */}
           {activeTab === 'stables' && (
             <div className="flex flex-col gap-4">
-              <div className="bg-amber-100/70 border border-amber-900/20 p-4 rounded-xl flex items-center gap-3">
+              <div className="bg-amber-100/70 dark:bg-[#141c28] border border-amber-900/20 dark:border-amber-500/20 p-4 rounded-xl flex items-center gap-3">
                 <span className="text-3xl">🐎</span>
                 <div>
-                  <h3 className="font-cinzel font-bold text-base text-amber-950">Městské stáje a chovy</h3>
-                  <p className="text-xs text-amber-900/80 font-lora">
+                  <h3 className="font-cinzel font-bold text-base text-amber-950 dark:text-amber-200">Městské stáje a chovy</h3>
+                  <p className="text-xs text-amber-900/80 dark:text-slate-300 font-lora">
                     Dobré zvíře je základem každé výpravy. Mezek uveze obrovskou kořist, zatímco kůň zkrátí útrapy cestování na mapě na polovinu.
                   </p>
                 </div>
@@ -744,25 +744,25 @@ export const TownServicesModal: React.FC<TownServicesModalProps> = ({ isOpen, on
                   const isOwned = activeMount?.id === mount.id;
 
                   return (
-                    <div key={mount.id} className={`bg-white/80 border-2 rounded-xl p-4 flex flex-col justify-between shadow-xs transition ${
-                      isOwned ? 'border-green-600 ring-2 ring-green-600/30' : 'border-amber-900/20 hover:border-amber-700/50'
+                    <div key={mount.id} className={`bg-white/80 dark:bg-[#141c28] border-2 rounded-xl p-4 flex flex-col justify-between shadow-xs transition ${
+                      isOwned ? 'border-green-600 ring-2 ring-green-600/30' : 'border-amber-900/20 dark:border-amber-500/20 hover:border-amber-700/50 dark:hover:border-amber-500'
                     }`}>
                       <div>
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-4xl">{mount.icon}</span>
-                          <span className="font-cinzel font-bold text-amber-900 bg-amber-100 px-2.5 py-1 rounded-lg border border-amber-900/20 text-sm">
+                          <span className="font-cinzel font-bold text-amber-900 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/70 px-2.5 py-1 rounded-lg border border-amber-900/20 dark:border-amber-500/30 text-sm">
                             🪙 {mount.price} zl
                           </span>
                         </div>
-                        <h4 className="font-cinzel font-bold text-base text-amber-950 mb-1">{mount.name}</h4>
-                        <p className="text-xs text-amber-900/80 font-lora mb-3">{mount.description}</p>
+                        <h4 className="font-cinzel font-bold text-base text-amber-950 dark:text-[#e2d9c8] mb-1">{mount.name}</h4>
+                        <p className="text-xs text-amber-900/80 dark:text-slate-300 font-lora mb-3">{mount.description}</p>
                         
-                        <div className="flex flex-col gap-1.5 mb-4 text-xs font-medium text-amber-950">
-                          <div className="flex items-center gap-1.5 bg-amber-50 p-1.5 rounded-lg border border-amber-800/15">
+                        <div className="flex flex-col gap-1.5 mb-4 text-xs font-medium text-amber-950 dark:text-[#e2d9c8]">
+                          <div className="flex items-center gap-1.5 bg-amber-50 dark:bg-[#192231] p-1.5 rounded-lg border border-amber-800/15 dark:border-amber-500/20">
                             <span>🎒</span>
                             <span>Kapacita batohu: <strong>+{mount.inventoryBonus} slotů</strong></span>
                           </div>
-                          <div className="flex items-center gap-1.5 bg-amber-50 p-1.5 rounded-lg border border-amber-800/15">
+                          <div className="flex items-center gap-1.5 bg-amber-50 dark:bg-[#192231] p-1.5 rounded-lg border border-amber-800/15 dark:border-amber-500/20">
                             <span>🗺️</span>
                             <span>Rychlost cestování: <strong>{mount.travelSpeedMultiplier === 0.5 ? '2x rychlejší (0.5 dne/hex)' : 'Standardní'}</strong></span>
                           </div>
@@ -772,10 +772,10 @@ export const TownServicesModal: React.FC<TownServicesModalProps> = ({ isOpen, on
                       <button
                         onClick={() => handleBuyMount(mount)}
                         disabled={isOwned || gold < mount.price}
-                        className={`w-full py-2 rounded-xl font-cinzel font-bold text-xs tracking-wider transition flex items-center justify-center gap-2 ${
+                        className={`w-full py-2 rounded-xl font-cinzel font-bold text-xs tracking-wider transition flex items-center justify-center gap-2 cursor-pointer ${
                           isOwned 
                             ? 'bg-green-700 text-white cursor-default' 
-                            : 'bg-amber-900 hover:bg-amber-950 text-white disabled:opacity-40 disabled:cursor-not-allowed'
+                            : 'bg-amber-900 hover:bg-amber-950 dark:bg-amber-600 dark:hover:bg-amber-500 text-white disabled:opacity-40 disabled:cursor-not-allowed'
                         }`}
                       >
                         {isOwned ? (
@@ -799,11 +799,11 @@ export const TownServicesModal: React.FC<TownServicesModalProps> = ({ isOpen, on
           {/* TAB 5: TEMPLE */}
           {activeTab === 'temple' && (
             <div className="flex flex-col gap-4">
-              <div className="bg-amber-100/70 border border-amber-900/20 p-4 rounded-xl flex items-center gap-3">
+              <div className="bg-amber-100/70 dark:bg-[#141c28] border border-amber-900/20 dark:border-amber-500/20 p-4 rounded-xl flex items-center gap-3">
                 <span className="text-3xl">⛪</span>
                 <div>
-                  <h3 className="font-cinzel font-bold text-base text-amber-950">Chrám Světlonoše a Oltář Bohů</h3>
-                  <p className="text-xs text-amber-900/80 font-lora">
+                  <h3 className="font-cinzel font-bold text-base text-amber-950 dark:text-amber-200">Chrám Světlonoše a Oltář Bohů</h3>
+                  <p className="text-xs text-amber-900/80 dark:text-slate-300 font-lora">
                     V temném světě Aelthgardu je božská přízeň neocenitelná. Slož obětinu pro božské vedení v boji nebo se očisti od zhoubného moru.
                   </p>
                 </div>
@@ -811,17 +811,17 @@ export const TownServicesModal: React.FC<TownServicesModalProps> = ({ isOpen, on
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto w-full">
                 {TEMPLE_SERVICES.map(service => (
-                  <div key={service.id} className="bg-white/80 border-2 border-amber-900/20 rounded-xl p-5 flex flex-col justify-between shadow-sm hover:border-amber-700/60 transition">
+                  <div key={service.id} className="bg-white/80 dark:bg-[#141c28] border-2 border-amber-900/20 dark:border-amber-500/20 rounded-xl p-5 flex flex-col justify-between shadow-sm hover:border-amber-700/60 dark:hover:border-amber-500 transition">
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-4xl">{service.icon}</span>
-                        <span className="font-cinzel font-bold text-amber-900 bg-amber-100 px-3 py-1 rounded-lg border border-amber-900/20 text-sm">
+                        <span className="font-cinzel font-bold text-amber-900 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/70 px-3 py-1 rounded-lg border border-amber-900/20 dark:border-amber-500/30 text-sm">
                           🪙 {service.cost} zl
                         </span>
                       </div>
-                      <h4 className="font-cinzel font-bold text-base text-amber-950 mb-1">{service.name}</h4>
-                      <p className="text-xs text-amber-900/70 font-lora mb-3">{service.description}</p>
-                      <div className="bg-amber-50 border border-amber-700/20 p-2.5 rounded-lg text-xs font-semibold text-amber-950 mb-4">
+                      <h4 className="font-cinzel font-bold text-base text-amber-950 dark:text-[#e2d9c8] mb-1">{service.name}</h4>
+                      <p className="text-xs text-amber-900/70 dark:text-slate-300 font-lora mb-3">{service.description}</p>
+                      <div className="bg-amber-50 dark:bg-[#192231] border border-amber-700/20 dark:border-amber-500/20 p-2.5 rounded-lg text-xs font-semibold text-amber-950 dark:text-amber-200 mb-4">
                         🕊️ {service.effectDescription}
                       </div>
                     </div>
@@ -829,7 +829,7 @@ export const TownServicesModal: React.FC<TownServicesModalProps> = ({ isOpen, on
                     <button
                       onClick={() => handleTempleService(service.id)}
                       disabled={gold < service.cost}
-                      className="w-full py-2 bg-amber-800 hover:bg-amber-900 text-white rounded-xl font-cinzel font-bold text-xs tracking-wider transition disabled:opacity-40 flex items-center justify-center gap-2"
+                      className="w-full py-2 bg-amber-800 hover:bg-amber-900 dark:bg-amber-600 dark:hover:bg-amber-500 text-white rounded-xl font-cinzel font-bold text-xs tracking-wider transition disabled:opacity-40 flex items-center justify-center gap-2 cursor-pointer"
                     >
                       <span>Obětovat {service.cost} zl</span>
                     </button>
