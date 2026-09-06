@@ -426,6 +426,7 @@ Vrať POUZE json ve formátu:
         'pointsOfInterest': [], 
         'vyznamna_mista': [], 
         'zname_postavy': [], 
+        'current_node_id': 'oakhaven',
         'rations': 3,
         'backstory': getattr(req, 'backstory', '') or '',
         'version': '2.1.0',
