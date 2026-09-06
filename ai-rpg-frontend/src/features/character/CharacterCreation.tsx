@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { 
   Settings2, Sparkles, ChevronRight, ChevronLeft, Crown, Shield, 
-  Wand2, Axe, Ghost, Skull, Book, Flame, X, Loader2, Globe, Eye, Sun, Compass, ArrowLeft,
+  Wand2, Axe, Ghost, Skull, Book, Flame, X, Loader2, Globe, Eye, Sun, Moon, Compass, ArrowLeft,
   Swords, Zap, Check, CheckCircle2, Star, Award, Heart
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SeamlessVideo } from '../../components/ui/SeamlessVideo';
+import { AmbientBackground } from '../../components/ui/AmbientBackground';
 import { calculateBaseStats } from '../../utils/statsCalculator';
 import { RACES } from '../../data/races';
 import { CLASS_SKILL_TREES } from '../../data/classSkillTrees';
@@ -42,8 +43,12 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
     dndClass, setDndClass, 
     stats, setStats, 
     keywords, setKeywords, 
-    gameMode, setGameMode 
+    gameMode, setGameMode,
+    theme, setTheme
   } = useGameStore();
+
+  const isDark = theme === 'dark' || (theme === 'auto' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  const toggleTheme = () => setTheme(isDark ? 'light' : 'dark');
 
   React.useEffect(() => {
     if (dndClass && race) {
@@ -75,17 +80,20 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
   };
 
   const getClassIcon = (c: string) => {
-    switch(c) {
-      case "Bojovník": case "Barbar": return <Shield size={19} />;
-      case "Paladin": return <Crown size={19} />;
-      case "Kouzelník": case "Čaroděj": case "Černokněžník": return <Wand2 size={19} />;
-      case "Klerik": return <Book size={19} />;
-      case "Druid": return <Flame size={19} />;
-      case "Bard": return <Sparkles size={19} />;
-      case "Tulák": return <Ghost size={19} />;
-      case "Hraničář": return <Axe size={19} />;
-      case "Mnich": return <Shield size={19} />;
-      default: return <Swords size={19} />;
+    switch (c) {
+      case "Barbar": return <Axe size={18} />;
+      case "Bard": return <Sparkles size={18} />;
+      case "Klerik": return <Shield size={18} />;
+      case "Druid": return <Flame size={18} />;
+      case "Bojovník": return <Swords size={18} />;
+      case "Mnich": return <Shield size={18} />;
+      case "Paladin": return <Shield size={18} />;
+      case "Hraničář": return <Axe size={18} />;
+      case "Tulák": return <Ghost size={18} />;
+      case "Čaroděj": return <Wand2 size={18} />;
+      case "Černokněžník": return <Skull size={18} />;
+      case "Kouzelník": return <Book size={18} />;
+      default: return <Swords size={18} />;
     }
   };
 
@@ -97,9 +105,8 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
   return (
     <div className="min-h-screen w-full bg-[#12181f] text-slate-900 flex flex-col items-center justify-center p-2 sm:p-4 lg:p-6 overflow-y-auto overflow-x-hidden relative select-none">
       
-      {/* Background Ambience */}
-      <video src="/video/bg1.mp4" autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none opacity-45" />
-      <div className="absolute inset-0 bg-gradient-to-b from-[#e5dfc5]/25 dark:from-black/50 via-[#f9f6e6]/60 dark:via-[#0c1017]/80 to-transparent z-0 pointer-events-none" />
+      {/* Background Ambience with Smooth Crossfade */}
+      <AmbientBackground overlayClassName="bg-gradient-to-b from-[#e5dfc5]/25 dark:from-black/50 via-[#f9f6e6]/60 dark:via-[#0c1017]/80 to-transparent" />
 
       {loading && (
         <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center cursor-not-allowed p-4">
@@ -136,6 +143,17 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
             </p>
           </div>
           <div className="flex items-center gap-3">
+            {/* Quick Theme Toggle in Character Creation */}
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl border border-amber-900/20 dark:border-amber-600/30 text-slate-700 dark:text-amber-200 hover:bg-amber-100/70 dark:hover:bg-[#1a2332] font-cinzel font-bold text-xs transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
+              title={isDark ? "Přepnout na Světlý kodex" : "Přepnout na Černý grimoár"}
+            >
+              {isDark ? <Sun size={14} className="text-amber-400" /> : <Moon size={14} className="text-amber-800" />}
+              <span className="hidden md:inline">{isDark ? "Grimoár" : "Světlý"}</span>
+            </button>
+
             <div className="flex gap-1.5 sm:gap-2">
               {[1, 2, 3, 4].map(i => (
                 <div 

@@ -31,6 +31,7 @@ import { SeamlessVideo } from '../components/ui/SeamlessVideo';
 import { CharacterCarousel } from '../components/character/CharacterCarousel';
 import { audioManager } from '../services/audio/audioManager';
 import { CURRENT_GAME_VERSION } from '../services/version/gameVersion';
+import { AmbientBackground } from '../components/ui/AmbientBackground';
 
 const getAvatarVideo = (r?: string) => {
   if (!r) return null;
@@ -1197,10 +1198,8 @@ export default function Home() {
             </button>
           </div>
         
-        {/* Deep background fog */}
-        <SeamlessVideo src="/video/bg1.mp4" className="absolute inset-0 w-full h-full z-0 pointer-events-none opacity-60 dark:opacity-40" />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#e5dfc5]/20 via-[#f9f6e6]/50 to-transparent dark:from-[#0b0f16]/60 dark:via-[#0b0f16]/80 dark:to-[#0b0f16]/95 z-0 pointer-events-none transition-colors duration-500" />
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-rpg-magic/10 dark:bg-amber-500/5 blur-[120px] rounded-full z-0 pointer-events-none" />
+        {/* Deep ambient background with smooth crossfade between light & dark mode videos */}
+        <AmbientBackground />
 
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
@@ -1216,7 +1215,23 @@ export default function Home() {
           </div>
 
           {!isLoggedIn ? (
-            <div className="w-full max-w-sm bg-[#f9f6e6]/60 dark:bg-[#121823]/90 backdrop-blur-md p-8 rounded-2xl border border-amber-900/10 dark:border-amber-500/20 shadow-2xl">
+            <div className="w-full max-w-sm bg-[#f9f6e6]/75 dark:bg-[#121823]/90 backdrop-blur-md p-6 sm:p-8 rounded-2xl border border-amber-900/15 dark:border-amber-500/20 shadow-2xl">
+              {/* Header with Theme Toggle directly on Login Card */}
+              <div className="flex justify-between items-center mb-5 pb-3 border-b border-amber-900/10 dark:border-amber-500/20">
+                <span className="font-cinzel text-xs font-bold text-amber-950 dark:text-amber-200 tracking-wider">
+                  {isRegistering ? "Registrace hrdiny" : "Vstup do říše"}
+                </span>
+                <button
+                  type="button"
+                  onClick={toggleTheme}
+                  className="px-2.5 py-1 rounded-lg bg-white/80 dark:bg-[#182230] border border-amber-900/20 dark:border-amber-500/30 text-xs font-cinzel text-amber-950 dark:text-amber-200 flex items-center gap-1.5 hover:scale-105 transition shadow-2xs cursor-pointer"
+                  title={isDark ? "Přepnout na Světlý kodex" : "Přepnout na Černý grimoár"}
+                >
+                  {isDark ? <Sun size={13} className="text-amber-400" /> : <Moon size={13} className="text-amber-800" />}
+                  <span>{isDark ? "Grimoár" : "Světlý"}</span>
+                </button>
+              </div>
+
               <div className="space-y-6">
                 <div>
                   <input 
@@ -1349,13 +1364,14 @@ export default function Home() {
 
       {/* --- AELTHGARD IMMERSIVE GAMEPLAY UI --- */}
       
-      {/* Background Layer */}
+      {/* Background Layer with Live Ambient Crossfading Videos */}
       <div className="absolute inset-0 z-0">
+        <AmbientBackground className="absolute inset-0 w-full h-full z-0 pointer-events-none opacity-30 dark:opacity-40" glow={false} />
         <div 
-          className="absolute inset-0 bg-cover bg-center transition-all duration-1000"
+          className="absolute inset-0 bg-cover bg-center transition-all duration-1000 mix-blend-overlay"
           style={{ backgroundImage: `url(${currentLocationImage || 'https://www.transparenttextures.com/patterns/black-scales.png'})` }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#f9f6e6]/95 via-[#f9f6e6]/70 to-[#f9f6e6]/30 dark:from-[#0b0f16]/95 dark:via-[#0b0f16]/80 dark:to-[#0b0f16]/50 backdrop-blur-sm transition-colors duration-500" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#f9f6e6]/95 via-[#f9f6e6]/70 to-[#f9f6e6]/30 dark:from-[#0b0f16]/95 dark:via-[#0b0f16]/80 dark:to-[#0b0f16]/50 backdrop-blur-xs transition-colors duration-500" />
       </div>
 
       <div className="w-full max-w-[1720px] flex flex-col h-full relative z-10 p-1.5 sm:p-3 md:p-4 lg:p-6 pb-0">
