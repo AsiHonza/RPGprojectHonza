@@ -99,6 +99,11 @@ const FormattedSystemLog = ({ text }: { text: string }) => {
 
 
 
+const isFemale = (p?: string) => {
+  const normalized = (p || "").trim().toLowerCase().replace(/ž/g, "z");
+  return normalized === "zena" || normalized === "female";
+};
+
 export default function Home() {
   const { 
     bgVolume, setBgVolume, currentTrack, setCurrentTrack, ttsVolume, setTtsVolume, ttsProvider, setTtsProvider, 
@@ -632,7 +637,7 @@ export default function Home() {
                     if (npcText) {
                       lastAudioQueue.push({
                         text: npcText,
-                        type: npc.pohlavi === "zena" ? "npc_zena" : "npc_muz"
+                        type: isFemale(npc.pohlavi) ? "npc_zena" : "npc_muz"
                       });
                     }
                   }
@@ -682,7 +687,7 @@ export default function Home() {
               if (npcText) {
                 queue.push({
                   text: npcText,
-                  type: npc.pohlavi === "zena" ? "npc_zena" : "npc_muz"
+                  type: isFemale(npc.pohlavi) ? "npc_zena" : "npc_muz"
                 });
               }
             }
@@ -1021,9 +1026,10 @@ export default function Home() {
         if (data.vypravec) audioQueue.push({text: data.vypravec, type: "narrator"});
         if (data.npc_dialogy && data.npc_dialogy.length > 0) {
             data.npc_dialogy.forEach((npc: any) => {
-               if (npc.text) {
-                 const type = npc.pohlavi === "muz" ? "npc_muz" : "npc_zena";
-                 audioQueue.push({text: npc.text, type});
+               const npcText = npc.text || npc.replika;
+               if (npcText) {
+                 const type = isFemale(npc.pohlavi) ? "npc_zena" : "npc_muz";
+                 audioQueue.push({text: npcText, type});
                }
             });
         }
@@ -1746,7 +1752,7 @@ export default function Home() {
                                 <div key={nIdx} className="bg-[#f4ecd8]/90 dark:bg-[#1b2433]/90 p-3.5 rounded-2xl border border-amber-900/15 dark:border-amber-500/20 shadow-2xs">
                                   <div className="flex justify-between items-center mb-1">
                                     <span className="font-bold text-rpg-magic dark:text-amber-400 font-cinzel">{npc.jmeno}</span>
-                                    <button onClick={() => playAudio((npc.text || npc.replika), npc.pohlavi === 'zena' ? 'npc_zena' : 'npc_muz')} className="text-slate-600 dark:text-slate-400 hover:text-[#2d3748] dark:hover:text-amber-200"><Volume2 size={16} /></button>
+                                    <button onClick={() => playAudio((npc.text || npc.replika), isFemale(npc.pohlavi) ? 'npc_zena' : 'npc_muz')} className="text-slate-600 dark:text-slate-400 hover:text-[#2d3748] dark:hover:text-amber-200"><Volume2 size={16} /></button>
                                   </div>
                                     <div className="text-slate-900 dark:text-[#f1ede4]">"{npc.text || npc.replika}"</div>
                                 </div>

@@ -455,6 +455,11 @@ ZÁZNAMY PRO FRONTEND A EFEKTIVITA TOKENŮ:
         dm_json['svetova_fakta'] = state_dict.get('svetova_fakta', [])
         dm_json['zname_postavy'] = known_npcs
 
+        # Normalize pohlavi values in npc_dialogy (safety net for AI output)
+        for dialog in dm_json.get('npc_dialogy', []):
+            raw_p = str(dialog.get('pohlavi', 'muz')).strip().lower()
+            dialog['pohlavi'] = 'zena' if 'zen' in raw_p or 'žen' in raw_p or raw_p == 'female' else 'muz'
+
         supabase.table('characters').update({'history': updated_history, 'state': state_dict}).eq('api_key', db_key).execute()
         return dm_json
     except Exception as e:

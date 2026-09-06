@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Literal
 import uuid
 
 class Item(BaseModel):
@@ -72,7 +72,7 @@ class CombatEnemy(BaseModel):
 
 class NPCDialog(BaseModel):
     jmeno: str
-    pohlavi: str
+    pohlavi: Literal["muz", "zena"] = Field(default="muz", description="Pohlaví postavy: 'muz' nebo 'zena'")
     image_prompt: str
     text: str
 

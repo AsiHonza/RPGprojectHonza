@@ -1,56 +1,63 @@
-import json
-import os
-from google import genai
-from google.genai import types
-
-def get_action_intent(action_str: str, api_key: str) -> str:
+def get_action_intent(action_str: str, api_key: str = None) -> str:
+    """Deterministic intent router — classifies player input as UI_AKCE or BEZNA_HRA.
+    
+    Replaces the previous Gemini API call with expanded keyword matching.
+    Saves ~160 tokens per turn and ~300-500ms latency.
+    """
     if not action_str or action_str.strip() == "":
         return 'BEZNA_HRA'
-        
-    # Lokální rychlý bypass pro zjevné a čisté UI klíčová slova (šetříme API i u micro-modelu)
-    clean_action = action_str.lower().strip()
-    ui_keywords = ["inventar", "inventář", "batoh", "denik", "deník", "ukoly", "úkoly", "staty", "statistiky"]
-    if any(clean_action == kw for kw in ui_keywords) or clean_action.startswith("ukaž inventář") or clean_action.startswith("ukaz inventar"):
-        # Pojistka: pokud to obsahuje "a ", "pak", "zabij", "jdi", nejedná se o čistou UI akci
-        if not any(word in clean_action for word in [" a ", "pak", "potom", "zabij", "jdi", "otevři dveře"]):
-            return 'UI_AKCE'
-            
-    client = genai.Client(api_key=api_key)
     
-    prompt = f"""Zanalyzuj nasledujici text hrace v RPG hre a urci jeho zamer.
-Text hrace: "{action_str}"
-
-Pravidla:
-1. Pokud text obsahuje JAKOUKOLIV pribehovou akci, utok, prozkoumavani, mluveni s postavami nebo pohyb, vrat VZDY "BEZNA_HRA".
-2. Pokud se hrac POUZE diva do inventare, statistik, deniku ukolu, nebo otevyra herni menu bez zasahu do sveta (napr. "ukaz inventar", "co mam v batohu?", "denik", "stats"), vrat "UI_AKCE".
-3. V pripade kombinace (napr. "kouknu do baglu a pak zabiju krale") vrat VZDY "BEZNA_HRA".
-"""
+    clean = action_str.lower().strip()
     
-    routing_schema = {
-        "type": "OBJECT",
-        "properties": {
-            "intent": {
-                "type": "STRING", 
-                "enum": ["BEZNA_HRA", "UI_AKCE"],
-            }
-        },
-        "required": ["intent"]
+    # Exact-match UI keywords (common short commands)
+    ui_exact = {
+        "inventar", "inventář", "batoh", "denik", "deník",
+        "ukoly", "úkoly", "staty", "statistiky", "stats",
+        "mapa", "menu", "nastaveni", "nastavení", "quest",
+        "questy", "schopnosti", "equipment", "vybaveni",
+        "vybavení", "journal", "log", "záznamy", "zaznamy"
     }
     
-    try:
-        resp = client.models.generate_content(
-            model='gemini-3.6-flash', 
-            contents=prompt, 
-            config=types.GenerateContentConfig(
-                response_mime_type='application/json', 
-                response_schema=routing_schema,
-                temperature=0.0
-            )
-        )
-        
-        clean_text = resp.text.strip().removeprefix('```json').removesuffix('```').strip()
-        data = json.loads(clean_text)
-        return data.get('intent', 'BEZNA_HRA')
-    except Exception as e:
-        print("Router error:", e)
-        return 'BEZNA_HRA'
+    if clean in ui_exact:
+        return 'UI_AKCE'
+    
+    # Prefix-based UI patterns
+    ui_prefixes = [
+        "ukaž ", "ukaz ", "otevři inventář", "otevri inventar",
+        "podívej se na ", "podivej se na ", "zobraz ",
+        "co mám v", "co mam v", "koukni na ", "otevři deník",
+        "otevri denik", "ukaž úkoly", "ukaz ukoly",
+        "podívej do ", "podivej do ", "otevři mapu",
+        "otevri mapu", "ukaž staty", "ukaz staty",
+        "koukni do ", "zkontroluj "
+    ]
+    
+    if any(clean.startswith(p) for p in ui_prefixes):
+        # Safety check: if it also contains a story action, treat as gameplay
+        story_indicators = [
+            " a ", " pak ", " potom ", "zabij", "jdi", "otevři dveře",
+            "útok", "utok", "mluv", "prozkoumej", "bojuj", "zaútoč",
+            "zautoc", "seber", "použij", "pouzij", "vystřel", "vystrel",
+            "kouzl", "uteč", "utec", "skryj", "vyjednávej", "vyjednavej"
+        ]
+        if not any(w in clean for w in story_indicators):
+            return 'UI_AKCE'
+    
+    # Question-form UI queries
+    ui_questions = [
+        "co mám v batohu", "co mam v batohu",
+        "jaké mám úkoly", "jake mam ukoly",
+        "jaké mám staty", "jake mam staty",
+        "kolik mám zlata", "kolik mam zlata",
+        "kolik mám životů", "kolik mam zivotu",
+        "kolik mám hp", "kolik mam hp",
+        "jakou mám zbraň", "jakou mam zbran",
+        "co mám na sobě", "co mam na sobe"
+    ]
+    
+    if any(clean.startswith(q) for q in ui_questions):
+        story_indicators = [" a ", " pak ", " potom "]
+        if not any(w in clean for w in story_indicators):
+            return 'UI_AKCE'
+    
+    return 'BEZNA_HRA'

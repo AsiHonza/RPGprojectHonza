@@ -18,7 +18,7 @@ ELEVEN_VOICES = {
 EDGE_CONFIG = {
     "narrator": {"voice": "cs-CZ-AntoninNeural", "rate": "-6%", "pitch": "-6Hz"},
     "npc_muz": {"voice": "cs-CZ-AntoninNeural", "rate": "-3%", "pitch": "-3Hz"},
-    "npc_zena": {"voice": "cs-CZ-VlastaNeural", "rate": "-2%", "pitch": "0Hz"}
+    "npc_zena": {"voice": "cs-CZ-VlastaNeural", "rate": "-2%", "pitch": "+0Hz"}
 }
 
 async def generate_edge_tts(text: str, voice_type: str = "narrator") -> bytes:
