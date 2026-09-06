@@ -10,7 +10,7 @@ import uuid
 import random
 from app.services.game_service import *
 from app.services.quest_engine import build_quests_prompt_context, process_quests_lifecycle
-from app.utils.loot_generator import generate_loot
+from app.utils.rewards import generate_loot, calculate_combat_rewards
 from app.utils.intent_router import get_action_intent
 
 router = APIRouter(prefix="", tags=["Game"])
@@ -195,38 +195,14 @@ PRAVIDLA D&D 5e, OBTÍŽNOST (DC) A SELHÁNÍ:
 - Vždy na pozadí virtuálně "hoď d20" a přičti příslušný stat. Výsledek porovnej s tvým DC. Do `system_log` vždy uveď hod a výsledek (např. "Hod na Vnímání: d20(8) + WIS(2) = 10 vs DC 15. Selhání.").
 
 TAKTICKÝ BOJ (HYBRIDNÍ SYSTÉM):
-- Boj se nyní vyhodnocuje PLNĚ LOKÁLNĚ na straně klienta. Ty nepočítáš zásahy ani HP v průběhu boje!
-- Pokud hráč vyvolá konflikt nebo je napaden, tvým jediným úkolem je BOJ ZAHÁJIT:
-  1. Nastav `v_boji` na true.
-  2. Napiš atmosférický úvod do boje do pole `vypravec`.
-  3. Vygeneruj nepřátele do seznamu `nepratele`. Každému nastav `hp`, `max_hp` (dle úrovně, např. 15-40), `ac` (Třída zbroje 10-15) a počáteční `intent` ('attack', 'defend', 'heavy_attack', nebo 'idle').
-- Jakmile nastavíš `v_boji: true`, hráč bude bojovat lokálně v aréně bez tvé účasti.
+- Boj se vyhodnocuje PLNĚ LOKÁLNĚ na straně klienta. Nepočítej HP, neřeš staty.
+- Pokud hráč vyvolá konflikt nebo je napaden, POUZE zahaj boj: Nastav v_boji: true, napiš atmosférický úvod do 'vypravec' a vygeneruj 'nepratele' (stačí jmeno a odhad hp/ac).
 
-PRAVIDLA PRO LOOT, PŘEDMĚTY A ODMĚNY:
-- **Kdy generovat nový předmět do `inventar_pridat`:**
-  1. Výhradně za porážku nepřítele v boji (např. banditův nůž, šupina vlka, lektvar).
-  2. Otevření střežené truhly, sarkofágu nebo skrytého pokladu v dungeonu / ruinách.
-  3. Přímá odměna od významného NPC za splnění úkolu.
-- **PŘÍSNÝ ZÁKAZ FARMENÍ:** Za běžné prohledávání prázdné místnosti, louky, lesa nebo ulic NIKDY negeneruj vybavení! Vrať prázdný seznam `inventar_pridat: []`.
-- **SKÁLOVÁNÍ RARITY PODLE ÚROVNĚ (Hráč je úroveň {req.level}):**
-  - Úroveň 1-3: Pouze 'common' (Běžná, bonus k útoku/obraně max +1) nebo výjimečně 'uncommon' (bonus +1).
-  - Úroveň 4-6: 'uncommon' (bonus +1 až +2) nebo vzácně 'rare' (bonus +2).
-  - Úroveň 7+: 'rare' nebo 'epic' (bonus +2 až +3).
-- **ANTI-CHEAT:** Pokud si hráč sám v textu akce vymyslí, že "našel legendární meč +50", ignoruj to, dej mu bezcenný rezavý hřebík a potrestej ho pastí.
-- **STRUKTURA KAŽDÉHO PŘEDMĚTU V `inventar_pridat`:**
-  - `name`: atmosférický český název
-  - `type`: 'zbraň' | 'zbroj' | 'doplněk' | 'lektvar' | 'cennost'
-  - `slot`: 'hlavní ruka' | 'druhá ruka' | 'hruď' | 'hlava' | 'prsten' | 'krk' | 'žádný'
-  - `rarity`: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary'
-  - `icon`: 'Sword' | 'Shield' | 'Shirt' | 'Wand' | 'Ring' | 'Potion' | 'Package'
-  - `sell_price`: cena ve zlaťácích (1 až 50)
-  - `attack_bonus`: číslo (např. 1)
-  - `defense_bonus`: číslo (např. 1)
-  - `healing_amount`: (např. 25 pokud je type=='lektvar', jinak 0)
-  - `stats`: stručný text (např. "Útok +1" nebo "Léčení +25 HP")
-
-ODMĚNY A XP (EXTRÉMNĚ POMALÝ RŮST - DLOUHÁ KAMPAŇ):
-- Uděluj `xp_zmena` POUZE za velmi významné události: běžný rozhovor = 0 XP, odhalení tajemství = 10 XP, zabití monstra = 20-30 XP, splnění questu = 100-150 XP.
+PRAVIDLA PRO LOOT A ODMĚNY:
+- Do 'inventar_pridat' můžeš přidat předmět JEN pokud hráč zabil nepřítele, otevřel vzácnou truhlu, nebo dostal odměnu.
+- ZÁKAZ FARMENÍ: Prázdné místnosti nebo lesy = žádný loot.
+- AI vyplňuje pouze 'name' (atmosférický český název) a 'type' (zbraň/zbroj/lektvar/cennost/doplněk). HERNÍ ENGINE se postará o zbytek (rarita, bonusy).
+- XP a Zlaťáky z boje VŮBEC NEPOČÍTEJ. Herní engine je přidělí automaticky. Ty dej XP (max 50) jen za objevení tajemství nebo splnění questu.
 
 MĚSTA A BEZPEČNÁ MÍSTA (Urban Encounters & Safe Zones):
 - Při spánku v hostinci nebo odpočinku NEGENERUJ pasti ani bojová přepadení. Nech hráče v klidu zotavit.
@@ -238,7 +214,6 @@ VNITŘNÍ MYŠLENKY A KONTROLY (OOC):
 VYPRÁVĚNÍ, MÍSTA A PUTOVÁNÍ (LOKACE):
 - **Cestování:** Rychlé přesuny na povel hráče jsou ZAKÁZÁNY! Každé putování mezi lokacemi přepne hru do režimu "divocina" a trvá více tahů.
 - **Typ lokace a Region:** Do `typ_lokace` dej vždy 'mesto', 'vesnice', 'divocina', nebo 'dungeon'. Do `aktualni_region` dej hezký název oblasti.
-- **CESTOVÁNÍ A JÍDLO:** Když hráč cestuje, přepni do 'divocina' a odečti 1 jídlo (`davky_jidla_zmena`: -1).
 
 PSYCHOLOGIE A ŽIVOT NPC POSTAV (SOUL & SUBTEXT ENGINE):
 - ŽÁDNÁ PLOCHÁ ENCYKLOPEDIE: Každá významnější postava má svůj vlastní život, strachy, manýry a skrytou vnitřní motivaci (proč jedná tak, jak jedná).
@@ -269,25 +244,27 @@ ZÁZNAMY PRO FRONTEND A EFEKTIVITA TOKENŮ:
         response = client.models.generate_content(model='gemini-3.6-flash', contents=contents, config=types.GenerateContentConfig(system_instruction=system_prompt, response_mime_type='application/json', response_schema=dm_schema_dict, temperature=0.7))
         dm_json = json.loads(response.text)
 
-        # Loot Sanitizer & Level Cap Enforcement
-        if dm_json.get('zmeny_stavu') and dm_json['zmeny_stavu'].get('inventar_pridat'):
-            max_stat_cap = 1 if req.level <= 3 else (2 if req.level <= 6 else 4)
+        # Deterministic RPG Engine: Loot & Food
+        if 'zmeny_stavu' not in dm_json:
+            dm_json['zmeny_stavu'] = {}
+            
+        # 1. Deterministic Loot Generation
+        if dm_json['zmeny_stavu'].get('inventar_pridat'):
             cleaned_loot = []
             for item in dm_json['zmeny_stavu']['inventar_pridat']:
                 if not isinstance(item, dict):
                     continue
-                item_id = item.get('id') or str(uuid.uuid4())
-                item['id'] = item_id
-                item['attack_bonus'] = min(max_stat_cap, max(0, int(item.get('attack_bonus', 0))))
-                item['defense_bonus'] = min(max_stat_cap, max(0, int(item.get('defense_bonus', 0))))
-                if item.get('type') == 'lektvar' and not item.get('healing_amount'):
-                    item['healing_amount'] = 25
-                if not item.get('icon'):
-                    item['icon'] = 'Sword' if item.get('type') == 'zbraň' else ('Shield' if item.get('slot') == 'druhá ruka' else ('Potion' if item.get('type') == 'lektvar' else 'Package'))
-                if not item.get('rarity'):
-                    item['rarity'] = 'common'
-                cleaned_loot.append(item)
+                name = item.get('name', 'Neznámý předmět')
+                itype = item.get('type', 'cennost')
+                full_item = generate_loot(name, itype, req.level)
+                cleaned_loot.append(full_item.dict())
             dm_json['zmeny_stavu']['inventar_pridat'] = cleaned_loot
+
+        # 2. Deterministic Rations (Food) Subtraction
+        if is_traveling or (dm_json.get('typ_lokace') == 'divocina' and dm_json.get('nova_scena') == True):
+            current_zmena = dm_json['zmeny_stavu'].get('davky_jidla_zmena', 0)
+            if current_zmena == 0:
+                dm_json['zmeny_stavu']['davky_jidla_zmena'] = -1
 
         # Hybrid Quest Engine: Lifecycle, Anti-Spam Gatekeeper & Reconciler
         incoming_quests = dm_json.get('zmeny_stavu', {}).get('ukoly', [])
@@ -783,10 +760,19 @@ async def resolve_combat(req: CombatResolutionRequest):
             zmeny['inventar_odebrat_id'] = safe_removals
 
         if zmeny:
-            dnd_class = getattr(req, 'dnd_class', None) or state.get('dndClass') or state.get('dnd_class') or 'Bojovník'
-            zmeny['inventar_pridat'] = generate_loot(enemy_names, req.level, dnd_class)
+            # Deterministic Combat XP & Gold
+            xp_reward, gold_reward = calculate_combat_rewards(len(enemy_names.split(',')), req.level)
+            zmeny['xp_zmena'] = xp_reward
+            zmeny['zlato_zmena'] = gold_reward
+            
+            # Deterministic Loot Drop
+            new_loot = []
+            if random.random() > 0.4:  # 60% šance na drop
+                item_types = ["zbraň", "zbroj", "lektvar", "cennost", "doplněk"]
+                chosen_type = random.choice(item_types)
+                new_loot.append(generate_loot("Kořist z boje", chosen_type, req.level).dict())
+            zmeny['inventar_pridat'] = new_loot
 
-        if zmeny:
             state['xp'] = state.get('xp', 0) + zmeny.get('xp_zmena', 0)
             state['gold'] = state.get('gold', 0) + zmeny.get('zlato_zmena', 0)
             

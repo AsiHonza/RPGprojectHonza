@@ -46,13 +46,17 @@ class NPCRecord(BaseModel):
     odhalene_tajemstvi: Optional[str] = Field(default=None, description="Tajemství nebo zranitelnost odhalená hráčem. Pokud dosud nebylo odhaleno, nechat null/prázdné")
     duvera: int = Field(default=0, description="Stupeň důvěry k hráči (-10 až +10)")
 
+class AILootStub(BaseModel):
+    name: str = Field(description="Atmosférický název předmětu (např. 'Zrezivělý meč goblinů')")
+    type: Literal["zbraň", "zbroj", "doplněk", "lektvar", "cennost"] = Field(description="Kategorie předmětu")
+
 class StateChanges(BaseModel):
     zivoty_zmena: int = 0
     xp_zmena: int = Field(0)
     davky_jidla_zmena: int = Field(0)
     zlato_zmena: int = Field(0)
     spell_slots_zmena: int = Field(0)
-    inventar_pridat: List[Item] = []
+    inventar_pridat: List[AILootStub] = []
     inventar_odebrat_id: List[str] = []
     ukoly: List[Ukol] = Field(default=[])
     travel_mode_set: Optional[bool] = None
