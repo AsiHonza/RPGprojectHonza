@@ -137,7 +137,20 @@ async def play_action(req: PlayerActionRequest):
             active_flags = state_dict.get('decision_flags', [])
             flags_rendered = ", ".join(active_flags) if active_flags else "Žádná (začátek hry)"
 
-            node_prompt_str = f"""\n======================================================================\n[KANONICKÁ DATA LOKACE ZE SVĚTA AELTHGARD (OBSIDIAN KNOWLEDGE BASE)]:\n- Uzel: {node_data.get('name')} (ID: {current_node_id}, Typ: {node_data.get('type')})\n- Popis prostředí: {node_data.get('description')}\n- PŘÍTOMNÁ KANONICKÁ NPC (Mluv a jednej za ně přesně v tomto duchu):\n{local_npcs_rendered}\n- DOSTUPNÉ ZÁPLETKY A ÚKOLY:\n{local_quests_rendered}\n- ODEHRANÁ ROZHODNUTÍ HRÁČE (DECISION FLAGS - respektuj minulé volby!):\n  {flags_rendered}\n======================================================================\n"""
+            secrets_lines = []
+            for s in node_data.get('secrets', []):
+                if isinstance(s, dict):
+                    secrets_lines.append(f"  * {s.get('name', 'Skrýš')}: {s.get('description', '')} (Nález: {s.get('loot', '')})")
+                elif isinstance(s, str):
+                    secrets_lines.append(f"  * {s}")
+            for l in node_data.get('loot_containers', []):
+                if isinstance(l, dict):
+                    secrets_lines.append(f"  * [Kontejner] {l.get('name', 'Truhla')}: {l.get('location', '')} - {l.get('contents', '')} (Podmínka: {l.get('condition', 'Volně přístupné')})")
+                elif isinstance(l, str):
+                    secrets_lines.append(f"  * [Kontejner] {l}")
+            secrets_rendered = "\n".join(secrets_lines) if secrets_lines else "  Žádné specifické skryté truhly nebyly v záznamech nalezeny."
+
+            node_prompt_str = f"""\n======================================================================\n[KANONICKÁ DATA LOKACE ZE SVĚTA AELTHGARD (OBSIDIAN KNOWLEDGE BASE)]:\n- Uzel: {node_data.get('name')} (ID: {current_node_id}, Typ: {node_data.get('type')})\n- Popis prostředí: {node_data.get('description')}\n- PŘÍTOMNÁ KANONICKÁ NPC (Mluv a jednej za ně přesně v tomto duchu):\n{local_npcs_rendered}\n- DOSTUPNÉ ZÁPLETKY A ÚKOLY:\n{local_quests_rendered}\n- ODEHRANÁ ROZHODNUTÍ HRÁČE (DECISION FLAGS - respektuj minulé volby!):\n  {flags_rendered}\n- KANONICKÁ TAJEMSTVÍ A SKRYTÝ LOOT (VŽDY DODRŽUJ! Pokud hráč cíleně prohledává toto konkrétní místo, uplatňuje tip od NPC nebo plní úkol, VŽDY mu vygeneruj PŘESNĚ tento konkrétní kanonický nález):\n{secrets_rendered}\n======================================================================\n"""
         travel_prompt = ''
         if is_traveling:
             roll = random.randint(1, 20)

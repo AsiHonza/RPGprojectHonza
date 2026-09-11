@@ -8,6 +8,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { TransformWrapper, TransformComponent, ReactZoomPanPinchRef } from "react-zoom-pan-pinch";
 import { WORLD_LORE } from '../../data/worldLore';
 import { useGameStore } from '../../store/gameStore';
+import { getLocationQuestStatus } from '../../utils/mapQuestUtils';
+import { MapLocationTooltip, MapTooltipLocationData } from './MapLocationTooltip';
 
 const HEX_SIZE = 18;
 class CustomHex extends defineHex({ dimensions: HEX_SIZE, orientation: Orientation.POINTY }) {}
@@ -97,6 +99,8 @@ export default function HexMap({
   const storePlayerLoc = useGameStore(s => s.playerLocation);
   const storeFogOfWar = useGameStore(s => s.fogOfWarEnabled);
   const storeExplored = useGameStore(s => s.exploredHexes);
+  const quests = useGameStore(s => s.quests);
+  const rations = useGameStore(s => s.rations);
 
   const playerLoc = propPlayerLocation !== undefined ? propPlayerLocation : storePlayerLoc;
   const fogOfWar = propFogOfWar !== undefined ? propFogOfWar : storeFogOfWar;
@@ -119,8 +123,8 @@ export default function HexMap({
 
       return {
         ...hex,
-        nazev: locationLore?.nazev || defaultName,
-        popis: locationLore?.popis || null,
+        nazev: hex.name || hex.nazev || locationLore?.nazev || defaultName,
+        popis: hex.description || hex.popis || locationLore?.popis || null,
         kingdomName: kInfo ? kInfo.name : null,
       };
     });
@@ -377,6 +381,7 @@ export default function HexMap({
                     const distToPlayer = activeLocation ? hexDistance(activeLocation.q, activeLocation.r, hexData.q, hexData.r) : 999;
                     const isVisible = distToPlayer <= 2;
                     const isExplored = !fogOfWar || exploredSet.has(hexKey) || isVisible;
+                    const questStatus = isExplored ? getLocationQuestStatus({ q: hexData.q, r: hexData.r }, quests) : null;
 
                     const isPlayerHex = activeLocation?.q === hexData.q && activeLocation?.r === hexData.r;
                     const isSelectedHex = propSelectedHex?.q === hexData.q && propSelectedHex?.r === hexData.r;
@@ -395,7 +400,7 @@ export default function HexMap({
                       <g 
                         key={`hex-${i}`}
                         className="group cursor-pointer"
-                        onMouseEnter={() => setHoveredHex({ ...hexData, isExplored, isVisible })}
+                        onMouseEnter={() => setHoveredHex({ ...hexData, isExplored, isVisible, questStatus })}
                         onMouseLeave={() => setHoveredHex(null)}
                         onClick={(e) => handleHexClickInternal(hexData, e)}
                       >
@@ -520,6 +525,35 @@ export default function HexMap({
                                     <g transform="translate(-6, -6)">
                                       <Eye size={12} className="text-slate-200" />
                                     </g>
+                                  </g>
+                                )}
+
+                                {/* Dynamic Quest Badge on Hex */}
+                                {questStatus && questStatus.primaryBadge !== 'none' && (
+                                  <g transform="translate(8, -10)">
+                                    <circle 
+                                      r="5.5" 
+                                      fill={
+                                        questStatus.primaryBadge === 'turn_in' ? '#eab308' :
+                                        questStatus.primaryBadge === 'available' ? '#f59e0b' :
+                                        questStatus.primaryBadge === 'objective' ? '#06b6d4' : '#10b981'
+                                      }
+                                      stroke="#451a03"
+                                      strokeWidth="1"
+                                      className={questStatus.primaryBadge === 'turn_in' ? 'animate-bounce' : ''}
+                                    />
+                                    <text 
+                                      x="0" y="2.2" 
+                                      fontSize="6.5" 
+                                      fontWeight="bold" 
+                                      fill="#451a03" 
+                                      textAnchor="middle" 
+                                      className="select-none font-sans"
+                                    >
+                                      {questStatus.primaryBadge === 'turn_in' ? '?' : 
+                                       questStatus.primaryBadge === 'available' ? '!' : 
+                                       questStatus.primaryBadge === 'objective' ? '◈' : '✓'}
+                                    </text>
                                   </g>
                                 )}
                               </g>
@@ -655,39 +689,30 @@ export default function HexMap({
         )}
       </TransformWrapper>
 
-      {/* Floating Hover Tooltip (Desktop) */}
+      {/* Floating Interactive Tooltip (Desktop / Mobile) */}
       <AnimatePresence>
         {hoveredHex && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#faf6ea]/95 dark:bg-[#121823]/95 backdrop-blur-md border-2 border-amber-900/40 dark:border-amber-600/40 px-4 py-2.5 rounded-xl shadow-2xl pointer-events-none z-50 text-center max-w-xs sm:max-w-sm text-slate-900 dark:text-[#e2d9c8]"
-          >
-            {!hoveredHex.isExplored ? (
-              <div className="text-amber-950 dark:text-amber-300 font-cinzel font-bold text-sm">
-                🌫️ Neznámé končiny (Mlha)
-              </div>
-            ) : hoveredHex.nazev ? (
-              <>
-                <h3 className="font-cinzel font-bold text-amber-900 dark:text-amber-300 text-base">{hoveredHex.nazev}</h3>
-                {hoveredHex.popis && <p className="font-lora text-slate-800 dark:text-slate-300 text-xs line-clamp-2 mt-0.5">{hoveredHex.popis}</p>}
-                <div className="text-[11px] font-semibold text-amber-800 dark:text-amber-400 mt-1">
-                  {TERRAIN_CONFIG[hoveredHex.terrain]?.label || hoveredHex.terrain} 
-                  {hoveredHex.kingdomName && ` • ${hoveredHex.kingdomName}`}
-                </div>
-              </>
-            ) : (
-              <div>
-                <h3 className="font-cinzel font-bold text-slate-900 dark:text-amber-200 text-sm">
-                  {TERRAIN_CONFIG[hoveredHex.terrain]?.label || hoveredHex.terrain}
-                </h3>
-                {hoveredHex.kingdomName && (
-                  <p className="font-lora text-amber-800 dark:text-amber-400 text-xs mt-0.5">{hoveredHex.kingdomName}</p>
-                )}
-              </div>
-            )}
-          </motion.div>
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 max-w-xs sm:max-w-sm w-full px-3 pointer-events-auto">
+            <MapLocationTooltip 
+              location={{
+                id: hoveredHex.node_id || `hex_${hoveredHex.q}_${hoveredHex.r}`,
+                name: hoveredHex.isExplored 
+                  ? (hoveredHex.nazev || TERRAIN_CONFIG[hoveredHex.terrain]?.label || hoveredHex.terrain)
+                  : 'Neznámé končiny (Mlha)',
+                type: hoveredHex.poi || 'divocina',
+                description: hoveredHex.isExplored 
+                  ? (hoveredHex.popis || (hoveredHex.kingdomName ? `Území království ${hoveredHex.kingdomName}` : undefined))
+                  : 'Hustá mlha zahaluje tyto neprozkoumané končiny.',
+                faction: hoveredHex.kingdomName || undefined,
+                isCurrent: activeLocation?.q === hoveredHex.q && activeLocation?.r === hoveredHex.r,
+                canTravel: activeLocation && hexDistance(activeLocation.q, activeLocation.r, hoveredHex.q, hoveredHex.r) === 1,
+                rations,
+                questStatus: hoveredHex.questStatus,
+                isExplored: hoveredHex.isExplored
+              }}
+              onTravel={() => onHexClick?.(hoveredHex)}
+            />
+          </div>
         )}
       </AnimatePresence>
     </div>

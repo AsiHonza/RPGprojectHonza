@@ -76,6 +76,6 @@ dialog_quest:
     offer: "Poutníku... Vidím, že nosíš zbraň a nebojíš se cesty. Před dvěma dny mi lupiči vyplenili komoru a sebrali Annin prsten. Utekli ke Staré křižovatce. Aldric mi nepomůže. Přines mi ho zpět, zaplatím ti vším, co mi zbývá!"
     in_progress: "Už jsi byl na Staré křižovatce? Prosím, pospěš si, než ten prsten překupníci odvezou do Svobodných měst."
     complete_A: "Můj bože... to je on! Vracíš mi mou duši. Tady, vezmi si těchto 25 zlaťáků a pecen čerstvého chleba. Oakhaven ti nikdy nezapomene tuto laskavost!"
-    complete_B: "Cože to říkáš? Magická runa Kulla? Tajemné Útočiště?! Anna... byla Probuzená čarodějka?! Proč mi to nikdy neřekla... Vezmi si tenhle klíč. Patřil jí. Odemkne truhlu pod podlahou, kterou jsem nikdy nedokázal otevřít."
+    complete_B: "Cože to říkáš? Magická runa Kulla? Tajemné Útočiště?! Anna... byla Probuzená čarodějka?! Našel jsem včera její starý hřeben. Chtěl jsem ho spálit, ale... nedokázal jsem to. Kdo se mnou ty roky spal v jedné posteli? Cizinec? Monstrum? Nebo anděl, kterého jsem nepochopil?... Vezmi si tenhle klíč. Patřil jí. Odemkne truhlu pod podlahou, kterou jsem nikdy nedokázal otevřít. A nech mě chvíli o samotě."
 ```
 

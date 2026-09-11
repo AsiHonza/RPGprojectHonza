@@ -36,6 +36,8 @@ if sys.stdout.encoding != 'utf-8':
 def parse_frontmatter(filepath: Path) -> tuple[dict, str]:
     """Parse YAML frontmatter and markdown body from a file."""
     text = filepath.read_text(encoding='utf-8')
+    # Strip UTF-8 BOM if present (PowerShell Set-Content writes BOM)
+    text = text.lstrip('\ufeff')
     
     # Match YAML frontmatter between --- delimiters
     match = re.match(r'^---\s*\n(.*?)\n---\s*\n(.*)', text, re.DOTALL)
@@ -98,6 +100,20 @@ def strip_wikilinks(text: str) -> str:
     return text
 
 
+def extract_section_lines(body: str, headers: list[str]) -> list[str]:
+    """Extract bullet points or lines under specified markdown headers."""
+    for header in headers:
+        idx = body.find(header)
+        if idx != -1:
+            after = body[idx + len(header):]
+            next_h = re.search(r'\n## ', after)
+            section = after[:next_h.start()] if next_h else after
+            lines = [strip_wikilinks(l.strip().lstrip('-*•')).strip() for l in section.strip().split('\n') if l.strip().startswith(('-', '*', '•'))]
+            if lines:
+                return lines
+    return []
+
+
 def build_locations(vault_path: Path) -> list[dict]:
     """Build location nodes from 📍 Locations/ directory."""
     locations = []
@@ -119,6 +135,13 @@ def build_locations(vault_path: Path) -> list[dict]:
         description = extract_description(body)
         yaml_blocks = extract_yaml_blocks(body)
         
+        secrets = meta.get('secrets') or yaml_blocks.get('secrets') or extract_section_lines(body, [
+            '## 🗝️ Tajemství a Skrytý Loot', '## Tajemství a Skrytý Loot',
+            '## 🗝️ Tajemství a Role v Příběhu', '## Tajemství a Role v Příběhu',
+            '## 🗝️ Tajemství', '## Tajemství'
+        ])
+        loot_containers = meta.get('loot_containers') or yaml_blocks.get('loot_containers') or []
+        
         node = {
             'id': node_id,
             'name': meta.get('title', md_file.stem),
@@ -131,6 +154,8 @@ def build_locations(vault_path: Path) -> list[dict]:
             'kingdom_id': meta.get('kingdom_id', 0),
             'npcs': meta.get('npcs', []),
             'quests': meta.get('quests', []),
+            'secrets': secrets,
+            'loot_containers': loot_containers,
             'default_actions': yaml_blocks.get('default_actions', [
                 'Prozkoumat okolí', 'Podívat se po lidech', 'Rozbít tábor'
             ]),
@@ -366,10 +391,17 @@ def main():
         'lore_context.json': lore
     }
     
-    print(f"\n💾 Writing JSON files to {output_path}/")
+    frontend_output_path = Path('./ai-rpg-frontend/src/data/generated').resolve()
+    frontend_output_path.mkdir(parents=True, exist_ok=True)
+
+    print(f"\n💾 Writing JSON files to {output_path}/ and {frontend_output_path}/")
     for filename, data in files.items():
+        # Backend
         filepath = output_path / filename
         filepath.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')
+        # Frontend
+        fe_filepath = frontend_output_path / filename
+        fe_filepath.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')
         print(f"   ✅ {filename} ({len(json.dumps(data, ensure_ascii=False))} bytes)")
     
     # Summary

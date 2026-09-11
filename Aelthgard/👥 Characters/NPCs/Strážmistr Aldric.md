@@ -61,6 +61,8 @@ dialog_topics:
     text: "Boris je dobrý chlap, ale žije v minulosti. Jeho žena Anna zemřela před rokem a on pořád hledá její prstýnek. Kdybych měl posílat stráže za každým ztraceným šperkem, kdo by hlídal brány před gobliny a bandity z křižovatky?"
   - topic: "O Temném hvozdu"
     text: "Tam nechoď. Les patří kmenům a divočině. Pokud tam vlezeš, nikdo tě hledat nepůjde. A ty elfí šípy nevarují předem."
+  - topic: "O Inkvizitorovi Kaelenovi"
+    text: "Ptáš se, proč ho prostě nevyženu? Víš, jak dlouho trvá, než sem dorazí císařská legie, když žádám o pomoc? Dva měsíce. Víš, jak dlouho trvá, než mě ten fanatik nechá upálit na náměstí? Pět minut. Nemám dost mužů na obranu města před zrůdami, natož abych válčil se Sol-Sanctem. Musíme ho jen přetrpět a nedat mu důvod k čistce."
 ```
 
 ### Quest dialog (Q101)

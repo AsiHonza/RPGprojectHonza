@@ -45,7 +45,7 @@ steps:
     location_id: oakhaven
     trigger: "interact_npc:boris_mlynar"
     narrative: |
-      Boris Mlynář tě oslovuje s prosbou v hlase. Vypráví o krádeži zlatého prstenu po své zesnulé ženě Anně. Stopa vede na Starou křižovatku.
+      Boris Mlynář tě oslovuje s prosbou v hlase. Vypráví o krádeži zlatého prstenu po své zesnulé ženě Anně. Během rozhovoru si všimneš, že voda v náhonu má nepřirozený modravý nádech a podlahová prkna mlýna se zničehonic nepatrně otřesou. Boris to ignoruje s tím, že "země je tu poslední dobou neklidná". Stopa vede na Starou křižovatku.
     on_complete_flag: "Q001_step1_done"
 
   - id: 2
@@ -61,7 +61,7 @@ steps:
     location_id: oakhaven
     trigger: "branch_choice"
     narrative: |
-      Stojíš znovu před Borisem. V kapse tě hřeje Annin prsten se záhadnou runou. Boris na tebe hledí plný naděje.
+      Stojíš znovu před Borisem. V kapse tě hřeje Annin prsten se záhadnou runou. Mlynář na tebe hledí plný naděje, zatímco klapající kolo mlýna dál rozráží nazelenale modrou vodu.
 ```
 
 ## Větvení a Morální Volby (Branches)
