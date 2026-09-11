@@ -281,6 +281,15 @@ ZÁVAZNÉ PRAVIDLO: V každém souboji striktně použij tyto hodnoty v `system_
                     skills_summary_list.append(f"- {s}")
         skills_summary = "\n".join(skills_summary_list) if skills_summary_list else "Zatím žádné odemknuté schopnosti (hráč spoléhá na základní výbavu a instinkty)."
 
+        perks_list = state_dict.get('perks', [])
+        perks_summary = []
+        for p in perks_list:
+            if isinstance(p, dict):
+                perks_summary.append(f"- {p.get('name', 'Neznámé znamení')} ({p.get('rarity', 'common')}, {p.get('tag', '')}): {p.get('shortDesc', '')} [Mechanika: {p.get('mechanicsDetail', '')}]")
+            elif isinstance(p, str):
+                perks_summary.append(f"- {p}")
+        perks_rendered = "\n".join(perks_summary) if perks_summary else "Hráč dosud nepřijal žádné Znamení Osudu."
+
         quests_prompt_str = build_quests_prompt_context(state_dict.get('quests', []))
 
         context_action = f"[Dlouhodobá paměť (relevantní fakta z minulosti):]\n{relevant_memories}\n{world_prompt_str}\n{node_prompt_str}\n\n{spatial_grounding}\n\n{quests_prompt_str}\n\n{combat_stats_summary}\n\n{travel_prompt}\n\n[Akce hráče:]\n{action_str}\n"
@@ -296,6 +305,10 @@ PRAVIDLA PRO ÚKOLY (STRIKTNÍ QUEST ENGINE - ZÁKAZ SPAMU):
 
 ODEMKNUTÉ SCHOPNOSTI, KOUZLA A DOVEDNOSTI HRÁČE:
 {skills_summary}
+
+AKTIVNÍ ZNAMENÍ OSUDU A PERKY HRÁČE (PŘEDIVO OSUDU):
+{perks_rendered}
+- Respektuj tato Znamení Osudu v narativu! Pokud má hráč diplomatické znamení (např. Stříbrný jazyk), nabídni mu v 'nabizene_akce' mírová či chytrá řešení. Pokud má bojové nebo temné znamení, promítni jeho auru do reakcí NPC.
 
 POKYNY PRO NABÍZENÉ AKCE A DIALOGY SE SCHOPNOSTMI:
 - Mezi 3 až 5 'nabizene_akce' VŽDY zahrň 1 až 2 akce označené štítkem schopnosti, např. "[Schopnost: {{název schopnosti}}] Popis specifického taktického nebo příběhového použití", které využívají hráčovy reálně odemknuté dovednosti.

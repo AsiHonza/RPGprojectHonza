@@ -84,6 +84,41 @@ def get_race_dialogue_option(race: str, npc_id: str) -> Optional[str]:
         return '[Tiefling] "Lidé jako já vědí vše o předsudcích a podezřívání. Řekni mi pravdu bez vytáček."'
     return None
 
+def get_perk_dialogue_option(perks: list, npc_id: str) -> Optional[str]:
+    if not perks:
+        return None
+    perk_ids = set()
+    for p in perks:
+        if isinstance(p, dict):
+            perk_ids.add(p.get('id', ''))
+        elif isinstance(p, str):
+            perk_ids.add(p)
+            
+    if 'univ_silver_tongue' in perk_ids:
+        if npc_id == 'boris_mlynar':
+            return '[Karta: Stříbrný jazyk] "Uklidni se, Borisi. Bolest v tvém hlase by obměkčila i kámen. Najdu tvůj prsten a dám věci do pořádku."'
+        elif npc_id == 'strazmistr_aldric':
+            return '[Karta: Stříbrný jazyk] "Aldrici, oba víme, že Solarianova inkvizice přinese městu jen zkázu. Spojme síly dřív, než bude pozdě."'
+        elif npc_id == 'inkvizitor_kaelen':
+            return '[Karta: Stříbrný jazyk] "Víra a rozum nemusí být nepřátelé, inkvizitore. Dovol mi vyřešit klášter bez zbytečného krveprolití."'
+    if 'univ_sixth_sense' in perk_ids:
+        if npc_id == 'boris_mlynar':
+            return '[Karta: Šestý smysl] "Ten náhon... necítíš ten chlad ve vzduchu? Zloději nebyli obyčejní tuláci."'
+        elif npc_id == 'strazmistr_aldric':
+            return '[Karta: Šestý smysl] "Ve městě je špeh. Bandité na křižovatce přesně věděli, kdy hlídka střídá."'
+    if 'barbarian_blood_frenzy' in perk_ids:
+        if npc_id == 'boris_mlynar':
+            return '[Karta: Krvavý zápal] "Pověz mi, kde ti psi táboří. Přísahám, že jejich doupě obrátím v popel."'
+        elif npc_id == 'strazmistr_aldric':
+            return '[Karta: Krvavý zápal] "Přestaň váhat, strážmistře! Dej mi volnou ruku a na křižovatce nezůstane stát jediný bandita."'
+    if 'warlock_soul_harvest' in perk_ids:
+        if npc_id == 'inkvizitor_kaelen':
+            return '[Karta: Sklizeň duší] "Poznávám pach stínů, inkvizitore. Ale já temnotu ovládám, zatímco tebe děsí k smrti."'
+    if 'cleric_solarian_verdict' in perk_ids:
+        if npc_id == 'inkvizitor_kaelen':
+            return '[Karta: Solarianův soud] "Plamen boha Slunce plane i ve mně, inkvizitore. Poznáš v mých očích stejný posvátný žár?"'
+    return None
+
 def try_run_campaign_action(action_text: str, char_data: dict, db_key: str) -> Optional[dict]:
     """
     Evaluates action in the context of Act 1 campaign.
@@ -103,6 +138,7 @@ def try_run_campaign_action(action_text: str, char_data: dict, db_key: str) -> O
     xp = state_dict.get('xp', 0)
     level = state_dict.get('level', 1)
     reputation = state_dict.get('reputation', {})
+    perks = state_dict.get('perks', [])
     
     act_lower = action_text.lower().strip()
     
@@ -292,10 +328,34 @@ def try_run_campaign_action(action_text: str, char_data: dict, db_key: str) -> O
         elif 'Q001_completed_C' in flags:
             greeting_text = "Ty... Prsten jsi nenašel, viď? Cítím v kostech, že mi něco tajíš. Prosím, nech mě o samotě s mým žalem."
 
+        # Perk Dialogue Handling
+        if '[karta:' in act_lower:
+            if 'stříbrný jazyk' in act_lower or 'stribrny jazyk' in act_lower:
+                dm_json = {
+                    "vypravec": "Tvůj hlas je klidný a nese v sobě vzácné pochopení, které Borise zasáhne přímo do srdce. Starý muž si otře slzu a poprvé po dlouhé době se zhluboka nadechne.\n'Máš pravdu, příteli. Hněv a pláč Annu nevrátí. Věřím ti. Vezmi si tento starý klíč od člunu u řeky a 15 zlaťáků na cestu. Ať tě ochraňují bohové.'",
+                    "popis_okoli": "Oakhaven – Starý mlýn. Napětí opadlo a v Borisových očích svitla naděje.",
+                    "typ_lokace": "mesto",
+                    "npc_dialogy": [{
+                        "jmeno": "Boris Mlynář",
+                        "pohlavi": "muz",
+                        "text": "Tvá slova mají dar hojit rány. Kéž by takových jako ty bylo v Aelthgardu víc."
+                    }],
+                    "nabizene_akce": [
+                        "Přijmout úkol: Najít Annin prsten na Staré křižovatce",
+                        "Vydat se na náměstí Oakhaven",
+                        "Odejít z mlýna"
+                    ],
+                    "system_log": "Úspěšná zkouška vyjednávání skrze Znamení: Stříbrný jazyk! Získáno +15 zlaťáků a důvěra Borise.",
+                    "zmeny_stavu": { "zlato_zmena": 15 }
+                }
+                return _save_and_return(dm_json, action_text, state_dict, char_data, db_key)
+
         actions = []
         if 'Q001_started' not in flags and not any(k in flags for k in ['Q001_completed_A', 'Q001_completed_B', 'Q001_completed_C']):
             actions.append("Přijmout úkol: Najít Annin prsten na Staré křižovatce")
         
+        perk_opt = get_perk_dialogue_option(perks, 'boris_mlynar')
+        if perk_opt: actions.append(perk_opt)
         class_opt = get_class_dialogue_option(dnd_class, 'boris_mlynar')
         if class_opt: actions.append(class_opt)
         race_opt = get_race_dialogue_option(race, 'boris_mlynar')
