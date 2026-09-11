@@ -355,6 +355,8 @@ Vrať POUZE json ve formátu:
         'inventory': cls_data['inventory'], 
         'gold': 15, 
         'skills': cls_data['starting_skills'], 
+        'preparedSkills': [s['id'] for s in cls_data.get('starting_skills', []) if s.get('id')],
+        'game_mode': getattr(req, 'game_mode', 'campaign') or 'campaign',
         'active_quests': [], 
         'completed_quests': [], 
         'stats': req.stats, 

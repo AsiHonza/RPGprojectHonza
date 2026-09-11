@@ -11,7 +11,7 @@ import { ItemIcon } from '../components/ui/ItemIcon';
 import { InventoryPanel } from '../features/character/InventoryPanel';
 import { DeathModal } from '../features/character/DeathModal';
 import ReactPlayer from 'react-player';
-import { Send, Heart, Flame, Package, Sword, Shield, FlaskConical, Gem, Shirt, ScrollText, X, Volume2, VolumeX, User, Users, Settings2, Map, Sparkles, Skull, BookOpen, MapPin, Drumstick, Mail, Loader2, Trash2 , Brain , Menu, RotateCcw, ShoppingBag, Target, Sun, Moon, Compass } from "lucide-react";
+import { Send, Heart, Flame, Package, Sword, Shield, FlaskConical, Gem, Shirt, ScrollText, X, Volume2, VolumeX, User, Users, Settings2, Map, Sparkles, Skull, BookOpen, MapPin, Drumstick, Mail, Loader2, Trash2 , Brain , Menu, RotateCcw, ShoppingBag, Target, Sun, Moon, Compass, Castle } from "lucide-react";
 import { CharacterCreation } from '../features/character/CharacterCreation';
 import { MapModal } from '../features/map/MapModal';
 import { QuestsModal } from '../features/character/QuestsModal';
@@ -23,6 +23,7 @@ import { SettingsModal } from '../features/ui/SettingsModal';
 import { PatchNotesModal } from '../features/ui/PatchNotesModal';
 import { CampModal } from '../features/character/CampModal';
 import { TownServicesModal } from '../features/town/TownServicesModal';
+import { TownDistrictDashboard } from '../features/town/TownDistrictDashboard';
 import { DesktopSidePanel } from '../features/ui/DesktopSidePanel';
 import { PlayerHeader } from '../features/ui/PlayerHeader';
 import { CombatArena } from '../features/combat/CombatArena';
@@ -113,7 +114,7 @@ export default function Home() {
     backstory, setBackstory, hp, setHp, maxHp, setMaxHp, level, setLevel, xp, setXp, gold, setGold, rations, setRations, 
     skillPoints, setSkillPoints, inventory, setInventory, equipped, setEquipped, worldData, setWorldData, journal, setJournal, 
     quests, setQuests, pinnedQuestId, setPinnedQuestId, npcs, setNpcs, currentRegion, setCurrentRegion, locationType, setLocationType, currentSpellSlots, 
-    setCurrentSpellSlots, maxSpellSlots, setMaxSpellSlots, skills, setSkills, availableSkills, setAvailableSkills, 
+    setCurrentSpellSlots, maxSpellSlots, setMaxSpellSlots, skills, setSkills, preparedSkills, setPreparedSkills, availableSkills, setAvailableSkills, 
     inCombat, setInCombat, enemies, setEnemies, playerLocation, setPlayerLocation, day, setDay, history, setHistory, 
     suggestedActions, setSuggestedActions, pointsOfInterest, setPointsOfInterest, currentLocationImage, setCurrentLocationImage, 
     currentLocationDesc, setCurrentLocationDesc, currentImage, setCurrentImage, combatLog, setCombatLog, reputation, setReputation, 
@@ -163,7 +164,7 @@ export default function Home() {
   const [savedCharacters, setSavedCharacters] = useState<any[]>([]);
       const [customAction, setCustomAction] = useState("");
   // Central Modal Manager State
-  type ActiveModalType = 'inventory' | 'map' | 'journal' | 'quests' | 'npcs' | 'skills' | 'stats' | 'settings' | 'patchNotes' | 'camp' | 'town_services' | null;
+  type ActiveModalType = 'inventory' | 'map' | 'journal' | 'quests' | 'npcs' | 'skills' | 'stats' | 'settings' | 'patchNotes' | 'camp' | 'town_services' | 'town_dashboard' | null;
   const [activeModal, setActiveModal] = useState<ActiveModalType>(null);
 
   const inventoryOpen = activeModal === 'inventory';
@@ -198,6 +199,9 @@ export default function Home() {
 
   const townServicesOpen = activeModal === 'town_services';
   const setTownServicesOpen = (open: boolean) => setActiveModal(open ? 'town_services' : null);
+
+  const townDashboardOpen = activeModal === 'town_dashboard';
+  const setTownDashboardOpen = (open: boolean) => setActiveModal(open ? 'town_dashboard' : null);
 
   const [isOOC, setIsOOC] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
@@ -718,6 +722,8 @@ export default function Home() {
         setXp(state.xp || 0);
         setSkillPoints(state.skillPoints || 0);
         setSkills(state.skills || []);
+        setPreparedSkills(state.preparedSkills || (state.skills ? state.skills.map((s: any) => s.id) : []));
+        if (state.game_mode) setGameMode(state.game_mode);
         setAvailableSkills(state.available_skills || [
             {id: "silny_uder", name: "Silný úder", desc: "Základní útok nablízko se zvýšeným poškozením (Aktivní)"},
             {id: "ohniva_koule", name: "Ohnivá koule", desc: "Sešle zničující ohnivou kouli na cíl (Aktivní - Magie)"},
@@ -1560,7 +1566,16 @@ export default function Home() {
               <Flame size={17} className="text-amber-600 dark:text-amber-400" /> <span>Tábor</span>
             </button>
 
-            {/* 4c. Tržnice & Služby - visible on md+ */}
+            {/* 4c. Městské čtvrti - visible on md+ */}
+            <button 
+              onClick={() => { setTownDashboardOpen(true); setHeroDropdownOpen(false); setMenuDropdownOpen(false); }} 
+              className="hidden md:flex flex-shrink-0 p-2 sm:p-2.5 text-amber-950 dark:text-amber-200 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 rounded-xl transition items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold shadow-2xs cursor-pointer"
+              title="Karetní přehled městských čtvrtí a budov"
+            >
+              <Castle size={17} className="text-amber-700 dark:text-amber-300" /> <span>Město</span>
+            </button>
+
+            {/* 4d. Tržnice & Služby - visible on md+ */}
             <button 
               onClick={() => { setTownServicesOpen(true); setHeroDropdownOpen(false); setMenuDropdownOpen(false); }} 
               className="hidden md:flex flex-shrink-0 p-2 sm:p-2.5 text-amber-950 dark:text-amber-200 bg-amber-200/90 dark:bg-amber-600/30 hover:bg-amber-300/90 dark:hover:bg-amber-600/50 border border-amber-600/40 dark:border-amber-400/40 rounded-xl transition items-center gap-1.5 text-xs sm:text-sm font-cinzel font-bold shadow-2xs"
@@ -1611,6 +1626,13 @@ export default function Home() {
                     </button>
                   </div>
 
+                  <button 
+                    onClick={() => { setTownDashboardOpen(true); setMenuDropdownOpen(false); }}
+                    className="w-full text-left px-3 py-2 text-amber-950 dark:text-amber-200 bg-amber-500/20 hover:bg-amber-500/30 rounded-xl transition flex items-center gap-2.5 text-xs sm:text-sm font-cinzel font-bold border border-amber-500/30 cursor-pointer"
+                  >
+                    <Castle size={16} className="text-amber-700 dark:text-amber-300" />
+                    <span>Čtvrti města</span>
+                  </button>
                   <button 
                     onClick={() => { setTownServicesOpen(true); setMenuDropdownOpen(false); }}
                     className="w-full text-left px-3 py-2 text-amber-950 dark:text-amber-200 bg-amber-100/80 dark:bg-amber-600/25 hover:bg-amber-200/80 dark:hover:bg-amber-600/40 rounded-xl transition flex items-center gap-2.5 text-xs sm:text-sm font-cinzel font-bold border border-amber-900/15 dark:border-amber-500/25"
@@ -1919,6 +1941,7 @@ export default function Home() {
               onOpenMap={() => setMapOpen(true)}
               onOpenQuests={() => { setQuestsOpen(true); setUnreadQuests(false); }}
               onOpenTownServices={() => setTownServicesOpen(true)}
+              onOpenTownDistrict={() => setTownDashboardOpen(true)}
               onOpenCamp={() => setCampOpen(true)}
               onOpenStats={() => setStatsOpen(true)}
               onOpenSkills={() => setSkillsOpen(true)}
@@ -1962,6 +1985,17 @@ export default function Home() {
 
       {/* Town Services Modal */}
       <TownServicesModal isOpen={townServicesOpen} onClose={() => setTownServicesOpen(false)} />
+
+      {/* Town District Dashboard */}
+      <TownDistrictDashboard 
+        isOpen={townDashboardOpen} 
+        onClose={() => setTownDashboardOpen(false)} 
+        onOpenWorldMap={() => setMapOpen(true)}
+        onOpenTownServices={(tab) => {
+          setTownServicesOpen(true);
+        }}
+        onSendAction={sendAction}
+      />
 
       {/* Inventory Modal */}
       <InventoryPanel 

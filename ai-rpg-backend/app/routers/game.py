@@ -81,6 +81,13 @@ async def play_action(req: PlayerActionRequest):
                 
                 return dm_json
 
+        # 📜 OFFLINE CAMPAIGN & SCRIPTED STORY INTERCEPTION
+        from app.services.campaign_runner import try_run_campaign_action
+        action_str = getattr(req, 'action_text', None) or getattr(req, 'action', '') or ''
+        campaign_response = try_run_campaign_action(action_str, char_data, db_key)
+        if campaign_response:
+            return campaign_response
+
         history = char_data.get('history', [])
         client = genai.Client(api_key=req.api_key if req.api_key and req.api_key != 'DUMMY' else os.environ.get('GEMINI_API_KEY'))
         contents = []

@@ -27,6 +27,7 @@
       ""
     ],
     "loot_containers": [],
+    "sub_locations": [],
     "default_actions": [
       "Prozkoumat okolí",
       "Podívat se po lidech",
@@ -58,6 +59,7 @@
       ""
     ],
     "loot_containers": [],
+    "sub_locations": [],
     "default_actions": [
       "Prozkoumat okolí",
       "Podívat se po lidech",
@@ -92,6 +94,7 @@
       "**Posvátný stáj-pavučina pod Pratisem:** Pod kořenovými oblouky největšího tisu je ukrytý vchod do přirozeného sklepa. Elfové ho používají jako zásobárnu. Hráč ho nalezne jedině, pokud doslova „vstoupí pod strom a podívá se dolů\". Obsah: zásoby sušeného masa a elfských bylin, 3 lahvičky *Lesní masti* (z Q005 — Sylwen dává stejný typ jako odměnu; nalezení skladu před questem neruší quest), keramická nádoba s elfí pečetí — po otevření: 2 dávky *Tiché střely* (šipky obalené houbovým extraktem — paralyzují cíl na 2 tahy)."
     ],
     "loot_containers": [],
+    "sub_locations": [],
     "default_actions": [
       "Prozkoumat okolí",
       "Podívat se po lidech",
@@ -128,6 +131,7 @@
       ""
     ],
     "loot_containers": [],
+    "sub_locations": [],
     "default_actions": [
       "Prozkoumat okolí",
       "Podívat se po lidech",
@@ -163,6 +167,7 @@
       "**Posvátný tis u pěšiny mlčení (Strážní strom):** Na úrovni první velké větve (8 sáhů nad zemí) je v dřevěné dutině zanechaný malý koš s elfskými provizemi: sušené maso, lahev pramenité vody a *Dřevěný průchodní žeton* — kdo ho předloží strážím tábora, nebude ihned zastřelen. Bez žetonu hráč musí překonat strážní výzvu Sylwen z Q005."
     ],
     "loot_containers": [],
+    "sub_locations": [],
     "default_actions": [
       "Prozkoumat okolí",
       "Podívat se po lidech",
@@ -204,6 +209,126 @@
     ],
     "secrets": [],
     "loot_containers": [],
+    "sub_locations": [
+      {
+        "id": "oakhaven_herbalist",
+        "name": "Bylinkářská chýše u palisády",
+        "type": "divocina",
+        "x": 50,
+        "y": 50,
+        "connections": [],
+        "description": "Malá roubená chaloupka s doškovou střechou porostlou kvetoucím netřeskem je doslova přilepená k masivním dubovým kůlům městské palisády. Kolem stavení se vine zahrádka ohraničená zídkou z říčních valounů, v níž bují divoký rozmarýn, kozlík lékařský, máta a temně fialové náprstníky. Jakmile člověk vkročí do nízké síně, obklopí ho omamná, suchá vůně sušených bylin, včelího vosku a pryskyřice. Ze stropních trámů visí stovky svázaných pugétů třezalky, pelyňku a měsíčku lékařského, které se jemně pohupují v průvanu z pootevřeného okénka. Na policích stojí desítky hliněných kořenek, skleněných baněk a kameninových moždířů. Bylinkářka Míra zde s tichým broukáním drtí sušené kořeny a vaří balzámy pro raněné strážné i vyděšené měšťany. ---",
+        "faction_id": "",
+        "kingdom_id": 0,
+        "npcs": [],
+        "quests": [],
+        "secrets": [],
+        "loot_containers": [],
+        "sub_locations": [],
+        "default_actions": [
+          "Prozkoumat okolí",
+          "Podívat se po lidech",
+          "Rozbít tábor"
+        ],
+        "encounters": [],
+        "source_file": "📍 Locations\\Oakhaven\\PointsOfInterest\\Bylinkářská chýše u palisády.md"
+      },
+      {
+        "id": "oakhaven_tavern",
+        "name": "Hostinec U Zlomeného štítu",
+        "type": "divocina",
+        "x": 50,
+        "y": 50,
+        "connections": [],
+        "description": "Když člověk otevře těžké dubové dveře pobité rezavými hřeby, ované ho směsice teplého kouře z rašelinových briket, pachu rozlitého piva, pečeného skopového loje a mokrých psích kožichů. Uprostřed lokálu praská v krbu tak velkém, že by se v něm dal upéct celý kanec. Podlaha je posypaná čerstvým rákosím a pilinami, které sají bláto z bot pocestných. Z trámů visí svazky sušeného česneku, uzené šunky a staré zrezivělé helmy, do nichž vlaštovky na jaře lepí svá hnízda. U dlouhých stolů z neopracovaných fošen sedí dřevorubci, unavení kovářští tovaryši a zkrachovalí kupci. V koutě u vyhaslého uhlí sedí Boris Mlynář, který třepe prázdným cínovým korbelem a zírá na prázdnou židli své zesnulé ženy. ---",
+        "faction_id": "",
+        "kingdom_id": 0,
+        "npcs": [],
+        "quests": [],
+        "secrets": [],
+        "loot_containers": [],
+        "sub_locations": [],
+        "default_actions": [
+          "Prozkoumat okolí",
+          "Podívat se po lidech",
+          "Rozbít tábor"
+        ],
+        "encounters": [],
+        "source_file": "📍 Locations\\Oakhaven\\PointsOfInterest\\Hostinec U Zlomeného štítu.md"
+      },
+      {
+        "id": "oakhaven_forge",
+        "name": "Kovárna u Hučícího měchu",
+        "type": "divocina",
+        "x": 50,
+        "y": 50,
+        "connections": [],
+        "description": "Kovárna je nejhlučnějším a nejžhavějším místem v celém Oakhaven. Z obřího cihlového komína dnem i nocí stoupá mastný černý dým vonící po koksu a tavené oceli. Pod doškovým přístřeškem stojí řady okovaných kol od vozů, pluhů a rezavých podkov. Uvnitř vládne oranžové šero protnuté gejzíry jisker. Středobodem dílny je gigantický kožený měch sešitý z hovězích kůží, poháněný řemenovým převodem ze strouhy, který při každém stlačení vydává hluboký hrdelní vzdech připomínající řev dospělého medvěda. Vzduch je nasycen štiplavým pachem chladicího oleje, síry a potu. Kovář Torben, mohutný trpaslík s popálenými předloktími, zde buší do rozžhaveného železa na dvousetkilové kovadlině, jejíž zvonění se nese celým údolím. ---",
+        "faction_id": "",
+        "kingdom_id": 0,
+        "npcs": [],
+        "quests": [],
+        "secrets": [],
+        "loot_containers": [],
+        "sub_locations": [],
+        "default_actions": [
+          "Prozkoumat okolí",
+          "Podívat se po lidech",
+          "Rozbít tábor"
+        ],
+        "encounters": [],
+        "source_file": "📍 Locations\\Oakhaven\\PointsOfInterest\\Kovárna u Hučícího měchu.md"
+      },
+      {
+        "id": "oakhaven_townhall",
+        "name": "Městská radnice a archiv",
+        "type": "divocina",
+        "x": 50,
+        "y": 50,
+        "connections": [],
+        "description": "Radnice je nejhonosnější, a přesto nejžalostnější budovou ve městě. Drolící se vápencové průčelí nese reliéf císařského slunce, jehož zlacení se už před lety oloupalo. Nad vchodem visí rezavý hodinový ciferník, jehož ručičky se zastavily před sedmi lety na třetí hodině ranní. Uvnitř páchne starý inkoust, vlhký papír a zatuchlý lůj ze svíček. V chladné soudní síni v přízemí sedí za masivním dubovým stolem Rychtář Vane, schovaný za stohy daňových výkazů, obklopen dvěma nervózními písaři s prsty černými od inkoustu. Každé slovo se zde odráží od studených klenutých stropů s nepříjemnou ozvěnou a za okny neustále postávají dlužníci čekající na milost, kterou jim nikdo neudělí. ---",
+        "faction_id": "",
+        "kingdom_id": 0,
+        "npcs": [],
+        "quests": [],
+        "secrets": [],
+        "loot_containers": [],
+        "sub_locations": [],
+        "default_actions": [
+          "Prozkoumat okolí",
+          "Podívat se po lidech",
+          "Rozbít tábor"
+        ],
+        "encounters": [],
+        "source_file": "📍 Locations\\Oakhaven\\PointsOfInterest\\Městská radnice a archiv.md"
+      },
+      {
+        "id": "oakhaven_mill",
+        "name": "Starý mlýn",
+        "type": "divocina",
+        "x": 50,
+        "y": 50,
+        "connections": [],
+        "description": "Klapání starého dřevěného kola mlýna je tepem celého údolí. Dvoupatrová kamenná stavba z hrubého říčního vápence je zčernalá stářím a z jižní strany porostlá bujným břečťanem. Ve vzduchu neustále visí lehký oblak jemného moučného prachu smíchaný s chladnou vodní tříští a pachem tlejících vrbových listů zachycených v česlích náhonu. Uvnitř mlýnice se rozléhá hluboké, hypnotické dunění dvoumetrových žulových kamenů. Všude leží zaprášené jutové pytle s obilím, dřevěné lopaty a váhy se závažími. V obytné světničce v patře vládne melancholické ticho – na stole leží rozečtená kniha modliteb, vyhaslý krb a nerozestlaná postel, na níž Anna trávila své poslední horečnaté dny. ---",
+        "faction_id": "",
+        "kingdom_id": 0,
+        "npcs": [],
+        "quests": [],
+        "secrets": [
+          "**Dutina pod podlahou:** Pod uvolněným prknem u převodového kola je schována ocelová kovaná truhlička. Zde byla uložena Annina kniha a stříbrný runový prsten (výchozí bod úkolu Q001_ZtrazenýPrsten).",
+          "**Přístup k řece:** Za mlýnem kotví stará rybářská pramice, kterou lze využít k tichému obeplutí městečka směrem k Dubovým blatům."
+        ],
+        "loot_containers": [],
+        "sub_locations": [],
+        "default_actions": [
+          "Prozkoumat okolí",
+          "Podívat se po lidech",
+          "Rozbít tábor"
+        ],
+        "encounters": [],
+        "source_file": "📍 Locations\\Oakhaven\\PointsOfInterest\\Starý mlýn.md"
+      }
+    ],
     "default_actions": [
       "Prozkoumat okolí",
       "Podívat se po lidech",
@@ -211,118 +336,5 @@
     ],
     "encounters": [],
     "source_file": "📍 Locations\\Oakhaven\\Oakhaven.md"
-  },
-  "oakhaven_herbalist": {
-    "id": "oakhaven_herbalist",
-    "name": "Bylinkářská chýše u palisády",
-    "type": "divocina",
-    "x": 50,
-    "y": 50,
-    "connections": [],
-    "description": "Malá roubená chaloupka s doškovou střechou porostlou kvetoucím netřeskem je doslova přilepená k masivním dubovým kůlům městské palisády. Kolem stavení se vine zahrádka ohraničená zídkou z říčních valounů, v níž bují divoký rozmarýn, kozlík lékařský, máta a temně fialové náprstníky. Jakmile člověk vkročí do nízké síně, obklopí ho omamná, suchá vůně sušených bylin, včelího vosku a pryskyřice. Ze stropních trámů visí stovky svázaných pugétů třezalky, pelyňku a měsíčku lékařského, které se jemně pohupují v průvanu z pootevřeného okénka. Na policích stojí desítky hliněných kořenek, skleněných baněk a kameninových moždířů. Bylinkářka Míra zde s tichým broukáním drtí sušené kořeny a vaří balzámy pro raněné strážné i vyděšené měšťany. ---",
-    "faction_id": "",
-    "kingdom_id": 0,
-    "npcs": [],
-    "quests": [],
-    "secrets": [],
-    "loot_containers": [],
-    "default_actions": [
-      "Prozkoumat okolí",
-      "Podívat se po lidech",
-      "Rozbít tábor"
-    ],
-    "encounters": [],
-    "source_file": "📍 Locations\\Oakhaven\\PointsOfInterest\\Bylinkářská chýše u palisády.md"
-  },
-  "oakhaven_tavern": {
-    "id": "oakhaven_tavern",
-    "name": "Hostinec U Zlomeného štítu",
-    "type": "divocina",
-    "x": 50,
-    "y": 50,
-    "connections": [],
-    "description": "Když člověk otevře těžké dubové dveře pobité rezavými hřeby, ované ho směsice teplého kouře z rašelinových briket, pachu rozlitého piva, pečeného skopového loje a mokrých psích kožichů. Uprostřed lokálu praská v krbu tak velkém, že by se v něm dal upéct celý kanec. Podlaha je posypaná čerstvým rákosím a pilinami, které sají bláto z bot pocestných. Z trámů visí svazky sušeného česneku, uzené šunky a staré zrezivělé helmy, do nichž vlaštovky na jaře lepí svá hnízda. U dlouhých stolů z neopracovaných fošen sedí dřevorubci, unavení kovářští tovaryši a zkrachovalí kupci. V koutě u vyhaslého uhlí sedí Boris Mlynář, který třepe prázdným cínovým korbelem a zírá na prázdnou židli své zesnulé ženy. ---",
-    "faction_id": "",
-    "kingdom_id": 0,
-    "npcs": [],
-    "quests": [],
-    "secrets": [],
-    "loot_containers": [],
-    "default_actions": [
-      "Prozkoumat okolí",
-      "Podívat se po lidech",
-      "Rozbít tábor"
-    ],
-    "encounters": [],
-    "source_file": "📍 Locations\\Oakhaven\\PointsOfInterest\\Hostinec U Zlomeného štítu.md"
-  },
-  "oakhaven_forge": {
-    "id": "oakhaven_forge",
-    "name": "Kovárna u Hučícího měchu",
-    "type": "divocina",
-    "x": 50,
-    "y": 50,
-    "connections": [],
-    "description": "Kovárna je nejhlučnějším a nejžhavějším místem v celém Oakhaven. Z obřího cihlového komína dnem i nocí stoupá mastný černý dým vonící po koksu a tavené oceli. Pod doškovým přístřeškem stojí řady okovaných kol od vozů, pluhů a rezavých podkov. Uvnitř vládne oranžové šero protnuté gejzíry jisker. Středobodem dílny je gigantický kožený měch sešitý z hovězích kůží, poháněný řemenovým převodem ze strouhy, který při každém stlačení vydává hluboký hrdelní vzdech připomínající řev dospělého medvěda. Vzduch je nasycen štiplavým pachem chladicího oleje, síry a potu. Kovář Torben, mohutný trpaslík s popálenými předloktími, zde buší do rozžhaveného železa na dvousetkilové kovadlině, jejíž zvonění se nese celým údolím. ---",
-    "faction_id": "",
-    "kingdom_id": 0,
-    "npcs": [],
-    "quests": [],
-    "secrets": [],
-    "loot_containers": [],
-    "default_actions": [
-      "Prozkoumat okolí",
-      "Podívat se po lidech",
-      "Rozbít tábor"
-    ],
-    "encounters": [],
-    "source_file": "📍 Locations\\Oakhaven\\PointsOfInterest\\Kovárna u Hučícího měchu.md"
-  },
-  "oakhaven_townhall": {
-    "id": "oakhaven_townhall",
-    "name": "Městská radnice a archiv",
-    "type": "divocina",
-    "x": 50,
-    "y": 50,
-    "connections": [],
-    "description": "Radnice je nejhonosnější, a přesto nejžalostnější budovou ve městě. Drolící se vápencové průčelí nese reliéf císařského slunce, jehož zlacení se už před lety oloupalo. Nad vchodem visí rezavý hodinový ciferník, jehož ručičky se zastavily před sedmi lety na třetí hodině ranní. Uvnitř páchne starý inkoust, vlhký papír a zatuchlý lůj ze svíček. V chladné soudní síni v přízemí sedí za masivním dubovým stolem Rychtář Vane, schovaný za stohy daňových výkazů, obklopen dvěma nervózními písaři s prsty černými od inkoustu. Každé slovo se zde odráží od studených klenutých stropů s nepříjemnou ozvěnou a za okny neustále postávají dlužníci čekající na milost, kterou jim nikdo neudělí. ---",
-    "faction_id": "",
-    "kingdom_id": 0,
-    "npcs": [],
-    "quests": [],
-    "secrets": [],
-    "loot_containers": [],
-    "default_actions": [
-      "Prozkoumat okolí",
-      "Podívat se po lidech",
-      "Rozbít tábor"
-    ],
-    "encounters": [],
-    "source_file": "📍 Locations\\Oakhaven\\PointsOfInterest\\Městská radnice a archiv.md"
-  },
-  "oakhaven_mill": {
-    "id": "oakhaven_mill",
-    "name": "Starý mlýn",
-    "type": "divocina",
-    "x": 50,
-    "y": 50,
-    "connections": [],
-    "description": "Klapání starého dřevěného kola mlýna je tepem celého údolí. Dvoupatrová kamenná stavba z hrubého říčního vápence je zčernalá stářím a z jižní strany porostlá bujným břečťanem. Ve vzduchu neustále visí lehký oblak jemného moučného prachu smíchaný s chladnou vodní tříští a pachem tlejících vrbových listů zachycených v česlích náhonu. Uvnitř mlýnice se rozléhá hluboké, hypnotické dunění dvoumetrových žulových kamenů. Všude leží zaprášené jutové pytle s obilím, dřevěné lopaty a váhy se závažími. V obytné světničce v patře vládne melancholické ticho – na stole leží rozečtená kniha modliteb, vyhaslý krb a nerozestlaná postel, na níž Anna trávila své poslední horečnaté dny. ---",
-    "faction_id": "",
-    "kingdom_id": 0,
-    "npcs": [],
-    "quests": [],
-    "secrets": [
-      "**Dutina pod podlahou:** Pod uvolněným prknem u převodového kola je schována ocelová kovaná truhlička. Zde byla uložena Annina kniha a stříbrný runový prsten (výchozí bod úkolu Q001_ZtrazenýPrsten).",
-      "**Přístup k řece:** Za mlýnem kotví stará rybářská pramice, kterou lze využít k tichému obeplutí městečka směrem k Dubovým blatům."
-    ],
-    "loot_containers": [],
-    "default_actions": [
-      "Prozkoumat okolí",
-      "Podívat se po lidech",
-      "Rozbít tábor"
-    ],
-    "encounters": [],
-    "source_file": "📍 Locations\\Oakhaven\\PointsOfInterest\\Starý mlýn.md"
   }
 }

@@ -115,13 +115,14 @@ def extract_section_lines(body: str, headers: list[str]) -> list[str]:
 
 
 def build_locations(vault_path: Path) -> list[dict]:
-    """Build location nodes from 📍 Locations/ directory."""
-    locations = []
+    """Build location nodes from 📍 Locations/ directory, nesting POIs into sub_locations."""
+    macro_locations = {}
+    sub_locations_by_parent = {}
     loc_dir = vault_path / '📍 Locations'
     
     if not loc_dir.exists():
         print("  ⚠️  📍 Locations/ directory not found")
-        return locations
+        return []
     
     for md_file in loc_dir.rglob('*.md'):
         meta, body = parse_frontmatter(md_file)
@@ -142,7 +143,17 @@ def build_locations(vault_path: Path) -> list[dict]:
         ])
         loot_containers = meta.get('loot_containers') or yaml_blocks.get('loot_containers') or []
         
-        node = {
+        parent_raw = meta.get('parent_location') or ''
+        parent_id = strip_wikilinks(str(parent_raw)).strip().lower() if parent_raw else None
+        
+        # Check if file is in a PointsOfInterest subfolder
+        is_sublocation = bool(parent_id) or ('PointsOfInterest' in md_file.parts)
+        if not parent_id and 'PointsOfInterest' in md_file.parts:
+            # Parent is directory above PointsOfInterest
+            parent_dir = md_file.parent.parent
+            parent_id = parent_dir.name.lower()
+        
+        node_data = {
             'id': node_id,
             'name': meta.get('title', md_file.stem),
             'type': meta.get('type', 'divocina').split('/')[0].strip().lower(),
@@ -156,17 +167,31 @@ def build_locations(vault_path: Path) -> list[dict]:
             'quests': meta.get('quests', []),
             'secrets': secrets,
             'loot_containers': loot_containers,
+            'sub_locations': [],
             'default_actions': yaml_blocks.get('default_actions', [
                 'Prozkoumat okolí', 'Podívat se po lidech', 'Rozbít tábor'
             ]),
             'encounters': yaml_blocks.get('encounters', []),
             'source_file': str(md_file.relative_to(vault_path))
         }
-        
-        locations.append(node)
-        print(f"  📍 {node['name']} ({node_id})")
+
+        if is_sublocation and parent_id:
+            sub_locations_by_parent.setdefault(parent_id, []).append(node_data)
+            print(f"  🏢 POI: {node_data['name']} ({node_id}) -> Parent: {parent_id}")
+        else:
+            macro_locations[node_id] = node_data
+            print(f"  📍 Macro Node: {node_data['name']} ({node_id})")
     
-    return locations
+    # Attach sub_locations to their macro parents
+    for parent_id, subs in sub_locations_by_parent.items():
+        if parent_id in macro_locations:
+            macro_locations[parent_id]['sub_locations'] = subs
+        else:
+            # If parent not found, keep sub-locations as standalone
+            for sub in subs:
+                macro_locations[sub['id']] = sub
+
+    return list(macro_locations.values())
 
 
 def build_npcs(vault_path: Path) -> list[dict]:

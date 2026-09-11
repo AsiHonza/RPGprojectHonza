@@ -2,7 +2,7 @@ import React from 'react';
 import { 
   Heart, Sparkles, Drumstick, MapPin, Map, Package, 
   ScrollText, ShoppingBag, Flame, User, Shield, Compass, 
-  Sword, CheckCircle2, ChevronRight, Award
+  Sword, CheckCircle2, ChevronRight, Award, Castle
 } from 'lucide-react';
 import { useGameStore } from '../../store/gameStore';
 import { SeamlessVideo } from '../../components/ui/SeamlessVideo';
@@ -12,6 +12,7 @@ interface DesktopSidePanelProps {
   onOpenMap: () => void;
   onOpenQuests: () => void;
   onOpenTownServices: () => void;
+  onOpenTownDistrict?: () => void;
   onOpenCamp: () => void;
   onOpenStats: () => void;
   onOpenSkills: () => void;
@@ -37,6 +38,7 @@ export const DesktopSidePanel: React.FC<DesktopSidePanelProps> = ({
   onOpenMap,
   onOpenQuests,
   onOpenTownServices,
+  onOpenTownDistrict,
   onOpenCamp,
   onOpenStats,
   onOpenSkills,
@@ -276,13 +278,24 @@ export const DesktopSidePanel: React.FC<DesktopSidePanelProps> = ({
           </button>
 
           {isInTown ? (
-            <button
-              onClick={onOpenTownServices}
-              className="py-1.5 px-2.5 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 dark:from-amber-700 dark:to-amber-800 text-amber-950 dark:text-amber-100 font-cinzel font-bold text-xs rounded-xl shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer animate-pulse"
-            >
-              <ShoppingBag size={14} />
-              <span>Tržnice & Kovář</span>
-            </button>
+            <div className="flex gap-1.5 w-full">
+              <button
+                onClick={onOpenTownDistrict || onOpenTownServices}
+                className="flex-1 py-1.5 px-2 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 rounded-xl font-cinzel font-bold text-xs text-amber-950 dark:text-amber-200 transition flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                title="Karetní přehled městských čtvrtí a budov"
+              >
+                <Castle size={13} className="text-amber-600 dark:text-amber-400" />
+                <span>Město</span>
+              </button>
+              <button
+                onClick={onOpenTownServices}
+                className="py-1.5 px-2.5 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 dark:from-amber-700 dark:to-amber-800 text-amber-950 dark:text-amber-100 font-cinzel font-bold text-xs rounded-xl shadow-xs transition flex items-center justify-center gap-1 cursor-pointer"
+                title="Městské služby, kovář a tržnice"
+              >
+                <ShoppingBag size={13} />
+                <span>Trh</span>
+              </button>
+            </div>
           ) : (
             <button
               onClick={onOpenQuests}

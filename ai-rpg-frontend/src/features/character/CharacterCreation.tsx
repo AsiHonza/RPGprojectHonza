@@ -757,34 +757,40 @@ export const CharacterCreation = ({ startNewGame, loading, backstory, generateBa
                 {step === 4 && (
                   <motion.div key="step4" variants={pageVariants} initial="initial" animate="in" exit="out" className="space-y-4">
                     {/* Game Mode Selector - Campaign FIRST & Recommended */}
-                    <div>
-                      <label className="block font-lora font-semibold text-sm sm:text-base mb-1.5 text-slate-800 dark:text-amber-100">
-                        Zvol herní režim pro svou legendu:
-                      </label>
+                    <div className="space-y-2">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+                        <label className="block font-lora font-semibold text-sm sm:text-base text-slate-800 dark:text-amber-100">
+                          Zvol herní režim pro svou legendu:
+                        </label>
+                        <span className="text-[11px] font-sans text-amber-700 dark:text-amber-400 italic">
+                          ℹ️ Trvalá volba pro tuto postavu
+                        </span>
+                      </div>
+                      
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <label className={`p-4 rounded-2xl border-2 cursor-pointer transition flex flex-col relative ${gameMode === 'campaign' ? 'border-amber-700 dark:border-amber-500 bg-amber-100/75 dark:bg-amber-950/50 shadow-md scale-[1.01]' : 'border-amber-900/15 dark:border-amber-600/30 bg-white/50 dark:bg-[#141b26] hover:border-amber-900/30 dark:hover:border-amber-600/50'}`}>
                           <input type="radio" value="campaign" checked={gameMode === 'campaign'} onChange={() => setGameMode('campaign')} className="hidden" />
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="font-cinzel font-bold text-base text-slate-900 dark:text-amber-100">Aelthgard (Kampaň)</span>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="font-cinzel font-bold text-base text-slate-900 dark:text-amber-100">Autorská kampaň</span>
                             <span className="bg-amber-700 text-white font-cinzel font-bold text-[10px] px-2.5 py-0.5 rounded-full shadow-xs">
-                              ⭐ Doporučeno
+                              ⭐ Klasické RPG
                             </span>
                           </div>
                           <span className="font-lora text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                            Plná mapa světa, 7 království, intriky bohů, zjevení a bohatá hlavní dějová zápletka s unikátními NPC.
+                            Pevně režírovaný a bohatý příběh zasazený do údolí Oakhaven. Propracované dialogové stromy, větvené úkoly s morálními volbami a přímé střety s frakcemi a Inkvizitorem Kaelenem.
                           </span>
                         </label>
 
-                        <label className={`p-4 rounded-2xl border-2 cursor-pointer transition flex flex-col ${gameMode === 'sandbox' ? 'border-amber-700 dark:border-amber-500 bg-amber-100/75 dark:bg-amber-950/50 shadow-md scale-[1.01]' : 'border-amber-900/15 dark:border-amber-600/30 bg-white/50 dark:bg-[#141b26] hover:border-amber-900/30 dark:hover:border-amber-600/50'}`}>
+                        <label className={`p-4 rounded-2xl border-2 cursor-pointer transition flex flex-col relative ${gameMode === 'sandbox' ? 'border-amber-700 dark:border-amber-500 bg-amber-100/75 dark:bg-amber-950/50 shadow-md scale-[1.01]' : 'border-amber-900/15 dark:border-amber-600/30 bg-white/50 dark:bg-[#141b26] hover:border-amber-900/30 dark:hover:border-amber-600/50'}`}>
                           <input type="radio" value="sandbox" checked={gameMode === 'sandbox'} onChange={() => setGameMode('sandbox')} className="hidden" />
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="font-cinzel font-bold text-base text-slate-900 dark:text-amber-100">Pustina (Sandbox)</span>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="font-cinzel font-bold text-base text-slate-900 dark:text-amber-100">Svobodný svět s AI</span>
                             <span className="bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-cinzel font-bold text-[10px] px-2 py-0.5 rounded-full">
-                              Volná hra
+                              🌌 Otevřený svět
                             </span>
                           </div>
                           <span className="font-lora text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                            Nekonečná volnost bez pevného kontinentu. Vypravěč generuje svět dynamicky podle tvých kroků.
+                            Dynamický živoucí svět reagující na jakoukoliv tvoji volbu a volně psané akce. Nekonečná svoboda jednání a nepředvídatelné generované události.
                           </span>
                         </label>
                       </div>

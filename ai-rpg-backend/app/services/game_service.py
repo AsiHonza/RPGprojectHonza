@@ -58,7 +58,7 @@ CLASS_TEMPLATES = {
             {'id': 'toughness', 'name': 'Zarputilost', 'desc': 'Tvé maximální zdraví se zvýší (Pasivní).'}
         ],
         'starting_skills': [
-            {'id': 'rage', 'name': 'Zuřivost', 'desc': 'Dočasně zvýší poškození a fyzickou odolnost (Aktivní).'}
+            {'id': 'barbar_rage', 'name': 'Zuřivost (Rage)', 'type': 'active', 'rank': 1, 'desc': 'Vstoupíš do zuřivosti: získáš +3 k fyzickému poškození a snižuješ utržené zranění o 30 % na 2 kola.'}
         ]
     },
     'Bard': {
@@ -120,7 +120,7 @@ CLASS_TEMPLATES = {
             {'id': 'charm', 'name': 'Kouzlo osobnosti', 'desc': 'Velká výhoda při vyjednávání s NPC (Pasivní).'}
         ],
         'starting_skills': [
-            {'id': 'mockery', 'name': 'Jízlivý posměch', 'desc': 'Způsobí psychické zranění a nevýhodu na útok nepřítele (Cantrip).'}
+            {'id': 'bard_vicious_mockery', 'name': 'Jízlivý posměch (Vicious Mockery)', 'type': 'active', 'rank': 1, 'desc': 'Zasypeš cíl urážkami: udělí 1d6 psychického poškození a nepřítel má postih k útoku.'}
         ]
     },
     'Klerik': {
@@ -196,7 +196,7 @@ CLASS_TEMPLATES = {
             {'id': 'turnundead', 'name': 'Odvracení nemrtvých', 'desc': 'Zastraší a zažene nemrtvé bytosti (Aktivní).'}
         ],
         'starting_skills': [
-            {'id': 'sacredflame', 'name': 'Posvátný plamen', 'desc': 'Ožehne cíl zářivou svatou energií (Cantrip).'}
+            {'id': 'cleric_healing_word', 'name': 'Léčivé slovo (Healing Word)', 'type': 'active', 'rank': 1, 'desc': 'Rychlé božské požehnání: okamžitě vyléčí 15 HP.'}
         ]
     },
     'Druid': {
@@ -258,7 +258,7 @@ CLASS_TEMPLATES = {
             {'id': 'entangle', 'name': 'Propletení', 'desc': 'Ze země vyraší kořeny, které znehybní nepřátele (Magie).'}
         ],
         'starting_skills': [
-            {'id': 'shillelagh', 'name': 'Šillelagh', 'desc': 'Posílí tvou hůl magií přírody pro mnohem větší poškození (Cantrip).'}
+            {'id': 'druid_wild_shape', 'name': 'Zvířecí podoba (Medvěd)', 'type': 'active', 'rank': 1, 'desc': 'Proměníš se v medvěda: získáš +25 dočasných HP a zvýšenou sílu úderů.'}
         ]
     },
     'Bojovník': {
@@ -334,7 +334,7 @@ CLASS_TEMPLATES = {
             {'id': 'defense', 'name': 'Mistr obrany', 'desc': 'Vyhnutí se útoku je snadnější (Pasivní).'}
         ],
         'starting_skills': [
-            {'id': 'secondwind', 'name': 'Druhý dech', 'desc': 'Obnoví ti v boji část zdraví (Aktivní).'}
+            {'id': 'fighter_second_wind', 'name': 'Druhý dech (Second Wind)', 'type': 'active', 'rank': 1, 'desc': 'Zatneš zuby a obnovíš si 15 HP a získáš 1 AP.'}
         ]
     },
     'Mnich': {
@@ -396,7 +396,7 @@ CLASS_TEMPLATES = {
             {'id': 'deflect', 'name': 'Odražení střel', 'desc': 'Umíš holýma rukama chytat a odrážet letící šípy (Pasivní).'}
         ],
         'starting_skills': [
-            {'id': 'flurry', 'name': 'Příval ran', 'desc': 'Série bleskových úderů pěstmi jako extra útok (Aktivní).'}
+            {'id': 'monk_flurry_of_blows', 'name': 'Příval ran (Flurry of Blows)', 'type': 'active', 'rank': 1, 'desc': 'Rychlá série dvou úderů pěstí: 2x (1d4 + obratnost) poškození.'}
         ]
     },
     'Paladin': {
@@ -472,7 +472,7 @@ CLASS_TEMPLATES = {
             {'id': 'aura', 'name': 'Aura ochrany', 'desc': 'Ty a tvoji spojenci lépe odoláváte magii (Pasivní).'}
         ],
         'starting_skills': [
-            {'id': 'smite', 'name': 'Božský úder', 'desc': 'Tvůj zbraňový útok získá obrovské radiantní (svaté) poškození (Magie).'}
+            {'id': 'paladin_smite', 'name': 'Božský úder (Divine Smite)', 'type': 'active', 'rank': 1, 'desc': 'Naplníš svou zbraň svatým světlem: útok udělí navíc 2d8 zářivého poškození.'}
         ]
     },
     'Hraničář': {
@@ -548,7 +548,7 @@ CLASS_TEMPLATES = {
             {'id': 'survivalist', 'name': 'Přežití v divočině', 'desc': 'Výrazně lepší šance při orientaci, lovu a hledání stop (Pasivní).'}
         ],
         'starting_skills': [
-            {'id': 'huntersmark', 'name': 'Značka lovce', 'desc': 'Označí cíl. Útoky proti němu působí bonusové zranění (Magie).'}
+            {'id': 'ranger_hunters_mark', 'name': "Značka lovce (Hunter's Mark)", 'type': 'active', 'rank': 1, 'desc': 'Zaměříš kořist: všechny tvé útoky proti tomuto cíli udělují +1d6 poškození navíc.'}
         ]
     },
     'Tulák': {
@@ -624,7 +624,7 @@ CLASS_TEMPLATES = {
             {'id': 'lockpicking', 'name': 'Mistr zloděj', 'desc': 'Páčení zámků a vybírání kapes s obrovskou výhodou (Pasivní).'}
         ],
         'starting_skills': [
-            {'id': 'sneakattack', 'name': 'Zákeřný útok', 'desc': 'Pokud nečekaně zaútočíš, způsobíš smrtící bonusové zranění (Pasivní).'}
+            {'id': 'rogue_sneak_attack', 'name': 'Zákeřný útok (Sneak Attack)', 'type': 'active', 'rank': 1, 'desc': 'Využiješ slabiny nepřítele: udělí 1d8 + obratnost poškození a způsobí Krvácení.'}
         ]
     },
     'Čaroděj': {
@@ -686,7 +686,7 @@ CLASS_TEMPLATES = {
             {'id': 'shield', 'name': 'Magický štít', 'desc': 'Jako reakci vytvoříš bariéru odrážející útoky (Magie).'}
         ],
         'starting_skills': [
-            {'id': 'firebolt', 'name': 'Ohnivá střela', 'desc': 'Vyšle mocný ohnivý projektil (Cantrip).'}
+            {'id': 'sorc_fire_bolt', 'name': 'Ohnivý zášleh (Fire Bolt)', 'type': 'active', 'rank': 1, 'desc': 'Vrhneš na nepřítele plamenný zášleh: udělí 1d10 ohnivého poškození a zapálí cíl.'}
         ]
     },
     'Černokněžník': {
@@ -748,7 +748,7 @@ CLASS_TEMPLATES = {
             {'id': 'darkvision', 'name': 'Ďáblovo vidění', 'desc': 'Perfektní vidění ve tmě a magické temnotě (Pasivní).'}
         ],
         'starting_skills': [
-            {'id': 'eldritchblast', 'name': 'Mrazivý paprsek', 'desc': 'Ikonický útok praskající temnou energií (Cantrip).'}
+            {'id': 'warlock_eldritch_blast', 'name': 'Tříštivý výboj (Eldritch Blast)', 'type': 'active', 'rank': 1, 'desc': 'Paprsek temné energie z Prázdnoty: udělí 1d10 poškození.'}
         ]
     },
     'Kouzelník': {
@@ -810,7 +810,7 @@ CLASS_TEMPLATES = {
             {'id': 'magearmor', 'name': 'Mágova zbroj', 'desc': 'Magicky zvýší tvou obranu (Magie).'}
         ],
         'starting_skills': [
-            {'id': 'rayoffrost', 'name': 'Mrazivý dotek', 'desc': 'Vrhne ledový paprsek, který zpomalí cíl (Cantrip).'}
+            {'id': 'wiz_magic_missile', 'name': 'Magická střela (Magic Missile)', 'type': 'active', 'rank': 1, 'desc': 'Vyšleš magický projektil ze surové síly (1d4 + 1 poškození).'}
         ]
     }
 }
