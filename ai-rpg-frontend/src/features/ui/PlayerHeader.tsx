@@ -32,7 +32,7 @@ export const PlayerHeader = ({
   const { 
     name, level, race, dndClass, hp, xp, 
     musicPlaying, setMusicPlaying, unreadQuests, setUnreadQuests,
-    gold, rations, currentRegion, skillPoints, quests, worldData
+    gold, rations, currentRegion, skillPoints, quests, worldData, activeTitle
   } = useGameStore();
 
   const [menuOpen, setMenuOpen] = useState(false);
@@ -68,7 +68,10 @@ export const PlayerHeader = ({
           {/* Info & Bars */}
           <div className="flex-1 max-w-md flex flex-col justify-center">
             <div className="flex justify-between items-end mb-1">
-              <h2 className="font-bold text-xl text-rpg-paper font-cinzel tracking-wider drop-shadow-md leading-none">{name}</h2>
+              <div className="flex flex-col">
+                <h2 className="font-bold text-xl text-rpg-paper font-cinzel tracking-wider drop-shadow-md leading-none">{name}</h2>
+                {activeTitle && <span className="text-xs text-rpg-magic font-cinzel italic drop-shadow-sm mt-1">{activeTitle}</span>}
+              </div>
               <span className="text-xs text-rpg-muted font-lora italic leading-none">{race} {dndClass}</span>
             </div>
             <div className="text-sm text-[#2b4c5e] font-cinzel mb-1 flex items-center gap-1 font-bold mt-1">

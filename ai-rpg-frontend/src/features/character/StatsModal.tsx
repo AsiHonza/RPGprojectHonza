@@ -3,7 +3,7 @@ import { X, User, Sparkles, Plus } from 'lucide-react';
 import { useGameStore } from '../../store/gameStore';
 
 export const StatsModal = ({ isOpen, onClose }: any) => {
-  const { stats, setStats, skillPoints, setSkillPoints } = useGameStore();
+  const { stats, setStats, skillPoints, setSkillPoints, titles, activeTitle, setActiveTitle } = useGameStore();
 
   if (!isOpen) return null;
 
@@ -60,6 +60,28 @@ export const StatsModal = ({ isOpen, onClose }: any) => {
               <div className="text-[10px] uppercase font-cinzel font-bold text-slate-500 dark:text-slate-400">Volné body</div>
               <div className="text-2xl font-cinzel font-bold text-amber-900 dark:text-amber-400">{skillPoints}</div>
             </div>
+          </div>
+
+          {/* Titles Banner */}
+          <div className="bg-white/80 dark:bg-[#141c28] border border-amber-900/15 dark:border-amber-500/20 p-4 rounded-xl shadow-sm">
+            <h3 className="font-cinzel font-bold text-base text-amber-950 dark:text-amber-200 mb-2">Renomé a Tituly</h3>
+            <p className="text-xs font-lora text-slate-600 dark:text-slate-400 mb-3">Vyber si titul, pod kterým tě bude znát svět a jeho obyvatelé. NPC na tebe budou reagovat odlišně v závislosti na tvém věhlasu.</p>
+            {titles && titles.length > 0 ? (
+              <select
+                value={activeTitle || ""}
+                onChange={(e) => setActiveTitle(e.target.value)}
+                className="w-full bg-[#f9f6e6] dark:bg-[#1c2637] border border-amber-900/20 dark:border-amber-500/30 rounded-lg p-2 font-cinzel text-amber-950 dark:text-amber-200 focus:outline-none focus:border-amber-500 transition-colors cursor-pointer"
+              >
+                {!activeTitle && <option value="" disabled>Vyber si svůj titul...</option>}
+                {titles.map((t, idx) => (
+                  <option key={idx} value={t}>{t}</option>
+                ))}
+              </select>
+            ) : (
+              <div className="text-xs italic text-slate-500 dark:text-slate-400 bg-black/5 p-2 rounded-lg border border-black/5 dark:border-white/5 text-center">
+                Zatím jsi nezískal žádný význačný titul. Plň úkoly a zapiš se do historie Aelthgardu.
+              </div>
+            )}
           </div>
 
           {/* Stats List */}

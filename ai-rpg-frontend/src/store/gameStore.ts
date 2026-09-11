@@ -316,6 +316,10 @@ interface GameState {
   setChronicle: (chronicle: string[] | ((prev: string[]) => string[])) => void;
   worldFlags: string[];
   setWorldFlags: (flags: string[] | ((prev: string[]) => string[])) => void;
+  titles: string[];
+  setTitles: (titles: string[] | ((prev: string[]) => string[])) => void;
+  activeTitle: string | null;
+  setActiveTitle: (title: string | null) => void;
   consequenceToast: { text: string; faction?: string; delta?: number } | null;
   setConsequenceToast: (toast: { text: string; faction?: string; delta?: number } | null) => void;
   
@@ -523,6 +527,12 @@ export const useGameStore = create<GameState>((set) => ({
   setWorldFlags: (worldFlags) => set((state) => ({ 
     worldFlags: typeof worldFlags === 'function' ? worldFlags(state.worldFlags) : worldFlags 
   })),
+  titles: [],
+  setTitles: (titles) => set((state) => ({
+    titles: typeof titles === 'function' ? titles(state.titles) : titles
+  })),
+  activeTitle: null,
+  setActiveTitle: (activeTitle) => set({ activeTitle }),
   consequenceToast: null,
   setConsequenceToast: (consequenceToast) => set({ consequenceToast }),
 
