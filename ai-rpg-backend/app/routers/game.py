@@ -255,10 +255,13 @@ async def play_action(req: PlayerActionRequest):
         total_attack = max(0, str_mod) + atk_bonus
         total_ac = 10 + max(0, dex_mod) + def_bonus
 
+        active_title = state_dict.get('activeTitle')
+        title_str = f" - Aktivní Titul: {active_title} (NPC musí na tento titul reagovat s patřičným respektem nebo strachem!)" if active_title else ""
+
         combat_stats_summary = f"""
 [AKTUÁLNÍ BOJOVÉ VYBAVENÍ A EFEKTIVNÍ STATY HRÁČE]:
 - Rasa a trait: {player_race} ({race_trait}. Respektuj tuto vlastnost v narativu a reakcích NPC!)
-- Úroveň: {req_level} | Životy: {state_dict.get('hp', 100)} / {state_dict.get('max_hp', 100)}
+- Úroveň: {req_level} | Životy: {state_dict.get('hp', 100)} / {state_dict.get('max_hp', 100)}{title_str}
 - Vybavená zbraň: {weapon_item.get('name') if weapon_item else 'Holé ruce'} (Bonus k útoku ze zbraně: +{atk_bonus})
 - Vybavená zbroj a štít: {', '.join([i.get('name') for i in [armor_item, shield_item] if i]) or 'Běžný oděv'} (Bonus k obraně ze zbroje: +{def_bonus})
 - Celkový Útok hráče: +{total_attack} (Při útoku hráče virtuálně hoď d20 + {total_attack} proti AC nepřítele)

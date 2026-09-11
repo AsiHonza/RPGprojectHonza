@@ -64,6 +64,7 @@ class StateChanges(BaseModel):
     travel_destination_set: Optional[str] = None
     current_node_id: Optional[str] = Field(default=None, description="Změna uzlu na mapě")
     decision_flags_pridat: List[str] = Field(default=[], description="Nové odemčené příběhové volby a flags")
+    tituly_pridat: List[str] = Field(default=[], description="Nové získané tituly pro hráče (např. 'Ochránce Oakhavenu')")
     zname_postavy_zmena: List[NPCRecord] = Field(default=[])
 
 class PlayerActionRequest(BaseModel):
