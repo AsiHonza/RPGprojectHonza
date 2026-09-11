@@ -1,10 +1,10 @@
-ï»¿import requests
+import requests
 
 url = "http://127.0.0.1:8000/create-character"
 data = {
-    "name": "AragornTest2",
-    "dnd_class": "HraniÄÃ¡Å™",
-    "race": "ÄŒlovÄ›k",
+    "name": "AragornTest3_unique",
+    "dnd_class": "Hranièáø",
+    "race": "Èlovìk",
     "stats": {"str": 14, "dex": 16, "con": 12, "int": 10, "wis": 14, "cha": 10},
     "email": "test@test.com",
     "game_mode": "campaign",

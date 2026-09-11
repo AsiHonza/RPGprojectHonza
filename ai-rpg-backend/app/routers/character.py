@@ -196,6 +196,8 @@ async def save_state(req: SaveStateRequest):
 
 @router.post('/create-character')
 async def create_character(req: CharacterCreateRequest):
+    import world_generator
+    import random
     clean_name = req.name.strip()
     clean_email = (req.email or '').strip() or 'hrac@aelthgard.com'
     api_key = f'{clean_email}#{clean_name}'
@@ -205,7 +207,6 @@ async def create_character(req: CharacterCreateRequest):
     world_data = None
     if req.game_mode == 'campaign':
         # 100% Deterministický svět pro 1. Akt z Obsidian kánonu (bez volání Gemini)
-        import world_generator
         math_world = world_generator.generate_world_data()
         world_data = {
             'hex_grid': math_world.get('hex_grid', []),
@@ -226,8 +227,6 @@ async def create_character(req: CharacterCreateRequest):
         }
     else:
         try:
-            import json
-            import world_generator
             math_world = world_generator.generate_world_data()
             client = genai.Client(api_key=req.api_key if req.api_key and 'DUMMY' not in req.api_key else os.environ.get('GEMINI_API_KEY'))
             world_prompt = f"""
@@ -279,7 +278,6 @@ Vrať POUZE validní JSON s klíči: main_plot, locations, key_npcs.
         # Sandbox mód s AI vypravěčem
         try:
             client = genai.Client(api_key=req.api_key if req.api_key and 'DUMMY' not in req.api_key else os.environ.get('GEMINI_API_KEY'))
-            import json, random
 
             start_archetypes = [
                 {
