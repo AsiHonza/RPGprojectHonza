@@ -571,8 +571,156 @@ def try_run_campaign_action(action_text: str, char_data: dict, db_key: str) -> O
             }
             return _save_and_return(dm_json, action_text, state_dict, char_data, db_key)
 
+    # -------------------------------------------------------------
+    # 6. DIALOGUE: STRÁŽMISTR ALDRIC (Strážnice / Náměstí Oakhaven)
+    # -------------------------------------------------------------
+    if any(k in act_lower for k in ['aldric', 'strážmistr', 'strazmistr', 'strážnice', 'straznice', 'hlídka', 'hlidka', 'gard']):
+        aldric_greeting = "Mám dvanáct chlapů na celé město a dvě stě sáhů hradeb. Císařský dvůr posílá jen výběrčí daní, ale když žádám o posily, dělají, že neslyší. Každý den navíc bez krveprolití je pro mě vyhraná bitva. Co potřebuješ, poutníku?"
+        if 'Q001_completed_A' in flags or 'Q001_completed_B' in flags:
+            aldric_greeting = "Slyšel jsem, že jsi pomohl Borisovi s tím prstenem. Dobrá práce. V tomhle městě je málo lidí, co udělají něco pro druhého bez taseného měšce. Ale dej si pozor na Kaelena v hostinci... ten inkvizitor nehledá spravedlnost, ale krev."
+
+        actions = []
+        if 'Q001_started' not in flags and not any(k in flags for k in ['Q001_completed_A', 'Q001_completed_B', 'Q001_completed_C']):
+            actions.append("Vydat se ke Starému mlýnu za mlynářem Borisem")
+        else:
+            actions.append("Cestuji do lokace: crossroads")
+        
+        class_opt = get_class_dialogue_option(dnd_class, 'strazmistr_aldric')
+        if class_opt: actions.append(class_opt)
+        race_opt = get_race_dialogue_option(race, 'strazmistr_aldric')
+        if race_opt: actions.append(race_opt)
+        actions.append("Poptat se na situaci na Staré křižovatce a v okolních lesích")
+        actions.append("Otevřít přehled města a prozkoumat čtvrti Oakhavenu")
+
+        dm_json = {
+            "vypravec": "Zastavil ses u bytelné trámové strážnice na náměstí. Strážmistr Aldric, prošedivělý veterán s hlubokou jizvou na lící a vycíděnou valerijskou šavlí po boku, si tě přeměří přísným, zkušeným pohledem vojáka.",
+            "popis_okoli": "Oakhaven – Městská strážnice. Na stěně visí zatykače na bandity z křižovatky a dva mladí gardisté brousí halapartny.",
+            "typ_lokace": "mesto",
+            "npc_dialogy": [{
+                "jmeno": "Strážmistr Aldric",
+                "pohlavi": "muz",
+                "text": aldric_greeting
+            }],
+            "nabizene_akce": actions,
+            "system_log": "Rozhovor se Strážmistrem Aldricem.",
+            "zmeny_stavu": {}
+        }
+        return _save_and_return(dm_json, action_text, state_dict, char_data, db_key)
+
+    # -------------------------------------------------------------
+    # 7. TOWN OVERVIEW & DISTRICT EXPLORATION
+    # -------------------------------------------------------------
+    if any(k in act_lower for k in ['přehled města', 'prehled mesta', 'čtvrti', 'ctvrti', 'prozkoumat město', 'prozkoumat mesto', 'náměstí', 'namesti']):
+        dm_json = {
+            "vypravec": "Stojíš v srdci Oakhavenu u vyhlazeného Pařezu Pradubu. Zdejší život pulzuje v křivolakých uličkách: na západě hučí vodní kolo Starého mlýna mlynáře Borise, ze severu doléhá dunění kovadliny kováře Torvina a z Hostince U Zlomeného štítu stoupá lákavá vůně pečené zvěřiny a piva.\n\n(Tip: Pro přehled budov a rychlé služby můžeš kdykoliv použít tlačítko 'Město' v horní liště!)",
+            "popis_okoli": "Oakhaven – Náměstí u Pradubu. Centrum pohraničního obchodu a řemesel.",
+            "typ_lokace": "mesto",
+            "npc_dialogy": [],
+            "nabizene_akce": [
+                "Vydat se ke Starému mlýnu za mlynářem Borisem",
+                "Zastavit se u Strážmistra Aldrica na strážnici",
+                "Navštívit Hostinec U Zlomeného štítu (Inkvizitor Kaelen)",
+                "Cestuji do lokace: crossroads"
+            ],
+            "system_log": "Prohlídka města Oakhaven. Zpřístupněny hlavní městské uzly.",
+            "zmeny_stavu": {}
+        }
+        return _save_and_return(dm_json, action_text, state_dict, char_data, db_key)
+
     # Not handled by offline scripted triggers
     return None
+
+def campaign_fallback_action(action_text: str, char_data: dict, db_key: str) -> dict:
+    """
+    100% Deterministic Fallback for Autorská kampaň.
+    Never calls Gemini. Keeps narrative grounded in canonical Act 1 lore
+    and guides the player to relevant quest objectives.
+    """
+    state_dict = char_data.get('state', {})
+    current_node_id = state_dict.get('current_node_id', 'oakhaven')
+    quests = state_dict.get('quests', [])
+    flags = set(state_dict.get('worldFlags', []) + state_dict.get('decision_flags', []))
+    q001 = next((q for q in quests if q.get('id') == 'Q001' or q.get('quest_id') == 'Q001'), None)
+    q002 = next((q for q in quests if q.get('id') == 'Q002' or q.get('quest_id') == 'Q002'), None)
+
+    if current_node_id == 'oakhaven':
+        if 'oakhaven_inquisition_lockdown' in flags:
+            narration = f"Rozhlížíš se po náměstí Oakhavenu. Ve vzduchu je cítit štiplavý dým a strach. Inkvizitor Kaelen drží město pod zámkem a Boris Mlynář čeká spoutaný u pranýře. Celé údolí hledí na tebe, zda se postavíš tyranovi!"
+            actions = [
+                "Konfrontovat Kaelena na náměstí a osvobodit Borise",
+                "Vyhledat Strážmistra Aldrica a požádat gardu o podporu"
+            ]
+        elif q001 and q001.get('stav') == 'aktivni':
+            has_ring = any('prsten' in i.get('name', '').lower() for i in state_dict.get('inventory', []))
+            if has_ring:
+                narration = f"Tvá akce '{action_text}' tě přivedla zpět k úvahám o prstenu. V kapse tě chladí Annin kacířský šperk. Starý Boris čeká u svého mlýna, zatímco v hostinci sedí neúprosný Inkvizitor Kaelen. Komu z nich prsten předložíš?"
+                actions = [
+                    "Vrátit se za Borisem k mlýnu",
+                    "Zajít za Inkvizitorem Kaelenem do Hostince U Zlomeného štítu",
+                    "Otevřít přehled města a čtvrtí"
+                ]
+            else:
+                narration = f"Tvá akce '{action_text}' rozvíří prach uliček Oakhavenu. Boris Mlynář netrpělivě čeká u mlýna – stopa banditů, kteří ukradli Annin prsten, vede na Starou křižovatku."
+                actions = [
+                    "Cestuji do lokace: crossroads",
+                    "Zajít k mlynáři Borisovi pro další podrobnosti",
+                    "Promluvit se Strážmistrem Aldricem"
+                ]
+        elif q002 and q002.get('stav') == 'aktivni':
+            narration = f"Vnímáš napětí, které v Oakhavenu roste. Inkvizitor Kaelen tě pověřil vyšetřením Ruin kláštera svaté Judity za křižovatkou. Z krypt se šíří mrazivý dech starých sil."
+            actions = [
+                "Cestuji do lokace: crossroads",
+                "Promluvit s Inkvizitorem Kaelenem v hostinci",
+                "Zastavit se u Strážmistra Aldrica"
+            ]
+        else:
+            narration = f"Reaguješ na okolí ('{action_text}'). Ranní slunce pomalu prohřívá dláždění u Pařezu Pradubu. Z mlýna u řeky doléhá zoufalý hlas mlynáře Borise a strážmistr Aldric na dohled kontroluje své muže."
+            actions = [
+                "Vydat se ke Starému mlýnu a zjistit, proč mlynář Boris pláče",
+                "Zastavit se u Strážmistra Aldrica na strážnici a poptat se na situaci",
+                "Otevřít přehled města a prozkoumat čtvrti Oakhavenu"
+            ]
+        popis = "Oakhaven – Náměstí u Pradubu. Pohraniční život plyne pod stálým dohledem palisád."
+        typ_loc = "mesto"
+
+    elif current_node_id == 'crossroads':
+        narration = f"Zkoumáš okolí Staré křižovatky ('{action_text}'). Mezi ostružiním u vyhořelé mýtnice leží rozbité sudy a stopy po rychlém úprku banditů. Cesty odtud vedou zpět do Oakhaven, nebo dál k Ruinám kláštera a do Temného hvozdu."
+        actions = [
+            "Prozkoumat okolí a hledat stopy banditů",
+            "Cestuji do lokace: oakhaven",
+            "Cestuji do lokace: monastery_ruins"
+        ]
+        popis = "Stará křižovatka. Zpustlé rozcestí starých císařských cest v ranním chladu."
+        typ_loc = "divocina"
+
+    elif current_node_id == 'monastery_ruins':
+        narration = f"Stojíš mezi zřícenými zdmi kláštera svaté Judity. Černý kámen vyzařuje mrazivou energii a po kamenných schodech dolů se táhne pach kadidla a vlhké hlíny z krypt."
+        actions = [
+            "Sestoupit do podzemní krypty k oltáři",
+            "Cestuji do lokace: crossroads"
+        ]
+        popis = "Ruiny kláštera sv. Judity. Mlčenlivé rozvaliny ukrývající podzemní krypty."
+        typ_loc = "dungeon"
+
+    else:
+        narration = f"Rozhlížíš se po okolí ({action_text}). Zdejší krajina je tichá, avšak neklidná."
+        actions = [
+            "Cestuji do lokace: oakhaven",
+            "Prozkoumat okolí"
+        ]
+        popis = "Pohraničí Aelthgardu."
+        typ_loc = "divocina"
+
+    dm_json = {
+        "vypravec": narration,
+        "popis_okoli": popis,
+        "typ_lokace": typ_loc,
+        "npc_dialogy": [],
+        "nabizene_akce": actions,
+        "system_log": "Autorská kampaň: Zpracováno offline vypravěčem.",
+        "zmeny_stavu": {}
+    }
+    return _save_and_return(dm_json, action_text, state_dict, char_data, db_key)
 
 def _save_and_return(dm_json: dict, action_text: str, state_dict: dict, char_data: dict, db_key: str) -> dict:
     """Helper to update state, history, and DB atomically."""

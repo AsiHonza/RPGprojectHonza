@@ -101,6 +101,36 @@ const FormattedSystemLog = ({ text }: { text: string }) => {
 
 
 
+const renderActionText = (text: string) => {
+  const match = text.match(/^(\[[^\]]+\])(.*)$/);
+  if (!match) return <span>{text}</span>;
+  const tag = match[1];
+  const rest = match[2];
+  let badgeColor = "bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-950/70 dark:text-amber-300 dark:border-amber-700/50";
+  const tagLower = tag.toLowerCase();
+  if (tagLower.includes("kouzel") || tagLower.includes("mág") || tagLower.includes("čar") || tagLower.includes("wiz")) {
+    badgeColor = "bg-purple-100 text-purple-900 border-purple-300 dark:bg-purple-950/70 dark:text-purple-300 dark:border-purple-700/50";
+  } else if (tagLower.includes("bojov") || tagLower.includes("barbar") || tagLower.includes("zuřivost") || tagLower.includes("figh")) {
+    badgeColor = "bg-red-100 text-red-900 border-red-300 dark:bg-red-950/70 dark:text-red-300 dark:border-red-700/50";
+  } else if (tagLower.includes("tulák") || tagLower.includes("zloděj") || tagLower.includes("rogu")) {
+    badgeColor = "bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-950/70 dark:text-emerald-300 dark:border-emerald-700/50";
+  } else if (tagLower.includes("klerik") || tagLower.includes("paladin")) {
+    badgeColor = "bg-sky-100 text-sky-900 border-sky-300 dark:bg-sky-950/70 dark:text-sky-300 dark:border-sky-700/50";
+  } else if (tagLower.includes("hranič") || tagLower.includes("druid") || tagLower.includes("rang")) {
+    badgeColor = "bg-teal-100 text-teal-900 border-teal-300 dark:bg-teal-950/70 dark:text-teal-300 dark:border-teal-700/50";
+  } else if (tagLower.includes("volba") || tagLower.includes("úkol") || tagLower.includes("hlavní") || tagLower.includes("čestný")) {
+    badgeColor = "bg-amber-200 text-amber-950 border-amber-400 dark:bg-amber-900/60 dark:text-amber-200 dark:border-amber-600/50";
+  }
+  return (
+    <span className="flex items-center gap-1.5 flex-wrap">
+      <span className={`px-2 py-0.5 rounded-md text-[11px] font-cinzel font-bold border tracking-wide uppercase ${badgeColor}`}>
+        {tag.slice(1, -1)}
+      </span>
+      <span>{rest.trim()}</span>
+    </span>
+  );
+};
+
 const isFemale = (p?: string) => {
   const normalized = (p || "").trim().toLowerCase().replace(/ž/g, "z");
   return normalized === "zena" || normalized === "female";
@@ -1420,6 +1450,15 @@ export default function Home() {
                 <h2 className="text-lg sm:text-xl font-cinzel text-[#2d3748] dark:text-[#e2d9c8] font-bold drop-shadow-md leading-tight">{name} <span className="text-rpg-magic dark:text-amber-400 text-xs">Lv.{level}</span></h2>
                 <div className="text-slate-700 dark:text-slate-400 font-lora text-xs flex items-center gap-1.5 flex-wrap">
                   <span>{race} {dndClass}</span>
+                  {gameMode === 'campaign' ? (
+                    <span className="bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded-full border border-amber-600/30 text-[10px] font-cinzel font-bold flex items-center gap-1">
+                      <BookOpen size={10} /> 1. Akt Kampaň
+                    </span>
+                  ) : (
+                    <span className="bg-purple-100 dark:bg-purple-950/80 text-purple-800 dark:text-purple-300 px-2 py-0.5 rounded-full border border-purple-600/30 text-[10px] font-cinzel font-bold flex items-center gap-1">
+                      <Brain size={10} /> AI Svět
+                    </span>
+                  )}
                   {currentRegion && (
                     <>
                       <span className="text-slate-400">•</span>
@@ -1851,7 +1890,7 @@ export default function Home() {
                             <span className="w-6 h-6 rounded-full bg-amber-900/10 dark:bg-amber-500/15 group-hover:bg-amber-700 dark:group-hover:bg-amber-600 group-hover:text-white flex items-center justify-center text-xs font-cinzel font-bold text-amber-900 dark:text-amber-300 transition-colors shrink-0">
                               {i + 1}
                             </span>
-                            <span className="font-medium group-hover:font-bold transition-all">{act}</span>
+                            <span className="font-medium group-hover:font-bold transition-all">{renderActionText(act)}</span>
                           </div>
                           <span className="opacity-0 group-hover:opacity-100 transition-all bg-amber-700 text-white px-3 py-1 rounded-xl font-cinzel text-xs font-bold shrink-0 ml-3 shadow-sm flex items-center gap-1 group-hover:translate-x-1">
                             Zvolit &rarr;
@@ -1902,17 +1941,33 @@ export default function Home() {
                 <div className="relative flex flex-row items-center gap-2 sm:gap-3 bg-white/90 dark:bg-[#121823]/95 backdrop-blur-xl p-2 sm:p-3 rounded-2xl border border-rpg-magic/30 dark:border-amber-500/30 shadow-[0_0_30px_rgba(0,0,0,0.8)]">
                   <button
                     onClick={() => setIsOOC(!isOOC)}
-                    className={`p-2.5 sm:p-3.5 transition-all rounded-xl flex items-center justify-center shrink-0 cursor-pointer ${isOOC ? 'bg-indigo-900/40 text-indigo-800 dark:text-indigo-300 border border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.2)]' : 'text-slate-600 dark:text-slate-400 hover:text-rpg-magic dark:hover:text-amber-300 bg-white/50 dark:bg-white/5 border border-transparent'}`}
-                    title="OOC (Myšlenka)"
+                    className={`p-2.5 sm:p-3.5 transition-all rounded-xl flex items-center justify-center shrink-0 cursor-pointer ${
+                      gameMode === 'campaign'
+                        ? 'bg-amber-100/90 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-600/40 shadow-[0_0_12px_rgba(217,119,6,0.15)]'
+                        : isOOC 
+                          ? 'bg-indigo-900/40 text-indigo-800 dark:text-indigo-300 border border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.2)]' 
+                          : 'text-slate-600 dark:text-slate-400 hover:text-rpg-magic dark:hover:text-amber-300 bg-white/50 dark:bg-white/5 border border-transparent'
+                    }`}
+                    title={gameMode === 'campaign' ? "Autorská kampaň (100% offline)" : "OOC (Myšlenka / AI)"}
                   >
-                    <Brain size={22} className={isOOC ? "animate-pulse text-indigo-600" : ""} />
+                    {gameMode === 'campaign' ? (
+                      <BookOpen size={22} className="text-amber-700 dark:text-amber-400" />
+                    ) : (
+                      <Brain size={22} className={isOOC ? "animate-pulse text-indigo-600" : ""} />
+                    )}
                   </button>
                   <input 
                     type="text" 
                     value={customAction}
                     onChange={(e) => setCustomAction(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && sendAction(customAction)}
-                    placeholder={isOOC ? "Přemýšlím nad..." : "Co uděláš dál?"} 
+                    placeholder={
+                      isOOC 
+                        ? "Přemýšlím nad..." 
+                        : gameMode === 'campaign' 
+                          ? "Zvol možnost výše, nebo popiš své konání v Oakhaven..." 
+                          : "Co uděláš dál?"
+                    } 
                     className={`flex-1 min-w-0 font-lora text-sm sm:text-lg bg-transparent px-2 sm:px-3 py-2 outline-none transition-colors ${isOOC ? 'text-indigo-900 dark:text-indigo-200 placeholder-indigo-400' : 'text-[#2d3748] dark:text-[#e2d9c8] placeholder-gray-500 dark:placeholder-slate-500'}`}
                     disabled={loading}
                   />

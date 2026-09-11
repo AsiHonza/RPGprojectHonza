@@ -204,21 +204,51 @@ async def create_character(req: CharacterCreateRequest):
         raise HTTPException(status_code=400, detail=f"Postava se jménem '{clean_name}' již existuje. Zvol prosím jiné jméno nebo původní postavu smaž.")
     world_data = None
     if req.game_mode == 'campaign':
+        # 100% Deterministický svět pro 1. Akt z Obsidian kánonu (bez volání Gemini)
+        import world_generator
+        math_world = world_generator.generate_world_data()
+        world_data = {
+            'hex_grid': math_world.get('hex_grid', []),
+            'pois': math_world.get('pois', []),
+            'main_plot': "V pohraničním údolí Oakhaven se probouzejí temné síly zapomenutého boha Kulla a solariánská inkvizice stupňuje svůj teror.",
+            'locations': [
+                {"id": 1, "name": "Oakhaven", "description": "Pohraniční město s hrázděnými domy, starým mlýnem a pevnou palisádou.", "ruler": "Strážmistr Aldric"},
+                {"id": 2, "name": "Stará křižovatka", "description": "Zpustlé rozcestí starých císařských cest s vyhořelou mýtnicí a doupětem banditů.", "ruler": "Bandité"},
+                {"id": 3, "name": "Ruiny kláštera", "description": "Rozvaliny kláštera sv. Judity ukrývající prastaré krypty boha Kulla.", "ruler": "Kultisté"},
+                {"id": 4, "name": "Opuštěný důl", "description": "Zavalené štoly na úpatí hor střežené trogly.", "ruler": "Příšery"},
+                {"id": 5, "name": "Temný hvozd", "description": "Hluboké lesy plné zmutovaných šelem a prastaré magie Vyldie.", "ruler": "Příroda"}
+            ],
+            'key_npcs': [
+                {"name": "Boris Mlynář", "role": "Mlynář v Oakhaven", "motive": "Najít snubní prsten své zesnulé ženy Anny"},
+                {"name": "Strážmistr Aldric", "role": "Velitel městské stráže", "motive": "Udržet pořádek a chránit obyvatele Oakhaven"},
+                {"name": "Inkvizitor Kaelen", "role": "Vyslanec Solariana", "motive": "Vymýtit kacířství a kult boha Kulla za každou cenu"}
+            ]
+        }
+    else:
         try:
             import json
             import world_generator
             math_world = world_generator.generate_world_data()
             client = genai.Client(api_key=req.api_key if req.api_key and 'DUMMY' not in req.api_key else os.environ.get('GEMINI_API_KEY'))
-            world_prompt = f"""\nNAVRHUJEŠ WORLD BIBLE PRO HIGH FANTASY KAMPAŇ (AELTHGARD).\n\nABSOLUTNÍ PRAVIDLA SVĚTA:\n1. Tón: Mix Fable a Zaklínače (Pohádkový vizuál, ale dospělé, krvavé a zkorumpované problémy).\n2. Magie: Nedá se učit. Je to "Probuzení", vzácný dar nebo kletba od bohů. Jsou to "Vyvolení".\n3. Zjevení: Bohové (Solarian - Řád a Krev, Vyldia - Příroda a Chaos, Kull - Stíny a Lži) se začínají zjevovat lidem.\n4. Království: Kontinent je rozdělen na 7 království. \n\nZde jsou základní archetypy 7 království (kingdom_id 1 až 7):\n  1K (Valerijské Impérium): Upadající Impérium (Zkorumpovaná šlechta)\n  2K (Svatá říše Solariova): Teokracie (Náboženští fanatici Řádu)\n  3K (Kmeny z Hlubokých hvozdů): Divoké Kmeny (Přeživší v bažinách/lesích, krevní rituály)\n  4K (Svobodná města): Obchodní Gildy (Žoldáci a peníze, žádný král)\n  5K (Karanténní Zóna): Magická pustina, zamořená monstry\n  6K (Železný Práh): Severní Hradba (Militarizovaná stráž před zlem)\n  7K (Tajemné Útočiště): Izolované útočiště Vyvolených (Mágové)\n\n  DŮLEŽITÉ: Ve výstupech (názvech lokací ani popisech) NIKDY nepoužívej generické názvy jako "Království 6". Místo toho vždy použij název dané frakce/území z tohoto seznamu (např. Železný Práh).\n\nTady je JSON se všemi body zájmu (POI) na vygenerované mapě:\n{json.dumps(math_world['pois'], ensure_ascii=False)}\n\nTvým úkolem je vrátit POUZE validní JSON (žádný markdown, žádné komentáře). Vygeneruj MAXIMÁLNĚ 5 nejzajímavějších lokací a 5 klíčových NPC s následující strukturou:\n{{\n  "main_plot": "Krátký popis hlavní zápletky světa (1 odstavec)",\n  "locations": [\n    {{"id": 1, "name": "Město X", "description": "Popis města a co se tam děje", "ruler": "Kdo tam vládne"}}\n  ],\n  "key_npcs": [\n    {{"name": "Jméno", "role": "Frakce/Role", "motive": "Co chce?"}}\n  ]\n}}\n"""
+            world_prompt = f"""
+NAVRHUJEŠ WORLD BIBLE PRO HIGH FANTASY KAMPAŇ (AELTHGARD).
+ABSOLUTNÍ PRAVIDLA SVĚTA:
+1. Tón: Mix Fable a Zaklínače.
+2. Magie: Probuzení od bohů.
+3. Bohové: Solarian, Vyldia, Kull.
+4. Království: 7 království.
+Tady je JSON se všemi body zájmu (POI):
+{json.dumps(math_world['pois'], ensure_ascii=False)}
+Vrať POUZE validní JSON s klíči: main_plot, locations, key_npcs.
+"""
             response = client.models.generate_content(model='gemini-3.6-flash', contents=world_prompt, config=types.GenerateContentConfig(response_mime_type='application/json'))
             clean_text = response.text.strip().removeprefix('```json').removesuffix('```').strip()
             ai_world_data = json.loads(clean_text)
             world_data = {'hex_grid': math_world.get('hex_grid', []), 'pois': math_world['pois'], 'main_plot': ai_world_data.get('main_plot'), 'locations': ai_world_data.get('locations'), 'key_npcs': ai_world_data.get('key_npcs')}
         except Exception as e:
             raise HTTPException(status_code=500, detail=f'Chyba při generování světa: {str(e)}')
+
     # ===== SPAWN LOCK: Oakhaven (Valerijské Impérium) =====
-    # Hráč vždy začíná v Oakhaven – výchozím uzlu světa.
-    # Mapa (current_node_id) i uvítací intro musí odrážet tuto lokaci.
     initial_location = {'q': 0, 'r': 0, 'biome': 'Plains', 'kingdom_id': 1}
     start_kingdom_name = 'Valerijské Impérium'
     start_loc_type = 'mesto'
@@ -232,109 +262,81 @@ async def create_character(req: CharacterCreateRequest):
     except Exception:
         oakhaven_description = 'Pohraničním městečkem Oakhaven projíždějí kupci z celého kontinentu.'
 
-    try:
-        client = genai.Client(api_key=req.api_key if req.api_key and 'DUMMY' not in req.api_key else os.environ.get('GEMINI_API_KEY'))
-        import json, random
-
-        # 5 pestrých startovních archetypů zakotvených v Oakhaven
-        start_archetypes = [
-            {
-                "theme": "ZÁHADA A NÁLEZ (Průzkum)",
-                "situation": "Postava dorazila do Oakhaven a hned u vstupní brány zahlédla cosi znepokojivého: záhadný zapečetěný dopis položený na kameni s jejím jménem, nebo podivný magický symbol vyrytý do zdi mlýna. Cílem je probudit zvědavost a umožnit vyšetřování."
-            },
-            {
-                "theme": "POUTNÍK A SPOLEČNOST (Sociální interakce a zvěsti)",
-                "situation": "Postava po dlouhé cestě dorazila do Oakhaven a sedí u krbu v hostinci 'U Zlomeného štítu'. Zaslechne šeptající cizince hovořit o ztraceném prstenu mlynáře Borise, nebo k ní přistoupí unavený posel s prosbou o pomoc."
-            },
-            {
-                "theme": "ŽIVEL A PŘEŽITÍ (Atmosférický příchod)",
-                "situation": "Oblast právě zasáhla náhlá prudká bouře. Postava hledá úkryt v Oakhaven pod střechou hostince 'U Zlomeného štítu', kde se tísní cestovatelé, mlynář Boris a pár ustarané gardy strážmistra Aldrice."
-            },
-            {
-                "theme": "OSOBNÍ STOPA (Napojení na minulost a cíl)",
-                "situation": "Postava dorazila do Oakhaven sledujíc stopu svého minulého života. Právě zahlédla symbol nebo tvář, která ji sem přivedla. V náměstí stojí strážmistr Aldric a sleduje ji přísným pohledem."
-            },
-            {
-                "theme": "MORÁLNÍ DILEMA A NAPĚTÍ (Konflikt beze zbraní)",
-                "situation": "Na Oakhavenském náměstí probíhá vyhrocený spor: výběrčí daní od valerijského Impéria nespravedlivě viní mlynáře Borise ze zadržení dávky mouky. Kolem stojí hlouček. Žádné vytasené meče – jen slova, autorita a lest."
-            }
+    if req.game_mode == 'campaign':
+        # 100% Deterministický startovní prolog 1. Aktu – Kletba údolí Oakhaven (žádné volání Gemini)
+        intro_text = (
+            f"Ranní mlha se líně převaluje přes dřevěné palisády Oakhavenu. V chladném povětří voní čerstvě pečený chléb a vlhké březové dřevo, avšak poklidnou atmosféru pohraničního městečka protíná zoufalý nářek z nedalekého starého mlýna.\n\n"
+            f"Mlynář Boris tam v šeru lomí rukama nad vylomenou komorou, zatímco na dlážděném náměstí u Pařezu Pradubu strážmistr Aldric s kamennou tváří dohlíží na ranní hlídku městské gardy.\n\n"
+            f"Tvůj příchod nezůstal bez povšimnutí – jako nový poutník ({req.race} {req.dnd_class}) stojíš na prahu událostí, které brzy rozhodnou o osudu celého údolí."
+        )
+        popis_okoli = "Oakhaven – Náměstí u Pradubu. Vzduch voní chlebem a březovým dřevem. Ze starého mlýna se ozývá nářek mlynáře Borise."
+        nabizene_akce = [
+            "Vydat se ke Starému mlýnu a zjistit, proč mlynář Boris pláče",
+            "Zastavit se u Strážmistra Aldrica na strážnici a poptat se na situaci",
+            "Otevřít přehled města a prozkoumat čtvrti Oakhavenu"
         ]
-        chosen_arch = random.choice(start_archetypes)
+    else:
+        # Sandbox mód s AI vypravěčem
+        try:
+            client = genai.Client(api_key=req.api_key if req.api_key and 'DUMMY' not in req.api_key else os.environ.get('GEMINI_API_KEY'))
+            import json, random
 
-        raw_backstory = getattr(req, 'backstory', '') or ''
-        if isinstance(raw_backstory, dict):
-            parts = []
-            if raw_backstory.get('appearance'): parts.append(f"Vzhled: {raw_backstory['appearance']}")
-            if raw_backstory.get('personality'): parts.append(f"Osobnost: {raw_backstory['personality']}")
-            if raw_backstory.get('backstory'): parts.append(f"Příběh: {raw_backstory['backstory']}")
-            backstory_info = "\n".join(parts) if parts else "Neuvedeno (začíná jako nový poutník bez zapsané minulosti)."
-        elif isinstance(raw_backstory, str) and raw_backstory.strip():
-            backstory_info = raw_backstory.strip()
-        else:
-            backstory_info = "Neuvedeno (začíná jako nový poutník bez zapsané minulosti)."
+            start_archetypes = [
+                {
+                    "theme": "ZÁHADA A NÁLEZ (Průzkum)",
+                    "situation": "Postava dorazila do Oakhaven a hned u vstupní brány zahlédla cosi znepokojivého: záhadný zapečetěný dopis položený na kameni s jejím jménem, nebo podivný magický symbol vyrytý do zdi mlýna."
+                },
+                {
+                    "theme": "POUTNÍK A SPOLEČNOST (Sociální interakce a zvěsti)",
+                    "situation": "Postava po dlouhé cestě dorazila do Oakhaven a sedí u krbu v hostinci 'U Zlomeného štítu'. Zaslechne šeptající cizince hovořit o ztraceném prstenu mlynáře Borise."
+                },
+                {
+                    "theme": "ŽIVEL A PŘEŽITÍ (Atmosférický příchod)",
+                    "situation": "Oblast právě zasáhla náhlá prudká bouře. Postava hledá úkryt v Oakhaven pod střechou hostince 'U Zlomeného štítu', kde se tísní cestovatelé a pár gardistů."
+                }
+            ]
+            chosen_arch = random.choice(start_archetypes)
 
-        main_plot_line = world_data.get('main_plot', '') if world_data else ''
-        world_context = f"""
+            raw_backstory = getattr(req, 'backstory', '') or ''
+            if isinstance(raw_backstory, dict):
+                parts = []
+                if raw_backstory.get('appearance'): parts.append(f"Vzhled: {raw_backstory['appearance']}")
+                if raw_backstory.get('personality'): parts.append(f"Osobnost: {raw_backstory['personality']}")
+                if raw_backstory.get('backstory'): parts.append(f"Příběh: {raw_backstory['backstory']}")
+                backstory_info = "\n".join(parts) if parts else "Nový poutník bez zapsané minulosti."
+            elif isinstance(raw_backstory, str) and raw_backstory.strip():
+                backstory_info = raw_backstory.strip()
+            else:
+                backstory_info = "Nový poutník bez zapsané minulosti."
+
+            main_plot_line = world_data.get('main_plot', '') if world_data else ''
+            world_context = f"""
 [SVĚT AELTHGARD – POHRANIČÍ VALERIJSKÉHO IMPÉRIA]:
 {f"Zápletka kontinentu: {main_plot_line}" if main_plot_line else ""}
-Místo startu: OAKHAVEN – pohraničním obchodním město v říši Valerijského Impéria.
+Místo startu: OAKHAVEN – pohraniční obchodní město.
 Popis prostředí: {oakhaven_description}
-Přítomné postavy: Strážmistr Aldric (cynický veterán gardy, přísný ale spravedlivý) a mlynář Boris Mlynář (unavený muž v padesátce, smutné oči, zlatý prsten mu nedávno ukradli).
-
-[POSTAVA HRÁČE]:
-- Jméno: {req.name}
-- Povolání: {req.dnd_class} | Rasa: {req.race}
-- Příběhové pozadí (Backstory): {backstory_info}
-
-[STARTOVNÍ SCÉNÁŘ – TÉMA: {chosen_arch['theme']}]:
-{chosen_arch['situation']}
-
-[PŘÍSNÁ PRAVIDLA PRO INTRO]:
-1. PŘÍSNÝ ZÁKAZ AUTOMATICKÉHO BOJE V 1. TAHU! ŽÁDNÁ inkvizice, žádné přepadení, žádný souboj. Hráč se má rozkoukat a zvolit svůj styl.
-2. Hráč začíná VÝHRADNĚ V OAKHAVEN. Nezačínej jinde!
-3. Ve 2-3 větách atmosféricky nalaď prostředí Oakhavenu (zvuky, počasí, vůně, atmosféra pohraničního města).
-4. Poté představ výše popsanou startovní situaci.
-5. 'nabizene_akce' MUSÍ nabídnout 3 ZCELA ODLIŠNÉ PŘÍSTUPY:
-   - Možnost 1: Průzkum / Pozorování / Zkoumání detailů okolí Oakhavenu.
-   - Možnost 2: Sociální interakce / Rozhovor s Borisem nebo Aldricem.
-   - Možnost 3: Akce specifická pro povolání/rasu ({req.dnd_class}/{req.race}).
-   NIKDY nenabízej útočné bojové akce v 1. tahu!
+Přítomné postavy: Strážmistr Aldric a mlynář Boris Mlynář.
+[POSTAVA HRÁČE]: {req.name}, {req.dnd_class}, {req.race}. Minulost: {backstory_info}
+[STARTOVNÍ SCÉNÁŘ – TÉMA: {chosen_arch['theme']}]: {chosen_arch['situation']}
 """
-        prompt = f'''
-Jsi Pán jeskyně v textové RPG hře D&D. Hráč právě vytvořil novou postavu:
-Jméno: {req.name}
-Rasa: {req.race}
-Třída: {req.dnd_class}
-Staty: {req.stats}
+            prompt = f'''
+Jsi Pán jeskyně v textové RPG hře D&D. Hráč právě vytvořil postavu:
+Jméno: {req.name}, Rasa: {req.race}, Třída: {req.dnd_class}, Staty: {req.stats}
 {world_context}
-
-Vrať POUZE json ve formátu:
-{{
-  "intro_text": "Text vypravěče (atmosférické představení prostředí + startovní situace/záhada/dialog)...",
-  "popis_okoli": "Stručný popis lokace",
-  "nabizene_akce": ["Konkrétní volba 1 (průzkum)", "Konkrétní volba 2 (dialog/interakce)", "Konkrétní volba 3 (třída/kouzlo/přístup)"]
-}}
+Vrať POUZE json: {{"intro_text": "...", "popis_okoli": "...", "nabizene_akce": ["...", "...", "..."]}}
 '''
-        response = client.models.generate_content(
-            model='gemini-3.6-flash',
-            contents=prompt,
-            config=types.GenerateContentConfig(response_mime_type='application/json')
-        )
-        import json
-        try:
+            response = client.models.generate_content(
+                model='gemini-3.6-flash',
+                contents=prompt,
+                config=types.GenerateContentConfig(response_mime_type='application/json')
+            )
             clean_text = response.text.strip().removeprefix('```json').removesuffix('```').strip()
             data = json.loads(clean_text)
             intro_text = data.get('intro_text', 'Mlha se rozestupuje a ty se rozhlížíš po okolí...')
-            popis_okoli = data.get('popis_okoli', 'Neznámé místo.')
-            nabizene_akce = data.get('nabizene_akce', ['Rozhlédnout se', 'Zkontrolovat vybavení', 'Promluvit s nejbližším člověkem'])
-            if not isinstance(nabizene_akce, list) or len(nabizene_akce) == 0:
-                nabizene_akce = ['Rozhlédnout se', 'Zkontrolovat vybavení', 'Promluvit s nejbližším člověkem']
-        except Exception:
-            intro_text = response.text.strip()
-            popis_okoli = 'Neznámé místo.'
-            nabizene_akce = ['Rozhlédnout se', 'Zkontrolovat vybavení', 'Promluvit s nejbližším člověkem']
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f'Chyba při generování intro textu: {str(e)}')
+            popis_okoli = data.get('popis_okoli', 'Oakhaven – Náměstí.')
+            nabizene_akce = data.get('nabizene_akce', ['Rozhlédnout se', 'Zkontrolovat výstroj', 'Promluvit s nejbližším člověkem'])
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f'Chyba při generování intro textu: {str(e)}')
         
     initial_history = [{'role': 'model', 'text': json.dumps({
         'aktualni_region': 'Oakhaven',
