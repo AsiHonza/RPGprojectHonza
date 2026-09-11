@@ -3,6 +3,8 @@ import { ItemIcon } from '../../components/ui/ItemIcon';
 import { X, Package, Shield, Swords, Sparkles, Heart, Plus, Trash2, Coins, AlertTriangle } from 'lucide-react';
 import { useGameStore } from '../../store/gameStore';
 import { RACES } from '../../data/races';
+import { calculateSetBonuses } from '../../services/economy/setEngine';
+import { CANONICAL_SETS } from '../../data/canonicalLoot';
 
 const RARITY_MAP: Record<string, { label: string; border: string; text: string; bg: string }> = {
   common: { label: 'Běžný', border: 'border-amber-900/20 dark:border-amber-500/20', text: 'text-slate-700 dark:text-slate-200', bg: 'bg-amber-100/70 dark:bg-amber-950/60' },
@@ -35,8 +37,10 @@ export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem 
 
   // Calculate Equipped Items & Combat Stats
   const equippedItems = inventory.filter((i: any) => Object.values(equipped).includes(i.id));
-  const weaponBonus = equippedItems.reduce((acc: number, i: any) => acc + (Number(i.attack_bonus) || 0), 0);
-  const armorBonus = equippedItems.reduce((acc: number, i: any) => acc + (Number(i.defense_bonus) || 0), 0);
+  const setBonuses = calculateSetBonuses(equippedItems);
+
+  const weaponBonus = equippedItems.reduce((acc: number, i: any) => acc + (Number(i.attack_bonus) || 0), 0) + setBonuses.attackBonus;
+  const armorBonus = equippedItems.reduce((acc: number, i: any) => acc + (Number(i.defense_bonus) || 0), 0) + setBonuses.defenseBonus;
   
   const strMod = Math.floor(((stats?.str ?? 10) - 10) / 2);
   const dexMod = Math.floor(((stats?.dex ?? 10) - 10) / 2);
@@ -199,6 +203,33 @@ export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem 
                 </div>
               </div>
 
+              {/* Active Set Bonuses */}
+              {setBonuses.activeSets.length > 0 && (
+                <div className="flex flex-col gap-1.5 p-2.5 rounded-xl bg-amber-100/70 dark:bg-amber-950/40 border border-amber-600/30 dark:border-amber-500/30 shadow-2xs">
+                  <div className="flex items-center gap-1.5 text-[11px] font-bold font-cinzel text-amber-900 dark:text-amber-300">
+                    <Sparkles size={13} className="text-amber-600 dark:text-amber-400" />
+                    <span>Aktivní Setové Bonusy:</span>
+                  </div>
+                  {setBonuses.activeSets.map((s, idx) => (
+                    <div key={idx} className="text-[11px] font-lora text-slate-800 dark:text-amber-100 flex flex-col gap-0.5">
+                      <div className="font-bold text-amber-950 dark:text-amber-200">
+                        {s.setDef.name} ({s.equippedCount}/{s.setDef.totalPieces})
+                      </div>
+                      {s.activeBonuses.map((b, bIdx) => (
+                        <div key={bIdx} className="text-emerald-700 dark:text-emerald-400 pl-2 font-medium">
+                          ✓ {b.description}
+                        </div>
+                      ))}
+                      {s.nextBonus && (
+                        <div className="text-slate-500 dark:text-slate-400 pl-2 italic">
+                          Další: ({s.nextBonus.count} ks) {s.nextBonus.description}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
               {/* Health */}
               <div className="flex justify-between items-center py-1 border-b border-amber-900/10 dark:border-amber-500/15 text-sm">
                 <span className="flex items-center gap-1.5 font-cinzel font-bold text-slate-700 dark:text-slate-300"><Heart size={16} className="text-red-600 dark:text-red-400" /> Zdraví:</span>
@@ -337,6 +368,69 @@ export const InventoryPanel = ({ isOpen, onClose, selectedItem, setSelectedItem 
                         </div>
                       )}
                     </div>
+
+                    {/* Gear Set Information */}
+                    {selectedItem.setId && CANONICAL_SETS[selectedItem.setId] && (() => {
+                      const setDef = CANONICAL_SETS[selectedItem.setId];
+                      const currentEquippedCount = equippedItems.filter((i: any) => i.setId === selectedItem.setId).length;
+                      return (
+                        <div className="w-full mb-3 p-3 bg-amber-100/70 dark:bg-amber-950/50 border border-amber-600/40 dark:border-amber-500/30 rounded-xl text-left shadow-2xs">
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="font-cinzel font-bold text-xs text-amber-950 dark:text-amber-200">
+                              🛡️ Set: {setDef.name}
+                            </span>
+                            <span className="text-[10px] font-bold text-amber-700 dark:text-amber-400 bg-amber-200/60 dark:bg-black/40 px-2 py-0.5 rounded">
+                              {currentEquippedCount} / {setDef.totalPieces} ks nasazeno
+                            </span>
+                          </div>
+                          <div className="flex flex-col gap-1 mt-2 text-[11px] font-lora">
+                            {setDef.bonuses.map((b, bIdx) => {
+                              const isActive = currentEquippedCount >= b.count;
+                              return (
+                                <div key={bIdx} className={isActive ? 'text-emerald-700 dark:text-emerald-400 font-bold' : 'text-slate-500 dark:text-slate-400'}>
+                                  ({b.count} ks): {b.description} {isActive ? '✓' : ''}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* Side-by-side comparison with equipped item in same slot */}
+                    {!isEquipped && selectedItem.slot && selectedItem.slot !== 'žádný' && (() => {
+                      const normSlot = selectedItem.slot.toLowerCase().trim();
+                      let targetSlot = normSlot;
+                      if (normSlot.includes("hlavní") || normSlot.includes("zbraň") || (normSlot.includes("ruka") && !normSlot.includes("druhá"))) targetSlot = "hlavní ruka";
+                      if (normSlot.includes("druhá") || normSlot.includes("štít")) targetSlot = "druhá ruka";
+                      if (normSlot.includes("hruď") || normSlot.includes("brnění") || normSlot.includes("zbroj") || normSlot.includes("tělo")) targetSlot = "hruď";
+                      if (normSlot.includes("hlava") || normSlot.includes("přilba")) targetSlot = "hlava";
+                      if (normSlot.includes("prsten")) targetSlot = "prsten";
+                      if (normSlot.includes("krk") || normSlot.includes("amulet")) targetSlot = "krk";
+
+                      const equippedId = equipped[targetSlot as keyof typeof equipped];
+                      const currentEquipped = inventory.find((i: any) => i.id === equippedId);
+                      if (!currentEquipped) return null;
+
+                      const atkDiff = (Number(selectedItem.attack_bonus) || 0) - (Number(currentEquipped.attack_bonus) || 0);
+                      const defDiff = (Number(selectedItem.defense_bonus) || 0) - (Number(currentEquipped.defense_bonus) || 0);
+
+                      return (
+                        <div className="w-full mb-3 p-2.5 bg-slate-100 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 rounded-xl text-left text-xs">
+                          <div className="text-[10px] uppercase font-cinzel font-bold text-slate-500 dark:text-slate-400 mb-1">
+                            Srovnání s nasazeným ({currentEquipped.name}):
+                          </div>
+                          <div className="flex gap-4 font-cinzel font-bold text-[11px]">
+                            <div>
+                              Útok: {atkDiff > 0 ? <span className="text-emerald-600 dark:text-emerald-400">+{atkDiff} ▲</span> : atkDiff < 0 ? <span className="text-rose-600 dark:text-rose-400">{atkDiff} ▼</span> : <span className="text-slate-500">0</span>}
+                            </div>
+                            <div>
+                              Obrana: {defDiff > 0 ? <span className="text-emerald-600 dark:text-emerald-400">+{defDiff} ▲</span> : defDiff < 0 ? <span className="text-rose-600 dark:text-rose-400">{defDiff} ▼</span> : <span className="text-slate-500">0</span>}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
 
                     <div className="font-cinzel font-bold mb-4 text-sm flex items-center justify-between w-full px-2">
                       <span className="text-slate-500 dark:text-slate-400">Cena u kupce:</span>

@@ -15,6 +15,7 @@ class Item(BaseModel):
     defense_bonus: int = Field(default=0, description="Bonus k obraně/AC (+1, +2)")
     healing_amount: int = Field(default=0, description="Léčení pro lektvary (např. 25)")
     stats: str = Field(default="", description="Stručný přehled vlastností (např. 'Útok +1')")
+    set_id: Optional[str] = Field(default=None, description="Identifikátor setu výstroje (např. 'oakhaven_guard')")
 
 class QuestStep(BaseModel):
     text: str = Field(description="Popis konkrétního dílčího cíle / kroku úkolu")

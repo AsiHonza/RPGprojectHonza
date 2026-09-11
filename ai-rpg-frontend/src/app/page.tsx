@@ -154,6 +154,8 @@ export default function Home() {
     updateReputation, chronicle, setChronicle, worldFlags, setWorldFlags, consequenceToast, setConsequenceToast,
     activeBuffs, addBuff, activeMount, setActiveMount, resetCharacterCreation, titles, setTitles, activeTitle, setActiveTitle,
     perks, setPerks, setFateDraftOpen, setActiveDraftCards,
+    exploredNodes, setExploredNodes,
+    safehouse, setSafehouse,
     theme, setTheme
   } = useGameStore();
 
@@ -491,14 +493,14 @@ export default function Home() {
             travel_mode: travelMode, travel_days_left: travelDaysLeft, travel_destination: travelDestination,
             zname_postavy: npcs, world_data: worldData, playerLocation: playerLocation,
             gold, currentSpellSlots, maxSpellSlots, activeBuffs, activeMount, reputation, chronicle, worldFlags, day,
-            titles, activeTitle, perks,
+            titles, activeTitle, perks, exploredNodes, safehouse,
             version: CURRENT_GAME_VERSION
           }
         }),
       }).catch(err => console.error("Autosave failed", err));
     }, 2000);
     return () => clearTimeout(timer);
-  }, [hp, maxHp, inventory, equipped, level, xp, skillPoints, skills, inCombat, enemies, quests, locationType, currentRegion, pointsOfInterest, gameState, stats, gold, currentSpellSlots, maxSpellSlots, rations, currentImage, currentImageError, travelMode, travelDaysLeft, travelDestination, npcs, worldData, playerLocation, activeBuffs, activeMount, reputation, chronicle, worldFlags, day, titles, activeTitle, perks]);
+  }, [hp, maxHp, inventory, equipped, level, xp, skillPoints, skills, inCombat, enemies, quests, locationType, currentRegion, pointsOfInterest, gameState, stats, gold, currentSpellSlots, maxSpellSlots, rations, currentImage, currentImageError, travelMode, travelDaysLeft, travelDestination, npcs, worldData, playerLocation, activeBuffs, activeMount, reputation, chronicle, worldFlags, day, titles, activeTitle, perks, exploredNodes, safehouse]);
 
   const playAudio = (text: string, voiceType: "narrator" | "npc_muz" | "npc_zena" = "narrator"): Promise<void> => {
     return audioManager.playSingleTts(API_URL, text, voiceType, ttsProvider, ttsVolume);
@@ -787,6 +789,8 @@ export default function Home() {
         if (state.titles) setTitles(state.titles);
         if (state.activeTitle) setActiveTitle(state.activeTitle);
         if (state.perks) setPerks(state.perks);
+        if (state.exploredNodes) setExploredNodes(state.exploredNodes);
+        if (state.safehouse) setSafehouse(state.safehouse);
         if (state.day !== undefined) setDay(state.day);
 
         if (state.travel_mode !== undefined) setTravelMode(state.travel_mode);

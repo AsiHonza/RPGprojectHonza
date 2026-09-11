@@ -1,8 +1,9 @@
 import random
 import uuid
+from typing import Optional
 from app.models.schemas import Item
 
-def generate_loot(item_name: str, item_type: str, player_level: int) -> Item:
+def generate_loot(item_name: str, item_type: str, player_level: int, set_id: Optional[str] = None) -> Item:
     """
     Vygeneruje plnohodnotný Item objekt na základě hrubého popisu od AI.
     Řeší raritu, bonusy, cenu a ikony na základě player_level (zcela deterministicky).
@@ -105,7 +106,8 @@ def generate_loot(item_name: str, item_type: str, player_level: int) -> Item:
         attack_bonus=attack_bonus,
         defense_bonus=defense_bonus,
         healing_amount=healing_amount,
-        stats=stats
+        stats=stats,
+        set_id=set_id
     )
 
 def calculate_combat_rewards(enemy_count: int, player_level: int):

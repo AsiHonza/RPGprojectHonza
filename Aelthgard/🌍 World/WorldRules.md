@@ -49,3 +49,15 @@ Mapa propojení lokací:
 - [[Stará křižovatka]] ↔ [[Temný hvozd]]
 - [[Stará křižovatka]] ↔ [[Ruiny kláštera]]
 - [[Temný hvozd]] ↔ [[Skrytý tábor elfů]]
+
+---
+
+## 5. Předivo Osudu a Znamení (Progrese hrdiny)
+- **Krize Osudu (Level-up):** Zkušenosti (XP) v Aelthgardu nepředstavují abstraktní čísla, ale **psychické a fyzické jizvy z prožitých zkoušek**. Když hrdina překoná kritický mezník, dochází k hluboké rezonanci Přediva.
+- **Tři cesty (Karetní draft):** Osud před hrdinu neklade neomezený katalog schopností. Vyjeví se mu vždy tři unikátní Znamení (Karty Osudu), z nichž si musí vybrat jedno.
+- **Tři božské proudy a lidská vůle:**
+  - *Znamení Solariana:* Řád, odhodlání, spravedlnost, posvátný oheň.
+  - *Dary Vyldie:* Divoké instinkty, přežití v přírodě, svalová paměť, regenerace.
+  - *Šepot Kulla (Pakty a Kletby):* Obrovská okamžitá moc vykoupená stínem, oslabením či temným břemenem.
+- **Zápis do světa:** Získaná znamení nejsou skrytá – NPC postavy vnímají jejich auru (např. Inkvizitor Kaelen rozpozná Kullovo kacířské znamení, Šamanka Sylwen uctívá dar Vyldie).
+

@@ -1,0 +1,170 @@
+"""
+Canonical Items and Exploration Loot Registry for Aelthgard Act 1.
+"""
+
+CANONICAL_ITEMS = {
+    "oakhaven_guard_helm": {
+        "id": "oakhaven_guard_helm",
+        "name": "Přilba pohraniční hlídky",
+        "type": "zbroj",
+        "slot": "hlava",
+        "rarity": "uncommon",
+        "icon": "Shield",
+        "sell_price": 35,
+        "attack_bonus": 0,
+        "defense_bonus": 1,
+        "healing_amount": 0,
+        "stats": "Obrana +1",
+        "description": "Kalená ocelová přilba s masivním nánosníkem a rytinou dubového listu.",
+        "setId": "oakhaven_guard",
+        "setName": "Zbroj Stráže z Oakhavenu"
+    },
+    "oakhaven_guard_chest": {
+        "id": "oakhaven_guard_chest",
+        "name": "Plátový kyrys s erbem dubu",
+        "type": "zbroj",
+        "slot": "hruď",
+        "rarity": "rare",
+        "icon": "Shield",
+        "sell_price": 65,
+        "attack_bonus": 0,
+        "defense_bonus": 2,
+        "healing_amount": 0,
+        "stats": "Obrana +2, Těžká zbroj",
+        "description": "Kvalitní kyrys městské gardy. Pevné ocelové pláty nýtované na tvrzené kůži.",
+        "setId": "oakhaven_guard",
+        "setName": "Zbroj Stráže z Oakhavenu"
+    },
+    "oakhaven_tower_shield": {
+        "id": "oakhaven_tower_shield",
+        "name": "Oakhovenský věžový štít",
+        "type": "zbroj",
+        "slot": "druhá ruka",
+        "rarity": "rare",
+        "icon": "Shield",
+        "sell_price": 50,
+        "attack_bonus": 0,
+        "defense_bonus": 2,
+        "healing_amount": 0,
+        "stats": "Obrana +2",
+        "description": "Masivní dřevěný štít okovaný železem, který nosili obránci proti nájezdníkům.",
+        "setId": "oakhaven_guard",
+        "setName": "Zbroj Stráže z Oakhavenu"
+    },
+    "anna_rune_ring": {
+        "id": "anna_rune_ring",
+        "name": "Annin runový prsten",
+        "type": "doplněk",
+        "slot": "prsten",
+        "rarity": "rare",
+        "icon": "Ring",
+        "sell_price": 45,
+        "attack_bonus": 0,
+        "defense_bonus": 0,
+        "healing_amount": 0,
+        "stats": "Aura stínu Kulla",
+        "description": "Zlatý prsten se skrytou kacířskou rytinou boha Kulla. Vyzařuje mrazivý chlad.",
+        "setId": "kull_cult",
+        "setName": "Roucho Stínového kultu Kulla"
+    },
+    "kull_whisper_hood": {
+        "id": "kull_whisper_hood",
+        "name": "Kápě stínového šepotu",
+        "type": "zbroj",
+        "slot": "hlava",
+        "rarity": "rare",
+        "icon": "Shirt",
+        "sell_price": 55,
+        "attack_bonus": 1,
+        "defense_bonus": 1,
+        "healing_amount": 0,
+        "stats": "Útok +1, Obrana +1",
+        "description": "Sametová kápě barvy půlnočního popela, která pohlcuje světlo pochodní.",
+        "setId": "kull_cult",
+        "setName": "Roucho Stínového kultu Kulla"
+    },
+    "kull_cultist_dagger": {
+        "id": "kull_cultist_dagger",
+        "name": "Kultistická dýka z krypt",
+        "type": "zbraň",
+        "slot": "hlavní ruka",
+        "rarity": "epic",
+        "icon": "Sword",
+        "sell_price": 80,
+        "attack_bonus": 2,
+        "defense_bonus": 0,
+        "healing_amount": 0,
+        "stats": "Útok +2, +1k4 stínové zranění",
+        "description": "Zubaté rituální ostří z obsidiánu zčernalého obětní krví.",
+        "setId": "kull_cult",
+        "setName": "Roucho Stínového kultu Kulla"
+    },
+    "tracker_leather_vest": {
+        "id": "tracker_leather_vest",
+        "name": "Vesta z medvědí kůže",
+        "type": "zbroj",
+        "slot": "hruď",
+        "rarity": "uncommon",
+        "icon": "Shirt",
+        "sell_price": 40,
+        "attack_bonus": 0,
+        "defense_bonus": 1,
+        "healing_amount": 0,
+        "stats": "Obrana +1, Odolnost proti chladu",
+        "description": "Tuhá huňatá kůže z lesního medvěda, prošívaná šlachami.",
+        "setId": "forest_tracker",
+        "setName": "Stopař z Temného hvozdu"
+    },
+    "tracker_fang_amulet": {
+        "id": "tracker_fang_amulet",
+        "name": "Amulet z krystalického tesáku",
+        "type": "doplněk",
+        "slot": "krk",
+        "rarity": "rare",
+        "icon": "Ring",
+        "sell_price": 60,
+        "attack_bonus": 1,
+        "defense_bonus": 0,
+        "healing_amount": 0,
+        "stats": "Útok +1, Zrak šelmy",
+        "description": "Vyleštěný tesák z krystalického vlka zavěšený na koženém řemínku.",
+        "setId": "forest_tracker",
+        "setName": "Stopař z Temného hvozdu"
+    },
+    "tracker_composite_bow": {
+        "id": "tracker_composite_bow",
+        "name": "Lovecký kompozitní luk",
+        "type": "zbraň",
+        "slot": "hlavní ruka",
+        "rarity": "rare",
+        "icon": "Wand",
+        "sell_price": 75,
+        "attack_bonus": 2,
+        "defense_bonus": 0,
+        "healing_amount": 0,
+        "stats": "Útok +2, Průrazná zbraň",
+        "description": "Mistrovsky lepený luk z tisového dřeva a rohů divokého tura.",
+        "setId": "forest_tracker",
+        "setName": "Stopař z Temného hvozdu"
+    },
+    "torben_masterwork_hammer": {
+        "id": "torben_masterwork_hammer",
+        "name": "Torbenovo mistrovské kované kladivo",
+        "type": "zbraň",
+        "slot": "hlavní ruka",
+        "rarity": "rare",
+        "icon": "Sword",
+        "sell_price": 65,
+        "attack_bonus": 2,
+        "defense_bonus": 0,
+        "healing_amount": 0,
+        "stats": "Útok +2, Drtivé poškození",
+        "description": "Těžké kovářské kladivo z trpasličí oceli, ztracené při závalu dolu."
+    }
+}
+
+def get_canonical_item(item_id: str) -> dict:
+    item = CANONICAL_ITEMS.get(item_id)
+    if item:
+        return dict(item)
+    return {}

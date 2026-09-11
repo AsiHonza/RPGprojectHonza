@@ -294,6 +294,10 @@ interface GameState {
   fogOfWarEnabled: boolean;
   setFogOfWarEnabled: (enabled: boolean | ((prev: boolean) => boolean)) => void;
   revealHexes: (centerQ: number, centerR: number, radius?: number) => void;
+  exploredNodes: Record<string, { searched: boolean; lootCollected: string[] }>;
+  setExploredNodes: (nodes: Record<string, { searched: boolean; lootCollected: string[] }> | ((prev: Record<string, { searched: boolean; lootCollected: string[] }>) => Record<string, { searched: boolean; lootCollected: string[] }>)) => void;
+  safehouse: { level: number; upgrades: string[]; lastHarvestDay: number };
+  setSafehouse: (safehouse: { level: number; upgrades: string[]; lastHarvestDay: number } | ((prev: { level: number; upgrades: string[]; lastHarvestDay: number }) => { level: number; upgrades: string[]; lastHarvestDay: number })) => void;
   worldData: any;
   journal: string[];
   setJournal: (journal: string[] | ((prev: string[]) => string[])) => void;
@@ -493,6 +497,14 @@ export const useGameStore = create<GameState>((set) => ({
     }
     return { exploredHexes: Array.from(newExplored) };
   }),
+  exploredNodes: {},
+  setExploredNodes: (exploredNodes) => set((state) => ({
+    exploredNodes: typeof exploredNodes === 'function' ? exploredNodes(state.exploredNodes) : exploredNodes
+  })),
+  safehouse: { level: 1, upgrades: [], lastHarvestDay: 0 },
+  setSafehouse: (safehouse) => set((state) => ({
+    safehouse: typeof safehouse === 'function' ? safehouse(state.safehouse) : safehouse
+  })),
   worldData: null,
   journal: [],
   setJournal: (journal) => set((state) => ({ journal: typeof journal === 'function' ? journal(state.journal) : journal })),

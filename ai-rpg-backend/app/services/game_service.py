@@ -900,54 +900,85 @@ def auto_equip_items(inventory: list, current_equipped: dict = None) -> dict:
     if not isinstance(inventory, list):
         return equipped
 
-    valid_item_ids = {i.get('id') for i in inventory if isinstance(i, dict) and i.get('id')}
+    valid_item_ids = {i.get('id'): i for i in inventory if isinstance(i, dict) and i.get('id')}
     for k in equipped:
         if equipped[k] and equipped[k] not in valid_item_ids:
             equipped[k] = None
 
     equipped_vals = {v for v in equipped.values() if v is not None}
+    equipped_items = [valid_item_ids[v] for v in equipped_vals if v in valid_item_ids]
+    active_set_ids = {i.get('set_id') or i.get('setId') for i in equipped_items if (i.get('set_id') or i.get('setId'))}
+
+    def score_item(item: dict) -> int:
+        score = (int(item.get('attack_bonus') or 0)) * 10 + (int(item.get('defense_bonus') or 0)) * 10
+        rarity_scores = {"common": 1, "uncommon": 3, "rare": 6, "epic": 10, "legendary": 15}
+        score += rarity_scores.get(item.get('rarity', 'common'), 1)
+        item_set = item.get('set_id') or item.get('setId')
+        if item_set:
+            score += 4
+            if item_set in active_set_ids:
+                score += 20  # Prefer completing active set
+        return score
 
     # 1. Main hand weapon: check slot == 'hlavní ruka' or type == 'zbraň'
     if not equipped["hlavní ruka"]:
-        weapon = next((i for i in inventory if isinstance(i, dict) and i.get('id') not in equipped_vals and (i.get('slot') == "hlavní ruka" or i.get('type') == "zbraň")), None)
-        if weapon:
-            equipped["hlavní ruka"] = weapon.get('id')
-            equipped_vals.add(weapon.get('id'))
+        weapons = [i for i in inventory if isinstance(i, dict) and i.get('id') not in equipped_vals and (i.get('slot') == "hlavní ruka" or i.get('type') == "zbraň")]
+        if weapons:
+            best_weapon = max(weapons, key=score_item)
+            equipped["hlavní ruka"] = best_weapon.get('id')
+            equipped_vals.add(best_weapon.get('id'))
+            if best_weapon.get('set_id') or best_weapon.get('setId'):
+                active_set_ids.add(best_weapon.get('set_id') or best_weapon.get('setId'))
 
     # 2. Chest armor: check slot == 'hruď' or (i.get('type') == 'zbroj' and slot != 'druhá ruka')
     if not equipped["hruď"]:
-        armor = next((i for i in inventory if isinstance(i, dict) and i.get('id') not in equipped_vals and (i.get('slot') == "hruď" or (i.get('type') == "zbroj" and i.get('slot') != "druhá ruka"))), None)
-        if armor:
-            equipped["hruď"] = armor.get('id')
-            equipped_vals.add(armor.get('id'))
+        armors = [i for i in inventory if isinstance(i, dict) and i.get('id') not in equipped_vals and (i.get('slot') == "hruď" or (i.get('type') == "zbroj" and i.get('slot') != "druhá ruka"))]
+        if armors:
+            best_armor = max(armors, key=score_item)
+            equipped["hruď"] = best_armor.get('id')
+            equipped_vals.add(best_armor.get('id'))
+            if best_armor.get('set_id') or best_armor.get('setId'):
+                active_set_ids.add(best_armor.get('set_id') or best_armor.get('setId'))
 
     # 3. Off-hand / Shield: check slot == 'druhá ruka' or icon == 'Shield'
     if not equipped["druhá ruka"]:
-        shield = next((i for i in inventory if isinstance(i, dict) and i.get('id') not in equipped_vals and (i.get('slot') == "druhá ruka" or (i.get('icon') == "Shield" and i.get('type') == "zbroj"))), None)
-        if shield:
-            equipped["druhá ruka"] = shield.get('id')
-            equipped_vals.add(shield.get('id'))
+        shields = [i for i in inventory if isinstance(i, dict) and i.get('id') not in equipped_vals and (i.get('slot') == "druhá ruka" or (i.get('icon') == "Shield" and i.get('type') == "zbroj"))]
+        if shields:
+            best_shield = max(shields, key=score_item)
+            equipped["druhá ruka"] = best_shield.get('id')
+            equipped_vals.add(best_shield.get('id'))
+            if best_shield.get('set_id') or best_shield.get('setId'):
+                active_set_ids.add(best_shield.get('set_id') or best_shield.get('setId'))
 
     # 4. Helmet: check slot == 'hlava'
     if not equipped["hlava"]:
-        helmet = next((i for i in inventory if isinstance(i, dict) and i.get('id') not in equipped_vals and i.get('slot') == "hlava"), None)
-        if helmet:
-            equipped["hlava"] = helmet.get('id')
-            equipped_vals.add(helmet.get('id'))
+        helmets = [i for i in inventory if isinstance(i, dict) and i.get('id') not in equipped_vals and i.get('slot') == "hlava"]
+        if helmets:
+            best_helmet = max(helmets, key=score_item)
+            equipped["hlava"] = best_helmet.get('id')
+            equipped_vals.add(best_helmet.get('id'))
+            if best_helmet.get('set_id') or best_helmet.get('setId'):
+                active_set_ids.add(best_helmet.get('set_id') or best_helmet.get('setId'))
 
     # 5. Ring: check slot == 'prsten' or icon == 'Ring'
     if not equipped["prsten"]:
-        ring = next((i for i in inventory if isinstance(i, dict) and i.get('id') not in equipped_vals and (i.get('slot') == "prsten" or i.get('icon') == "Ring")), None)
-        if ring:
-            equipped["prsten"] = ring.get('id')
-            equipped_vals.add(ring.get('id'))
+        rings = [i for i in inventory if isinstance(i, dict) and i.get('id') not in equipped_vals and (i.get('slot') == "prsten" or i.get('icon') == "Ring")]
+        if rings:
+            best_ring = max(rings, key=score_item)
+            equipped["prsten"] = best_ring.get('id')
+            equipped_vals.add(best_ring.get('id'))
+            if best_ring.get('set_id') or best_ring.get('setId'):
+                active_set_ids.add(best_ring.get('set_id') or best_ring.get('setId'))
 
     # 6. Necklace: check slot == 'krk' or slot == 'amulet'
     if not equipped["krk"]:
-        necklace = next((i for i in inventory if isinstance(i, dict) and i.get('id') not in equipped_vals and (i.get('slot') in ["krk", "amulet"])), None)
-        if necklace:
-            equipped["krk"] = necklace.get('id')
-            equipped_vals.add(necklace.get('id'))
+        necklaces = [i for i in inventory if isinstance(i, dict) and i.get('id') not in equipped_vals and (i.get('slot') in ["krk", "amulet"] or i.get('icon') == "Gem")]
+        if necklaces:
+            best_necklace = max(necklaces, key=score_item)
+            equipped["krk"] = best_necklace.get('id')
+            equipped_vals.add(best_necklace.get('id'))
+            if best_necklace.get('set_id') or best_necklace.get('setId'):
+                active_set_ids.add(best_necklace.get('set_id') or best_necklace.get('setId'))
 
     return equipped
 

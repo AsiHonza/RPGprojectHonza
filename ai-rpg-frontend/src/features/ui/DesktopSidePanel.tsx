@@ -1,11 +1,11 @@
-import React from 'react';
 import { 
   Heart, Sparkles, Drumstick, MapPin, Map, Package, 
   ScrollText, ShoppingBag, Flame, User, Shield, Compass, 
-  Sword, CheckCircle2, ChevronRight, Award, Castle
+  Sword, CheckCircle2, ChevronRight, Award, Castle, Search
 } from 'lucide-react';
 import { useGameStore } from '@/store/gameStore';
 import { getXpForNextLevel, getXpProgressPercent } from '@/utils/progression';
+import { canExploreNode, performNodeExploration } from '@/services/exploration/explorationEngine';
 import { SeamlessVideo } from '../../components/ui/SeamlessVideo';
 
 interface DesktopSidePanelProps {
@@ -49,8 +49,54 @@ export const DesktopSidePanel: React.FC<DesktopSidePanelProps> = ({
     gold, rations, skillPoints, currentSpellSlots, maxSpellSlots,
     currentRegion, locationType, pointsOfInterest, 
     quests, activeBuffs, activeMount, worldData, playerLocation,
-    reputation
+    reputation, currentNodeId, exploredNodes, setExploredNodes, 
+    setRations, setInventory, setGold, setXp, stats, setDay, 
+    setConsequenceToast, perks, safehouse
   } = useGameStore();
+
+  const handleExplore = () => {
+    const targetNode = currentNodeId || 'oakhaven';
+    const check = canExploreNode(targetNode, exploredNodes || {}, rations);
+    if (!check.allowed) {
+      setConsequenceToast({ text: check.reason || 'Oblast nelze prozkoumat.' });
+      return;
+    }
+
+    const hasSixthSense = (perks || []).some((p: any) => p.id === 'univ_sixth_sense');
+    const hasScoutPost = (safehouse?.upgrades || []).includes('scout_post');
+    const result = performNodeExploration(
+      targetNode,
+      exploredNodes || {},
+      rations,
+      stats?.wis || 10,
+      hasSixthSense,
+      hasScoutPost
+    );
+
+    if (!result.success) {
+      setConsequenceToast({ text: result.message });
+      return;
+    }
+
+    setRations((r: number) => Math.max(0, r - result.rationsConsumed));
+    setDay((d: number) => d + result.dayAdvanced);
+    setExploredNodes(result.updatedExploredNodes);
+
+    if (result.foundItem) {
+      setInventory((inv: any[]) => [...inv, result.foundItem]);
+    }
+    if (result.goldEarned > 0) {
+      setGold((g: number) => g + result.goldEarned);
+    }
+    if (result.xpEarned > 0) {
+      setXp((x: number) => x + result.xpEarned);
+    }
+
+    setConsequenceToast({
+      text: result.message,
+      delta: result.goldEarned
+    });
+  };
 
   const xpNeeded = getXpForNextLevel(level);
   const xpPercent = getXpProgressPercent(xp, level);
@@ -303,9 +349,30 @@ export const DesktopSidePanel: React.FC<DesktopSidePanelProps> = ({
               className="py-1.5 px-2.5 bg-amber-100 hover:bg-amber-200/80 dark:bg-[#171f2c] dark:hover:bg-[#202b3c] border border-amber-900/20 dark:border-amber-500/25 rounded-xl font-cinzel font-bold text-xs text-amber-950 dark:text-amber-200 transition flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
             >
               <ScrollText size={14} className="text-amber-800 dark:text-amber-400" />
-              <span>Kniha úkolů</span>
+              <span>Deník</span>
             </button>
           )}
+
+          {/* Exploration Action */}
+          {(() => {
+            const targetNode = currentNodeId || 'oakhaven';
+            const isSearched = exploredNodes?.[targetNode]?.searched;
+            return (
+              <button
+                onClick={handleExplore}
+                disabled={isSearched}
+                className={`col-span-2 py-2 px-2.5 rounded-xl font-cinzel font-bold text-xs transition flex items-center justify-center gap-2 shadow-2xs ${
+                  isSearched 
+                    ? 'bg-slate-200/50 dark:bg-slate-900/40 text-slate-500 border border-slate-400/20 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-amber-700/90 via-amber-600/90 to-amber-700/90 hover:from-amber-600 hover:to-amber-500 text-white border border-amber-500/40 shadow-sm cursor-pointer'
+                }`}
+                title={isSearched ? 'Tato oblast byla již prozkoumána' : 'Důkladný průzkum okolí (-1 Jídlo, 4 hodiny)'}
+              >
+                <Search size={14} className={isSearched ? 'text-slate-400' : 'text-amber-200 animate-pulse'} />
+                <span>{isSearched ? '✓ Oblast důkladně prozkoumána' : '🔍 Prozkoumat okolí (-1 Jídlo)'}</span>
+              </button>
+            );
+          })()}
         </div>
       </div>
 
