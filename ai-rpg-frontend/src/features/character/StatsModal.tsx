@@ -3,7 +3,7 @@ import { X, User, Sparkles, Plus } from 'lucide-react';
 import { useGameStore } from '../../store/gameStore';
 
 export const StatsModal = ({ isOpen, onClose }: any) => {
-  const { stats, setStats, skillPoints, setSkillPoints, titles, activeTitle, setActiveTitle } = useGameStore();
+  const { stats, setStats, skillPoints, setSkillPoints, titles, activeTitle, setActiveTitle, perks } = useGameStore();
 
   if (!isOpen) return null;
 
@@ -80,6 +80,52 @@ export const StatsModal = ({ isOpen, onClose }: any) => {
             ) : (
               <div className="text-xs italic text-slate-500 dark:text-slate-400 bg-black/5 p-2 rounded-lg border border-black/5 dark:border-white/5 text-center">
                 Zatím jsi nezískal žádný význačný titul. Plň úkoly a zapiš se do historie Aelthgardu.
+              </div>
+            )}
+          </div>
+
+          {/* Fate Cards / Znamení Osudu Banner */}
+          <div className="bg-white/80 dark:bg-[#141c28] border border-amber-900/15 dark:border-amber-500/20 p-4 rounded-xl shadow-sm">
+            <div className="flex items-center justify-between mb-1">
+              <h3 className="font-cinzel font-bold text-base text-amber-950 dark:text-amber-200">
+                Znamení Osudu (Aktivní talenty)
+              </h3>
+              <span className="text-xs font-bold font-cinzel text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+                {perks?.length || 0} aktivních
+              </span>
+            </div>
+            <p className="text-xs font-lora text-slate-600 dark:text-slate-400 mb-3">
+              Trvalé modifikátory a schopnosti získané při překonání krizí osudu.
+            </p>
+
+            {perks && perks.length > 0 ? (
+              <div className="flex flex-col gap-2.5">
+                {perks.map((p: any) => (
+                  <div 
+                    key={p.id}
+                    className="p-3 rounded-xl bg-amber-50/70 dark:bg-[#192231] border border-amber-900/15 dark:border-amber-500/25 flex flex-col gap-1.5"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-cinzel font-bold text-sm text-amber-950 dark:text-amber-200">
+                        {p.name}
+                      </span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-black/10 dark:bg-black/40 text-amber-700 dark:text-amber-400 border border-amber-900/10">
+                        {p.rarity} • {p.tag}
+                      </span>
+                    </div>
+                    <p className="text-xs font-lora text-slate-700 dark:text-slate-300 leading-relaxed">
+                      {p.shortDesc}
+                    </p>
+                    <div className="text-[11px] font-lora text-slate-600 dark:text-slate-400 border-t border-black/5 dark:border-white/5 pt-1.5 mt-0.5 flex flex-col gap-1">
+                      <div><strong className="text-amber-900 dark:text-amber-300 font-cinzel text-[10px]">⚔️ Boj:</strong> {p.mechanicsDetail}</div>
+                      <div><strong className="text-blue-800 dark:text-blue-300 font-cinzel text-[10px]">📜 Kampaň:</strong> {p.offlineEffectDesc}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-xs italic text-slate-500 dark:text-slate-400 bg-black/5 p-3 rounded-lg border border-black/5 dark:border-white/5 text-center">
+                Zatím jsi nepřijal žádné Znamení Osudu. První volba tě čeká při postupu na 2. úroveň!
               </div>
             )}
           </div>

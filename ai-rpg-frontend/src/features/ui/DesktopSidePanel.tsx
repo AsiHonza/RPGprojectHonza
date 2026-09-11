@@ -4,7 +4,8 @@ import {
   ScrollText, ShoppingBag, Flame, User, Shield, Compass, 
   Sword, CheckCircle2, ChevronRight, Award, Castle
 } from 'lucide-react';
-import { useGameStore } from '../../store/gameStore';
+import { useGameStore } from '@/store/gameStore';
+import { getXpForNextLevel, getXpProgressPercent } from '@/utils/progression';
 import { SeamlessVideo } from '../../components/ui/SeamlessVideo';
 
 interface DesktopSidePanelProps {
@@ -51,8 +52,8 @@ export const DesktopSidePanel: React.FC<DesktopSidePanelProps> = ({
     reputation
   } = useGameStore();
 
-  const xpNeeded = level * 500;
-  const xpPercent = Math.min(100, Math.floor((xp / xpNeeded) * 100));
+  const xpNeeded = getXpForNextLevel(level);
+  const xpPercent = getXpProgressPercent(xp, level);
   const hpPercent = Math.min(100, Math.floor((hp / maxHp) * 100));
   const isInTown = ['mesto', 'vesnice'].includes(locationType);
 

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { ActiveBuff } from '../services/economy/buffEngine';
 import { MountDef } from '../services/economy/economyEngine';
+import { FateCard } from '../data/fateCards';
 
 export function normalizeQuestTitle(title: string): string {
   if (!title) return '';
@@ -322,6 +323,17 @@ interface GameState {
   setActiveTitle: (title: string | null) => void;
   consequenceToast: { text: string; faction?: string; delta?: number } | null;
   setConsequenceToast: (toast: { text: string; faction?: string; delta?: number } | null) => void;
+
+  // Fate Cards / Znamení Osudu
+  perks: FateCard[];
+  setPerks: (perks: FateCard[] | ((prev: FateCard[]) => FateCard[])) => void;
+  addPerk: (card: FateCard) => void;
+  rerollsAvailable: number;
+  setRerollsAvailable: (r: number | ((prev: number) => number)) => void;
+  fateDraftOpen: boolean;
+  setFateDraftOpen: (open: boolean) => void;
+  activeDraftCards: FateCard[];
+  setActiveDraftCards: (cards: FateCard[]) => void;
   
   // Theme
   theme: "light" | "dark" | "auto";
@@ -535,6 +547,24 @@ export const useGameStore = create<GameState>((set) => ({
   setActiveTitle: (activeTitle) => set({ activeTitle }),
   consequenceToast: null,
   setConsequenceToast: (consequenceToast) => set({ consequenceToast }),
+
+  // Fate Cards
+  perks: [],
+  setPerks: (perks) => set((state) => ({
+    perks: typeof perks === 'function' ? perks(state.perks) : perks
+  })),
+  addPerk: (card) => set((state) => {
+    if (state.perks.some(p => p.id === card.id)) return state;
+    return { perks: [...state.perks, card] };
+  }),
+  rerollsAvailable: 1,
+  setRerollsAvailable: (rerollsAvailable) => set((state) => ({
+    rerollsAvailable: typeof rerollsAvailable === 'function' ? rerollsAvailable(state.rerollsAvailable) : rerollsAvailable
+  })),
+  fateDraftOpen: false,
+  setFateDraftOpen: (fateDraftOpen) => set({ fateDraftOpen }),
+  activeDraftCards: [],
+  setActiveDraftCards: (activeDraftCards) => set({ activeDraftCards }),
 
   currentSpellSlots: 0,
   setCurrentSpellSlots: (currentSpellSlots) => set((state) => ({ currentSpellSlots: typeof currentSpellSlots === "function" ? currentSpellSlots(state.currentSpellSlots) : currentSpellSlots })),

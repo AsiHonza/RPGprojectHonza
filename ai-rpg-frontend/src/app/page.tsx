@@ -34,6 +34,9 @@ import { audioManager } from '../services/audio/audioManager';
 import { CURRENT_GAME_VERSION } from '../services/version/gameVersion';
 import { AmbientBackground } from '../components/ui/AmbientBackground';
 import { WorldMapModal } from '../components/WorldMapModal';
+import { FateCardDraftModal } from '../features/progression/FateCardDraftModal';
+import { checkLevelUp } from '../utils/progression';
+import { getRandomFateCardDraft } from '../data/fateCards';
 
 const getAvatarVideo = (r?: string) => {
   if (!r) return null;
@@ -150,6 +153,7 @@ export default function Home() {
     currentLocationDesc, setCurrentLocationDesc, currentImage, setCurrentImage, combatLog, setCombatLog, reputation, setReputation, 
     updateReputation, chronicle, setChronicle, worldFlags, setWorldFlags, consequenceToast, setConsequenceToast,
     activeBuffs, addBuff, activeMount, setActiveMount, resetCharacterCreation, titles, setTitles, activeTitle, setActiveTitle,
+    perks, setPerks, setFateDraftOpen, setActiveDraftCards,
     theme, setTheme
   } = useGameStore();
 
@@ -487,14 +491,14 @@ export default function Home() {
             travel_mode: travelMode, travel_days_left: travelDaysLeft, travel_destination: travelDestination,
             zname_postavy: npcs, world_data: worldData, playerLocation: playerLocation,
             gold, currentSpellSlots, maxSpellSlots, activeBuffs, activeMount, reputation, chronicle, worldFlags, day,
-            titles, activeTitle,
+            titles, activeTitle, perks,
             version: CURRENT_GAME_VERSION
           }
         }),
       }).catch(err => console.error("Autosave failed", err));
     }, 2000);
     return () => clearTimeout(timer);
-  }, [hp, maxHp, inventory, equipped, level, xp, skillPoints, skills, inCombat, enemies, quests, locationType, currentRegion, pointsOfInterest, gameState, stats, gold, currentSpellSlots, maxSpellSlots, rations, currentImage, currentImageError, travelMode, travelDaysLeft, travelDestination, npcs, worldData, playerLocation, activeBuffs, activeMount, reputation, chronicle, worldFlags, day, titles, activeTitle]);
+  }, [hp, maxHp, inventory, equipped, level, xp, skillPoints, skills, inCombat, enemies, quests, locationType, currentRegion, pointsOfInterest, gameState, stats, gold, currentSpellSlots, maxSpellSlots, rations, currentImage, currentImageError, travelMode, travelDaysLeft, travelDestination, npcs, worldData, playerLocation, activeBuffs, activeMount, reputation, chronicle, worldFlags, day, titles, activeTitle, perks]);
 
   const playAudio = (text: string, voiceType: "narrator" | "npc_muz" | "npc_zena" = "narrator"): Promise<void> => {
     return audioManager.playSingleTts(API_URL, text, voiceType, ttsProvider, ttsVolume);
@@ -782,6 +786,7 @@ export default function Home() {
         if (state.worldFlags) setWorldFlags(state.worldFlags);
         if (state.titles) setTitles(state.titles);
         if (state.activeTitle) setActiveTitle(state.activeTitle);
+        if (state.perks) setPerks(state.perks);
         if (state.day !== undefined) setDay(state.day);
 
         if (state.travel_mode !== undefined) setTravelMode(state.travel_mode);
@@ -1150,21 +1155,30 @@ export default function Home() {
           if (data.zmeny_stavu.xp_zmena) {
              setXp(currentXp => {
                const newXp = currentXp + data.zmeny_stavu.xp_zmena;
-               const xpNeeded = level * 500;
-               if (newXp >= xpNeeded) {
-                 const nextLevel = level + 1;
+               const lvlRes = checkLevelUp(newXp, level);
+               if (lvlRes.leveledUp) {
+                 const nextLevel = lvlRes.newLevel;
                  const nextMaxHp = maxHp + 10;
                  setLevel(nextLevel);
                  setMaxHp(nextMaxHp);
                  setHp(nextMaxHp); // Full heal on level-up
                  const earnedPoints = nextLevel % 2 === 0 ? 2 : 1;
-                  setSkillPoints(sp => sp + earnedPoints);
+                 setSkillPoints(sp => sp + earnedPoints);
                  setQuestBanner({
                    title: `POSTOUPIL JSI NA ÚROVEŇ ${nextLevel}!`,
-                   subtitle: `+10 Max HP (vyléčen na ${nextMaxHp} HP) a získal jsi ${earnedPoints} ${earnedPoints === 1 ? "dovednostní bod" : "dovednostní body"}!`
+                   subtitle: `+10 Max HP a vyvoláno Předivo Osudu!`
                  });
                  setTimeout(() => setQuestBanner(null), 7000);
-                 return newXp - xpNeeded;
+
+                 // Spustit Karetní Draft Znamení Osudu
+                 const ownedIds = perks.map(p => p.id);
+                 const draft = getRandomFateCardDraft(dndClass, ownedIds, 3);
+                 if (draft.length > 0) {
+                   setActiveDraftCards(draft);
+                   setFateDraftOpen(true);
+                 }
+
+                 return lvlRes.remainingXp;
                }
                return newXp;
              });
@@ -2126,6 +2140,9 @@ export default function Home() {
 
         </div>
       )}
+
+      {/* Fate Cards / Znamení Osudu Draft Modal */}
+      <FateCardDraftModal />
 
       {/* Persistent Global HTML5 Audio Player */}
       <audio 

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { User, ScrollText, Volume2, VolumeX, Settings2, Menu, Map, Users, Package, MapPin, Sparkles, Heart, Drumstick, BookOpen } from 'lucide-react';
 import { useGameStore } from '../../store/gameStore';
 import { AnimatePresence, motion } from 'framer-motion';
+import { getXpProgressPercent } from '../../utils/progression';
 
 export const PlayerHeader = ({
   setSettingsOpen,
@@ -94,7 +95,7 @@ export const PlayerHeader = ({
               <motion.div 
                 className="h-full bg-gradient-to-r from-yellow-700 to-rpg-magic" 
                 initial={{ width: 0 }}
-                animate={{ width: `${(xp / (level * 300)) * 100}%` }}
+                animate={{ width: `${getXpProgressPercent(xp, level)}%` }}
                 transition={{ duration: 0.5 }}
               />
             </div>
